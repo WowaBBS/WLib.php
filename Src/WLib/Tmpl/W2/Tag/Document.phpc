@@ -1,0 +1,25 @@
+<?
+  $Loader->Parent_Class('/Tmpl/W2/Tag/Base' );
+ 
+  Class C_Tmpl_W2_Tag_Document Extends C_Tmpl_W2_Tag_Base
+  {
+    Var $tagName     ='#document'; // Имя тега
+ 
+    Function _Trim() { return false; }
+    
+    Function TagBuild() { Return ''; }
+ 
+    Function TagBuildHash()
+    {
+      $Res=parent::TagBuildHash();
+      UnSet($Res['n']);
+      $Res['t']='d';
+      Return $Res;
+    }
+ 
+    Function MakePHP(&$Info)
+    {
+      $this->MakePHPInner($Info);
+    }
+  }
+?>

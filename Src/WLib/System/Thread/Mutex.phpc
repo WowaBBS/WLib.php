@@ -1,0 +1,26 @@
+<?
+ $Loader->Load_Class('Stream/File');
+
+  Class C_System_Thread_Mutex Extends C_Stream_File
+  {
+    Var $TempPath=False;
+ 
+    Function _Init(Array $Args)
+    {
+     parent::_Init($Args);
+     $this->TempPath='./data/system/';
+    }
+ 
+    Function _FileName($AName)
+    {
+      Return $this->TempPath.$AName;
+    }
+ 
+    Function Open($AName, $AMode=False)
+    {
+      $Res=parent::Open($this->_FileName($AName), $AMode);
+      $this->FName=$AName;
+      Return $Res;
+    }
+  }
+?>

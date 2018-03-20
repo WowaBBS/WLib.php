@@ -1,0 +1,87 @@
+<?
+  $Loader->Begin_Class('/URI/Paths');
+ 
+  $Loader->Parent_Class('/Object');
+//$Loader->Using_Module('/System/IOFS');
+  $Loader->Using_Module('/FS/IOFS');
+  $Loader->Using_Type('/URI/Path/Dir/File');
+ 
+  Class C_URI_Paths extends C_Object
+  {
+    Var $Paths =[];
+    Var $URLs  =[];
+ 
+    Function Assign_Paths(&$APaths)
+    {
+      $this->Paths =$APaths->Paths ;
+      $this->URLs  =$APaths->URLs  ;
+    }
+ 
+    Function AddPath($APath, $AUrl=False)
+    {
+      Array_UnShift($this->Paths ,$APath );
+      Array_UnShift($this->URLs  ,$AUrl  );
+      ksort($this->Paths );
+      ksort($this->URLs  );
+    }
+ 
+    Function GetFile($AFilePath)
+    {
+      If(!Is_Object($AFilePath))
+        $AFilePath=New TPath($AFilePath);
+      $TmplName1=New TFileDir();
+      If($k=$TmplName1->SearchFile($AFilePath, $this->Paths))
+      {
+        $AFilePath->AddLeft($this->URLs[$k[0]]);
+        Return [$TmplName1->Make(), $AFilePath->Make()];
+      }
+      Return NULL;
+    }
+ 
+    Function GetFiles($AFilePath)
+    {
+      If(!Is_Object($AFilePath))
+        $AFilePath=New TPath($AFilePath);
+      $Res=[];
+      ForEach($this->Paths As $Path)
+      {
+        $TmplName1=New TPath($Path);
+        $TmplName1->Add($AFilePath);
+        $TmplName1=$TmplName1->Make();
+        If(Is_File($TmplName1))
+          $Res[]=$TmplName1;
+      }
+      Return $Res;
+    }
+ 
+    Function FilesList($AFilePath, $Mask=False, $Attr=3)
+    {
+      $Res=[];
+      ForEach($this->Paths As $Path)
+      {
+        $TmplName1=New TPath($Path);
+        $TmplName1->Add($AFilePath);
+        $TmplName1->Add('/');
+        $TmplName1=$TmplName1->Make();
+        If(Is_Dir($TmplName1))
+        {
+          $Ls=ListDir($TmplName1, $Mask, $Attr);
+          ForEach($Ls As $File)
+            If(!IsSet($Res[$File]))
+              $Res[$File]=$File;
+        }
+      }
+      Return Array_Values($Res);
+    }
+ 
+    Function GetPathFile($AFilePath)
+    {
+      $Res=$this->GetFile($AFilePath);
+      If(!$Res)
+        Return NULL;
+      Return $Res[0];
+    }
+  }
+ 
+  $Loader->End_Class();
+?>

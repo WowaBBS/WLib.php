@@ -1,0 +1,22 @@
+<?
+  $Loader->Parent_Class('/Object');
+//$Loader->Load_Class('/Tmpl/Router');
+
+  Class C_Tmpl_Base_Template Extends C_Object
+  {
+    Var $CurPath=False;
+  
+    Function &Init_Vars(Array &$Vars):Array
+    {
+      If(!IsSet($this->Vars))
+        Return $Vars;
+      $Res=&Vars_With(&$Vars, $this->Vars);
+      Return $Res;
+    }
+  
+    Function Exec_To_Str(Array &$Vars)
+    {
+      Return '';
+    }
+  };
+?>

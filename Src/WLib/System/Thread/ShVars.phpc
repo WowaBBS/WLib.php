@@ -1,0 +1,17 @@
+<?
+  $Loader->Load_Class('System/Thread/ShMem');
+ 
+  Class C_System_ShVars Extends C_System_ShMem
+  {
+    Function Get($Limit=16777216)
+    {
+      $Res=$this->Get_Content();
+      Return $Res? @UnSerialize($Res):[];
+    }
+ 
+    Function Put($Data)
+    {
+      Return $this->Put_Content(@Serialize($Data));
+    }
+  }
+?>

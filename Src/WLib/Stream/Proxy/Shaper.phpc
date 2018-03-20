@@ -1,0 +1,76 @@
+<?
+  $Loader->Parent_Class('/Stream/Proxy/Base');
+
+  Class C_Stream_Proxy_Shaper Extends C_Stream_Proxy_Base
+  {
+    // Ограничение (байт в секунду)
+    Var $Limit=16384;
+    // Байт отослано
+    Var $Size =0 ;
+    // С последнего времени
+    Var $Time =0 ;
+  
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $this->Time=GetMicroTime();
+    }
+  
+    Function Limit_Set($ALimit)
+    {
+      $this->Limit = $ALimit;
+      $this->Size  = $ALimit;
+    }
+  
+    Function Sleep($ASize)
+    {
+      $Size=&$this->Size;
+      $Size+=$ASize;
+      If($ASize<=0)
+        Return;
+   
+      $Time  =&$this->Time  ;
+      $Limit =&$this->Limit ;
+   
+      $DTime=GetMicroTime()-$Time;
+      $Time+=$DTime;
+      $Size=Max($Size-$Limit*$DTime,0);
+   /*
+      $QS=2; // Частота пауз в секнуду.
+      $QT=4; // Частота задержек в секнуду.
+      If($Size<$Limit*$QS)
+        Return;
+   */
+      // Рассчитываем текущую задерку
+      $Delay=$Size/$Limit;
+     /** /
+      Debug([
+        'ASize '=>$ASize ,
+        'Size  '=>$Size  ,
+        'Time  '=>$Time  ,
+        'Limit '=>$Limit ,
+        'DTime '=>$DTime ,
+        'Delay '=>$Delay ,
+      ]);
+     /**/
+      If($Delay<1)
+        USleep($Delay*1000000);
+      Else
+        Sleep($Delay);
+    }
+  
+    Function Write($Data)
+    {
+      $Res=parent::Write($Data);
+      $this->Sleep($Res);
+      Return $Res;
+    }
+  
+    Function Recv($Size)
+    {
+      $Res=parent::Recv(Min($this->Limit, $Size));
+      $this->Sleep(StrLen($Res));
+      Return $Res;
+    }
+  }
+?>

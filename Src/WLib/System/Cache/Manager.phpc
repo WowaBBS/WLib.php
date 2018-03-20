@@ -1,0 +1,45 @@
+<?
+  /// Менеджер кеша, создаёт объекты упревления кешом.
+  $Loader->Parent_Class('/Object');
+  
+  Class C_System_Cache_Manager extends C_Object
+  {
+    Var $Path='./cache';
+    Var $Cache=[];
+    Var $Vars=[
+      'MkDir'=>[
+        'Mod' => 06775,
+        'Own' => '',
+        'Grp' => '',
+      ],
+    ];
+
+    Protected Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $this->Path=New TPath($Args['Path']);
+      If(IsSet($Args['MkDir']))
+        $this->Vars['MkDir']=$Args['MkDir'];
+    }
+
+  //Function Get($ID, $Type='System/Cache/Storage/Null'  )
+  //Function Get($ID, $Type='System/Cache/Storage/Debug' )
+    Function Get($ID, $Type='System/Cache/Storage/Vars'  )
+  //Function Get($ID, $Type='System/Cache/Storage/Php'   )
+    {
+     If(!IsSet($this->Cache[$Type]))
+       $this->Cache[$Type]=[];
+     ElseIf(IsSet($this->Cache[$Type][$ID]))
+       Return $this->Cache[$Type][$ID];
+     $Path=New TPath($this->Path);
+     $Path->Add($ID);
+     $Args=[
+       'Manager' => &$this,
+       'Path'    =>  $Path,
+     ];
+     $Res=$this->Create_Object($Type, $Args);
+     $this->Cache[$Type][$ID]=$Res;
+     Return $Res;
+    }
+  }
+?>

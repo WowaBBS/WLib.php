@@ -1,0 +1,153 @@
+<?
+  //*************************************************************************\\
+  // Unit    : MProp                                                         \\
+  // Date    : 08.08.2002                                                    \\
+  // Creator : Wowa Savin <wowa@activesolutions.info>                        \\
+  // (c) Active solutions                                                    \\
+  //*************************************************************************\\
+  //
+  //
+  //
+  //
+ 
+  // Описание глобальных переменных
+  Global $_MPropId;
+ 
+  // Определение модуля
+  $Loader->Begin_Module('/System/Prop');
+ 
+  // Подключение модулей
+  //$Loader->Using_Module('/System');
+  //$Loader->Using_Module('/SysUtil');
+ 
+  // ***************************************************************************************
+ 
+  Define('tv_Any'      ,0);
+  Define('tv_String'   ,1);
+  Define('tv_Number'   ,2);
+  Define('tv_Scalar'   ,3);
+  Define('tv_Array'    ,4);
+  Define('tv_Object'   ,5);
+ 
+  $_MPropId=0;
+ 
+  Class T_Property
+  {
+    Var $_Property_ID;
+ 
+    Function T_Property()
+    {
+      $this->_Property_ID=++$GLOBALS['_MPropId'];
+    }
+ 
+    Function Init()
+    {
+    }
+ 
+    Function &GetVar(&$Path, $Type=tv_Any, $Vars=[])
+    {
+      Return NULL;
+    }
+ 
+    Function SetVar($Value, &$Path, $Type=tv_Any, $Vars=[])
+    {
+      Return NULL;
+    }
+  }
+ 
+  // Support old version
+  Class T_Property_Func
+  {
+    Var $GetProc ;
+    Var $PutProc ;
+    Var $Data    ;
+ 
+    Function __Construct($GetProc='', $PutProc='', $Data='')
+    {
+      $this->GetProc = $GetProc ;
+      $this->PutProc = $PutProc ;
+      $this->Data    = $Data    ;
+    }
+ 
+    Function &GetVar(&$Path, $Type=tv_Any, $Vars=[])
+    {
+      $GetProc=$this->GetProc;
+      $Res=$GetProc(['data'=>$this->Data]);
+      Return $Res;
+    }
+ 
+    Function SetVar($Value, &$Path, $Type=tv_Any, $Vars=[])
+    {
+      Return NULL;
+    }
+  }
+ 
+  Class T_Property_Var
+  {
+    Var $Vars ;
+    Var $Path ;
+ 
+    Function T_Property_Var(&$AVars, $APath)
+    {
+      $this->Vars = &$AVars ;
+      $this->Path =  $APath ;
+    }
+ 
+    Function &GetVar(&$Path, $Type=tv_Any, $Vars=[])
+    {
+      Return _Vars_Get_(Array_Merge($this->Path, $Path), $Vars);
+    }
+ 
+    Function SetVar($Value, &$Path, $Type=tv_Any, $Vars=[])
+    {
+      Return NULL;
+    }
+  }
+ 
+ #Function IsProperty($Var)
+ #{
+ #  Return
+ #    Is_Array($Var)
+ #    &&IsSet($Var['isproperty'])
+ #  //||Is_Object($Var)
+ # ;
+ #}
+ 
+//Function CrProperty($GetProc='', $PutProc='', $Data='')
+//{
+//  Global $_MPropId;
+//  Return [
+//    'isproperty' => True     ,
+//    'getproc'    => $GetProc ,
+//    'putproc'    => $PutProc ,
+//    'data'       => $Data    ,
+//    'id'         => $_MPropId++ ,
+//  ];
+//}
+ 
+  Function &CrProperty($GetProc='', $PutProc='', $Data='')
+  {
+   $Res=New T_Property_Func($GetProc, $PutProc, $Data);
+   Return $Res;
+  }
+ 
+//Function GetProperty($Var, $Add='')
+//{
+//  If(!IsProperty($Var))
+//    Return $Var;
+////If(Is_Object($Var))
+//  Return $Var['getproc']($Var, $Add);
+//}
+ 
+  Function PutProperty(&$Var, $Data, $Add='')
+  {
+  // If(!IsProperty($Var))
+  //  {
+     $Var=$Data;
+     Return True;
+  //  }
+  // Return $Var['putproc']($Var, $Data, $Add='');
+  }
+ 
+  $Loader->End_Module('/System/Prop');
+?>

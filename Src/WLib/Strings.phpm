@@ -1,0 +1,234 @@
+<?
+  //*************************************************************************\\
+  // Unit    : MStrings                                                      \\
+  // Date    : 13.08.2002                                                    \\
+  // Creator : Wowa Savin <wowa@activesolutions.info>                        \\
+  // (c) Active solutions                                                    \\
+  //*************************************************************************\\
+  //
+  //
+  //
+  //
+ 
+  // Описание глобальных переменных
+//Global $VarMStrings;
+ 
+  // Определение модуля
+  $Loader->Begin_Module('/Strings');
+ 
+  // Подключение модулей
+//Uses('MSystem');
+ 
+  // ***************************************************************************************
+ 
+  // Переводит размер файла в строку
+  Function SizeToStr($Size)
+  {
+    If($Size<1024)
+      Return $Size;
+    $Size/=1024;
+    If($Size<10)
+      Return Number_Format($Size, 1, '.', '').'K';
+    If($Size<1024)
+      Return (Int)$Size.'K';
+    $Size/=1024;
+    If($Size<10)
+      Return Number_Format($Size, 1, '.', '').'M';
+    If($Size<1024)
+      Return (Int)$Size.'M';
+    $Size/=1024;
+    If($Size<10)
+      Return Number_Format($Size, 1, '.', '').'G';
+    If($Size<1024)
+      Return (Int)$Size.'G';
+  }
+ 
+  // ***************************************************************************************
+ 
+  Function TextSplit($Str, $MaxLen=64)
+  {
+    $l=StrLen($Str);
+    $j=0;
+    $Ts=[' ',"\n","\t","\r"];
+    $Ts=Array_Flip($Ts);
+    For($i=0; $i<$l; $i++)
+      If(IsSet($Ts[$Str[$i]]))
+        $j=0;
+      Else
+        If($j++>$MaxLen)
+        {
+          $Str=SubStr_Replace($Str,' ', $i+1,0);
+          $l=StrLen($Str);
+        }
+    Return $Str;
+  }
+ 
+  // ***************************************************************************************
+ 
+  Function CharsSlashes($Chars, $Cs=[])
+  {
+    If(!Is_Array($Chars))
+    {
+    //$Cs=[];
+      For($i=0; $i<StrLen($Chars); $i++)
+        $Cs[$Chars[$i]]='\\'.$Chars[$i];
+      $Chars=$Cs;
+    }
+    Return $Chars;
+  }
+ 
+  Function All_AddSlashes($Str)
+  {
+    If(Is_Array($Str))
+    {
+      ForEach($Str As $k=>$v)
+        $Str[$k]=All_AddSlashes($v);
+      Return $Str;
+    }
+    $Res='';
+    For($i=0; $i<StrLen($Str); $i++)
+      $Res.='\\'.$Str[$i];
+    Return $Res;
+  }
+ 
+  Function Chars_AddSlashes($Str, $Chars)
+  {
+    $Chars=CharsSlashes($Chars);
+    If(Is_Array($Str))
+    {
+      ForEach($Str As $k=>$v)
+        $Str[$k]=Chars_AddSlashes($v, $Chars);
+      Return $Str;
+    }
+    $Res='';
+    For($i=0; $i<StrLen($Str); $i++)
+      If(IsSet($Chars[$Str[$i]]))
+        $Res.=$Chars[$Str[$i]];
+      Else
+        $Res.=$Str[$i];
+    Return $Res;
+  }
+ 
+  // Аналог AddSlashes - для регулярных выражений
+  // PS: может обрабатывать массивы
+  Function Preg_AddSlashes($Str)
+  {
+    If(Is_Array($Str))
+    {
+      ForEach($Str As $k=>$v)
+        $Str[$k]=Preg_AddSlashes($v);
+      Return $Str;
+    }
+    Return preg_quote($Str, "/");
+  //$Chars=CharsSlashes('-()[]{}<>.*?/^$|\\\'"', ["\0"=>'\0']);
+  //Return Chars_AddSlashes($Str, $Chars);
+  }
+ 
+  // Аналог AddSlashes - для Like оператора SQL
+  // PS: может обрабатывать массивы
+  Function Like_AddSlashes($Str)
+  {
+    $Chars=CharsSlashes('%_\\\'"',
+      ["\0"=>'\0',"\n"=>'\n',"\r"=>'\r',"\t"=>'\t']
+    );
+    Return Chars_AddSlashes($Str, $Chars);
+  }
+ 
+  // Аналог AddSlashes - для строк SQL
+  // PS: может обрабатывать массивы
+  Function SQL_AddSlashes($Str)
+  {
+    $Chars=CharsSlashes('\\\'"',
+      ["\0"=>'\0',"\n"=>'\n',"\r"=>'\r',"\t"=>'\t']
+    );
+    Return Chars_AddSlashes($Str, $Chars);
+  }
+ 
+  // Аналог AddSlashes - для строк JavaScript
+  // PS: может обрабатывать массивы
+  Function JS_AddSlashes($Str)
+  {
+    $Chars=CharsSlashes('\\\'"',
+      ["\0"=>'\0',"\n"=>'\n',"\r"=>'\r',"\t"=>'\t','<'=>'\x3C']
+    );
+    Return Chars_AddSlashes($Str, $Chars);
+  }
+ 
+  // Аналог AddSlashes - для функции Date
+  // PS: может обрабатывать массивы
+  Function Date_AddSlashes($Str)
+  {
+  //Return Chars_AddSlashes($Str, 'aABdDFgGhHiIjlLmMnOrsStTUwWYyzZ');
+    Return Chars_AddSlashes($Str, 'aABbCcDdEeFfGgHhIiJjKkLlMmNnOoPpRrSsTtUuWwXxYyZz');
+  }
+ 
+  // Удаляет повторяющиеся пробелы, даже если они в середине
+  Function MTrim($Str)
+  {
+    If(Is_Array($Str))
+    {
+      ForEach($Str As $k=>$v)
+        $Str[$k]=MTrim($v);
+      Return $Str;
+    }
+    Return Preg_Replace('/ +/m', ' ', $Str);
+  }
+ 
+  // Если строка Str начинается не со строки Sub,
+  // то Sub добавляется к Str слева
+  Function AddFStr($Str, $Sub)
+  {
+    If(Is_Array($Str))
+    {
+      ForEach($Str As $k=>$v)
+        $Str[$k]=AddFStr($v);
+      Return $Str;
+    }
+    If(!Preg_Match('/^'.AddSlashes($Sub).'.*/i', $Str))
+      $Str=$Sub.$Str;
+    Return $Str;
+  }
+ 
+  // Если строка Str начинается со строки Sub,
+  // то строка Sub удаляется из строки Str.
+  function DelFStr($Str, $Sub)
+  {
+    If(Is_Array($Str))
+    {
+      ForEach($Str As $k=>$v)
+        $Str[$k]=AddFStr($v);
+      Return $Str;
+    }
+    If(Preg_Match('/^'.AddSlashes($Sub).'(.*)/i', $Str, $Match))
+      $Str=$Match[1];
+    Return $Str;
+  }
+ 
+  Function HashStr($Str)
+  {
+    Return DecHex(Crc32(Serialize($Str)));
+  }
+ 
+  Function DownString(&$Str)
+  {
+    $Str=StrToLower($Str);
+  }
+ 
+  Function DownStr($Str)
+  {
+    DownString($Str);
+    Return $Str;
+  }
+ 
+  // ***************************************************************************************
+ 
+  Function IsIntStr($Str)
+  {
+    Return Preg_Match('/^[-+]?\d+$/', Trim((String)$Str));
+  //Return $Str===(String)(Int)$Str;
+  }
+ 
+  // ***************************************************************************************
+ 
+  $Loader->End_Module('/Array');
+?>

@@ -1,0 +1,148 @@
+<?
+  $Loader->Begin_Class('/Tmpl/W2/PhpBr');
+ 
+  $Loader->Parent_Class('/Object/Release');
+  $Loader->Using_Module('/Script/PHP/Build/Vars');
+  $Loader->Using_Class('/Tmpl/W2/Out/Arr');
+//$Loader->Using_Class('/Tmpl/W2/Out/ObH');
+ 
+  Class C_Tmpl_W2_PhpBr Extends C_Object_Release
+  {
+    Var $Head=[];
+    Var $Body=[];
+    Var $Foot=[];
+    Var $Tab=' ';
+    Var $Out    ;
+    Var $Tags   ;
+ 
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $this->Out=$this->Create_Object('/Tmpl/W2/Out/Arr');
+    //$this->Out=$this->Create_Object('/Tmpl/W2/Out/ObH');
+      $this->Out->Base=&$this;
+      $this->Tags=$this->Get_Singleton('/Tmpl/W2/Tag/Factory');
+    }
+ 
+    Function _Done()
+    {
+      $this->Out->Done();
+      parent::_Done();
+    }
+ 
+  //Function AddStr($Data)
+  //{
+  //  $this->Body[]=$this->Tab.$Data;
+  //}
+ 
+    Function Add_Line($Data)
+    {
+      $this->Body[]=$this->Tab.$Data."\n";
+    }
+ 
+    Function GetPHP()
+    {
+      Return Implode('', $this->Head).Implode('', $this->Body).Implode('', $this->Foot);
+    }
+ 
+    // ********************************************************************
+    // Vars alloc
+  //Var $dVars=[];
+    Var $cVars=0;
+ 
+    Function Var_Add($Name, $id)
+    {
+      Return '$v'.$this->cVars++;
+      Return '$'.$Name.$id;
+    }
+ 
+    // ********************************************************************
+    // Vars functions
+    Var $Vars_Name='$Vars';
+    Var $Vars_Stack=[];
+ 
+    Function Vars($ASVars=False)
+    {
+      If($ASVars)
+        Return $ASVars;
+      Return $this->Vars_Name;
+    }
+ 
+    Function Vars_New()
+    {
+      Array_Push($this->Vars_Stack, $this->Vars_Name);
+      $this->Vars_Name=$this->Var_Add('Vars',' _');
+      Return $this->Vars();
+    }
+ 
+    Function Vars_End()
+    {
+      $this->Vars_Name=Array_Pop($this->Vars_Stack);
+    }
+ 
+    Function Vars_WithV($Str)
+    {
+      $OldVars=$this->Vars();
+      $NewVars=$this->Vars_New();
+      $this->Add_Line($NewVars.'=&Vars_With(&'.$OldVars.','.$Str.');');
+    }
+ 
+    Function Vars_WithA($Arr)
+    {
+      $Str=['Array('];
+      ForEach($Arr As $k=>$v)
+      {
+        $Str[]="'";
+        $Str[]=$k;
+        $Str[]="'=>";
+        $Str[]=$v;
+        $Str[]=',';
+      }
+      $Str[Count($Str)-1]=')';
+      $this->Vars_WithV(Implode('', $Str));
+    }
+ 
+    Function Vars_EndWith()
+    {
+      $this->Add_Line('Vars_EndWith(&'.$this->Vars().');');
+      $this->Vars_End();
+    }
+ 
+    Function Vars_Get($Name, $ASVars=False, $Type=False)
+    {
+      If(StrPos($Name,'|')!==False)
+        Return 'Vars_GetVarST'.($Type? '_'.$Type:'').'(&'.$this->Vars($ASVars).','."'".$Name."')";
+      Return 'Vars_GetVarFST'.($Type? '_'.$Type:'').'(&'.$this->Vars($ASVars).",Array('".Implode("','", Explode('.', $Name))."'))";
+    }
+ 
+    Function Vars_GetS($Name, $ASVars=False)
+    {
+    //Return '(String)'.$this->Vars_Get($Name, $ASVars);
+      Return $this->Vars_Get($Name, $ASVars,'String');
+    }
+ 
+    // Paths
+    Function ParsePath($Path)
+    {
+    //$Res="'".$Path."'";
+      $Path=Explode('|', $Path);
+      ForEach($Path As $k=>$v)
+        If($k&1)
+          $Path[$k]=$this->Vars_Get($v);
+        Else
+        {
+          If($v==='')
+            UnSet($Path[$k]);//=NULL;
+          Else
+            $Path[$k]="'".$v."'";
+        }
+      If(Count($Path))
+        $Res=Implode('.', $Path);
+      Else
+        $Res="''";
+    //If(StrPos($Path,'|')!==False)
+    //  $Res='_ParsePath('.$Res.', $ Vars)';
+      Return $Res;
+    }
+  }
+?>

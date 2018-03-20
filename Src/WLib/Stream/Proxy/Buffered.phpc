@@ -1,0 +1,48 @@
+<?
+ $Loader->Parent_Class('/Stream/Proxy/Base');
+
+  Class C_Stream_Proxy_Buffered Extends C_Stream_Proxy_Base
+  {
+    Var $Output_Buffer=[];
+    Var $Output_Buffer_Size=0;
+    Var $Output_Buffer_Size_Max=8192;
+
+    Function Recv_Count() { Return $this->FStream->Recv_Count(); }
+
+    Function Write_Buffer()
+    {
+      $Data=Implode('', $this->Output_Buffer);
+      $this->Output_Buffer=[];
+      $this->Output_Buffer_Size=0;
+      parent::Write($Data);
+    //C_Stream_Proxy::Write($Data);
+    }
+
+    Function Write($Data)
+    {
+      $DataL=StrLen($Data);
+      $this->Output_Buffer[]=$Data;
+      $this->Output_Buffer_Size+=$DataL;
+      If($this->Output_Buffer_Size>=$this->Output_Buffer_Size_Max)
+        $this->Write_Buffer();
+    //Return $this->FStream->Write($Data);
+      Return $DataL;
+    }
+
+    Function Read ($Size) { Return $this->FStream->Read($Size);  }
+    Function EOF()        { Return $this->FStream->EOF();        }
+    Function Flush()
+    {
+      If($this->Output_Buffer)
+        $this->Write_Buffer();
+      Return $this->FStream->Flush();
+    }
+    //Function Get_Line($Size=1024) { Return $this->FStream->Get_Line($Size); }
+    Function Seek($AOffset, $AWhence=0) { Return $this->FStream->Seek($AOffset, $AWhence); }
+    Function Length()     { Return $this->FStream->Length();     }
+    Function Pos()        { Return $this->FStream->Pos();        }
+    // Truncate(0)
+    // Clear
+    // ShutDown()
+  }
+?>

@@ -1,0 +1,20 @@
+<?
+  $Loader->Parent_Class('/System/Cache/Storage/Base');
+  $Loader->Load_Module('/Debug');
+ 
+  Class C_System_Cache_Storage_Debug Extends C_System_Cache_Storage_Base
+  {
+    Function _Load()
+    {
+      Return False;
+    }
+  
+    Function _Save()
+    {
+      $FileName=$this->Path->Make();
+      Debug($FileName);
+      Debug($this->Info);
+      Return True;
+    }
+  }
+?>

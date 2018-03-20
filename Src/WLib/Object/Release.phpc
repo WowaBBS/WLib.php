@@ -1,0 +1,6 @@
+<?
+  $Loader->Parent_Class('/Object/Base');
+
+  // TODO: Body
+  Class C_Object_Release extends C_Object_Base {}
+?>

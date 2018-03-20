@@ -1,0 +1,7 @@
+<?
+  $Loader->Parent_Class('/Object');
+
+  Class C_Tmpl_Base_Manager Extends C_Object
+  {
+  };
+?>

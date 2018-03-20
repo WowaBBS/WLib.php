@@ -1,0 +1,16 @@
+<?
+  $Loader->Parent_Class('/System/Cache/Storage/Base');
+ 
+  Class C_System_Cache_Storage_Null Extends C_System_Cache_Storage_Base
+  {
+    Function _Load()
+    {
+      Return False;
+    }
+  
+    Function _Save()
+    {
+      Return True;
+    }
+  }
+?>

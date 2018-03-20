@@ -1,0 +1,210 @@
+<?
+  $Loader->Parent_Class('/Stream/Handle');
+  $Loader->Load_Lib('/FS/My');
+  $Loader->Load_Lib('/FS/Utils');
+ 
+  Class C_Stream_File Extends C_Stream_Handle
+  {
+    Var $FileName='';
+    Var $RFileName='';
+    Var $Locked=[LOCK_UN];
+    
+    Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      if(IsSet($Args['FileName']))
+      {
+        $this->Assign($Args['FileName']);
+        if(IsSet($Args['OpenMode']))
+          $this->Open($Args['OpenMode']);
+      }
+      elseif(IsSet($Args[0]))
+      {
+        $this->Assign($Args[0]);
+        if(IsSet($Args[1]))
+          $this->Open($Args[1]);
+      }
+    }
+  
+    Function Assign($Name)
+    {
+      $this->FileName=$Name;
+    //$this->RFileName=$this->Loader->Path->Get($Name);
+      $this->RFileName=$Name;
+    }
+  
+    Function Open($AMode=False)
+    {
+      If(!$AMode)
+        $AMode=omReadWrite|omMakePath|omBinary;
+      If($this->FHandle)
+        $this->Close();
+      If(Is_String($AMode))
+        $AMode=OpC2W($AMode);
+   
+      $CmdList=OpW2CCmd($AMode);
+    //Debug($CmdList);
+      ForEach($CmdList As $Cmd)
+        Switch($Cmd[0])
+        {
+        Case 'Exists':
+          If(FS_Is_File($this->FileName)!=$Cmd[1])
+            Break 2;
+          Break;
+        Case 'CreatePath':
+          $Path=Explode('/', $this->FileName);
+          Array_Pop($Path);
+          $Path=Implode('/', $Path);
+        //$this->Loader->Path->Make($Path);
+          CreatePath($Path,IsSet($this->MkDir)? $this->MkDir:0700);
+          Break;
+        Case 'Open':
+          If(!$this->FHandle)
+           {
+            If($Cmd[1]{0}=='r')
+              If(!FS_Is_File($this->RFileName))
+                Break;
+            $this->FHandle=@FOpen($this->RFileName, $Cmd[1]);
+           }
+          Break;
+        Case 'TestOpen':
+          If(!$this->FHandle)
+            Break 2;
+          Break;
+        Case 'Lock':
+          $this->Locked=[$Cmd[1]];
+          FLock($this->FHandle, $Cmd[1]);
+        //Debug(['lll', $this->FHandle, $Cmd[1]]);
+        //$this->Lock($Cmd[1]);
+          Break;
+        Case 'Clear':
+          $this->Seek(0);
+          $this->Truncate(0);
+          Break;
+        Case 'AppEnd':
+          $this->Seek(0,2);
+          Break;
+        }
+      Return $this->FHandle!=False;
+    }
+  
+    Function Create($AOpenIsExists=False)
+    {
+      Return $this->Open(
+        $AOpenIsExists?
+          omReadWrite|omCreate|omMakePath|omBinary
+           :
+          omReadWrite|omCreate|omMakePath|omBinary|omNotExist
+        );
+    }
+  
+    Function Go_Back_Str($ASize, $AData, $APos=0)
+    {
+    //#If Debug
+      If($ASize==0)
+      {
+        Trigger_Error('Size=0');
+        Return 0;
+      }
+    //#EndIf
+    //#If Debug
+      If($ASize+$APos!=StrLen($AData))
+      {
+        Trigger_Error('Error Size???');
+        Return 0;
+      }
+    //#EndIf
+      Return $this->Seek(-$ASize,1);
+    }
+  
+    Function Seek($AOffset=0, $AWhence=0)
+    {
+      Switch($AWhence)
+      {
+      Case 0: $AWhence=SEEK_SET; Break;
+      Case 1: $AWhence=SEEK_CUR; Break;
+      Case 2: $AWhence=SEEK_END; Break;
+      }
+      Return FSeek($this->FHandle, $AOffset, $AWhence)==0;
+    }
+  
+    Function Read($Size)
+    {
+      Return $this->Recv($Size);
+    }
+  
+    Function Recv_Count()
+    {
+      $Pos=FTell($this->FHandle);
+      FSeek($this->FHandle, 0, SEEK_END);
+      $Res=FTell($this->FHandle);
+      FSeek($this->FHandle, $Pos, SEEK_SET);
+      Return $Res-$Pos;
+    }
+  
+    Function Pos()
+    {
+      Return FTell($this->FHandle);
+    }
+  
+    Function Length()
+    {
+      $Pos=FTell($this->FHandle);
+      FSeek($this->FHandle,0,SEEK_END);
+      $Res=FTell($this->FHandle);
+      FSeek($this->FHandle, $Pos, SEEK_SET);
+      Return $Res;
+    }
+  
+    Function Truncate($Size=-1)
+    {
+      If($Size<0)
+        $Size+=$this->Pos()+1;
+      FTruncate($this->FHandle, $Size);
+    }
+  
+    Function TryLock($Typ=LOCK_EX)
+    {
+    //Return @FLock($this->FHandle, $Typ|LOCK_NB);
+      Return $this->Lock($Typ|LOCK_NB);
+    }
+  
+    Function Is_Locked()
+    {
+      Return Count($this->Locked)>1;
+    }
+  
+    Function Lock($Typ=LOCK_EX)
+    {
+      $Typ2=$this->Locked[Count($this->Locked)-1];
+      If($Typ2==$Typ)
+        $Res=True;
+      Else
+      {
+      //Debug(['Lock', $this->FHandle, $Typ]);
+        $Res=@FLock($this->FHandle, $Typ);
+      }
+      If($Res)
+        Array_Push($this->Locked, $Typ);
+      Return $Res;
+    }
+  
+    Function UnLock()
+    {
+      If(Count($this->Locked)<2)
+      {
+        Trigger_Error(
+          'Locked Error in "'.$this->RFileName.'"',
+          E_USER_WARNING
+        );
+        Return @FLock($this->FHandle, LOCK_UN);
+      }
+      $Typ2=Array_Pop($this->Locked);
+      $Typ=$this->Locked[Count($this->Locked)-1];
+      If($Typ2==$Typ)
+        Return True;
+    //Debug(['UnLock', $this->FHandle, $Typ]);
+      Return @FLock($this->FHandle, $Typ);
+    }
+  }
+?>

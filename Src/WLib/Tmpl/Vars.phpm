@@ -1,0 +1,309 @@
+<?
+  $Loader->Begin_Module('/Tmpl/Vars');
+ 
+ // String
+ 
+  // Запрашивает строку по строке
+  Function Vars_GetVarST_String(&$Vars, $Name)
+  {
+    $Res=_Vars_Get($Name, $Vars);
+    Switch(GetType($Res))
+    {
+    Case 'string':
+    Case 'integer':
+    Case 'double':
+    Case 'boolean':
+      Return $Res;
+    Case 'object':
+      Return $Res->AsString();
+    Case 'NULL':
+    Default:
+      Trigger_Error("Varible no foundet ".$Name, E_USER_WARNING);
+      Return 'Error';
+    }
+  }
+ 
+  // Запрашивает строку по массиву
+  Function Vars_GetVarFST_String(&$Vars, $Path)
+  {
+    $Res=_Vars_GetR_($Path, $Vars);
+    Switch(GetType($Res))
+    {
+    Case 'string':
+    Case 'integer':
+    Case 'double':
+    Case 'boolean':
+      Return $Res;
+    Case 'object':
+      Return $Res->AsString();
+    Case 'NULL':
+    Default:
+      Trigger_Error("Varible no foundet ".Implode('.', $Path), E_USER_WARNING);
+      Return 'Error';
+    }
+  }
+ 
+  // Запрашивает переменную по строке
+  Function &Vars_GetVarST(&$Vars, $Name)
+  {
+    $Res=_Vars_Get($Name, $Vars);
+    If($Res===NULL)
+    {
+      Trigger_Error("Varible no foundet ".$Name, E_USER_WARNING);
+      $Res='Error';
+    }
+    Return $Res;
+  }
+ 
+  // Запрашивает переменную по массиву
+  Function &Vars_GetVarFST(&$Vars, $Path)
+  {
+    $Res=_Vars_GetR_($Path, $Vars);
+    If($Res===NULL)
+    {
+      Trigger_Error("Varible no foundet ".Implode('.', $Path), E_USER_WARNING);
+      $Res='Error';
+    }
+    Return $Res;
+  }
+ 
+//Function Array_Merge2($A, $B)
+//{
+//  $Res=[];
+//  ForEach($A As $k=>$tmp)
+//    $Res[$k]=&$A[$k];
+//  ForEach($B As $k=>$tmp)
+//    $Res[$k]=&$B[$k];
+//  Return $Res;
+//}
+/* Не использовать!!!
+  Function Vars_WithST(&$Vars, $Name)
+  {
+    $With=_Vars_Get($Var, $Vars);
+    If($With===NULL)
+    {
+      Trigger_Error("Varible no foundet ".$Name, E_USER_WARNING);
+      $With=[];
+    }
+  //$R=Array_Merge(&$Vars, &$With);
+    $R=$With;
+    $R['']=&$Vars;
+    $Vars=&$R;
+  }
+*/
+  Function &Vars_With(Array &$Vars, $With):Array
+  {
+    If(Is_Array($With))
+    //$R=&Array_Merge(&$Vars, &$With);
+      $R=$With;
+    Else
+    {
+    //$W=[];
+    //$R=&Array_Merge(&$Vars, &$W);
+      $R=[];
+    }
+    $R['']=&$Vars;
+    Return $R;
+   }
+ 
+  Function Vars_WithR(Array &$Vars, $With):Array
+  {
+    If(Is_Array($With))
+    //$R=&Array_Merge(&$Vars, &$With);
+      $R=$With;
+    Else
+     {
+    //$W=[];
+    //$R=&Array_Merge(&$Vars, &$W);
+      $R=[];
+     }
+    $R['']=$Vars;
+    Return $R;
+  }
+ 
+  Function Vars_EndWith(&$Vars)
+  {
+    $Vars=NULL;
+  //$Vars=$Vars[''];
+  }
+/*
+  Function &_Vars_With_(&$With, &$Vars)
+  {
+  //$R=ArrAdd(&$Vars,& $With);
+    $R=Array_Merge(&$Vars, &$With);
+    $R['']=$Vars;
+    Return $R;
+  }
+ 
+  Function &_Vars_With_1(&$With, &$Vars)
+  {
+    $With['']=&$Vars;
+    Return $With;
+  }
+ 
+  Function &_Vars_With_3(&$With, &$Vars)
+  {
+    $With['']=&$Vars;
+    $Res=[''=>&$With];
+    Return $With;
+  }
+*/
+  // Запрашивает значение переменной $Path в $AVars
+  Function &_Vars_Get_($Path, &$AVars)
+  {
+  //Debug('Mem:'.memory_get_usage());
+  //Debug('Mem:'.memory_get_peak_usage());
+    $Res=&$AVars;
+    $NULL=NULL;
+    While($Path)
+    {
+      If(Is_Array($Res))
+      {
+        $VName=Array_Shift($Path);
+        If(!IsSet($Res[$VName]))
+          Return $NULL;
+        $Res=&$Res[$VName];
+      }
+      ElseIf(Is_Object($Res))
+      {
+        $Res=$Res->GetVar($Path, tv_Any, $AVars);
+        If($Res===NULL)
+          Break;
+      }
+    //ElseIf(IsProperty(&$Vars))
+    //  $Vars=&GetProperty(&$Vars,'');
+      Else
+        Return $NULL;
+    }
+    /* !!! */
+    $OldID=0;
+    While(True)
+    {
+      If(!Is_Object($Res))
+        Break;
+      If(!IsSet($Res->_Property_ID))
+        Break;
+      If($OldID==$Res->_Property_ID)
+        Break;
+      $OldID=$Res->_Property_ID;
+      $Res=$Res->GetVar($Path, tv_Any, $AVars);
+    }
+  
+    //While(IsProperty(&$Vars))
+    //  $Vars=&GetProperty(&$Vars,'');
+    Return $Res;
+  }
+ 
+  // Запрашивает значение переменной $Path в $AVars, рекурсивно проходясь по ''
+  Function &_Vars_GetR_($Path, &$AVars)
+  {
+    $Res=_Vars_Get_($Path, $AVars);
+    If($Res!==NULL)
+      Return $Res;
+  //If(!Is_Array($AVars))
+  //  Return $Res;
+    $Vr=&$AVars;
+    While(IsSet($Vr['']))
+    {
+      $Vr=&$Vr[''];
+      $Res=_Vars_Get_($Path, $Vr);
+      If($Res!==NULL)
+        Return $Res;
+    }
+ 
+   Global $ParseVars;
+ 
+   $Res=_Vars_Get_($Path, $ParseVars);
+   If($Res!==NULL)
+     Return $Res;
+   If(IsSet($ParseVars['IgnoreNull']))
+     If($ParseVars['IgnoreNull'])
+       $Res='';
+  //Return $z; //!!!!!!!!
+  //Debug($Res);
+    Return $Res;
+  }
+ 
+  Function _Vars_Path_($APath, &$AVars)
+  {
+    $Path=Explode('|', $APath);
+    $z=True;
+    ForEach($Path As $k=>$v)
+      If($z=!$z)
+      {
+        $V0=_Vars_Get($v, $AVars);
+        If($V0===NULL)
+          Return 'False';
+        Else
+        {
+          If(Is_Array($V0))
+            $Res=Implode('.', $V0);
+          $Path[$k]=$V0;
+        }
+     }
+    $Path=Implode(''  ,$Path);
+    $Path=Explode('.' ,$Path);
+    Return $Path;
+  }
+ 
+  Function &_Vars_Get($APath, &$AVars)
+  {
+    $Path =_Vars_Path_($APath ,$AVars);
+    $Res  =_Vars_GetR_($Path  ,$AVars);
+    Return $Res;
+  }
+ 
+  Function &_vars_getf($Path, &$Vars)
+  {
+    $Res=&$Vars;
+    While(!IsSet($Res[$Path]))
+    {
+      If(!IsSet($Res['']))
+      {
+        $R=NULL;
+        Return $R;
+      }
+      $Res=&$Res[''];
+      If(!Is_Array($Res))
+      {
+        $R=NULL;
+        Return $R;
+      }
+    }
+    Return $Res[$Path];
+  }
+ 
+  Function _search_put_var_($Data, $Var, &$Vars)
+  {
+    ForEach($Var As $v)
+    {
+      If(!IsSet($Vars[$v]))
+        Return False;
+      $v=Explode('|', $v, 2);
+      $Vars=&$Vars[$v[0]];
+    }
+    If(!IsSet($v[1]))
+      $v[1]='';
+    PutProperty($Vars, $Data, $v[1]);
+    Return True;
+  }
+ 
+  Function _put_var_($Data, $Var, &$Vars)
+  {
+    Global $ParseVars;
+    $Var=Explode('.', $Var);
+    If(_search_put_var_($Data, $Var, $Vars))
+      Return True;
+    If(_search_put_var_($Data, $Var, $ParseVars))
+      Return True;
+    $Vars2=&$ParseVars;
+    ForEach($Var As $v)
+    {
+      If(!IsSet($Vars2[$v]))
+        $Vars2[$v]=Null;
+      $Vars2=&$Vars2[$v];
+    }
+    $Vars2=$Data;
+    Return True;
+  }
+?>

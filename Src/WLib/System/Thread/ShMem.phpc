@@ -1,0 +1,7 @@
+<?
+  $Loader->Load_Class('System/Thread/Mutex');
+ 
+  Class C_System_ShMem Extends C_System_Mutex
+  {
+  }
+?>

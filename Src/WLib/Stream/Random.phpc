@@ -1,0 +1,40 @@
+<?
+  $Loader->Parent_Class('/Stream/Base');
+
+  Class C_Stream_Random Extends C_Stream_Base
+  {
+    Function Recv_Count()
+    {
+      Return 1024;
+    }
+  
+    Function EOF()
+    {
+      Return False;
+    }
+  
+    Function Clear()
+    {
+      //
+    }
+  
+    Function Recv($ASize)
+    {
+      $Res=Str_Repeat(' ', $ASize);
+      For($i=$ASize; $i;)
+        $Res{--$i}=Chr(Rand(0,255));
+      Return $Res;
+    }
+  
+    Function Write($Data)
+    {
+      For($i=StrLen($Data); $i;)
+        SRand(Rand()^Ord($Data{--$i}));
+      Return StrLen($Data);
+    }
+  
+    Function Close()
+    {
+    }
+  }
+?>

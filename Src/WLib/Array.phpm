@@ -1,0 +1,410 @@
+<?
+  //*************************************************************************\\
+  // Unit    : MArray                                                        \\
+  // Date    : 25.07.2002                                                    \\
+  // Creator : Wowa Savin <wowa@activesolutions.info>                        \\
+  // (c) Active solutions                                                    \\
+  //*************************************************************************\\
+  //
+  // В модуле содержатся функции обрабатывающие массивы.
+  //
+ 
+  // Определение модуля
+  $Loader->Begin_Module('/Array');
+ 
+  // Подключение модулей
+  $Loader->Load_Module('/System');
+ 
+  // Возвращает количество элементов в массиве
+  // Значение может быть меньше чем Count
+  Function ArrayCount($Arr)
+  {
+    If(!Is_Array($Arr))
+      Return 0;
+    If(!IsSet($Arr[0]))
+      Return 0;
+    $l=0;
+    $r=1;
+    While(IsSet($Arr[$r]))
+    {
+      $l=$r;
+      $r*=2;
+    }
+    While($l<$r-1)
+    {
+      $c=($l+$r)/2;
+      $c=(Int)$c;
+      If(IsSet($Arr[$c]))
+        $l=$c;
+      Else
+        $r=$c;
+    }
+    Return $r;
+  //Return Count($Arr);
+  }
+ 
+  // Возвращает количество элементов в массиве, если это массив, иначе 0
+  Function ACount($Arr)
+  {
+    If(!Is_Array($Arr))
+      Return 0;
+    Return Count($Arr);
+  }
+ 
+  // Вытаскивает из хеша структуру
+  Function ExtractRecord($Arr)
+  {
+    $Res=[];
+    ForEach($Arr As $k=>$v)
+      If(!Is_Integer($k))
+        $Res[$k]=$v;
+    Return $Res;
+  }
+ 
+  // Удаляет ключи из хеша, если они есть
+  Function UnSetKeys(&$Hash, $Keys)
+  {
+    ForEach($Keys As $Key)
+      If(IsSet($Hash[$Key]))
+        UnSet($Hash[$Key]);
+  }
+ 
+  // Вытаскивает из хеша массив
+  Function ExtractArray($Arr)
+  {
+    $Res=[];
+    For($k=0; IsSet($Arr[$k]); $k++)
+      $Res[]=$Arr[$k];
+  //ForEach($Arr As $k=>$v)
+  //  If(Is_Integer($k))
+  //    $Res[$k]=$v;
+    Return $Res;
+  }
+ 
+  // Помогает TreeAsArray
+  Function _TreeAsArray(&$Res, $Tree, $Sub, $b, $e)
+  {
+    $Vars=ExtractRecord($Tree);
+  //$m=$b? ($e? '0':'b'):($e? 'e':'1');
+    $c=Count($Sub);
+  //$Vars['ptree']=$Parent? $Parent:False;
+    $Vars['ltree']=$c;
+  //$Vars['mtree']=$m;
+    $Vars['etree']=$e;
+    $Vars['btree']=$b;
+    $Vars['stree']=$Sub;
+    $Sub[]=[
+      'etr'=>$e,
+      'btr'=>$b,
+    //'mtr'=>$m,
+    ];
+    $Vars['itree']=$Sub;
+    $Vars['otree']=($c&1)==0;
+    $c=ArrayCount($Tree);
+    $Vars['ctree']=$c;
+    $Res[]=$Vars;
+    For($i=0; $i<$c; $i++)
+      _TreeAsArray($Res, $Tree[$i], $Sub, $i==0, $i==$c-1);
+  }
+ 
+  // Преобразует дерево в массив
+  Function TreeAsArray($Tree)
+  {
+    $Res=[];
+    _TreeAsArray($Res, $Tree, [], True, True);
+    Return $Res;
+  }
+ 
+  // Преобразует дерево в массив
+  Function TreeAsArrayAll($Tree)
+  {
+   $c=ArrayCount($Tree);
+   $Res=[];
+   For($i=0; $i<$c; $i++)
+     _TreeAsArray($Res, $Tree[$i], [], $i==0, $i==$c-1);
+   Return $Res;
+  }
+ 
+  Function _ArrayAsTree(&$Idx, $AStart, $AId)
+  {
+    If(!IsSet($Idx[$AStart]))
+      Return False;
+    $Res=$Idx[$AStart];
+    $Idx[$AStart]=NULL;
+    ForEach($Res As $k=>$v)
+      $Res[$k]=ArrAdd($Res[$k], _ArrayAsTree($Idx, $v[$AId], $AId));
+    Return $Res;
+  }
+ 
+  // Преобразует массив в дерево
+  Function ArrayAsTree($Arr, $AStart=0, $AId='id', $AParent='parent')
+  {
+    $Idx=[];
+    $c=ArrayCount($Arr);
+    For($i=0; $i<$c; $i++)
+    {
+      $Item=$Arr[$i];
+      $Idx[$Item[$AParent]][]=$Item;
+    }
+    Return _ArrayAsTree($Idx, $AStart, $AId);
+  }
+ 
+  // Объеденяет переменные структур $a, $b и возвращает результат
+  // Если переменная содержится в двух структурах, то её значение
+  // берётся из второго.
+  Function ArrAdd($a, $b)
+  {
+    If(Is_Array($b))
+      ForEach($b As $c=>$d)
+       {
+        If(IsSet($a[$c]))
+          UnSet($a[$c]);
+        $a[$c]=$d;
+       }
+    Return $a;
+  }
+ 
+  // Преобразует ключи хеша $Arr по ассоциативному массиву $Rec
+  Function ArrayAsRecord($Arr, $Rec, $Sub=0)
+  {
+    $Res=[];
+    If($Sub>0)                       s
+    {
+      $Sub--;
+      ForEach($Arr As $k=>$v)
+        $Res[$k]=ArrayAsRecord($v, $Rec, $Sub);
+      Return $Res;
+    }
+    ForEach($Rec As $k=>$v)
+      If($v)
+        If(IsSet($Arr[$k]))
+          $Res[$v]=$Arr[$k];
+    Return $Res;
+  }
+ 
+  // Последовательно обьеденяет массив массивов в массив
+  Function ArrConc()
+  {
+    $a=Func_Get_Args();
+    If(Count($a)==0)
+      Return [];
+    If(Count($a)==1)
+      $a=$a[0];
+    $Res=[];
+    If(Is_Array($a) && Count($a)>0)
+      ForEach($a As $s)
+        If(Is_Array($s) && Count($s)>0)
+          ForEach($s As $v)
+            $Res[]=$v;
+    Return $Res;
+  }
+ 
+  // Нормализует массив, путём последовательной индексации
+  Function PackArray($Arr)
+  {
+    Return Array_Values($Arr);
+  }
+ 
+  // Преобразовывает массив $Arr в массив структур $Records,
+  // где значения массива $Arr хранятся в поле $Name
+  Function ArrayInRecords(&$Records, $Name, $Arr)
+  {
+    ForEach($Arr As $Key=>$Data)
+      $Records[$Key][$Name]=$Data;
+  }
+ 
+  // Вытаскивает из массива структур $Records, поля $Name
+  // и возвращает их в массиве
+  Function ArrayFromRecords($Records, $Name)
+  {
+    $Arr=Array();
+    ForEach($Records As $Key=>$Data)
+      $Arr[$Key]=$Data[$Name];
+    Return $Arr;
+  }
+ 
+  // Вытаскивает из массива структур $Records, поля $NameKey и $NameValue
+  // и возвращает их в хеше типа [$NameKey]=>[$NameValue]
+  Function HashFromRecords($Records, $NameKey, $NameValue=NULL)
+  {
+    $Arr=Array();
+    If($NameValue===NULL)
+      ForEach($Records As $Data)
+        $Arr[$Data[$NameKey]]=$Data;
+    Else
+      ForEach($Records As $Data)
+        $Arr[$Data[$NameKey]]=$Data[$NameValue];
+    Return $Arr;
+  }
+ 
+  // Производит Группировку Массива $Arr По полям из $Groups
+  Function Array_GroupBy($Arr, $Groups)
+  {
+    If(!Is_Array($Groups))
+      $Groups=[$Groups];
+    $Group=Array_Shift($Groups);
+    $Res=[];
+    ForEach($Arr As $v)
+    {
+      $k=$v[$Group];
+      If(!IsSet($Res[$k]))
+        $Res[$k]=Array();
+      $Res[$k][]=$v;
+    }
+    If($Groups)
+      ForEach($Res As $k=>$v)
+        $Res[$k]=Array_GroupBy($v, $Groups);
+    Return $Res;
+  }
+ 
+  // Производит Группировку Массива $Arr По полям из $Groups
+  Function Array_GroupBy_Old($Arr, $Groups, $Fields)
+  {
+    If(!Is_Array($Groups))
+      $Groups=[$Groups];
+    If(!Is_Array($Fields))
+      $Fields=[$Fields];
+    $Group=Array_Shift($Groups);
+    $Field=Array_Shift($Fields);
+    $Res=[];
+    $Count=ACount($Arr);
+    For($i=0; $i<$Count; $i++)
+     {
+      $k=$Arr[$i][$Group];
+      If(!IsSet($Res[$k]))
+        $Res[$k]=[$Group=>$k, $Field=>Array()];
+      $Res[$k][$Field][]=$Arr[$i];
+     }
+    $Res=Array_Values($Res);
+    $Count=ACount($Res);
+    If($Groups)
+      For($i=0; $i<$Count; $i++)
+        $Res[$i][$Field]=Array_GroupBy($Res[$i][$Field], $Groups, $Fields);
+    Return $Res;
+  }
+ 
+  // Добавляет в массив структур поля:
+  //    idx - индекс элемента массива 0..n-1
+  //    num - номер элемента массива  1..n или $First..$First+n-1
+  //    odd - чётность элемента
+  Function ReIndexs(&$Arr, $First=1)
+  {
+  //For($i=0; $i<ArrayCount($Arr); $i++)
+  //Return;
+   $i=0;
+   While(IsSet($Arr[$i]))
+   {
+     $Item=&$Arr[$i];
+   //$Arr[$i]='';
+     $Item['idx']=$i;
+     $Item['num']=$First++;
+     $Item['odd']=($i&1)==0;
+   //$Arr[$i]=$Item;
+     $i++;
+   }
+  }
+ 
+  // Сортирует массив структур $Arr
+  // по полю $Key в обратном порядке
+  Function NSortOf(&$Arr, $Key)
+  {
+   $c=ArrayCount($Arr);
+   For($i=0; $i<($c-1); $i++)
+     For($j=$i+1; $j<$c; $j++)
+       If($Arr[$i][$Key]<$Arr[$j][$Key])
+        {
+         $Item=$Arr[$i];
+         $Arr[$i]=$Arr[$j];
+         $Arr[$j]=$Item;
+        }
+  }
+ 
+  // Сортирует массив структур $Arr
+  // по полю $Key в порядке $z
+  Function SortOf(&$Arr, $Key, $z=false)
+  {
+   If($z)
+     Return NSortOf($Arr, $Key);
+ 
+   $c=ArrayCount($Arr);
+   For($i=0; $i<($c-1); $i++)
+     For($j=$i+1; $j<$c; $j++)
+       If($Arr[$i][$Key]>$Arr[$j][$Key])
+        {
+         $Item=$Arr[$i];
+         $Arr[$i]=$Arr[$j];
+         $Arr[$j]=$Item;
+        }
+  }
+ /*
+  // Сортирует натуральной сортировкой, с одним шаблоном, сохраняя ключи
+  Function ANatSortPart($Arr)
+  {
+    $Tmp=[];
+    ForEach($Arr As $k=>$v)
+    {
+      $s=Preg_Replace('/\d+/Ss','', $v);
+      If(IsSet($Tmp[$s]))
+        $Tmp[$s][$k]=$v;
+      Else
+        $Tmp[$s]=[$k=>$v];
+    }
+    ForEach($Tmp As $k=>$v)
+      If(Count($v)>1)
+        UASort($Tmp[$k], 'strnatcmp');
+    $Res=[];
+    ForEach($Tmp As $t)
+      ForEach($t As $k=>$v)
+        $Res[$k]=$v;
+  //NatSort();
+    Return $Res;
+  }
+ */
+  // Сортирует натуральной сортировкой, с одним шаблоном
+  Function NatSortPart($Arr)
+  {
+    $Tmp=Array();
+    ForEach($Arr As $v)
+    {
+      $s=Preg_Replace('/\d+/Ss','', $v);
+      If(IsSet($Tmp[$s]))
+        $Tmp[$s][]=$v;
+      Else
+        $Tmp[$s]=[$v];
+    }
+    ForEach($Tmp As $k=>$v)
+      If(Count($v)>1)
+        NatSort($Tmp[$k]);
+    $Res=[];
+    ForEach($Tmp As $t)
+      ForEach($t As $v)
+        $Res[]=$v;
+  //NatSort();
+    Return $Res;
+  }
+ /*
+  // Сортирует по ключу натуральной сортировкой, с одним шаблоном
+  Function KNatSortPart($Arr)
+  {
+    $Tmp=[];
+    ForEach($Arr As $k=>$v)
+    {
+      $s=Preg_Replace('/\d+/Ss','', $k);
+      If(IsSet($Tmp[$s]))
+        $Tmp[$s][$k]=$v;
+      Else
+        $Tmp[$s]=[$k=>$v];
+    }
+    ForEach($Tmp As $k=>$v)
+      If(Count($v)>1)
+        UKSort($Tmp[$k],'strnatcmp');
+    $Res=[];
+    ForEach($Tmp As $t)
+      ForEach($t As $k=>$v)
+        $Res[$k]=$v;
+  //NatSort();
+    Return $Res;
+  }
+ */
+  $Loader->End_Module('/Array');
+?>

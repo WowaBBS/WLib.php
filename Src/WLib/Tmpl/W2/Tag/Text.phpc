@@ -1,0 +1,83 @@
+<?
+  $Loader->Begin_Class('/Tmpl/W2/Tag/Text' );
+ 
+  $Loader->Parent_Class('/Tmpl/W2/Tag/Item' );
+ 
+  Class C_Tmpl_W2_Tag_Text Extends C_Tmpl_W2_Tag_Item
+  {
+    Var $tagName     ='#text'; // Имя тега
+    Var $value       ; // Содержимое
+  
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+    //$this->tagName='#text';
+    //$this->value=AStr($Args[0]);
+      $this->value=$Args[0];
+    }
+  
+    Function _Trim() { return false; }
+    Function TagBuild() {  Return $this->value; }
+  
+    Function TagBuildHash()
+    {
+      Return ['t'=>'t', 'v'=>$this->value];
+    }
+    
+    Function Pack_Old($Text)
+    {
+      If($this->ListPrev->_Trim()); $Text=Preg_Replace('/^\\s*?\\n/S', '', $Text);
+      If($this->ListNext->_Trim()); $Text=Preg_Replace('/\\n\\s*?$/s', '', $Text);
+      return $Text;
+    }
+  
+    Function Pack_Html($Text)
+    {
+      $Res=Explode("\n", $Text);
+      $i=Count($Res)-1;
+      If($i<=0) return $Text;
+  
+      If(!Trim($Res[$i])) $Res[$i]='';
+      If(!Trim($Res[0 ])) UnSet($Res[0]);
+  
+      return Implode("\n", $Res);
+    }
+  
+    Function Pack_Cpp($Text)
+    {
+      $Res=Explode("\n", $Text);
+      $i=Count($Res)-1;
+      If($i<=0) return $Text;
+      
+      if(!IsSet($Res[$i][0])) UnSet($Res[$i]);
+      if(!IsSet($Res[ 0][0])) UnSet($Res[ 0]);
+  
+      return Implode("\n", $Res);
+    }
+  
+    Function Pack_Def($Text)
+    {
+      $Res=Explode("\n", $Text);
+      $i=Count($Res)-1;
+      If($i<=0) return $Text;
+  
+      if($this->ListNext->_Trim() && !Trim ($Res[$i]   )) UnSet($Res[$i]);
+      if($this->ListPrev->_Trim() && !IsSet($Res[ 0][0])) UnSet($Res[ 0]);
+        
+      return Implode("\n", $Res);
+    }
+  
+    Function MakePHP(&$Info)
+    {
+      $Text=$this->value;
+     
+    //$Text= $this->Pack_Old  ($Text);
+    //$Text= $this->Pack_Html ($Text);
+    //$Text= $this->Pack_Cpp  ($Text);
+      $Text= $this->Pack_Def  ($Text);
+     
+      If($Text)
+        $Info->Out->Text($Text);
+    }
+  }
+?>

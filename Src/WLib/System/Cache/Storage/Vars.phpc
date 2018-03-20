@@ -1,0 +1,27 @@
+<?
+  $Loader->Parent_Class('/System/Cache/Storage/Base');
+ 
+  Class C_System_Cache_Storage_Vars Extends C_System_Cache_Storage_Base
+  {
+    Function _Load()
+    {
+      $Name=$this->Path->Make().'.vars';
+      $this->IsLoaded=True;
+      If(!Is_File($Name))
+        Return False;
+      $this->Info=UnSerialize(LoadFile($Name));
+      Return $this->Info? True:False;
+    }
+  
+    Function _Save()
+    {
+      $FileName=$this->Path->Make().'.vars';
+      $Info=Serialize($this->Info);
+      $Dir=ExtractFilePath($FileName);
+      If(!Is_Dir($Dir))
+        If(!CreatePath($Dir, $this->Manager->Vars['MkDir']['Mod']))
+          Return False;
+      Return SaveFile($FileName, $Info);
+    }
+  }
+?>

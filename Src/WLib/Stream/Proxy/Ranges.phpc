@@ -1,0 +1,140 @@
+<?
+  $Loader->Parent_Class('/Stream/Proxy/Base');
+
+  Class C_Stream_Proxy_Ranges Extends C_Stream_Proxy_Base
+  {
+    Var $Ranges =[[0,-1,0,0,0,0]];
+    Var $Length =0;
+    Var $Pos    =0;
+    Var $Range  =[0,-1,0,0,0,0];
+    Var $RangeI =0;
+  
+    Function Ranges_Set_Array($ARanges)
+    {
+      $L=0;
+      ForEach($ARanges As $k=>$r)
+      {
+        $l=$r[1]-$r[0]+1;
+        $r[2]=$l;
+        $r[3]=$L;
+        $L+=$l;
+        $r[4]=$L;
+        $r[5]=$r[0]-$r[3];
+        $ARanges[$k]=$r;
+      }
+      If(!$ARanges)
+        $ARanges=[[0,-1,0,0,0,0]];
+      $this->Ranges = $ARanges;
+      $this->RangeI = 0  ;
+      $this->Range  = $ARanges[0];
+      $this->Pos    = 0  ;
+      $this->Length = $L ;
+      $this->Seek(0,0);
+    }
+  
+    //Function Recv_Count() { Return $this->FStream->Recv_Count(); }
+    Function Write($Data)
+    {
+      $Res=0;
+      While($Data)
+      {
+        $l=$this->Range[4]-$this->Pos;
+        If($l<=0)
+          Return $Res;
+        If($l<=StrLen($Data))
+        {
+          If($l<StrLen($Data))
+            $lw=parent::Write(SubStr($Data, 0, $l));
+          Else
+            $lw=parent::Write($Data);
+          $this->Pos+=$lw;
+          $Res+=$lw;
+          If($lw<$l)
+            Return $Res;
+          $Data=SubStr($Data, $l);
+          If(!$this->_Next_Range())
+            Return $Res;
+        }
+        Else
+        {
+          $lw=parent::Write($Data)+$Res;
+          $this->Pos+=$lw;
+          Return $lw;
+        }
+      }
+      Return $Res;
+    }
+  
+    Function Recv($Size)
+    {
+      $Rest_Len=$this->Range[4]-$this->Pos;
+    //Debug([$l, Count($Res), $Size]);
+      If($Rest_Len<=0)
+        Return '';
+      $Res=parent::Recv(Min($Rest_Len, $Size));
+      $Res_Len=StrLen($Res);
+      $this->Pos+=$Res_Len;
+      If($Res_Len==$Rest_Len)
+        $this->_Next_Range();
+      Return $Res;
+    }
+  
+    Function EOF() { Return $this->Range[4]<=$this->Pos; }
+  
+    Function Seek($AOffset=0, $AWhence=0)
+    {
+      Switch($AWhence)
+      {
+      Case 0: $Pos=              $AOffset; Break;
+      Case 1: $Pos=$this->Pos   +$AOffset; Break;
+      Case 2: $Pos=$this->Length+$AOffset; Break;
+      }
+      If($Pos<0)
+        Return False;
+      If($Pos>=$this->Length)
+       {
+        $this->Pos=$Pos;
+        Return True;
+       }
+   
+      $Ranges = $this->Ranges ;
+      $Range  = $this->Range  ;
+      $RangeI = $this->RangeI ;
+   
+      While($Range[4]<=$Pos)
+        $Range=$Ranges[++$RangeI];
+      While($Range[3]>$Pos)
+        $Range=$Ranges[--$RangeI];
+   
+      If(!$this->FStream->Seek($Range[5]+$Pos))
+        Return False;
+   
+      $this->RangeI = $RangeI ;
+      $this->Range  = $Range  ;
+      $this->Pos    = $Pos    ;
+   
+      Return True;
+    }
+  
+    Function _Next_Range()
+    {
+      $i=++$this->RangeI;
+      If(!IsSet($this->Ranges[$i]))
+      {
+        $this->RangeI--;
+        Return False;
+      }
+      $Range=$this->Ranges[$i];
+      $this->Range=$Range;
+      If(!$this->FStream->Seek($Range[3]))
+        Return False;
+      Return True;
+    }
+  
+    Function Length()     { Return $this->Length; }
+    Function Pos()        { Return $this->Pos;    }
+    // Truncate(0)
+    // Clear
+    // ShutDown()
+  }
+?>

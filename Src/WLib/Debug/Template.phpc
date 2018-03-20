@@ -1,0 +1,189 @@
+<?
+  // Taken from builder of UE, directory Builder/Lib/Debug
+  $Loader->Parent_Class('/Object');
+
+  Class C_Debug_Template extends C_Object
+  {
+    Var $Skip    ='..';
+    Var $AddTab  ='  ';
+    Var $Slashes =[
+       '"'  => '\"',
+       "\0" => '\0',
+       "\t" => '\t',
+       "\r" => '\r',
+       "\n" => '\n',
+       "\\" => '\\\\',
+       "\$" => '\$',
+       "\{" => '\{',
+     ];
+    Var $BinarySignReg='/[^\t\r\n\x20-\xF8]/';
+    Var $ChunkLen=64;
+    Var $StrMaxLen=256;
+ 
+    Function Value($Ctx, $Value)
+    {
+       If($Ctx->Level_End())
+       {
+         $Ctx->Write($this->Skip);
+         Return;
+       }
+       $_TOV=GetType($Value);
+       Switch($_TOV)
+       {
+       Case 'boolean'       : $this->Boolean  ($Ctx, $Value); break;
+       Case 'integer'       : $this->Integer  ($Ctx, $Value); break;
+       Case 'double'        : $this->Double   ($Ctx, $Value); break;
+       Case 'string'        : $this->String   ($Ctx, $Value); break;
+       Case 'object'        : $this->Object   ($Ctx, $Value); break;
+       Case 'array'         : $this->Array    ($Ctx, $Value); break;
+       Case 'NULL'          : $this->Null     ($Ctx, $Value); break;
+       Case 'resource'      : $this->Resource ($Ctx, $Value); break;
+       Case 'float'         : $this->Float    ($Ctx, $Value); break;
+       Case 'unknown type'  : $this->UnKnown  ($Ctx, $Value); break;
+       Case 'user function' : $this->Function ($Ctx, $Value); break;
+       Default:
+         $_f='T'.$_TOV;
+         $this->$_f($Ctx, $Value);
+       }
+    }
+ 
+    Function Boolean  ($Ctx, $v) { $Ctx->Write($v? 'True':'False'); }
+    Function Integer  ($Ctx, $v) { $Ctx->Write($v); }
+    Function Double   ($Ctx, $v) { $Ctx->Write($v); }
+    Function Float    ($Ctx, $v) { $Ctx->Write($v); }
+    Function Resource ($Ctx, $v) { $Ctx->Write('Resource '.get_resource_type($v).'('.$v.')'); }
+    Function Null     ($Ctx, $v) { $Ctx->Write('Null'); }
+    Function Function ($Ctx, $v) { $Ctx->Write('Function '.$v); }
+    Function UnKnown  ($Ctx, $v) { $Ctx->Write('UnKnown '.$v);  }
+    
+    Function AddSlashes($v) { return StrTr($v, $this->Slashes); }
+  //Function IsBinary($v) { return StrLen(StrPBRK($v, $this->BinarySign))!==false; }
+    Function IsBinary($v) { return Preg_Match($this->BinarySignReg, $v)==1; }
+    Function IsMultiString($v) { return StrPos($v, "\n")!==false; }
+    
+    Function String_Chunk($Ctx, $v, $Len)
+    {
+      $Ctx->Write("''.\n");
+      $SaveInline=$Ctx->NoInline();
+      $OldTab=$Ctx->Tab_Push($this->AddTab);
+      $List=str_split($v, $Len);
+      $Last=Array_Pop($List);
+      ForEach($List As $Chunk)
+        $Ctx->Write('"'.$this->AddSlashes($Chunk).'".'."\n");
+      $Ctx->Write('"'.$this->AddSlashes($Last).'"');
+      $Ctx->Tab_Pop($OldTab);
+      $Ctx->EndNoInline($SaveInline);
+    }
+    
+    Function MultiString($Ctx, $v)
+    {
+      $Ctx->Write("''.\n");
+      $SaveInline=$Ctx->NoInline();
+      $OldTab=$Ctx->Tab_Push($this->AddTab);
+      $List=explode("\n", $v);
+      $Last=Array_Pop($List);
+      ForEach($List As $Chunk)
+        $Ctx->Write('"'.$this->AddSlashes($Chunk).'\\n".'."\n");
+      $Ctx->Write('"'.$this->AddSlashes($Last).'"');
+    //$Ctx->Write("''");
+      $Ctx->Tab_Pop($OldTab);
+      $Ctx->EndNoInline($SaveInline);
+    }
+    
+    Function String($Ctx, $v)
+    {
+    //if($Ctx->IsInline())
+    //  $Ctx->Write('"'.$this->AddSlashes($v).'"');
+      $IsBinary =$this->IsBinary($v);
+      $IsMulti  =!$IsBinary && $this->IsMultiString($v);
+      $l=StrLen($v);
+      if($l<$this->StrMaxLen && !$IsMulti)
+        $Ctx->Write('"'.$this->AddSlashes($v).'"');
+      elseif($IsBinary)
+        $this->String_Chunk($Ctx, $v, $this->ChunkLen);
+      else
+        $this->MultiString($Ctx, $v);
+    }
+    
+    Function Array($Ctx, $Value)
+    {
+      if(!Count($Value))
+      {
+        $Ctx->Write('[]');
+        return;
+      }
+      $Ctx->WriteLn('[');
+      $OldTab=$Ctx->Tab_Push($this->AddTab);
+      $this->ArrayBody($Ctx, $Value);
+      if(!$Ctx->IsInline())
+        $Ctx->Write(',');
+      $Ctx->Tab_Pop($OldTab);
+      $Ctx->WriteLn();
+      $Ctx->Write(']');
+    }
+    
+    Function Object($Ctx, $Value)
+    {
+      $Class=Get_Class($Value);
+      if($Ctx->Manager->ProcessClass($Ctx, $Class, $Value))
+        return;
+      $this->ObjectDefault($Ctx, $Class, $Value);
+    }
+ 
+    Function ArrayBody($Ctx, $Value)
+    {
+    //$Ctx->WriteLn();
+      $Idx=0;
+      ForEach($Value As $k=>$V)
+      {
+        if($Idx!==0)
+          $Ctx->WriteLn($Ctx->IsInline()? ', ':',');
+        if($Idx===$k)
+          $Idx++;
+        else
+        {
+          $Idx=null;
+          $this->Value($Ctx, $k);
+          $Ctx->Write('=>');
+        }
+        $Ctx->Level_Inc();
+        $this->Value($Ctx, $V);
+        $Ctx->Level_Dec();
+      }
+    }
+    
+    Function GetObjectVars($Value)
+    {
+      $v=Get_Object_Vars($Value);
+      if(Method_Exists($Value, '_Debug_Serialize'))
+        $Value->_Debug_Serialize($v);
+      return $v;
+    }
+    
+    Function ObjectDefault($Ctx, $Class, $Value)
+    {
+      $Ctx->Write('new '.$Class.'(');
+      $v=$this->GetObjectVars($Value);
+      $this->Value($Ctx, $v);
+      $Ctx->Write(')');
+    }
+ 
+    Function CallFunc($Ctx, $Func, $Args)
+    {
+      if(Is_Object($Args)) $Args=$this->GetObjectVars($Args);
+      if(Is_Array($Args))
+      {
+        $Ctx->Write($Func.'(');
+        $this->ArrayBody($Ctx, $Args);
+        $Ctx->Write(')');
+      }
+      else
+        $Ctx->Write($Func.'('.$Args.')');
+    }
+   
+    Function NewClass($Ctx, $Class, $Args)
+    {
+      $this->CallFunc($Ctx, 'new '.$Class, $Args);
+    }
+  }
+?>

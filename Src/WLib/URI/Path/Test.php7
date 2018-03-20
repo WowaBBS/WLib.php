@@ -1,0 +1,13 @@
+<?
+  Include '../../Using.php';
+  $Loader->Load_Type('/URI/Path/Base');
+
+  $CP=New TPath('dissovet/');
+  Echo $CP->Make()."\n";
+  $MP=New TPath('Zaschita');
+  Echo $MP->Make()."\n";
+  $MP->PathFrom($CP);
+  Echo $MP->Make()."\n";
+  $MP->Add('/index.html');
+  Echo $MP->Make()."\n";
+?>

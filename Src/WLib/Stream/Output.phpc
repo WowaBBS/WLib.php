@@ -1,0 +1,29 @@
+<?
+  $Loader->Parent_Class('/Stream/Handle');
+
+  Class C_Stream_Output Extends C_Stream_Handle
+  {
+    Var $FileName;
+
+    Function Open($ATextMode=False)
+    {
+      $this->FHandle=@FOpen('php://output', $ATextMode? 'wt':'wb');
+      Return $this->FHandle!=False;
+    }
+
+    Function TryLock()
+    {
+    //Return @FLock($this->FHandle,LOCK_EX|LOCK_NB);
+    }
+
+    Function Lock()
+    {
+    //Return @FLock($this->FHandle,LOCK_EX);
+    }
+
+    Function UnLock()
+    {
+    //Return @FLock($this->FHandle,LOCK_UN);
+    }
+  }
+?>

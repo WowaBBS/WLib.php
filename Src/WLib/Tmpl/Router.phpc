@@ -1,0 +1,257 @@
+<?
+  $Loader->Begin_Class('/Tmpl/Router');
+
+  $Loader->Parent_Class('/Object');
+  $Loader->Using_Class('/Tmpl/Mode' );
+  $Loader->Using_Class('/URI/Paths' );
+ 
+  Class C_Tmpl_Router Extends C_Object
+  {
+  //Var $Path  = './modes/' ;
+  //Var $URL   =   'modes/' ;
+    Var $Dir   = 'templates' ;
+    Var $Paths ;
+  //Var $Path  = './templates/' ;
+  //Var $URL   = 'templates/' ;
+    Var $LHash = [] ;
+ 
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+    //$this->Paths=&$GLOBALS['Paths'];
+      $this->Paths=$this->Create_Object('/URI/Paths');
+      $this->Paths->AddPath('./', 'Unknown'); // TODO
+    }
+ 
+    Function CalcMode($Mode, $Mode2)
+    {
+    //$Mode1=$Mode;
+    //If($Mode!=='')
+    //  If($Mode[0]!='/')
+    //    $Mode=$Mode2.'/'.$Mode;
+    //Debug([$Mode1, $Mode2, $Mode]);
+      If($Mode==='')
+        $Mode=$Mode2;
+      Else
+        If($Mode[0]!='/')
+          $Mode=$Mode2.'/'.$Mode;
+      $Mode=Explode('/', $Mode);
+      $i=0;
+      While($i<Count($Mode))
+      {
+        $Name=$Mode[$i];
+        If($Name=='')
+          Array_Splice($Mode, $i, 1);
+        ElseIf($Name=='..')
+        {
+          If($i>0)
+            Array_Splice($Mode, --$i, 2);
+          Else
+            Array_Splice($Mode, 0, 1);
+        }
+        Else
+          $i++;
+      }
+      $Mode=Implode('/', $Mode);
+      Return $Mode;
+    }
+ 
+    Function _GetLoc($Mode='')
+    {
+      If(!IsSet($this->LHash))
+        $this->LHash=[];
+      If(IsSet($this->LHash[$Mode]))
+        $Location=$this->LHash[$Mode];
+      Else
+      {
+        If($Mode!=='')
+          $PMF=$Mode.'/location.php';
+        Else
+          $PMF='location.php';
+        $PMFL=$this->GetFiles($PMF);
+        $LocationRes=[];
+        ForEach($PMFL As $PMFF)
+        {
+          $Location=[];
+          Include($PMFF);
+          $LocationRes=Array_Merge($LocationRes, $Location);
+        }
+      //If(!$PMFL)
+      //  $LocationRes=[['Folder'=>-1]];
+        $LocationRes[]=['Folder'=>-1];
+        $Location=$LocationRes;
+        $this->LHash[$Mode]=$Location;
+      }
+    //Debug($Location);
+      Return $Location;
+    }
+ 
+    Function _GetLoc2(&$Vars, &$Mode, &$Fld='')
+    {
+      $Loc=$this->_GetLoc($Mode);
+      If(!$Loc)
+        Return False;
+      $Fld2=$Fld;
+      $Fld='';
+      $Access='';
+      ForEach($Loc As $L)
+      {
+        $F=$L['Folder'];
+        If(IsSet($L['Access']))
+          $Access=$L['Access'];
+        Else
+          $Access='';
+        $z=1;
+        If($F===0)
+        { // Правило для текущей директории
+          //$Fld=$L['Mode'].($L['Mode']&&$Fld2? '/':'').$Fld2;
+          $Fld=$L['Mode'];
+          Break;
+        }
+        ElseIf(($F===' ')&&($Fld2===''))
+        { // Правило для текущей директории, если она конечная точка
+          $Fld=IsSet($L['Mode'])? $L['Mode']:'';
+          Break;
+        }
+        ElseIf(($F===1)&&($Fld2!==''))
+        { // Следущая директория - это параметр
+          $Fld=$L['Mode'];
+          Break;
+        }
+        ElseIf(($F===-1) && $this->File($Mode.($Mode&&$Fld2? '/':'').$Fld2.'/'))
+        { // Следущая директория - это папка в текущей
+          $Fld=$Fld2;
+          Break;
+        }
+        ElseIf(StrCaseCmp($F, $Fld2)==0)
+        { // Следущая директория - это конкретная директория
+          If(IsSet($L['Mode']))
+            $Fld=$L['Mode'];
+          Else
+            $Fld=$Fld2;
+          Break;
+        }
+        Else
+          $z=0; // Ни одного правила не выполнилось...
+      }
+      If($Access)
+      {
+        $CAccess=_vars_getf('Access', $Vars);
+        If($CAccess===NULL)
+          Return False;
+        Else
+          If(!$CAccess->TestAccess($Access))
+            Return False;
+      }
+      If(!$z)
+        Return False;
+      If(IsSet($L['Vars']))
+      {
+        If(!Is_Array($L['Vars']))
+          $VNames=Explode('.', $L['Vars']);
+        $Vs=&$Vars;
+        ForEach($VNames As $VName)
+          If(!$VName)
+          {
+            $Vs[]=[];
+            End($Vs);
+            $Vs=&$Vs[Key($Vs)];
+          }
+          Else
+          {
+            If(!IsSet($Vs[$VName]))
+              $Vs[$VName]=[];
+            $Vs=&$Vs[$VName];
+          }
+        $Vs=$Fld2;
+      }
+      If(IsSet($L['Exec']))
+      {
+        If($Mode!=='')
+          $PMF=$this->File($Mode.'/'.$L['Exec']);
+        Else
+          $PMF=$this->File($L['Exec']);
+      //Debug([$Mode.'/'.$L['Exec'], $PMF, $Mode]);
+        Include($PMF);
+      }
+      If($Fld==='')
+        Return True;
+    //Echo $Fld2,"/n";
+      If($Fld!=$Fld2)
+        $Mode=$this->CalcMode($Fld, $Mode);
+      ElseIf($Mode!=='')
+        $Mode.='/'.$Fld;
+      Else
+        $Mode.=$Fld;
+      Return True;
+    }
+ 
+    Function GetLocation(&$Vars, $Mode)
+    {
+      If(!Is_Array($Mode))
+        $Mode=Explode('/', $Mode);
+      $Mode[]='';
+      $SMode='';
+      ForEach($Mode As $Fld)
+        If(!$this->_GetLoc2($Vars, $SMode, $Fld))
+          Return False;
+      Return $SMode;
+    }
+ 
+    Function &Get(&$Vars, $AMode)
+    {
+      $R=$this->Create_Object(
+        'Tmpl/Mode',
+        [
+         'Vars'   => &$Vars  ,
+         'Router' => &$this  ,
+         'Mode'   =>  $AMode ,
+        ]
+      );
+      Return $R;
+    }
+ 
+    Function &Cur(&$Vars, $DefMode='', $Prefix='')
+    {
+      Global $TypeModeURL;
+      Global $Web_HtAccess;
+      If($TypeModeURL>0)
+      {
+        $Tmp1=clone $Web_HtAccess->CurPath;
+        If($Tmp1->IsDir())
+          $Tmp1->Del(-1);
+        $Tmp1=$Tmp1->Make();
+        If($Tmp1)
+          $DefMode=$Tmp1;
+      }
+      $DefMode=LoadVar('Mode', $DefMode);
+    //$P=New TPath($DefMode);
+      $Res=$this->Get($Vars, $Prefix.$DefMode);
+      Return $Res;
+    }
+ 
+    Function File($AFile='')
+    {
+      $Res=$this->Paths->GetFile($this->Dir.'/'.$AFile);
+      Return $Res[0];
+    }
+ 
+    Function GetFiles($AFile='')
+    {
+      $Res=$this->Paths->GetFiles($this->Dir.'/'.$AFile);
+      Return $Res;
+    }
+ 
+    Function ListFiles($AFile='')
+    {
+      $Res=$this->Paths->FilesList($this->Dir.'/'.$AFile);
+      Return $Res;
+    }
+ 
+    Function FileURL($AFile='')
+    {
+      $Res=$this->Paths->GetFile($this->Dir.'/'.$AFile);
+      Return $Res[1];
+    }
+  }
+?>

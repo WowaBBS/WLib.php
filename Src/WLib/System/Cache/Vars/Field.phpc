@@ -1,0 +1,108 @@
+<?
+  $Loader->Parent_Class('/Object');
+  
+  // Поддерево кеша переменных
+  Class C_System_Cache_Vars_Field Extends C_Object
+  {
+    Var $CVars ;
+    Var $Field ;
+    Var $IsLoaded=False;
+    Var $IsCheck=False;
+  
+    Var $Info=[];
+    Var $Data=[];
+  
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $this->CVars = $Args['CVars'];
+      $this->Field = $Args['Field'];
+    }
+  
+    Function Load($Def=[])
+    {
+      If($this->IsLoaded)
+        Return True;
+      If($this->CVars->IsLoaded)
+        $Res=True;
+      Else
+        $Res=$this->CVars->_Load();
+      $I=&$this->CVars->Info;
+      If(!IsSet($I[$this->Field]))
+        $I[$this->Field]=[
+          'DID'  => False ,
+          'Data' => $Def  ,
+        ];
+      $I=&$I[$this->Field];
+      $this->Info=&$I;
+      $this->Data=&$I['Data'];
+      $this->IsLoaded=True;
+    }
+  
+    Function DID_Check($DID)
+    {
+      If(!$this->IsLoaded)
+        $this->Load();
+    //Debug([$this->Info['DID'], $DID]);
+      If($this->Info['DID']===$DID)
+      {
+        $this->IsCheck=True;
+        Return True;
+      }
+    //$this->Info['DID']=$DID;
+      Return False;
+    }
+  
+    Function DID_UpDate($DID)
+    {
+      $this->Info['DID']=$DID;
+    //Return $this->Save();
+    }
+  
+    Function Save($Data=NULL)
+    {
+      If($Data!==NULL)
+        $this->Data=$Data;
+      $this->CVars->_Save();
+    }
+  
+    Function File_Alloc($ID)
+    {
+      $I=$this->_Files_Info();
+      $Res=$this->CVars->File_Alloc($ID);
+      If($Res!==False)
+        $I['ByID'][$ID]=True;
+      Return $Res;
+    }
+  
+    Function File_Delete($ID)
+    {
+      $I=$this->_Files_Info();
+      If(!IsSet($I['ByID'][$ID]))
+        Return False;
+      Return $this->CVars->File_Delete($ID);
+    }
+  
+    Function &_Files_Info()
+    {
+      $I=$this->Info;
+      If(!$I)
+        $this->_Load();
+      If(!IsSet($I[' files'])||($I[' files']['DID']!=$I['DID']))
+        $I[' files']=[
+          'ByID'=>Array(),
+          'Idx'=>0,
+          'DID'=>$I['DID'],
+        ];
+      Return $I[' files'];
+    }
+  
+    Function File_Path($ID)
+    {
+      $I=$this->_Files_Info();
+      If(!IsSet($I['ByID'][$ID]))
+        Return False;
+      Return $this->CVars->File_Path($ID);
+    }
+  }
+?>

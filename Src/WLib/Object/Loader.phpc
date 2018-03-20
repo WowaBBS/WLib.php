@@ -1,0 +1,171 @@
+<?
+ Class C_Object_Loader
+ {
+   Var $_Paths =['./Lib/'];
+   Var $_Libs  =[];
+   Var $_Singleton  =[];
+   Var $Included_Files=[]; //< TODO: Remove?
+ //Var $LoadingClass='';
+   
+   Function AddSearchPath($Path)
+   {
+     if(Is_Array($Path))
+     {
+       ForEach($Path As $Item)
+         $this->AddSearchPath($Item);
+       return;
+     }
+     $Path=StrTr(RealPath($Path), '\\', '/');
+     if(SubStr($Path,-1)=='/')
+       $Path=SubStr($Path,0,-1);
+   //if(SubStr($Path,-1)!='/')
+   //  $Path.='/';
+   //echo 'AddSearchPath ', $Path,"\n";
+     $this->_Paths[]=$Path;
+   }
+
+   Function Loader_Init($APath_Libs)
+   {
+   //If(Is_Object($APath_Libs))
+   //{
+   //  //$this->Loader_Info[SL_Path_Libs]=$APath_Libs->Loader_Info[SL_Path_Libs];
+   //  $this->Loader_Info=&$APath_Libs->Loader_Info;
+   //  $this->Path=&$APath_Libs->Path;
+   //}
+   //Else
+     {
+       $this->_Paths=[];
+       $this->AddSearchPath($APath_Libs);
+     //$this->Load_Lib('/All');
+  
+     //$this->Load_Type('/System/Path');
+     //$this->Path=New T_System_Path();
+  
+     //$this->Load_Type('/System/Event');
+     //$this->ShutDown_List=New T_System_Event();
+     //$this->ExitProc_List=New T_System_Event();
+  
+  
+     //$this->Load_Lib('/Support/PHP4');
+       $this->Load_Class('/Object/Base');
+     //$this->Loader_Info=&$this->Loader_Info;
+     }
+   //Register_ShutDown_Function([&$this, 'ShutDown']);
+   //$this->Add_ShutDown([&$this, 'Done']);
+   }
+   
+   Function _Find_Lib(String $Name, String $Ext='')
+   {
+     ForEach($this->_Paths as $__Path)
+     {
+       $_Path=$__Path.$Name.$Ext;
+       If(Is_File($_Path))
+       {
+         if(true) // Check windows only
+         {
+           $_RPath=StrTr(RealPath($_Path), '\\', '/');;
+           if($_RPath!==$_Path)
+           { // TODO: Error log
+             echo 'Excepted path ',$_RPath ,"\n";
+             echo 'Actual   path ',$_Path  ,"\n";
+             return false;
+           }
+         }
+         return $_Path;
+       }
+     }
+     return false;
+   }
+   
+   Function _Load_Lib(String $Name, Array $Mode=[], String $Ext='.php')
+   {
+     $AZSafe=IsSet($Mode['Safe'])&& $Mode['Safe'];
+   //$Name=StrToLower($Name);
+     $_Libs=&$this->_Libs;
+     If(IsSet($_Libs[$Name]))
+       Return $_Libs[$Name];
+     $Res=Str_Replace('/', '_', $Name);
+     $Loader=&$this;
+     //////
+     $_Path=$this->_Find_Lib($Name, $Ext);
+     If($_Path===False) $Res=False; Else
+     {
+       If($AZSafe) { If(!Include_Once($_Path)) $Res=False; }
+       Else        { If(!Require_Once($_Path)) $Res=False; }
+     }
+     If($Res)
+       $this->Included_Files[$Name.$Ext]=$_Path;
+     ElseIf(!$AZSafe)
+     {
+       Trigger_Error('Can`t load lib '.$Name.$Ext, E_USER_WARNING);
+       UnSupport();
+     }
+     $_Libs[$Name]=$Res;
+     Return $Res;
+   }
+
+   Function Load_Lib($Name, Array $Mode=[])
+   {
+     $this->_Load_Lib($Name, $Mode);
+   }
+
+   Function Load_Class($Name, Array $Mode=[])
+   {
+     $Res=$this->_Load_Lib($Name, $Mode, '.phpc');
+     Return $Res? 'C'.$Res:$Res;
+   //Return $Res;
+   }
+
+   Function Create_Object($Name, Array $Args=[], Array $Mode=[])
+   {
+     $Res=$this->Load_Class($Name, $Mode);
+     If(!$Res)
+       Return $Res;
+     $Class_Name=$Res;
+ 
+     If(!IsSet($Args['Loader']))
+       $Args['Loader']=&$this;
+     $Res=New $Class_Name($Args);
+     Return $Res;
+   }
+   
+   Function Get_Singleton($Name, Array $Args=[], Array $Mode=[])
+   {
+     $Key=Count($Args)? $Name.Serialize($Args):$Name;
+     $S=&$this->_Singleton;
+   //Echo 'GetSinlgeton(',$Key,')[',Implode(', ', Array_Keys($S)),"]\n";
+     if(IsSet($S[$Key]))
+       $Res=$S[$Key];
+     else
+       $Res=$S[$Key]=$this->Create_Object($Name, $Args, $Mode);
+     return $Res;
+   }
+
+   Function Object($Name, Array $Args=[], Array $Mode=[])
+   {
+     throw new Exception('Not implemented');
+     //see: D:\MyWeb\_files\wlib\system\loader.phpc
+     // This is creating singleton from System/Singleton/
+   }
+   
+   Function Using_Class  ($Name) {}
+   Function Using_Module ($Name) { $this->Load_Module ($Name); }
+   Function Using_Type   ($Name) { $this->Load_Type   ($Name); }
+   
+   Function Load_Module ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name, $Mode, '.phpm'); }
+   Function Load_Type   ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name, $Mode, '.phpt'); }
+
+   Function Parent_Class($Name) { $this->Load_Class ($Name); }
+   
+   Function Begin_Module () {}
+   Function Begin_Class  () {}
+   Function Begin_Type   () {}
+   Function Begin_Lib    () {}
+   
+   Function End_Module () {}
+   Function End_Class  () {}
+   Function End_Type   () {}
+   Function End_Lib    () {}
+ }
+
+?>

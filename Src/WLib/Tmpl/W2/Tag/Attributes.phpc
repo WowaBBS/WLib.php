@@ -1,0 +1,123 @@
+<?
+  $Loader->Parent_Class('/Object/Release');
+# $Loader->Load_Lib('/Support/PHP4');
+ 
+  Class C_Tmpl_W2_Tag_Attributes Extends C_Object_Release implements ArrayAccess
+  {
+    Protected $List=[];
+ 
+    Protected Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      if(IsSet($Args[0]))
+      {
+        $v=$Args[0]; // TODO: Is_Array;
+        if(Is_String ($v)) $this->AddStr($v); else
+        if(!Is_Null  ($v)) Unsupported();
+      }
+    }
+    
+    Protected Function _Done()
+    {
+      $this->Clear();
+      parent::_Done();
+    }
+    
+    //****************************************************************
+    // Magic methods
+
+    Function __Get   (String $k)     { return $this->Get($k);        }
+    Function __IsSet (String $k)     { return $this->Has($k);        }
+    Function __Set   (String $k, $v) {        $this->Set($k, $v);    }
+    Function __UnSet (String $k)     {        $this->Set($k, false); }
+ 
+    //****************************************************************
+    // ArrayAccess interface
+
+    Public Function offsetExists     ($k):bool { return $this->Get($k);        }
+    Public Function offsetGet        ($k)      { return $this->Has($k);        }
+    Public Function offsetSet        ($k ,$v)  {        $this->Set($k, $v);    }
+    Public Function offsetUnset      ($k)      {        $this->Set($k, false); }
+    
+    //****************************************************************
+    
+    Function Has($Name) { Return IsSet($this->List[$Name]); }
+    Function Clear() { $this->List=[]; }
+    Function Get($Name)
+    {
+      If(!IsSet($this->List[$Name]))
+        Return False;
+      $Res=$this->List[$Name];
+      If($Res===False)
+        Return '';
+      $C=SubStr($Res, 0, 1);
+      If(($C==='"')||($C==="'"))
+        $Res=Html_Entity_DeCode(SubStr($Res, 1, -1));
+      Return $Res;
+    }
+ 
+    Function Set($Name, $Value, $ZDel=True)
+    {
+      If($Value===False && $ZDel)
+      {
+        UnSet($this->List[$Name]);
+        Return;
+      }
+      If(Is_String($Value))
+        If(!Preg_Match("/^[\w\d]*$/iS", $Value))
+          $Value='"'.HtmlEntities($Value).'"';
+      $this->List[$Name]=$Value;
+    }
+ 
+    Function AddStr($Str)
+    {
+      // Одинарные кавычки
+      $Qw= "'[^'\\\\]*?(?:\\\\'[^'\\\\]*?)*?'";
+      // Двойные ковычки
+      $DQw='"[^"\\\\]*?(?:\\\\"[^"\\\\]*?)*?"';
+      $QAttr='/\\s*((?:'.$Qw.')|(?:'.$DQw.')|(?:[^\\s=]+)|(?:=))/isS';
+      $Cnt=Preg_Match_All($QAttr, $Str, $_Attr);
+      $z=0;
+      $Key='';
+      ForEach($_Attr[1]As $A)
+       If($z===0)
+       {
+         $Key=$A;
+         $z=1;
+       }
+       ElseIf($z===1)
+       {
+         If($A!=='=')
+         {
+           $z=0;
+           $this->List[$Key]=True;
+         }
+         Else
+           $z=2;
+       }
+       Else
+       {
+         $this->List[$Key]=$A;
+         $z=0;
+       }
+    }
+ 
+    Function Make()
+    {
+      $Res=[''];
+      ForEach($this->List As $k=>$v)
+        If($v===False)
+         {}
+        ElseIf($v===True)
+          $Res[]=$k;
+        Else
+          $Res[]=$k.'='.$v;
+      Return Implode(' ', $Res);
+    }
+ 
+    Function MakePHP(&$Info)
+    {
+      Return VarToPHP($this->List, $Info->Tab.'  ');
+    }
+  }
+?>

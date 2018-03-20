@@ -1,0 +1,67 @@
+<?
+  $Loader->Parent_Class('/Stream/Proxy/Base');
+
+  Class C_Stream_Proxy_Sub Extends C_Stream_Proxy_Base
+  {
+    Var $Length =0;
+    Var $Offset =0;
+    Var $Pos    =0;
+  
+  //Function Recv_Count() { Return $this->FStream->Recv_Count(); }
+    Function Write($Data)
+    {
+      $l=$this->Length-$this->Pos;
+      If($l<=0)
+        Return 0;
+      If($l<StrLen($Data))
+        $Data=SubStr($Data, 0, $l);
+      $lw=parent::Write($Data)+$Res;
+      $this->Pos+=$lw;
+      Return $lw;
+    }
+  
+    Function Recv($Size)
+    {
+      $Rest_Len=$this->Length-$this->Pos;
+      If($Rest_Len<=0)
+        Return '';
+      If($Size>$Rest_Len)
+        $Size=$Rest_Len;
+      $Res=parent::Recv($Size);
+      $this->Pos+=StrLen($Res);
+      Return $Res;
+    }
+  
+    Function EOF() { Return $this->Length<=$this->Pos; }
+  
+    Function Seek($AOffset=0, $AWhence=0)
+    {
+      Switch($AWhence)
+      {
+      Case 0: $Pos=              $AOffset; Break;
+      Case 1: $Pos=$this->Pos   +$AOffset; Break;
+      Case 2: $Pos=$this->Length+$AOffset; Break;
+      }
+      If($Pos<0)
+        Return False;
+      If($Pos>=$this->Length)
+      {
+        $this->Pos=$Pos;
+        Return True;
+      }
+   
+      If(!$this->FStream->Seek($this->Offset+$Pos))
+        Return False;
+   
+      $this->Pos    = $Pos    ;
+   
+      Return True;
+    }
+  
+    Function Length()     { Return $this->Length; }
+    Function Pos()        { Return $this->Pos;    }
+    // Truncate(0)
+    // Clear
+    // ShutDown()
+  }
+?>

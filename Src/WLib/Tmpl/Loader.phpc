@@ -1,0 +1,94 @@
+<?
+  $Loader->Parent_Class('/Object');
+  $Loader->Using_Class('/Tmpl/Router');
+  $Loader->Using_Module('/Tmpl/Vars');
+
+  Class C_Tmpl_Loader Extends C_Object
+  {
+    Var $Router    =False;
+    Var $Types     =[];
+    Var $DefType   ='W2';
+    Var $Templates =[];
+ 
+    Protected Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $this->Router      =$this->Create_Object('/Tmpl/Router');
+      $this->Types['W2'] =$this->Create_Object('/Tmpl/W2/Manager');
+    }
+ 
+    Protected Function _Done()
+    {
+      $this->Router->Done();
+      parent::_Done();
+    }
+ 
+    Protected Function _Norm_Path(&$Vars, $TmplName)
+    {
+       If(!StrLen($TmplName))
+         Return '';
+       $TmplName=StrToLower(StrTr($TmplName, '\\', '/'));
+       If($TmplName{0}=='/')
+         Return $TmplName;
+       $_CurPath=_vars_getf(' CurPath', $Vars);
+       If(!$_CurPath)
+       {
+         Trigger_Error('??? CurPath '. $TmplName);
+         return '';
+       }
+       Return $_CurPath->Make().$TmplName;
+    }
+ 
+    Protected Function _Real_Path(&$Vars, $TmplName)
+    {
+      $TmplName=$this->_Norm_Path($Vars, $TmplName);
+      Return $this->Router->File($TmplName);
+    }
+ 
+    Protected Function _List_Files(&$Vars, $TmplName, $Mask=False, $Attr=1)
+    {
+      $TmplName=$this->_Norm_Path($Vars, $TmplName);
+      Return $this->Router->ListFiles($TmplName, $Mask, $Attr);
+    }
+ 
+    Function Templ_Exists(&$Vars, $TmplName)
+    {
+      $TmplName=$this->_Real_Path($Vars, $TmplName);
+      If($TmplName==NULL)
+        Return False;
+      If(IsSet($this->Templates[$TmplName]))
+        Return True;
+      Return Is_File($TmplName);
+    }
+ 
+    Function &Load_Template(&$Vars, $TmplName)
+    {
+      $FullName=$this->_Norm_Path($Vars, $TmplName);
+      $FileName=$this->Router->File($FullName);
+      $FileName=$this->_Real_Path($Vars, $TmplName);
+      If(IsSet($this->Templates[$FileName]))
+        Return $this->Templates[$FileName];
+      If(!Is_File($FileName))
+      {
+        $_CurPath=_vars_getf(' CurPath', $Vars);
+        ErrStr('Template file not founded: "'.$TmplName.'" from "'.($_CurPath? $_CurPath->Make():'').'"');
+        $Res=$this->Create_Object('/Tmpl/Base/Template');
+      }
+      Else
+        $Res=$this->Types[$this->DefType]->Get_File($FileName);
+      $Res->Vars[' CurPath']=New TPath(DirName($FullName).'/');
+      $this->Templates[$FileName]=&$Res;
+      Return $Res;
+    }
+ 
+    Function &String_Template(&$Vars, $Text)
+    {
+      $md5=md5($Text);
+      If(IsSet($this->Templates[$md5]))
+        Return $this->Templates[$md5];
+      $Res=$this->Types[$this->DefType]->Get_String($Text);
+      $this->Templates[$md5]=&$Res;
+      Return $Res;
+    }
+  }
+?>

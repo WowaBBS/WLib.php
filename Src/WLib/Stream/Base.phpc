@@ -1,0 +1,737 @@
+<?
+  $Loader->Parent_Class('/Object');
+  $Loader->Load_Lib('/Stream/Utils');
+ 
+  Define('x2x16',0x10000);
+  Define('x2x32',x2x16*x2x16);
+  Define('x2x48',x2x32*x2x16);
+  Define('Double_Machne_Big_Endian', 1); // TODO:
+ 
+  Class C_Stream_Base extends C_Object
+  {
+    Var $_BS=65536 ;//1024*64;
+    Var $_BT=64    ;//1024*64/1024;
+  
+    Function Close()
+    {
+    }
+  
+    Function EOF()
+    {
+      Return True;
+    }
+  
+    Function Read_Max($ASize_Min=1, $ASize_Max=65536)
+    {
+      $Res=[];
+      While($ASize_Min>0)
+      {
+        $Str=$this->Recv($ASize_Max);
+      //Debug($Str);
+        $Len=StrLen($Str);
+        If($Len==0)
+          Break;
+        $ASize_Min-=$Len;
+        $ASize_Max-=$Len;
+        $Res[]=$Str;
+      }
+      Switch(Count($Res))
+      {
+      Case  0: Return '';
+      Case  1: Return $Res[0];
+      Default: Return Implode('', $Res);
+      }
+    }
+  
+    Function Read($ASize)
+    {
+      $Res=[];
+      While($ASize)
+      {
+        $Str=$this->Recv($ASize);
+        $Len=StrLen($Str);
+        If($Len==0)
+          Break;
+        $ASize-=$Len;
+        $Res[]=$Str;
+      }
+      Switch(Count($Res))
+      {
+      Case  0: Return '';
+      Case  1: Return $Res[0];
+      Default: Return Implode('', $Res);
+      }
+    }
+  
+    Function Recv($Size)
+    {
+      Return '';
+    }
+  
+    Function Stat()
+    {
+      Return [];
+    }
+  
+    Function Get_Content($Size=1024)
+    {
+      $bs=$this->_BS;
+      $bt=$this->_BT;
+      $this->Seek(0);
+      $Res=[];
+      Do
+      {
+        Set_Time_Limit($bt);
+        $Out=$this->Recv($bs);
+        $Res[]=$Out;
+      }
+      While(!$this->Eof());
+      Return Implode('', $Res);
+    }
+  
+    Function Put_Content($Data)
+    {
+      $this->Seek(0);
+      If($this->Write($Data)!==StrLen($Data))
+        Return False;
+      $this->Truncate();
+      $this->Flush();
+      Return True;
+    }
+  
+    Function Get_Line($Size=1024)
+    {
+      $Res='';
+      Do
+      {
+        $Out=$this->Recv(1);
+      //Debug($Out);
+      //If($Out===False)
+      //  If(StrLen($Res)>0)
+      //    Return $Res;
+      //  Else
+      //    Return False;
+        If($Out=="\r")
+           Continue;
+        If($Out=="\n")
+           Break;
+        $Res.=$Out;
+      }
+      While(!$this->Eof());
+      Return $Res;
+    }
+  
+    Function Write($Data)
+    {
+      Return 0;
+    }
+  
+    Function PassThru()
+    {
+      $bs=$this->_BS;
+      $bt=$this->_BT;
+      $fo=FOpen('php://output','wb');
+    //$fo=FOpen('php://stdout','wb');
+    //Stream_Set_Blocking ($fo,false);
+      $Res=True;
+      Do
+       {
+      //Debug('Set_Time_Limit('.$bt.');');
+        Set_Time_Limit($bt);
+      //Debug('$r=$this->Recv('.$bs.');');
+        $r=$this->Recv($bs);
+      //Debug('!');
+      //Ignore_User_Abort(0);
+      //Flush();
+      //Debug(Connection_Status().'.'.Connection_Aborted());
+      //Debug(FWrite($fo,'').'.'.Connection_Status().'.'.Connection_Aborted());
+      //$R=0;
+        $R=FWrite($fo, $r, StrLen($r));
+      //Echo $r;
+      //Debug($R);
+        If($R===False)
+         {
+          $Res=False;
+          Break;
+         }
+       }
+      While(!$this->Eof());
+      FClose($fo);
+      Return $Res;
+    }
+  
+    Function Seek($AOffset, $AWhence=0)
+    {
+      Return False;
+    }
+  
+    Function Skip($ASize)
+    {
+      Return $this->Seek($ASize,1);
+    }
+  
+    Function Length()
+    {
+      Return 0;
+    }
+  
+    Function Pos()
+    {
+      Return 0;
+    }
+  
+    Function Copy_To_Stream(C_Stream_Base $AStream, $Len=-1)
+    {
+      $bs=$this->_BS;
+      $bt=$this->_BT;
+      $D='';
+      Do
+      {
+        If($D==='')
+        {
+          Set_Time_Limit($bt);
+          $l=$bs;
+          if($Len>=0 && $l>$Len)
+            $l=$Len;
+          $D=$this->Recv($l);
+          if($Len>=0)
+            $Len-=StrLen($D);
+        }
+        $S=$AStream->Write($D);
+        If($S===False)
+          Return False;
+        ElseIf(Is_Int($S)&&($S<StrLen($D)))
+          $D=SubStr($D, $S);
+        Else
+          $D='';
+      }
+      While(!$this->Eof() && $Len!=0);
+      Return True;
+    }
+  
+    Function Save_To_Stream(C_Stream_Base $AStream)
+    {
+      $bs=$this->_BS;
+      $bt=$this->_BT;
+      $this->Seek(0);
+      Do
+      {
+        Set_Time_Limit($bt);
+        $D=$this->Recv($bs);
+        If($AStream->Write($D)!=StrLen($D))
+          Return False;
+      }
+      While(!$this->Eof());
+      Return True;
+    }
+  
+    Function Clear()
+    {
+      $this->Truncate(0);
+    }
+  
+    Function Flush()
+    {
+    }
+  
+    Function _Done()
+    {
+      $this->Close();
+      parent::_Done();
+    }
+  
+    Function ShutDown()
+    {
+    }
+  
+  
+    //********************************
+    // Byte functions
+    
+    Var $BE=true;
+  
+    Function Read0($Size)
+    {
+      $Res=$this->Read($Size);
+      $Size-=StrLen($Res);
+      If($Size==0)
+        Return $Res;
+      Return $Res.Str_Repeat("\0", $Size);
+    }
+  
+    Function Read_UInt8() {  Return Ord($this->Read0(1)); }
+    Function Read_UInt16b() { $Res=$this->Read0(2); $Res=UnPack('n', $Res); Return $Res[1]; }
+    Function Read_UInt16l() { $Res=$this->Read0(2); $Res=UnPack('v', $Res); Return $Res[1]; }
+  //Function Read_UInt16m() { $Res=$this->Read0(2); $Res=UnPack('S', $Res); Return $Res[1]; }
+    Function Read_UInt32b() { $Res=$this->Read0(4); $Res=UnPack('N', $Res); Return $Res[1]; }
+    Function Read_UInt32l() { $Res=$this->Read0(4); $Res=UnPack('V', $Res); Return $Res[1]<0? $Res[1]+4294967296:$Res[1]; }
+  //Function Read_UInt32m() { $Res=$this->Read0(4); $Res=UnPack('L', $Res); Return $Res[1]; }
+  //Function Read_UInt64b() { $Res=$this->Read0(8); $Res=UnPack('J', $Res); Return $Res[1]; } // TODO: Only 64 bit version
+  //Function Read_UInt64l() { $Res=$this->Read0(8); $Res=UnPack('P', $Res); Return $Res[1]; } // TODO: Only 64 bit version
+  
+    Function Read_UInt24b() { $Res=$this->Read0(3); $R=UnPack('n', $Res); Return ($R[1]<<8)|Ord($Res{2}); }
+    Function Read_UInt24l() { $Res=$this->Read0(3); $R=UnPack('v', $Res); Return (Ord($Res{2})<<16)|$R[1]; }
+                                                                   
+    Function Read_UInt48b()
+    {
+      $R=$this->Read0(6);
+      $R=UnPack('n*', $R);
+      Return
+        $R[1]*x2x32+
+        $R[2]*0x10000+
+        $R[3];
+    }
+  
+    Function Read_UInt48l()
+    {
+      $R=$this->Read0(6);
+      $R=UnPack('v*', $R);
+      Return
+        $R[3]*x2x32+
+        $R[2]*0x10000+
+        $R[1];
+    }
+  
+    Function Read_UInt64b()
+    {
+      $R=$this->Read0(8);
+      $R=UnPack('n*', $R);
+      Return
+        $R[1]*x2x48+
+        $R[2]*x2x32+
+        $R[3]*0x10000+
+        $R[4];
+    }
+  
+    Function Read_UInt64l()
+    {
+      $R=$this->Read0(8);
+      $R=UnPack('v*', $R);
+      $R=
+        $R[4]*x2x48+
+        $R[3]*x2x32+
+        $R[2]*0x10000+
+        $R[1];
+      Return $R;
+    }
+  
+    Function Read_UInt16() { return $this->BE? $this->Read_UInt16b():$this->Read_UInt16l(); }
+    Function Read_UInt32() { return $this->BE? $this->Read_UInt32b():$this->Read_UInt32l(); }
+    Function Read_UInt24() { return $this->BE? $this->Read_UInt24b():$this->Read_UInt24l(); }
+    Function Read_UInt48() { return $this->BE? $this->Read_UInt48b():$this->Read_UInt48l(); }
+    Function Read_UInt64() { return $this->BE? $this->Read_UInt64b():$this->Read_UInt64l(); }
+    
+    Function Read_Float64() {  return $this->_Read_Float64b($this->BE); }
+    
+    Function Write_UInt8  ($i) { Return $this->Write(Chr($i)); }
+    Function Write_UInt16b($i) { Return $this->Write(Pack('n', $i)); }
+    Function Write_UInt16l($i) { Return $this->Write(Pack('v', $i)); }
+    Function Write_UInt32b($i) { Return $this->Write(Pack('N', $i)); }
+    Function Write_UInt32l($i) { Return $this->Write(Pack('V', $i)); }
+    Function Write_UInt64b($i) { Return $this->Write(Pack('J', $i)); } // TODO: Only 64 bit version
+    Function Write_UInt64l($i) { Return $this->Write(Pack('P', $i)); } // TODO: Only 64 bit version
+  
+    Function Write_UInt24b($i) { Return $this->Write(Pack('Cn', $i>>16, $i)); }
+    Function Write_UInt24l($i) { Return $this->Write(Pack('vC', $i, $i>>16)); }
+  
+    Function Write_UInt16($v) { return $this->BE? $this->Write_UInt16b($v):$this->Write_UInt16l($v); }
+    Function Write_UInt32($v) { return $this->BE? $this->Write_UInt32b($v):$this->Write_UInt32l($v); }
+    Function Write_UInt24($v) { return $this->BE? $this->Write_UInt24b($v):$this->Write_UInt24l($v); }
+    Function Write_UInt48($v) { return $this->BE? $this->Write_UInt48b($v):$this->Write_UInt48l($v); }
+    Function Write_UInt64($v) { return $this->BE? $this->Write_UInt64b($v):$this->Write_UInt64l($v); }
+    
+    Function Write_Float32($v) { return $this->_Write_Float32b($v, $this->BE); }
+    Function Write_Float64($v) { return $this->_Write_Float64b($v, $this->BE); }
+  
+    // Надо проверять
+    Function _Read_Float_($BE, $Size, $Format)
+    {
+      $Res=$this->Read0($Size);
+      If(Double_Machne_Big_Endian!=$BE)
+        $Res=StrRev($Res);
+      $Res=UnPack($Format, $Res);
+      Return $Res[1];
+    }
+  
+    Function _Write_Float_($v, $BE, $Format)
+    {
+      $Res=Pack($Format, $v);
+      If(Double_Machne_Big_Endian!=$BE)
+        $Res=StrRev($Res);
+      Return $this->Write($Res);
+    }
+  
+    Function _Read_Float32($BE) { return $this->_Read_Float_($BE, 4, 'f'); }
+    Function _Read_Float64($BE) { return $this->_Read_Float_($BE, 8, 'd'); }
+  
+    Function _Write_Float32($v, $BE) { return $this->_Write_Float_($v, $BE, 'f'); }
+    Function _Write_Float64($v, $BE) { return $this->_Write_Float_($v, $BE, 'd'); }
+  
+    Function Read_Float32b() { return $this->_Read_Float32(true); }
+    Function Read_Float64b() { return $this->_Read_Float64(true); }
+  
+    Function Read_Float32l() { return $this->_Read_Float32(false); }
+    Function Read_Float64l() { return $this->_Read_Float64(false); }
+  
+    Function Write_Float32b($v) { return $this->_Write_Float32($v, true); }
+    Function Write_Float64b($v) { return $this->_Write_Float64($v, true); }
+  
+    Function Write_Float32l($v) { return $this->_Write_Float32($v, false); }
+    Function Write_Float64l($v) { return $this->_Write_Float64($v, false); }
+  
+  //Function Write_DoubleB($i)
+  //Function Write_DoubleL($i)
+  //Function Read_DoubleB()
+  //Function Read_DoubleL()
+  
+    //********************************
+    // Bit Right functions
+  
+  //Var $rm=0; // Маска
+  //Var $rb=0; // Байт
+  
+    Function BitR_Read_Start()
+    {
+      $this->rm=0;
+      $this->rb=0;
+    }
+  
+    Function BitR_Read_Stop()
+    {
+      UnSet($this->rm);
+      UnSet($this->rb);
+    }
+  
+    Function BitR_Rest_Len()
+    {
+      Switch($this->rm)
+      {
+      Case 0x80: Return 8;
+      Case 0x40: Return 7;
+      Case 0x20: Return 6;
+      Case 0x10: Return 5;
+      Case 0x08: Return 4;
+      Case 0x04: Return 3;
+      Case 0x02: Return 2;
+      Case 0x01: Return 1;
+      Case    0: Return 0;
+      Default  : Return False;
+      }
+    }
+  
+    Function BitR_Rest_Mask()
+    {
+      Return ($this->rm<<1)-1;
+    }
+  
+    Function BitR_Read_UInt($Len)
+    {
+      $rm=&$this->rm;
+      $rb=&$this->rb;
+      $Res=0;
+      While($Len)
+      {
+        If(!$rm)
+        {
+          $rm=0x80;
+          $rb=Ord($this->Read(1));
+        }
+        $Res<<=1;
+        If($rm&$rb)
+          $Res++;
+        $rm>>=1;
+        $Len--;
+      }
+      Return $Res;
+    }
+  
+    Function BitR_Read_UNum($Len)
+    {
+      $rm=&$this->rm;
+      $rb=&$this->rb;
+      $Res=0;
+      While($Len)
+      {
+        If(!$rm)
+        {
+          $rm=0x80;
+          $rb=Ord($this->Read(1));
+        }
+        $Res*=2;
+        If($rm&$rb)
+          $Res++;
+        $rm>>=1;
+        $Len--;
+      }
+      Return $Res;
+    }
+  
+    Function BitR_Read_Int($Len)
+    {
+      If($Len<=0)
+        Return 0;
+      $Sign=$this->BitR_Read_UInt(1);
+      $Len--;
+      If(!$Len)
+        Return $Sign? -1:0;
+      $Res=$this->BitR_Read_UInt($Len);
+      Return $Sign? ($Res-1<<$Len):$Res;
+    }
+  
+    Function BitR_Read_UIntR($Len)
+    {
+      $rm=&$this->rm;
+      $rb=&$this->rb;
+      $Res=0;
+      $RM=1;
+      While($Len)
+      {
+        If(!$rm)
+        {
+          $rm=0x80;
+          $rb=Ord($this->Read(1));
+        }
+        If($rm&$rb)
+          $Res|=$RM;
+        $RM<<=1;
+        $rm>>=1;
+        $Len--;
+      }
+      Return $Res;
+    }
+  
+    //********************************
+    // Bit Left functions
+  
+  //Var $rm=0; // Маска
+  //Var $rb=0; // Байт
+  
+    Function BitL_Read_Start()
+    {
+      $this->rm=256;
+      $this->rb=0;
+    }
+  
+    Function BitL_Read_Stop()
+    {
+      UnSet($this->rm);
+      UnSet($this->rb);
+    }
+  
+    Function BitL_Rest_Len()
+    {
+      Switch($this->rm)
+      {
+      Case  256: Return 0;
+      Case 0x80: Return 1;
+      Case 0x40: Return 2;
+      Case 0x20: Return 3;
+      Case 0x10: Return 4;
+      Case 0x08: Return 5;
+      Case 0x04: Return 6;
+      Case 0x02: Return 7;
+      Case 0x01: Return 8;
+      Default  : Return False;
+      }
+    }
+  
+    Function BitL_Rest_Mask()
+    {
+      Switch($this->rm)
+      {
+      Case  256: Return   0;
+      Case 0x80: Return   1;
+      Case 0x40: Return   3;
+      Case 0x20: Return   7;
+      Case 0x10: Return  15;
+      Case 0x08: Return  31;
+      Case 0x04: Return  63;
+      Case 0x02: Return 127;
+      Case 0x01: Return 255;
+      Default  : Return False;
+      }
+    }
+  
+    Function BitL_Read_UInt($Len)
+    {
+      $rm=&$this->rm;
+      $rb=&$this->rb;
+      $Res=0;
+      While($Len)
+      {
+        If($rm>255)
+        {
+          $rm=1;
+          $rb=Ord($this->Read(1));
+        }
+        $Res<<=1;
+        If($rm&$rb)
+          $Res++;
+        $rm<<=1;
+        $Len--;
+      }
+      Return $Res;
+    }
+  
+    Function BitL_Read_UNum($Len)
+    {
+      $rm=&$this->rm;
+      $rb=&$this->rb;
+      $Res=0;
+      While($Len)
+      {
+        If($rm>255)
+        {
+          $rm=1;
+          $rb=Ord($this->Read(1));
+        }
+        $Res*=2;
+        If($rm&$rb)
+          $Res++;
+        $rm<<=1;
+        $Len--;
+      }
+      Return $Res;
+    }
+  
+    Function BitL_Read_Int($Len)
+    {
+      If($Len<=0)
+        Return 0;
+      $Sign=$this->BitL_Read_UInt(1);
+      $Len--;
+      If(!$Len)
+        Return $Sign? -1:0;
+      $Res=$this->BitL_Read_UInt($Len);
+      Return $Sign? ($Res-1<<$Len):$Res;
+    }
+  
+    Function BitL_Read_UIntR($Len)
+    {
+      $rm=&$this->rm;
+      $rb=&$this->rb;
+      $Res=0;
+      $RM=1;
+      While($Len)
+      {
+        If($rm>255)
+        {
+          $rm=1;
+          $rb=Ord($this->Read(1));
+        }
+        If($rm&$rb)
+          $Res|=$RM;
+        $RM<<=1;
+        $rm<<=1;
+        $Len--;
+      }
+      Return $Res;
+    }
+  
+    // ------------------------------------------------
+    // - Строковые функции
+  
+    /// Читает символы из набора Chars
+    Function Read_Chars($Chars)
+    {
+      FAbstract();
+    }
+  
+    /// Читает до символов из набора Chars, включая последий
+    Function Read_To_Chars($Chars, $Min=8192, $Max=65536)
+    {
+      FAbstract();
+    }
+  
+    /// Читает поток, пока не найдет строку $Needle
+    /// Результат:
+    ///   [
+    ///     0 => False - Если конец файла,
+    ///     1 => Данные до найденной стороки,
+    ///     2 => Найденная строка или '', если строка не найдена
+    ///   ];
+    Function Read_To_Str($Needle, $Min=8192, $Max=65536)
+    {
+      $NLen=StrLen($Needle);
+      $Str=$this->Read_Max($Min, $Max);
+      $SLen=StrLen($Str);
+      $NIsEnd=$SLen>=$Min;
+      If(!$SLen)
+      {
+        Return [
+          False,
+          '',
+          '',
+        ];
+      }
+      $R=StrPos($Str, $Needle);
+      If($R!==False)
+      {
+        $Res=[
+          $NIsEnd,
+          SubStr($Str, 0, $R),
+          $Needle
+        ];
+        $R+=$NLen;
+        $SLen-=$R;
+        If($SLen)
+        {
+          $this->Go_Back_Str($SLen, $Str, $R);
+          $Res[0]=True;
+        }
+      }
+      Else
+      {
+        If($NIsEnd)
+          $R=$Min-$NLen+1;
+        Else
+          $R=$SLen;
+        $Res=[
+          $NIsEnd,
+          SubStr($Str, 0, $R),
+          ''
+        ];
+        $SLen-=$R;
+        If($SLen)
+        {
+          $this->Go_Back_Str($SLen, $Str, $R);
+        }
+      }
+      Return $Res;
+    }
+  
+    // Читает данные до встречи c символами из $RegExp,
+    //   $RegExp - требования:
+    //     1) что бы захватывал данные с начала строки
+    //     2) Ничего не находил в случае, если там нечего искать
+    Function Read_RegExp($RegExp, $ASize_Min=8192, $ASize_Max=65536)
+    {
+      $Str=$this->Read_Max($ASize_Min, $ASize_Max);
+      $SLen=StrLen($Str);
+      $NIsEnd=$SLen>=$ASize_Min;
+      If(Preg_Match($RegExp, $Str, $Res))
+      {
+        $R=StrLen($Res[0]);
+        $Res[0]=$NIsEnd;
+   
+        $SLen-=$R;
+        If($SLen)
+        {
+          $this->Go_Back_Str($SLen, $Str, $R);
+          $Res[0]=True;
+        }
+        ElseIf($NIsEnd)
+          $Res[0]=2;
+      }
+      Else
+      {
+        $Res=[
+          $NIsEnd,
+          $Str,
+          ''
+        ];
+      }
+      Return $Res;
+    }
+  }
+?>

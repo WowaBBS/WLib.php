@@ -1,0 +1,88 @@
+<?
+  $Loader->Parent_Class('/Stream/Proxy/Base');
+
+  Class C_Stream_Proxy_Reader Extends C_Stream_Proxy_Base
+  {
+    Var $FBuffer =[];
+    Var $FLength =0;
+    Var $FPos    =0;
+ 
+    Function Recv($ASize)
+    {
+      $_Buffer=&$this->FBuffer;
+      If(!$_Buffer)
+      {
+        $_Buffer[]=parent::Recv(65536);
+      //Return '';
+      }
+      $FPos=&$this->FPos;
+      $Res=$_Buffer[0];
+      If(StrLen($Res)<=$FPos+$ASize)
+      {
+        Array_Shift($_Buffer);
+        If($FPos)
+        {
+          $Res=SubStr($Res, $FPos);
+          $FPos=0;
+        }
+        $this->FLength-=StrLen($Res);
+        Return $Res;
+      }
+      $Res=SubStr($Res, $FPos, $ASize);
+      $FPos+=$ASize;
+      $this->FLength-=$ASize;
+      Return $Res;
+    }
+  
+    Function Write_Back($Data)
+    {
+      If((String)$Data==='')
+        Return 0;
+      If($this->FPos)
+        $this->FBuffer[0]=SubStr($this->FBuffer[0], $this->FPos);
+      $L=StrLen($Data);
+      $this->FLength+=$L;
+      Array_UnShift($this->FBuffer, $Data);
+      Return $L;
+    }
+  
+    Function Go_Back_Str($ASize, $AData, $APos=0)
+    {
+    //Return $this->FStream->Go_Back_Str($ASize, $AData, $APos);
+    //#If Debug
+      If($ASize==0)
+      {
+        Trigger_Error('Size=0');
+        Return 0;
+      }
+    //#EndIf
+    //#If Debug
+      If($ASize+$APos!=StrLen($AData))
+      {
+        Trigger_Error('Error Size???');
+        Return 0;
+      }
+    //#EndIf
+      $FPos=&$this->FPos;
+      If($FPos)
+      {
+        $Seek=Min($FPos, $ASize);
+        $FPos-=$Seek;
+        $ASize-=$Seek;
+        $this->FLength+=$Seek;
+        If(!$ASize)
+          Return $Seek;
+        $AData=SubStr($AData, $APos, $ASize);
+      }
+      Else
+      {
+        $Seek=0;
+        If($APos)
+          $AData=SubStr($AData, $APos);
+      }
+      $this->FLength+=$ASize;
+      Array_UnShift($this->FBuffer, $AData);
+      Return $Seek+$ASize;
+    }
+  }
+?>

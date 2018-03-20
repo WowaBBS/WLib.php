@@ -1,0 +1,101 @@
+<?
+  // Taken from builder of UE, directory Builder/Lib/Debug
+  $Loader->Parent_Class('/Object');
+  $Loader->Load_Lib('/Debug/Stream'   );
+ 
+  Class C_Debug_Manager extends C_Object
+  {
+    Var $Template;
+    Var $Classes =[];
+    Var $Level=-1; 
+    
+    Static $Stream_Echo_Default;
+    Var $Stream_Echo    ;
+    Var $Stream_Default ;
+    
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $this->Stream_Default =Self::$Stream_Echo_Default;
+      $this->Stream_Echo    =Self::$Stream_Echo_Default;
+      $this->Template = $this->Create_Object('/Debug/Template');
+    }
+    
+    Var $Files=[];
+    
+    Function Get(String $FileName)
+    {
+      if(IsSet($this->Files[$FileName]))
+        return $this->Files[$FileName];
+      $Res=$this->Create($FileName);
+    //Echo 'DebugCreate(',$FileName,")[",Implode(', ', Array_Keys($this->Files)),"]",$this->Object_Id,"\n";
+      $this->Files[$FileName]=$Res;
+      return $Res;
+    }
+    
+    Function Create($Stream=null)
+    {
+      if(Is_Null   ($Stream)) $Stream=$this->Stream_Default;
+      if(Is_String ($Stream))
+      {
+        $this->Loader->Load_Lib('/Stream/Utils');
+        $Stream=$this->Create_Object('/Stream/File',
+          [
+            'FileName'=>$Stream,
+            'OpenMode'=>omWrite|omCreate|omBinary|omClear
+          ]
+        );
+      }
+      return $this->Create_Object('/Debug/Context',
+        [
+          'Manager' =>$this,
+          'Stream'  =>$Stream
+        ]
+      );
+    }
+    
+    Function GetClass($Class)
+    {
+      if($Class===false) return false;
+      if(IsSet($this->Classes[$Class]))
+        return $this->Classes[$Class];
+      $Res=$this->GetClass(Get_Parent_Class($Class));
+      $this->Classes[$Class]=$Res;
+      return $Res;
+    }
+ 
+    Function ProcessClass($Ctx, $Class, $Value)
+    {
+    //If(Method_Exists($Value,'_Debug'))
+    //  $v=$Value->_Debug();
+    //Else
+      $Func=$this->GetClass($Class);
+      if($Func===false)
+        return;
+      $Func($Ctx, $Class, $Value);
+      return true;
+    }
+    
+    Function AddInlineClass($Class)
+    {
+      $this->Classes[$Class]=
+        Function($Ctx, $Class, $Value)
+        {
+        //$Ctx->Inline_NewClass($Class, $Value);
+          $Ctx->Inline_CallFunc($Class, $Value);
+        };
+    }
+
+    Function AddNoInlineClass($Class)
+    {
+      $this->Classes[$Class]=
+        Function($Ctx, $Class, $Value)
+        {
+        //$Ctx->NoInline_NewClass($Class, $Value);
+          $Ctx->NoInline_CallFunc($Class, $Value);
+        };
+    }
+  };
+  
+  C_Debug_Manager::$Stream_Echo_Default=new T_Debug_Stream_Echo_Default();
+?>

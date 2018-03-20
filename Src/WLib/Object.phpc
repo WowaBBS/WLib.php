@@ -1,0 +1,5 @@
+<?
+  $Loader->Parent_Class('/Object/Base');
+
+  Class C_Object extends C_Object_Base {}
+?>

@@ -1,0 +1,543 @@
+<?
+  //*************************************************************************\\
+  // Unit    : System/MIOFS                                                  \\
+  // Date    : 08.04.2008                                                    \\
+  // Creator : Wowa Savin <wowa@ssu.samara.ru>                               \\
+  // (c) Active solutions                                                    \\
+  //*************************************************************************\\
+  //
+  // Главный модуль
+  // Содержит базовые функции
+  //
+ 
+  $Loader->Begin_Module('System/MIOFS');
+ 
+  // ***************************************************************************************
+ 
+  UMask(0);
+ 
+  // Выдирает путь к файлу
+  Function ExtractFilePath($Path)
+  {
+    If(Is_Array($Path))
+    {
+      $Res=Array();
+      ForEach($Path As $k=>$Item)
+        $Res[$k]=ExtractFilePath($Item);
+      Return $Res;
+    }
+    $Path=Str_Replace("\\",'/', $Path);
+    $Names=Explode('/', $Path);
+    If(Count($Names)>1)
+      $Path=$Names[0];
+    For($i=1; $i<Count($Names)-1; $i++)
+      $Path.='/'.$Names[$i];
+    If(Count($Names)>1)
+      Return $Path.'/';
+    Return '';
+  }
+ 
+  // Выдирает имя файла
+  Function ExtractFileName($Path)
+  {
+    If(Is_Array($Path))
+    {
+      $Res=Array();
+      ForEach($Path As $k=>$Item)
+        $Res[$k]=ExtractFileName($Item);
+      Return $Res;
+    }
+    $Path=Str_Replace("\\",'/', $Path);
+    $Names=Explode('/', $Path);
+    Return $Names[Count($Names)-1];
+  }
+ 
+  // Выдирает расширение файла
+  Function ExtractFileExt($Path)
+  {
+    If(Is_Array($Path))
+    {
+      $Res=Array();
+      ForEach($Path As $k=>$Item)
+        $Res[$k]=ExtractFileExt($Item);
+      Return $Res;
+    }
+    $Name=ExtractFileName($Path);
+    $Name=Explode('.', $Name);
+    If(Count($Name)>1)
+      $Name=$Name[Count($Name)-1];
+    Else
+      $Name='';
+    Return $Name;
+  }
+ 
+  // Выдирает ник файла
+  Function ExtractFileNick($Path)
+  {
+    If(Is_Array($Path))
+    {
+      $Res=Array();
+      ForEach($Path As $k=>$Item)
+        $Res[$k]=ExtractFileNick($Item);
+      Return $Res;
+    }
+    $Nic=ExtractFileName($Path);
+    If(Preg_Match('/(.*)\..*/Ss', $Nic, $Matches))
+      $Nic=$Matches[1];
+    Return $Nic;
+  }
+ 
+  // Удаляет в конце слеш
+  Function PathToDir($Path)
+  {
+    If(Is_Array($Path))
+    {
+      $Res=Array();
+      ForEach($Path As $k=>$Item)
+        $Res[$k]=PathToDir($Item);
+      Return $Res;
+    }
+    Return Preg_Replace('/[\\/\\\\]+$/Ss', '', $Path);
+  }
+ 
+  // Добавляет в конец слеш
+  Function DirToPath($Path)
+  {
+    If(Is_Array($Path))
+    {
+      $Res=Array();
+      ForEach($Path As $k=>$Item)
+        $Res[$k]=DirToPath($Item);
+      Return $Res;
+    }
+    Return PathToDir($Path).'/';
+  }
+ 
+  // Проверяет, соответствует ли строка $File маске $Mask
+  Function Wild($File, $Mask)
+  {
+    $Mask=Str_Replace('.','\.', $Mask);
+    $Mask=Str_Replace('*','.*', $Mask);
+    $Mask=Str_Replace('?','.?', $Mask);
+    $Mask='/^'.$Mask.'$/Ss';
+    Return Preg_Match($Mask, $File);
+  }
+ 
+  // Изменяет имя файла по маске
+  Function ChangeNameMask($Path, $Mask)
+  {
+    If(Is_Array($Path))
+    {
+      $Res=Array();
+      ForEach($Path As $k=>$Item)
+        $Res[$k]=ChangeNameMask($Item, $Mask);
+      Return $Res;
+    }
+    If($Mask=='')
+      Return $Path;
+    If(Preg_Match('/^(\w+)\.(.*?)\*(.*?)$/Ss', $Mask, $Matches))
+      Return $Matches[1].'.'.$Matches[2].ExtractFileExt($Path).$Matches[3];
+    If(Preg_Match('/^(.*?)\*(.*?)\*(.*?)$/Ss', $Mask, $Matches))
+      Return $Matches[1].ExtractFileNick($Path).$Matches[2].ExtractFileExt($Path).$Matches[3];
+    If(Preg_Match('/^(.*?)\*(.*?)$/Ss', $Mask, $Matches))
+      Return $Matches[1].ExtractFileNick($Path).$Matches[2];
+    Return $Mask;
+  }
+ 
+  // Нормализует путь $Path, удаляя ненужное
+  // Если $ZTrim, то проверяет существование пути
+  Function NormPath($Path, $Add='', $ZTrim=False)
+  {
+    If(Is_Array($Path))
+    {
+      $Res=Array();
+      ForEach($Path As $k=>$Item)
+        $Res[$k]=NormPath($Item, $Host);
+      Return $Res;
+    }
+    $Path=Str_Replace('\\','/', $Path);
+    $Tmp=Explode('/', $Path);
+    $List=Array('');
+    ForEach($Tmp As $v)
+    {
+      $v=Trim($v);
+      If($v=='')
+        Continue;
+      If($v=='.')
+        $List=Array('');
+      ElseIf($v=='..')
+      {
+        If(Count($List)>1)
+          Array_Pop($List);
+      }
+      Else
+        $List[]=$v;
+    }
+    $Path='';
+    For($i=0;$i<Count($List);$i++)
+    {
+      $Tmp=$Path.$List[$i].'/';
+      If($ZTrim)
+        If((!Is_File($Add.$Tmp))&&(!Is_Dir($Add.$Tmp)))
+          Break;
+      $Path=$Tmp;
+      If(Is_File($Add.$Tmp))
+        Break;
+    }
+    Return $Path;
+  }
+ 
+  // Добавляет строку $Dir слева к каждому элементу массива $Files
+  Function AddPaths($Dir, $Files)
+  {
+    $Res=Array();
+    ForEach($Files As $File)
+      $Res[]=$Dir.$File;
+    Return $Res;
+  }
+ 
+  Function ParsePath($Path)
+  {
+    If(Is_Array($Path))
+    {
+      $Res=Array();
+      ForEach($Path As $k=>$Item)
+        $Res[$k]=ParsePath($Item);
+      Return $Res;
+    }
+  //$Path=Str_Replace("\\", '/', $Path);
+    $Path=StrTr(Trim($Path), '\\', '/');
+    If($Path&&($Path[StrLen($Path)-1])=='/')
+      $Res=Array('dirname'=>SubStr($Path,0,StrLen($Path)-1),'basename'=>'');
+    Else
+      $Res=PathInfo($Path);
+    Extract($Res);
+    $Drv='';
+    If((StrLen($dirname)>1)&&($dirname[1]==':'))
+      $Drv=$dirname[0];
+    $Nic=$basename;
+    If(!IsSet($extension))
+      $extension='';
+    Else
+      $Nic=SubStr($basename, 0, StrLen($basename)-1-StrLen($extension));
+    Return [
+      'Drive' =>$Drv       ,
+      'Dir'   =>$dirname   ,
+      'Name'  =>$basename  ,
+      'Path'  =>$Path      ,
+      'Nic'   =>$Nic       ,
+      'Ext'   =>$extension ,
+    ];
+  }
+ 
+  // ***************************************************************************************
+ 
+  // Загружает текстовый файл
+  Function LoadText($FileName)
+  {
+    If(!($fh=@FOpen($FileName,'r')))
+      Return False;
+    $Res='';
+    While(!FEof($fh))
+      $Res.=Str_Replace("\r",'',FRead($fh,256*256));
+    FClose($fh);
+    Return $Res;
+  }
+ 
+  // Загружает бинарный файл
+  Function LoadFile($FileName)
+  {
+    If(!($fh=@FOpen($FileName,'r')))
+      Return False;
+    $Res='';
+    While(!FEof($fh))
+      $Res.=FRead($fh,256*256);
+    FClose($fh);
+    Return $Res;
+  }
+ 
+  // Сохраняет бинарный файл
+  Function SaveFile($FileName, $Data)
+  {
+    If(!($fh=@FOpen($FileName, 'w')))
+      Return False;
+    $Res=FWrite($fh, $Data)==StrLen($Data);
+    FClose($fh);
+    Return $Res;
+  }
+ 
+  // Сохраняет текстовый файл
+  Function SaveText($FileName, $Data)
+  {
+    If(!($fh=@FOpen($FileName, 'w')))
+      Return False;
+    $Res=FWrite($fh,$Data)==StrLen($Data);
+    FClose($fh);
+    Return $Res;
+  }
+ 
+  // Добавляет в бинарный файл
+  Function AddFile($FileName, $Data)
+  {
+    If(!($fh=@FOpen($FileName, 'a+')))
+      Return False;
+    $Res=FWrite($fh, $Data)==StrLen($Data);
+    FClose($fh);
+    Return $Res;
+  }
+ 
+  // Добавляет в текстовый файл
+  Function AddText($FileName, $Data)
+  {
+    If(!($fh=@FOpen($FileName, 'a+')))
+      Return False;
+    $Res=FWrite($fh, $Data)==StrLen($Data);
+    FClose($fh);
+    Return $Res;
+  }
+ 
+  // ***************************************************************************************
+ 
+  Function CreatePath($Path, $Attr=0700)
+  {
+    If(Is_Dir($Path))
+      Return True;
+    $Arr=Explode('/', $Path);
+    $Path='';
+    ForEach($Arr As $v)
+      If(StrLen($v))
+      {
+        $Path.=$v;
+        If(!Is_Dir($Path))
+          If(File_Exists($Path))
+            Return False;
+          Else
+            @MkDir($Path, $Attr);
+        $Path.='/';
+      }
+    Return Is_Dir($Path);
+  }
+ 
+  // Копирует файл
+  Function _CopyFile($From, $To)
+  {
+    $fi=@FOpen($From, 'r');
+    If(!$fi)
+      Return False;
+    $fo=@FOpen($To, 'w');
+    If(!$fo)
+    {
+      FClose($fi);
+      Return False;
+    }
+    While(!FEof($fi))
+    {
+      $Data=FRead($fi, 256*256);
+      If(FWrite($fo, $Data)!=StrLen($Data))
+      {
+        FClose($fi);
+        FClose($fo);
+        Return False;
+      }
+    }
+    FClose($fi);
+    FClose($fo);
+    Return True;
+  }
+ 
+  // Удаляет файл(ы) и/или каталог(и)
+  // Плюёт на все ошибки...
+  Function DeleteFile($File)
+  {
+    If(Is_Array($File))
+    {
+      $Res=True;
+      ForEach($File As $i=>$Item)
+        $Res=$Res && DeleteFile($Item);
+      Return $Res;
+    }
+    If(Is_Dir($File))
+    {
+      $List=ListDir($File.'/');
+      $LP=AddPaths($File.'/', $List);
+      If(!DeleteFile($LP))
+        Return False;
+      Return @RmDir($File);
+    }
+    If(Is_File($File))
+      Return @UnLink($File);
+    Return False;
+  }
+ 
+  // Копирует файл(ы) и/или каталог(и) из $From в $To
+  // Плюёт на все ошибки...
+  Function CopyFile($From, $To) //!!!!!!
+  {
+    If(Is_Array($From))
+    {
+      $Res=True;
+      ForEach($From As $i=>$Item)
+        $Res=$Res&&CopyFile($Item, $To[$i]);
+      Return $Res;
+    }
+    If($From ==$To) Return True;
+    If($From =='' ) Return True;
+    If($To   =='' ) Return True;
+    If(Is_Dir($From))
+    {
+      $List=ListDir($From.'/');
+      $LF=AddPaths($From.'/', $List);
+      $LT=AddPaths($To.'/', $List);
+      @MkDir($To.'/', 0700);
+      Return CopyFile($LF, $LT);
+    }
+    If(Is_File($From))
+    //Return @Copy($From, $To);
+      Return @_CopyFile($From, $To);
+    Return False;
+  }
+ 
+  // Переименовывает/перемещает файл(ы)
+  // и/или каталог(и) из $From в $To
+  // Плюёт на все ошибки...
+  Function RenameFile($From, $To)
+  {
+    If(Is_Array($From))
+    {
+      $Res=True;
+      ForEach($From As $i=>$Item)
+        $Res=$Res && RenameFile($Item, $To[$i]);
+      Return $Res;
+    }
+    If($From == $To ) Return True;
+    If($From == ''  ) Return True;
+    If($To   == ''  ) Return True;
+    If(Is_Dir($From))
+    {
+      If(@ReName($From, $To))
+        Return True;
+      $List=ListDir($From.'/');
+      $LF=AddPaths($From.'/', $List);
+      $LT=AddPaths($To  .'/', $List);
+      @MkDir($To.'/', 0700);
+      $Res=RenameFile($LF, $LT);
+      If($Res)
+        DeleteFile($From);
+      Return $Res;
+    }
+    If(Is_File($From))
+    {
+      If(@ReName($From, $To))
+        Return True;
+      If(CopyFile($From, $To))
+      {
+        DeleteFile($From);
+        Return True;
+      }
+      Return False;
+    }
+    Return False;
+  }
+ 
+  // Переименовывает/перемещает файл(ы)
+  // и/или каталог(и) из $From в $To
+  // Плюёт на все ошибки...
+  Function MoveFile($From, $To)
+  {
+    Return RenameFile($From, $To);
+  }
+ 
+  // Удаляет файл(ы) и/или каталог(и)
+  // Плюёт на все ошибки...
+  Function DeleteFiles($Files)
+  {
+    Return DeleteFile($Files);
+  }
+ 
+  // Копирует файл(ы) и/или каталог(и) из $From в $To
+  // Плюёт на все ошибки...
+  Function CopyFiles($LFrom, $LTo)
+  {
+    Return CopyFile($LFrom, $LTo);
+  }
+ 
+  // Переименовывает/перемещает файл(ы)
+  // и/или каталог(и) из $From в $To
+  // Плюёт на все ошибки...
+  Function RenameFiles($LFrom, $LTo)
+  {
+    Return RenameFile($LFrom, $LTo);
+  }
+ 
+  // Переименовывает/перемещает файл(ы)
+  // и/или каталог(и) из $From в $To
+  // Плюёт на все ошибки...
+  Function MoveFiles($LFrom, $LTo)
+  {
+    Return RenameFile($LFrom, $LTo);
+  }
+ 
+  // ***************************************************************************************
+ 
+  Function FindFile($List, $Path='', &$RPath='')
+  {
+    $L=Array_Shift($List);
+    If($List)
+    {
+      ForEach($L As $V)
+        If($Res=FindFile($List, $Path.$V, $RPath))
+          Return $Res;
+      Return False;
+    }
+  
+    ForEach($L As $V)
+  //{
+    //DWriteLn($Path.$V.'->'.Is_File($Path.$V));
+      If(Is_File($Path.$V))
+    //{
+    //  $RPath=ExtractFilePath($Path.$V);
+        Return $Path.$V;
+    //}
+  //}
+    Return False;
+  }
+ 
+  // ***************************************************************************************
+ 
+  //$faFile = 1 ;
+  //$faDir  = 2 ;
+  //$faAll  = 3 ;
+ 
+  // Возвращает список файлов по адресу $Path,
+  // соответствующие маске $Mask, с атрибутами $Attr
+  Function ListDir($Path, $Mask=False, $Attr=3, $Add='')
+  {
+    If($Mask)
+    {
+      $Mask=Str_Replace('.','\.', $Mask);
+      $Mask=Str_Replace('*','.*', $Mask);
+      $Mask=Str_Replace('?','.?', $Mask);
+      $Mask='/^'.$Mask.'$/iSs';
+    }
+    $Dir=@OpenDir($Path);
+    If(!$Dir)
+      Return NULL;
+ 
+    $Res=Array();
+    While(False!==($File=ReadDir($Dir)))
+    {
+      If($File=='.'  ) Continue;
+      If($File=='..' ) Continue;
+      If($Attr==1) If(!Is_File ($Path.$File)) Continue;
+      If($Attr==2) If(!Is_Dir  ($Path.$File)) Continue;
+      If($Mask) If(!Preg_Match($Mask, $File)) Continue;
+      $Res[]=$Add.$File;
+    }
+    CloseDir($Dir);
+    Return $Res;
+  }
+ 
+  // ***************************************************************************************
+ 
+  $Loader->End_Module('System/MIOFS');
+?>

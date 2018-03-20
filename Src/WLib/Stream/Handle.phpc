@@ -1,0 +1,70 @@
+<?
+  $Loader->Parent_Class('/Stream/Base');
+
+  Class C_Stream_Handle Extends C_Stream_Base
+  {
+    Var $FHandle=NULL;
+  
+    Function Close()
+    {
+      If($this->FHandle)
+      {
+        FClose($this->FHandle);
+        $this->FHandle=NULL;
+      }
+    }
+  
+    Function Stat()
+    {
+      Return FStat($this->FHandle);
+    }
+  
+    Function Recv($Size)
+    {
+      if($Size<=0)
+        Error();
+      Return FRead($this->FHandle, $Size);
+    }
+  
+    Function Get_Line($Size=1024)
+    {
+      $fp=$this->FHandle;
+      $Res='';
+      Do
+      {
+        $Out=@FRead($fp,1);
+        If($Out===False)
+          If(StrLen($Res))
+            Return $Res;
+          Else
+            Return False;
+        If($Out=="\r")
+           Continue;
+        If($Out=="\n")
+           Break;
+        $Res.=$Out;
+      }
+      While(!FEof($fp));
+      Return $Res;
+    }
+  
+    Function EOF()
+    {
+      Return FEof($this->FHandle);
+    }
+  
+    Function Write($Data)
+    {
+      if(!Is_String($Data) && !Is_Int($Data))
+        Unsupported();
+      Return FWrite($this->FHandle, $Data);
+    }
+  
+  //Function PassThru() { FPassThru($this->FHandle); } // TODO: Why?
+  
+    Function Flush()
+    {
+      FFlush($this->FHandle);
+    }
+  }
+?>

@@ -1,0 +1,125 @@
+<?
+  $Loader->Begin_Class('/Tmpl/W2/Out/Str');
+ 
+  $Loader->Parent_Class('/Object/Release');
+ 
+  Class C_Tmpl_W2_Out_Str Extends C_Object_Release
+  {
+    // ********************************************************************
+    // Output functions
+    Var $List=[];
+    Var $Var='$Res';
+    Var $Base=NULL;
+ 
+    Function FBegin()
+    {
+      $this->Base->Add_Line('$Res=\'\';');
+    }
+ 
+    Function FEnd()
+    {
+      $this->Base->Add_Line('Return $Res;');
+    }
+ 
+    Function Capture($Func=NULL, $Size=False)
+    {
+      $this->Base->Add_Line(' {');
+      $T=$this->Base->Tab;
+      $Item=[
+        'Var'=>$this->Var,
+        'Tab'=>$T,
+        'Func'=>$Func,
+      ];
+  
+      If($Func===False)
+        $this->Var=False;
+      Else
+        $this->Var=$this->Base->Var_Add('Res', Count($this->List));
+  
+      $this->Base->Tab=$T.'  ';
+      $this->List[]=$Item;
+  
+      If($this->Var)
+        $this->Base->Add_Line($this->Var.'=\'\';');
+    }
+ 
+    Function End($ZOut)//=NULL)
+    {
+      $Item=Array_Pop($this->List);
+      If($ZOut===NULL)
+        $ZOut=$this->Var;
+      If($ZOut)
+      {
+        $vo=$this->Get();
+        $this->Base->Add_Line($Item['Var'].'.='.$vo.';');
+      }
+      $this->Var=$Item['Var'];
+      $this->Base->Tab=$Item['Tab'];
+      $this->Base->Add_Line(' }');
+    }
+ 
+    Function Get()
+    {
+      $ov=$this->Var;
+      $this->Var=False;
+      $Res=$ov;
+      $ol=$this->List;
+      If($ol)
+      {
+        $i=$ol[Count($ol)-1];
+        If($i['Func'])
+          $Res=$i['Func'].'('.$Res.')';
+      }
+      $this->Base->Add_Line($ov."=".$Res.';');
+      Return $ov;
+    }
+ 
+  //Function Up($Str)
+  //{
+  //  $Item=$this->List[Count($this->List)-1];
+  //  $this->Base->Add_Line($Item['Var'].'.='.$Str.';');
+  //}
+ 
+    Function Get_Debug()
+    {
+      Return $this->Var;
+    }
+ 
+  //Function Set($Data)
+  //{
+  //  $this->Base->Add_Line($this->Var.'='.$Data.';');
+  //}
+ 
+    Function Evaluate($Data)
+    {
+      $ov=&$this->Var;
+      If($ov)
+        $this->Base->Add_Line($ov.'.='.$Data.';');
+      Else
+      {
+        $this->Base->Add_Line($Data.';');
+      //$ov=$this->Var_Add('Res',Count($this->List)-1),
+      //$this->Base->Add_Line($ov.'='.$Data.';');
+      }
+    }
+ 
+    Function Text($Text)
+    {
+      $R=[
+        '\\'  => '\\\\',
+        "'"  => "\\'",
+        "\r" => "'".'."\\r".'."'",
+      ];
+      $TextE="'";
+      $Text=Explode("\n",StrTr($Text, $R));
+      If((Count($Text)>1)&&($Text[Count($Text)-1]===''))
+       {
+        UnSet($Text[Count($Text)-1]);
+        $TextE="'".'."\\n"';
+       }
+      $Text="'".Implode("'".'."\\n"'.".\n".$this->Base->Tab."  '", $Text).$TextE;
+      If($this->Var)
+        $this->Evaluate($Text);
+    }
+  }
+?>

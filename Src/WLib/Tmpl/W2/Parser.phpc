@@ -1,0 +1,239 @@
+<?
+  $Loader->Begin_Class('/Tmpl/W2/Parser');
+
+  $Loader->Parent_Class('/Object/Release');
+  $Loader->Using_Class('/Tmpl/W2/Tag/Base');
+  $Loader->Using_Class('/Tmpl/W2/Tag/Text');
+  $Loader->Using_Class('/Tmpl/W2/PhpBr');
+  $Loader->Using_Module('/Strings');
+ 
+  Define('idxW2TagAll'    ,0); // TODO: Const into class
+  Define('idxW2TagText'   ,1);
+  Define('idxW2TagTag'    ,2);
+  Define('idxW2TagFirst'  ,3);
+  Define('idxW2TagName'   ,4);
+  Define('idxW2TagParams' ,5);
+  Define('idxW2TagAttr'   ,6);
+ 
+  Class C_Tmpl_W2_Parser Extends C_Object_Release
+  {
+    Var $LastTag   =False    ; // Тег, после которого будет добавляться новый!
+    Var $Rest      = ''      ; // Остаток необработанного текста
+    Var $LastTags  = []      ; // Теги требующие своего завершения
+    Var $Mode      = 0       ; // Режим парсера
+    Var $CDataText = []      ; // Данные CData
+    Var $Match     = ""      ; // Регексп
+ 
+    Var $TagsCData=[];
+    Var $TagsEmpty=[];
+ 
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $this->Unique_Id='('.mt_rand().')';
+      $this->Clear();
+      $this->Match_Init($Args);
+    }
+    
+    Function Match_Init($Args)
+    {
+      $TB=IsSet($Args['Tag_First'])? $Args['Tag_First']:'(';
+      $TE=IsSet($Args['Tag_Last' ])? $Args['Tag_Last' ]:')';
+    //// Внутритежное пространство
+    //$Vnutr='[^\\/<>\\\\\\(\\)\'"]*?';
+    //// Одинарные кавычки
+    //$Qw ="'[^'\\\\]*?(?:\\\\'[^'\\\\]*?)*?'";
+    //// Двойные ковычки
+    //$DQw='"[^"\\\\]*?(?:\\\\"[^"\\\\]*?)*?"';
+    //// Внутритежное пространство
+    //$Vnutr='(?:'.$Vnutr.'|'.$Qw.'|'.$DQw.')*?'.$Vnutr;
+      // Внутритежное пространство
+      $NoVnutr='/<>\\(){}\'"';
+      $NoVnutr=Preg_AddSlashes($NoVnutr);
+      $Vnutr='[^'.$NoVnutr.']';
+     //$Vnutr='[^\\/<>\\\\\\(\\)\'"]';
+      // Одинарные кавычки
+      $Qw ="'[^'\\\\]*?(?:\\\\'[^'\\\\]*?)*?'";
+      // Двойные ковычки
+      $DQw='"[^"\\\\]*?(?:\\\\"[^"\\\\]*?)*?"';
+      // Внутритежное пространство
+      $Vnutr='(?:'.$Vnutr.'|'.$Qw.'|'.$DQw.')*?';
+      // Тэг обычный
+      $TB=Preg_AddSlashes($TB);
+      $TE=Preg_AddSlashes($TE);
+    //$Split='|-,;:/\.';
+    //$Split=Preg_AddSlashes($Split);
+    //$Tag=$TB.'(\/|end)?([\w]+)(?::([\w'.$Split.']+)|('.$Vnutr.'))'.$TE;
+    //echo $Tag, "\n"; // TODO: It not work
+      $Tag=$TB.'(\/|end)?([\w]+)(?::([\w\|\-\,\;\:\/\\\.]+)|('.$Vnutr.'))'.$TE;
+    //echo $Tag, "\n";
+      $Q='(.*?)('.$Tag.')';
+      $this->Match='/'.$Q.'/isS';
+    }
+ 
+    Function _Done()
+    {
+      $this->Rest='';
+      $this->LastTags=[];
+      $F=False;
+      $this->LastTag=&$F;
+      $this->Mode=0;
+      parent::_Done();
+    }
+ 
+    Function AddTagCData($Tags=[])
+    {
+      If(!Is_Array($Tags))
+        $Tags=[$Tags];
+      ForEach($Tags As $Tag)
+        $this->TagsCData[StrToLower($Tag)]=True;
+    }
+ 
+    Function AddTagEmpty($Tags=[])
+    {
+      If(!Is_Array($Tags))
+        $Tags=[$Tags];
+      ForEach($Tags As $Tag)
+        $this->TagsEmply[StrToLower($Tag)]=True;
+    }
+ 
+    Function Clear()
+    {
+      $this->Rest='';
+      $this->LastTags=[];
+      $F=False;
+      $this->LastTag=&$F;
+      $this->Mode=0;
+      $this->CDataText=[];
+    }
+ 
+    /**
+     * Добавляет тег в конец
+     *
+     * @param T_Tmpl_W2_Tag $Tag
+     */
+    Function AddTag(&$Tag)
+    {
+      $this->LastTag->ListAdd($Tag);
+      $this->LastTag=&$Tag;
+    }
+ 
+    Function _VeryEndTag(&$NewTag)
+    {
+      $LastTags=&$this->LastTags;
+      For($i=Count($LastTags)-1; $i>=0; $i--)
+        If($LastTags[$i]->tagName===$NewTag->tagName)
+          Break;
+      If($i>=0)
+      {
+        $LastTags[$i]->EndTag=&$NewTag;
+        $NewTag->EndTag=&$LastTags[$i];
+        $Cnt=Count($LastTags);
+        For($i=$i; $i<$Cnt; $i++) // ??
+          UnSet($LastTags[$i]);
+      }
+    }
+ 
+    Function Parse($Tmpl)
+    {
+      If($this->Rest)
+      {
+        $Tmpl=$this->Rest.$Tmpl;
+        $this->Rest='';
+      }
+      $LastTags=&$this->LastTags;
+      $Len=0;
+      $Count=Preg_Match_All($this->Match, $Tmpl, $_Tags, PREG_SET_ORDER);
+    //Debug($_Tags);
+      ForEach($_Tags As $v)
+    //While(Preg_Match('/^'.Preg_Offset($Len).$Q.'/is', $Tmpl,$v))
+    //While(Preg_Match('/'.$Q.'/is',$Tmpl,$v,0,$Len))
+      {
+        $Tmp=False;
+        $NewTag=&$Tmp;
+        //Echo StrLen($v[0]),' ';
+        $Len+=StrLen($v[0]);
+        If($this->Mode===0)
+        {
+          If($v[idxW2TagText   ])
+          {
+            $NewTag=$this->Create_Object('/Tmpl/W2/Tag/Text', [$v[idxW2TagText]]);
+            If($NewTag)
+              $this->AddTag($NewTag);
+            $NewTag=&$Tmp;
+          }
+          // pcdate cdate
+          $tagName=StrToLower($v[idxW2TagName]);
+  
+          $NewTag=$this->Create_Object('/Tmpl/W2/Tag/Base', [
+            'AsText'     => $v[idxW2TagTag    ],
+            'tagName'    => $tagName,
+            'Attributes' => $v[idxW2TagAttr   ]??'',
+            '_f'         => $v[idxW2TagFirst  ],
+          //'_e'         => $v[idxW2TagEnd    ],
+            'Params'     => $v[idxW2TagParams ]??'',
+          ]);
+  
+          If($NewTag->_f)
+            $this->_VeryEndTag($NewTag);
+          If(!$NewTag->_f&&!IsSet($this->TagsEmply[$tagName]))
+          {
+            If(IsSet($this->TagsCData[$tagName]))
+            {
+              $this->Mode=1;
+              $this->CDataText=[];
+            }
+            $LastTags[Count($LastTags)]=&$NewTag;
+          }
+        }
+        ElseIf($this->Mode===1)
+        {
+          If(!$v[idxW2TagFirst ] || (StrToLower($v[idxW2TagName])!==$this->LastTag->tagName))
+            $this->CDataText[]=$v[idxW2TagAll];
+          Else
+          {
+            $this->CDataText[]=$v[idxW2TagText];
+            $Text=Implode('', $this->CDataText);
+            $this->CDataText=[];
+  
+            $NewTag=$this->Create_Object('/Tmpl/W2/Tag/Text', [$Text]);
+            If($NewTag)
+              $this->AddTag($NewTag);
+            $NewTag=&$Tmp;
+  
+            $tagName=StrToLower($v[idxW2TagName]);
+            $NewTag=$this->Create_Object('/Tmpl/W2/Tag/Base', [
+              'AsText'     => $v[idxW2TagTag    ],
+              'tagName'    => $tagName,
+              'Attributes' => $v[idxW2TagAttr   ]??'',
+              '_f'         => $v[idxW2TagFirst  ],
+            //'_e'         => $v[idxW2TagEnd    ],
+              'Params'     => $v[idxW2TagParams ]??'',
+            ]);
+  
+            $this->_VeryEndTag($NewTag);
+            $this->Mode=0;
+          }
+        //$this->Rest
+        }
+        If($NewTag)
+          $this->AddTag($NewTag);
+      }
+      If($Len<>StrLen($Tmpl))
+        $this->Rest=SubStr($Tmpl, $Len, StrLen($Tmpl)-$Len);
+      Else
+        $this->Rest='';
+    }
+ 
+    Function EndParse()
+    {
+      If($this->Rest)
+      {
+        $NewTag=$this->Create_Object('/Tmpl/W2/Tag/Text', [$this->Rest]);
+        $this->AddTag($NewTag);
+      }
+      $this->Rest='';
+    //Debug($this);
+    }
+  }
+?>

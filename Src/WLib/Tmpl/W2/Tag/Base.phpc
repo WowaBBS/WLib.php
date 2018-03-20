@@ -1,0 +1,270 @@
+<?
+  $Loader->Parent_Class('/Tmpl/W2/Tag/Item' );
+  $Loader->Using_Class('/Tmpl/W2/Tag/Attributes');
+ 
+  Class C_Tmpl_W2_Tag_Base Extends C_Tmpl_W2_Tag_Item
+  {
+    Var $EndTag = False ; // Завершение/Начало тега
+ 
+    Var $_f=False   ;
+    Var $Params=''  ;
+    Var $Attributes ;
+    Var $AsText=''  ;
+    
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      If(IsSet($Args['tagName']))
+      {
+        $this->tagName = $Args['tagName' ];
+        $this->_f      = $Args['_f'      ];
+      //$this->_e      = $Args['_e'      ];
+        $this->AsText  = $Args['AsText'  ];
+        $this->Params  = $Args['Params'  ];
+       }
+      if($this->_f!=='/')
+        $this->Attributes=$this->Create_Object('/Tmpl/W2/Tag/Attributes', [$Args['Attributes']??null]);
+    }
+ 
+    Function _Done()
+    {
+      If($this->Attributes ?? false)
+      {
+        $this->Attributes->Done();
+        $this->Attributes=NULL;
+      }
+    //FStr($this->tagName );
+    //FStr($this->_f      );
+    //FStr($this->_e      );
+      parent::_Done();
+    }
+    
+    Function HasAttributes() { return $this->Attributes??false; }
+    Function HasAttr(String $k)      { return $this->Attributes->Has($k); }
+    Function GetAttr(String $k)      { return $this->Attributes->Get($k); }
+    Function SetAttr(String $k, $v)  { return $this->Attributes->Set($k, $v); }
+    Function RemoveAttr(String $k)   { return $this->Attributes->Set($k, false); }
+ 
+    Function _Trim() { return $this->EndTag!==false; }
+ 
+    Function TagBuild()
+    {
+      $Res=[
+        '<',
+        $this->_f,
+        $this->tagName,
+        $this->Attributes->Make(), // TODO: Check Attributes
+        '>'
+      ];
+      Return Implode('', $Res);
+    }
+ 
+    Function Chields()
+    {
+      If($this->_f)
+        Return [];
+      $ETag=$this->EndTag;
+      If(!$ETag)
+        Return [];
+      $Res=[];
+      $Id=$ETag->Object_Id;
+      $LTag=&$this->ListNext;
+      While($LTag->Object_Id!==$Id)
+      {
+        $Res[]=&$LTag;
+        If(IsSet($LTag->EndTag)&&$LTag->EndTag)
+          $LTag=&$LTag->EndTag;
+        $LTag=&$LTag->ListNext;
+      }
+      Return $Res;
+    }
+ 
+    Function TagBuildHash()
+    {
+      $Res=['t'=>'b', 'n'=>$this->tagName];
+      If($this->EndTag)
+      {
+        $Childs=$this->Chields();
+        $R=[];
+        ForEach($Childs As $k=>$v)
+          $R[]=$Childs[$k]->TagBuildHash();
+        $Res['c']=$R;
+      }
+      Return $Res;
+    }
+ 
+    Function &_Clear()
+    {
+      $F=False;
+      $this->EndTag=&$F;
+      $Res=parent::_Clear();
+    //$Res=T_Tmpl_W2_Tag::_Clear();
+      Return $Res;
+    }
+ 
+    Function &Delete($ZSub=True, $ZMain=True)
+    {
+      If(!$this->EndTag)
+        If($ZMain)
+          Return $this->ListDelete();
+        Else
+          Return $this;
+      If($ZSub)
+      {
+        If($this->_f)
+        {
+          $T1=&$this->EndTag;
+          $T2=&$this;
+        }
+        Else
+        {
+          $T1=&$this;
+          $T2=&$this->EndTag;
+        }
+        If(!$ZMain)
+        {
+          $T1=&$T1->ListNext;
+          If($T1->Object_Id===$T2->Object_Id)
+            Return $this;
+          $T2=&$T2->ListPrev;
+          $T1->ListDeleteTo($T2);
+          Return $this;
+        }
+  
+        Return $T1->ListDeleteTo($T2);
+      }
+      If(!$ZMain)
+        Return $this;
+      $this->EndTag->ListDelete();
+      Return $this->ListDelete();
+    }
+ 
+    Function innerText()
+    {
+      If($this->_f)
+        Return '';
+      $ETag=$this->EndTag;
+      If(!$ETag)
+        Return '';
+      $Res=[];
+      $LTag=&$this;
+      While($LTag->Object_Id!==$ETag->Object_Id)
+      {
+        If($LTag->tagName==='#text')
+          $Res[]=$LTag->value;
+        $LTag=&$LTag->ListNext;
+      }
+      Return Implode('', $Res);
+    }
+ 
+    Function innerText_Length()
+    {
+      If($this->_f)
+        Return 0;
+      $ETag=$this->EndTag;
+      If(!$ETag)
+        Return 0;
+      $Res=0;
+      $LTag=&$this;
+      While($LTag->Object_Id!==$ETag->Object_Id)
+      {
+        If($LTag->tagName==='#text')
+          $Res+=StrLen($LTag->value);
+        $LTag=&$LTag->ListNext;
+      }
+      Return $Res;
+    }
+ 
+    Function GetCData($SkipComment=False)
+    {
+      $Res=$this->innerText();
+      If($SkipComment)
+        $Res=Preg_Replace('/^[\\s\\t\\n]*<!--(.*)-->[\\s\\t\\n]*$/is', '\\1', $Res);
+      Return $Res;
+    }
+ 
+    Function PutCData($Data, $AddComment=False)
+    {
+      $this->Delete(True,False);
+      If($AddComment!==False)
+        $Data="\n<!--\n".$Data.$AddComment."-->\n";
+      $NewTag=$this->Create_Object('/Tmpl/W2/Tag/Text', [$Data]);
+      $this->ListAdd($NewTag);
+    }
+ 
+    Function MakePHPInnerId(&$Info, $Id)
+    {
+      $LTag=&$this->ListNext;
+      While($LTag->Object_Id!==$Id)
+      {
+        $LTag->MakePHP($Info);
+        If(IsSet($LTag->EndTag)&&$LTag->EndTag)
+          $LTag=&$LTag->EndTag;
+        $LTag=&$LTag->ListNext;
+      }
+    }
+ 
+    Function MakePHPInner(&$Info)
+    {
+      If($this->_f)
+        Return [];
+      $ETag=$this->EndTag;
+      If(!$ETag)
+        Return [];
+      $Id=$ETag->Object_Id;
+      $this->MakePHPInnerID($Info, $Id);
+    }
+ 
+    Function MakePHP(&$Info)
+    {
+      If($this->_f)
+        Return;
+      $ti=$Info->Tags->Create($this->tagName);
+      $Tags=[];
+      If($this->EndTag)
+      {
+        $Sub=$ti::$InnerTags;
+  
+        $IdE=$Id=$this->EndTag->Object_Id;
+        $T1=Array_Keys($Sub);
+        $Tags=[$T1[0]=>[&$this, $IdE]];
+        $LLTag=$T1[0];
+  
+        $LTag=&$this->ListNext;
+        While($LTag->Object_Id!==$Id)
+        {
+          If(IsSet($Sub[$LTag->tagName]))
+          {
+            If($LTag->EndTag)
+            {
+              If($T1)
+              { 
+                UnSet($Tags[$LTag->tagName]);
+                $T1=False;
+              }
+              $Tags[$LTag->tagName]=[&$LTag, $LTag->EndTag->Id];
+            }
+            Else
+            {
+              $Tags[$LLTag][1]=$LTag->Id;
+              $Tags[$LTag->tagName]=[&$LTag, $IdE];
+            }
+            Break;
+          }
+          If(IsSet($LTag->EndTag)&&$LTag->EndTag)
+            $LTag=&$LTag->EndTag; // TODO: Error
+          $LTag=&$LTag->ListNext;
+        }
+  
+      //Return "$Res[]='".PHP_AddSlashes($this->value)."';\n";
+      //$Info->Add_Line('//!!!');
+      }
+      $ti->MakeAttr($this);
+      $ti->MakePHP($Info, $this, $Tags);
+    //Else
+    //{
+    //  $Info->Out->Evaluate('Tmpl_w2_Tag_'.$this->tagName.'($ Vars,'.$this->Attributes->MakePHP().')');
+    //}
+    }
+  }
+?>

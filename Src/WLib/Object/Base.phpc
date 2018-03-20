@@ -1,0 +1,107 @@
+<?
+//$Loader->Load_Class('/Object/Base');
+
+  Class C_Object_Base
+  {
+    Private Static $Object_Counter=0;
+    Var $Object_Id;
+    Var $Loader  =null;
+ 
+    //****************************************************************
+    // Context
+    
+    Function Create_Object($Name, Array $Args=[], Array $Mode=[])
+    {
+      return $this->Loader->Create_Object($Name, $Args, $Mode);
+    }
+
+    Function Get_Singleton($Name, Array $Args=[], Array $Mode=[])
+    {
+      return $this->Loader->Get_Singleton($Name, $Args, $Mode);
+    }
+    
+    //****************************************************************
+    // Time life
+
+    Private $_Inited =false;
+    
+    Final Function __Construct(Array $Args)
+    {
+      $this->Object_Id=Self::$Object_Counter++;
+      $this->Loader=$Args['Loader'];
+      UnSet($Args['Loader']);
+      $this->_Init($Args);
+      if(!$this->_Inited)
+        throw new Exception('Initializing is not fully');
+        //Trigger_Error('Initializing is not fully', E_USER_ERROR); // WARNING
+    }
+  
+    Protected Function _Init(Array $Args)
+    {
+      $this->_Inited=true;
+    }
+
+    Protected Function _Done()
+    {
+      $this->_Inited=false;
+    }
+    
+    Final Function Done()
+    {
+      if(!$this->_Inited)
+        throw new Exception('Object hasn`t initialized');
+      $this->_Done();
+      if($this->_Inited)
+        throw new Exception('Destroing is not fully');
+    }
+    
+    Function _Lock() { return $this; }
+    Function _UnLock() {}
+ 
+    //****************************************************************
+    // Debug
+    
+    Protected Function _Debug_Info(Array &$Res)
+    {
+      if($this->Loader!==null) unset($Res['Loader']);
+      if($this->_Inited      ) unset($Res['_Inited']);
+    }
+    
+    /// Debug manager
+    Final Function _Debug_Serialize(Array &$Res) { $this->_Debug_Info($Res); }
+    
+    Final Function __debugInfo()
+    {
+    //throw new Exception('!!!!!!!!!!!!!!!!!!!!');
+      $Res=Get_Object_Vars($this);
+      $this->_Debug_Info($Res);
+      return $Res;
+    }
+    
+    //****************************************************************
+    // Clone
+
+    Function Clone() { return clone $this; }
+    
+    Protected Function _Clonable() { return false; }
+    Protected Function _Clone()
+    {
+      $this->_Inited=true;
+    }
+    
+    Final Function __clone()
+    {
+      if(!$this->_Clonable())
+        throw new Exception('Object can`t be cloned');
+      if(!$this->_Inited)
+        throw new Exception('Object hasn`t initialized');
+      $this->Object_Id=Self::$Object_Counter++;
+      $this->_Inited=false;
+      $this->_Clone();
+      if(!$this->_Inited)
+        throw new Exception('Initializing is not fully');
+    }
+
+    //****************************************************************
+  }
+?>

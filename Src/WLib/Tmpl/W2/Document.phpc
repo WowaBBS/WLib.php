@@ -1,0 +1,117 @@
+<?
+  //*************************************************************************\\
+  // Unit    : T_Tmpl_W2_Document                                            \\
+  // Date    : 17.10.2002                                                    \\
+  // Creator : Wowa Savin <wowa@activesolutions.info>                        \\
+  //*************************************************************************\\
+  //
+  //
+  //
+  //
+ 
+  // Описание глобальных переменных
+  // Global $VarM_Tmpl_W2;
+ 
+  // Определение модуля
+  $Loader->Begin_Class('/Tmpl/W2/Document');
+ 
+ // Подключение модулей
+  $Loader->Parent_Class('/Object/Release');
+# $Loader->Using_Module('/System' );
+# $Loader->Using_Module('/SysUtil');
+# $Loader->Using_Module('/Error'  );
+# $Loader->Using_Module('/Array'  );
+# $Loader->Using_Class('/Tmpl/W2/Parser');
+  $Loader->Using_Class('/Tmpl/W2/Tag/Document' );
+ 
+  // ***************************************************************************************
+  Class C_Tmpl_W2_Document Extends C_Object_Release
+  {
+    Var $FirstTag = False ;
+    Var $LastTag  = False ;
+    Var $Parser   = False ;
+ 
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $ParserArgs=IsSet($Args['Parser'])? $Args['Parser']:[];
+      $this->Parser=$this->Create_Object('/Tmpl/W2/Parser', $ParserArgs);
+      $this->Clear();
+    //$Parser->SetDocument(&$this);
+    //$FirstTag
+    }
+ 
+    Function _Done()
+    {
+      While($this->FirstTag)
+      {
+      //Echo $this->FirstTag->TagBuild(),' ';
+        $this->FirstTag->ListDelete();
+      }
+      $this->Parser->Done();
+      $F=False;
+      $this->Parser   =&$F;
+      $this->FirstTag =&$F;
+      $this->LastTag  =&$F;
+      parent::_Done();
+    }
+ 
+    Function Clear()
+    {
+      $this->Parser->Clear();
+      While($this->FirstTag)
+        $this->FirstTag->ListDelete();
+     
+      $Tag1=$this->Create_Object('/Tmpl/W2/Tag/Document');
+      $Tag2=$this->Create_Object('/Tmpl/W2/Tag/Document');
+
+      $Tag1->EndTag=&$Tag2;
+      $Tag2->EndTag=&$Tag1;
+ 
+      $Tag2->_f='/';
+ 
+      $Tag1->ListFirst($this);
+      $Tag1->ListAdd($Tag2);
+ 
+      $this->Parser->LastTag=&$Tag1;
+    }
+ 
+    Function Parse($Tmpl)
+    {
+      $this->Clear();
+      $this->Parser->Parse($Tmpl);
+      $this->Parser->EndParse();
+      $this->Parser->Clear();
+    }
+ 
+    Function Build()
+    {
+      $Res=[];
+      $Tag=&$this->FirstTag;
+      While($Tag)
+      {
+        $Res[]=$Tag->TagBuild();
+        $Tag=&$Tag->ListNext;
+      }
+      Return Implode('', $Res);
+    }
+ 
+    Function BuildHash()
+    {
+      Return $this->FirstTag->TagBuildHash();
+    }
+ 
+    Function LoadFromFile($FileName)
+    {
+      $this->Clear();
+      $this->Parse(LoadText($FileName));
+    }
+ 
+    Function SaveToFile($FileName)
+    {
+      SaveFile($FileName, $this->Build());
+    }
+  }
+ 
+  // ***************************************************************************************
+?>

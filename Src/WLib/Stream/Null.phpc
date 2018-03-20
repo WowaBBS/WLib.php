@@ -1,0 +1,72 @@
+<?
+  $Loader->Parent_Class('/Stream/Base');
+
+  Class C_Stream_Null Extends C_Stream_Base
+  {
+    Function Open($AMode)
+    {
+      Return True;
+    }
+ 
+    Function Close()
+    {
+    }
+ 
+    Function Lock($Pos=0, $Len=0)
+    {
+      Return True;
+    }
+ 
+    Function UnLock($Pos=0, $Len=0)
+    {
+      Return True;
+    }
+ 
+    Function Read($ASize)
+    {
+      Return '';
+    }
+ 
+    Function ReadLn()
+    {
+      Return '';
+    }
+ 
+    Function Write($Data)
+    {
+    }
+ 
+    Function Seek($Pos, $Typ=-1)
+    {
+      Return 0;
+    }
+ 
+    Function Pos()
+    {
+      Return 0;
+    }
+ 
+    Function Size()
+    {
+      Return 0;
+    }
+ 
+    Function Truncate($Pos=False)
+    {
+    }
+ 
+    Function EOF()
+    {
+      Return True;
+    }
+ 
+    Function ELn()
+    {
+      Return True;
+    }
+ 
+    Function Clear()
+    {
+    }
+  }
+?>

@@ -1,0 +1,41 @@
+<?
+  $Loader->Parent_Class('/Stream/Base');
+
+  Class C_Stream_Proxy_Base Extends C_Stream_Base
+  {
+    Var $FStream; //C_Stream_Base
+
+    Function Open(C_Stream_Base $AStream)
+    {
+      If($this->FStream)
+        $this->FStream->_UnLock();
+      $this->FStream=$AStream->_Lock();
+    }
+
+    Function Recv_Count() { Return $this->FStream->Recv_Count(); }
+    Function Write($Data) { Return $this->FStream->Write($Data); }
+    Function Read ($Size) { Return $this->FStream->Read($Size);  }
+    Function EOF()        { Return $this->FStream->EOF();        }
+    Function Flush()      { Return $this->FStream->Flush();      }
+  //Function Get_Line($Size=1024) { Return $this->FStream->Get_Line($Size); }
+    Function Seek($AOffset, $AWhence=0) { Return $this->FStream->Seek($AOffset, $AWhence); }
+    Function Length()     { Return $this->FStream->Length();     }
+    Function Pos()        { Return $this->FStream->Pos();        }
+    Function TryLock($Typ){ Return $this->FStream->TryLock($Typ);}
+    Function Lock($Typ)   { Return $this->FStream->Lock($Typ);   }
+    Function UnLock()     { Return $this->FStream->UnLock();     }
+    // Truncate(0)
+    // Clear
+    // ShutDown()
+
+    Function Close()
+    {
+      If($this->FStream)
+      {
+        $this->FStream->_UnLock();
+        $this->FStream=NULL;
+      }
+      parent::Close();
+    }
+  }
+?>

@@ -1,0 +1,111 @@
+<?
+  $Loader->Parent_Class('/Tmpl/Base/Manager');
+  $Loader->Using_Class('/Tmpl/W2/Document');
+  $Loader->Using_Class('/System/Cache/Manager');
+  $Loader->Using_Class('/Tmpl/W2/Template');
+ 
+  Class C_Tmpl_W2_Manager Extends C_Tmpl_Base_Manager
+  {
+    Var $Templates     =[];
+    Var $Cache         ='./Cache/Tmpl/W2/'; // TODO: Cache object
+  //Var $Cache         ='./Cache/';
+    Var $Version       ='V3x0x0';
+    Var $Config_Parser =[];
+    
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      if(IsSet($Args['Parser']))
+        $this->Config_Parser=$Args['Parser'];
+    }
+ 
+    Function FilePhp($Id)
+    {
+      Return $this->Cache.$Id.'.php';
+    }
+ 
+    Function IsCompiled($Id)
+    {
+      return Is_File($this->FilePhp($Id));
+    }
+ 
+    Function LoadPhp($Id)
+    {
+      Include($this->FilePhp($Id));
+    }
+ 
+    Function FuncName($Id)
+    {
+       Return '_Tmpl_w2_'.$Id.'_';
+    }
+ 
+    Function IsLoaded($Id)
+    {
+      Return Function_Exists($this->FuncName($Id));
+    }
+ 
+    Function _Complie($Str, $Id)
+    {
+      $Args=[
+        'Parser'=>$this->Config_Parser,
+      ];
+      $Tmpl=$this->Create_Object('/Tmpl/W2/Document', $Args);
+      $Tmpl->Parse($Str);
+      $Info=$this->Create_Object('/Tmpl/W2/PhpBr');
+      $Info->Head[]='<?'."\n";
+      $Info->Head[]=' Function '.$this->FuncName($Id).'(&'.$Info->Vars().")\n";
+      $Info->Head[]=' {'."\n";
+    //$Info->Head[]='$Res=[];'."\n";
+      $Info->Out->FBegin();
+      $Tmpl->FirstTag->MakePHP($Info);
+      $Info->Out->FEnd();
+    //$Info->Foot[]="Return Implode('',\$Res);\n";
+      $Info->Tab='';
+      $Info->Foot[]=' }'."\n";
+      $Info->Foot[]='?>';
+      if(!Is_Dir($this->Cache))
+        CreatePath($this->Cache);
+      if(!SaveText($this->FilePhp($Id), $Info->GetPHP()))
+      {
+        CreatePath($this->Cache);
+        SaveText($this->FilePhp($Id), $Info->GetPHP());
+      }
+      $Info->Done();
+      $Tmpl->Done();
+      $Tmpl=NULL;
+    }
+ 
+    Function &Get_File($FileName, $Id=False)
+    {
+      $Stat=Stat($FileName);
+      If(!$Id)
+        $Id=md5($Stat['ino'  ].'-'.$Stat['size' ].'-'.$Stat['mtime'].'-'.$FileName.'-'.$this->Version);
+      If(!$this->IsLoaded($Id))
+      {
+        If(!$this->IsCompiled($Id))
+        {
+          $Str=File_Get_Contents($FileName);
+          $this->_Complie($Str, $Id);
+        }
+        $this->LoadPhp($Id);
+      }
+      $Res=$this->Create_Object('/Tmpl/W2/Template', ['Func'=>$this->FuncName($Id)]);
+      Return $Res;
+    }
+ 
+    Function &Get_String($Str, $Id=False)
+    {
+      If(!$Id)
+        $Id=md5($Str);
+      If(!$this->IsLoaded($Id))
+      {
+        If(!$this->IsCompiled($Id))
+          $this->_Complie($Str, $Id);
+  
+        $this->LoadPhp($Id);
+      }
+      $Res=$this->Create_Object('/Tmpl/W2/Template', ['Func'=>$this->FuncName($Id)]);
+      Return $Res;
+    }
+  }
+?>

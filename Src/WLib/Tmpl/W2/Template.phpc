@@ -1,0 +1,21 @@
+<?
+  $Loader->Parent_Class('/Tmpl/Base/Template');
+ 
+  Class C_Tmpl_W2_Template Extends C_Tmpl_Base_Template
+  {
+    Var $Func='';
+  
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $this->Func=&$Args['Func'];
+    }
+  
+    Function Exec_To_Str(Array &$Vars)
+    {
+      $V=$this->Init_Vars(&$Vars);
+      $f=$this->Func;
+      Return $f($V);
+    }
+  }
+?>

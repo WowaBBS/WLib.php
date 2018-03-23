@@ -83,7 +83,7 @@
 
     Function Clone() { return clone $this; }
     
-    Protected Function _Clonable() { return false; }
+    Protected Function _Cloneable() { return false; }
     Protected Function _Clone()
     {
       $this->_Inited=true;
@@ -91,7 +91,7 @@
     
     Final Function __clone()
     {
-      if(!$this->_Clonable())
+      if(!$this->_Cloneable())
         throw new Exception('Object can`t be cloned');
       if(!$this->_Inited)
         throw new Exception('Object hasn`t initialized');

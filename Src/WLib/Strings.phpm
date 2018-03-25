@@ -228,6 +228,14 @@
   //Return $Str===(String)(Int)$Str;
   }
  
+  Function CacheString($Str)
+  {
+    static $Cache=[];
+    if(IsSet($Cache[$Str])) return $Cache[$Str];
+    $Cache[$Str]=$Str;
+    return $Str;
+  }
+  
   // ***************************************************************************************
  
   $Loader->End_Module('/Array');

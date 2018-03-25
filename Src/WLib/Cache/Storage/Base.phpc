@@ -1,0 +1,69 @@
+<?
+  $Loader->Parent_Class('/Cache/Base');
+  ///
+  Abstract Class C_Cache_Storage_Base Extends C_Cache_Base
+  {
+    Var $Vars =[];
+    Var $IsLoaded     = False;
+    Var $IsChanged    = false;
+    Var $LoadOnInit   = false;
+    Var $SaveOnChange = !false;
+    
+    Function MarkChanged()
+    {
+      $this->IsChanged=true;
+      if($this->SaveOnChange)
+        $this->Save();
+    }
+  
+    Protected Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      if($this->LoadOnInit)
+        $this->Load();
+    }
+    
+    Protected Function _Done()
+    {
+      If($this->IsChanged)
+        $this->Save();
+      Parent::_Done();
+      $this->Vars=[];
+      $this->IsLoaded=false ;
+    }
+  
+    Function Sub($Field)
+    {
+      $Args=[
+        'Storage' => $this  ,
+        'Field'   => $Field ,
+      ];
+      $Res=$this->Create_Object('/Cache/Storage/Field', $Args);
+      Return $Res;
+    }
+  
+    Protected Abstract Function _Load();
+    Protected Abstract Function _Save();
+
+    Function OnLoad(){}
+    Final Function Load()
+    {
+      If($this->IsLoaded)
+        Return True;
+      $this->IsLoaded=true;
+      $this->Vars=[];
+      $Res=$this->_Load();
+      $this->OnLoad();
+      return $Res;
+    }
+    
+    Final Function Save()
+    {
+      if(!$this->IsLoaded)
+        return;
+      $this->IsLoaded=true;
+      $this->IsChanged=false;
+      return $this->_Save();
+    }
+  }
+?>

@@ -1,0 +1,82 @@
+<?
+  $Loader->Parent_Class('/Object');
+  ///
+  Abstract Class C_Cache_Base Extends C_Object
+  {
+    Var $Manager  ;
+    Var $FullPath ;
+    Var $RelPath  ;
+    
+    Protected Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $this->Manager  =$Args['Manager'  ];
+      $this->RelPath  =$Args['RelPath'  ];
+      $this->FullPath =$Args['FullPath' ];
+    //$this->Path=New TPath($Args['Path']);
+    //$Res=[];
+    //ForEach($this->Path->Path As $i=>$v)
+    //  If(!$i||($v!=='')&&($v!=='.'))
+    //    //$Res[]=$v;
+    //    $Res[]=Preg_Replace('/:/','', $v);
+    //$this->Path->Path=$Res;
+      
+    }
+    
+    Protected Function _Done()
+    {
+      $this->Manager->_Remove($this);
+      Parent::_Done();
+    }
+
+    Protected Function _Debug_Info(Array &$Res)
+    {
+      Parent::_Debug_Info($Res);
+      UnSet($Res['Manager']);
+    }
+
+  //****************************************************************
+  // Factory
+  
+    Function _Get($Path, $Type, $Args=[])
+    {
+      return $this->Manager->_Get($this->RelPath.$Path, $Type, $Args);
+    }
+
+    Function GetStorage($Path, $Type=null, $Args=[])
+    {
+      if(Is_Null($Type))
+        $Type=$this->Manager->StorageType;
+      Return $this->_Get($Path, $Type, $Args);
+    }
+    
+    Function GetEnumDir($Path='')
+    {
+      $Storage=$this->GetStorage($Path.'EnumDir');
+      return $this->_Get($Path ,'/Cache/EnumDir', ['Storage'=>$Storage]);
+    }
+
+    Function GetMD5Enum($Path='')
+    {
+      $Storage=$this->GetStorage($Path.'MD5_EnumDir');
+      return $this->_Get($Path ,'/Cache/MD5/EnumDir', ['Storage'=>$Storage]);
+    }
+
+    Function GetMD5Storage($Path='')
+    {
+      $Storage=$this->GetStorage($Path.'MD5');
+      return $this->_Get($Path ,'/Cache/MD5/Storage', ['Storage'=>$Storage]);
+    }
+
+    Function GetSub($Path='')
+    {
+      return $this->_Get($Path ,'/Cache/Sub');
+    }    
+
+    Function GetMap($Path='', $bBig=false, $Args=[])
+    {
+      return $this->_Get($Path , $bBig?'/Cache/MapEx':'/Cache/Map');
+    }    
+  //****************************************************************
+  }
+?>

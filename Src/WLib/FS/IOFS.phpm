@@ -10,7 +10,7 @@
   // Содержит базовые функции
   //
  
-  $Loader->Begin_Module('System/MIOFS');
+  $Loader->Begin_Module('FS/IOFS');
  
   // ***************************************************************************************
  
@@ -298,26 +298,6 @@
  
   // ***************************************************************************************
  
-  Function CreatePath($Path, $Attr=0700)
-  {
-    If(Is_Dir($Path))
-      Return True;
-    $Arr=Explode('/', $Path);
-    $Path='';
-    ForEach($Arr As $v)
-      If(StrLen($v))
-      {
-        $Path.=$v;
-        If(!Is_Dir($Path))
-          If(File_Exists($Path))
-            Return False;
-          Else
-            @MkDir($Path, $Attr);
-        $Path.='/';
-      }
-    Return Is_Dir($Path);
-  }
- 
   // Копирует файл
   Function _CopyFile($From, $To)
   {
@@ -539,5 +519,5 @@
  
   // ***************************************************************************************
  
-  $Loader->End_Module('System/MIOFS');
+  $Loader->End_Module('FS/IOFS');
 ?>

@@ -1,0 +1,42 @@
+<?
+  /// Менеджер кеша, создаёт объекты упревления кешом.
+  $Loader->Parent_Class('/Cache/Map');
+  
+  Class C_Cache_MD5_Storage extends C_Cache_Map
+  {
+    Var $SaveOnChange = false;
+
+    // PHP Warning:  Declaration of
+    //   C_Cache_MD5_Storage::Get($BaseDir, $Prefix='')
+    //   should be compatible with
+    //   C_Cache_Map::Get($Key, $Hash, $Getter, $Args=null)
+  //Function  Get($BaseDir, $Prefix='')
+  //{
+  //  Return $this;
+  //}
+  
+    Function _CalcMD5($FullPath)
+    {
+      return FS_md5_file($FullPath);
+    }
+    
+    Function CalcMD5($FullPath, $RootPath='')
+    {
+    //if(!$this->Exists) return '';
+    //$md5=&$this->md5;
+    //if($md5!=='')
+    //  return $md5;
+      if(!FS_Is_File($FullPath))
+        return '';
+      $Size    =FS_FileSize  ($FullPath);
+      $Changed =FS_FileMTime ($FullPath);
+      $md5=$this->Get(
+        $FullPath,
+        $Size.','.$Changed,
+        Array($this, '_CalcMD5'),
+        $FullPath
+      );
+      return $md5;
+    }
+  }
+?>

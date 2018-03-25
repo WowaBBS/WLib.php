@@ -1,0 +1,11 @@
+<?
+  $Loader->Parent_Class('/Cache/Storage/Base');
+ 
+  Abstract Class C_Cache_Storage_File Extends C_Cache_Storage_Base
+  {
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+    }
+  }
+?>

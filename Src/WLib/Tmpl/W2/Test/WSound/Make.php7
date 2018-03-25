@@ -1,0 +1,76 @@
+<?
+  include '..\..\..\..\Using.php';
+  include 'list.php';
+//Include 'system.php';
+
+//$Loader->Using_Module('/TSpeed');
+//$Loader->Using_Module('/Error');
+//$Loader->Using_Module('/System');
+//$Loader->Using_Module('/Debug');
+  
+  $TLoader=$Loader->Create_Object('/Tmpl/Loader');
+  $Manager_Args=Array(
+    'Parser'=>Array(
+      'Tag_First' =>'{',
+      'Tag_Last'  =>'}',
+    ),
+  );
+  $TLoader->Types['w2_cpp']=$Loader->Create_Object('/Tmpl/W2/Manager', $Manager_Args);
+  $TLoader->DefType='w2_cpp';
+  
+  $Dir_Out='Out/';
+  
+  $ConvFiles=Array(
+    //    Type      ,Template           ,Output
+    Array('Effect'  ,'/WSound/Effect/item.cpp'        ,'WSound/Effect/{Var:CPP}.cpp'   ),
+    Array('Effect'  ,'/WSound/Effect/item.h'          ,'WSound/Effect/{Var:CPP}.h'     ),
+    Array('Effects' ,'/WSound/Effect/Base.h'          ,'WSound/Effect/Base.h'          ),
+    Array('Effects' ,'/WSound/Type/Effect/Type.h'     ,'WSound/Type/Effect/Type.h'     ),
+    Array('Effects' ,'/WSound/Effect/.lib.cpp'        ,'WSound/Effect/.lib.cpp'        ),
+    Array('Effects' ,'/WSound/Effect/.all.h'          ,'WSound/Effect/.all.h'          ),
+    Array('Effect'  ,'/WOpenAL/Effect/item.h'         ,'WOpenAL/Effect/{Var:CPP}.h'    ),
+    Array('Effects' ,'/WOpenAL/Effect/.all.h'         ,'WOpenAL/Effect/.all.h'         ),
+    Array('Effects' ,'/WOpenAL/Effect/Base.h'         ,'WOpenAL/Effect/Base.h'         ),
+    Array('Effects' ,'/WOpenAL/Effect/Check.h'        ,'WOpenAL/Effect/Check.h'        ),
+    Array('Effects' ,'/WOpenAL/Struct/Effect.h'       ,'WOpenAL/Struct/Effect.h'       ),
+    Array('Effects' ,'/WOpenAL/TypeConv/EffectType.h' ,'WOpenAL/TypeConv/EffectType.h' ),
+  );
+  
+  function Templates_Init(&$TLoader, &$ConvFiles, $Dir_Out)
+  {
+    $Vars=Array();
+    ForEach($ConvFiles as $k=>$tmp)
+    {
+      $ConvFile=&$ConvFiles[$k];
+      $ConvFile['Template' ]=$TLoader->Load_Template   ($Vars,          $ConvFile[1]);
+      $ConvFile['Output'   ]=$TLoader->String_Template ($Vars, $Dir_Out.$ConvFile[2]);
+    }
+  }
+  
+  function Templates_Process(&$ConvFiles, $Type, &$Vars)
+  {
+    ForEach($ConvFiles as $k=>$tmp)
+    {
+      $ConvFile=&$ConvFiles[$k];
+      
+      if($ConvFile[0]!==$Type) continue;
+      
+      $Content = $ConvFile['Template' ]->Exec_To_Str($Vars);
+      $Output  = $ConvFile['Output'   ]->Exec_To_Str($Vars);
+      
+      CreatePath(ExtractFilePath($Output));
+      
+      $Content=str_replace("\r", '', $Content);
+      $Content=str_replace("\n", "\r\n", $Content);
+      file_put_contents($Output, $Content);
+    }
+  }
+  
+  Templates_Init($TLoader, $ConvFiles, $Dir_Out);
+ 
+  $Vars=Array('Effects'=>&$Effects);
+  Templates_Process($ConvFiles, 'Effects', $Vars);
+  
+  foreach($Effects as $Effect)
+    Templates_Process($ConvFiles, 'Effect', $Effect);
+?>

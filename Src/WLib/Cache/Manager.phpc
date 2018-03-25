@@ -1,0 +1,77 @@
+<?
+  /// Менеджер кеша, создаёт объекты упревления кешом.
+  $Loader->Parent_Class('/Cache/Base');
+  
+  Class C_Cache_Manager extends C_Cache_Base
+  {
+    Var $FullPath='./.cache/';
+    Var $Cache=[];
+    Var $Objects=[];
+    Var $Vars=[
+      'MkDir'=>[
+        'Mod' => 06775,
+        'Own' => '',
+        'Grp' => '',
+      ],
+    ];
+
+    Protected Function _Init(Array $Args)
+    {
+      $Args['Manager']=$this;
+      $Args['RelPath']='';
+      if(IsSet($Args[0]))
+        $Args['FullPath']=$Args[0];
+      if(!IsSet($Args['FullPath']))
+        $Args['FullPath']=$this->FullPath;
+      parent::_Init($Args);
+      If(IsSet($Args['MkDir']))
+        $this->Vars['MkDir']=$Args['MkDir'];
+    }
+
+    Function _Done()
+    {
+      Parent::_Done();
+      $List=Array_Reverse(Array_Keys($this->Objects)); // TODO: Remove copying array
+      $Objects =&$this->Objects;
+      $Cache   =&$this->Cache;
+      ForEach($List As $i)
+      {
+        $I=$Objects[$i];
+        $Cache[$I[0]][$I[1]]->Done();
+      }
+    }
+    
+  //Var $StorageType='/Cache/Storage/Null'  ;
+  //Var $StorageType='/Cache/Storage/Debug' ;
+  //Var $StorageType='/Cache/Storage/Vars'  ;
+    Var $StorageType='/Cache/Storage/PHP'   ;
+    
+    Function _Get($Path, $Type, $Args=[])
+    {
+      If(!IsSet($this->Cache[$Type]))
+        $this->Cache[$Type]=[];
+      ElseIf(IsSet($this->Cache[$Type][$Path]))
+        Return $this->Cache[$Type][$Path];
+    //$FullPath=New TPath($this->FullPath);
+    //$FullPath->Add($Path);
+      $FullPath=$this->FullPath.$Path;
+      $Args['Manager'  ]=$this     ;
+      $Args['FullPath' ]=$FullPath ;
+      $Args['RelPath'  ]=$Path     ;
+      $Res=$this->Create_Object($Type, $Args);
+      $this->Objects[$Res->Object_Id]=[$Type, $Path];
+      $this->Cache[$Type][$Path]=$Res;
+      Return $Res;
+    }
+    
+    Function _Remove($Obj)
+    {
+      if($Obj==$this)
+        return;
+      $I=$this->Objects[$Obj->Object_Id];
+      UnSet($this->Cache[$I[0]][$I[1]]);
+      UnSet($this->Objects[$Obj->Object_Id]);
+    }
+    
+  }
+?>

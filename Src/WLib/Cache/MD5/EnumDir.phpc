@@ -1,0 +1,32 @@
+<?
+  /// Менеджер кеша MD5
+  $Loader->Parent_Class('/Cache/EnumDir');
+  
+  Class C_Cache_MD5_EnumDir extends C_Cache_EnumDir
+  {
+    Var $Storages=[];
+    Var $Objects=[];
+  
+    Function Get($BaseDir, $Prefix='')
+    {
+      if(IsSet($this->Storages[$BaseDir]))
+        return $this->Storages[$BaseDir];
+      $CacheDir=$this->Alloc($BaseDir, $Prefix);
+      $Res=$this->GetMD5Storage($CacheDir.'_');
+    //echo $CacheDir,"\n";
+      $this->Storages[$BaseDir]=$Res;
+      return $Res;
+    }
+    
+    Function _Done()
+    {
+      UnSet($this->Storages);
+      Parent::_Done();
+    }
+
+    Function CalcMD5($FullPath, $RootPath='')
+    {
+      return $this->Get($RootPath)->CalcMD5($FullPath);
+    }
+  }
+?>

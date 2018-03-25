@@ -1,0 +1,43 @@
+<?
+  $Loader->Parent_Class('/Cache/Storage/Base');
+  
+  // Поддерево кеша переменных
+  Class C_Cache_Storage_Field Extends C_Cache_Storage_Base
+  {
+    Var $Storage;
+    Var $Field ;
+    Var $IsLoaded=False;
+    Var $IsCheck=False;
+
+    Function MarkChanged() { Parent::MarkChanged(); $this->Storage->MarkChanged(); }
+  
+    Protected Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $this->Storage = $Args['Storage' ];
+      $this->Field   = $Args['Field'   ]??[];
+    }
+  
+    Protected Function _Load()
+    {
+      $Res=$this->Storage->Load();
+      $I=&$this->Storage->Vars;
+      ForEach($this->Field As $Field)
+      {
+        If(!IsSet($I[$Field]))
+        {
+          $I[$Field]=[];
+          $Res=false;
+        }
+        $I=&$I[$Field];
+      }
+      $this->Vars=&$I;
+      return $Res;
+    }
+  
+    Protected Function _Save($Data=NULL)
+    {
+      $this->Storage->_Save();
+    }
+  }
+?>

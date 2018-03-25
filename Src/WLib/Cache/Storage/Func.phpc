@@ -1,0 +1,43 @@
+<?
+  $Loader->Parent_Class('/Cache/Storage/PHP');
+ 
+  Class C_Cache_Storage_Func Extends C_Cache_Storage_PHP
+  {
+    Var $Defines=[];
+  
+    Function _SaveBody(&$Res)
+    {
+      $RndID=md5($this->Path.MicroTime(1));
+   
+      $Vars=&$this->Vars;
+   
+      $Res=[];
+      $Res[]='<?'."\n";
+   
+      $Vars['Procs']=[];
+      ForEach($this->Defines As $Name=>$Proc)
+       {
+        $NameID='p'.md5($RndID.$Name);
+        $Vars['Procs'][$Name]=$NameID;
+        $Res[]='Function '.$NameID.'($Vars){'."\n";
+        $Res[]=$Proc;
+        $Res[]="\n}\n";
+       }
+    }
+  
+    Function DefineProc($Proc, $EvalData)
+    {
+      $this->Defines[$Proc]=$EvalData;
+    }
+  
+    Function ExecProc($Proc, $Vars)
+    {
+      If(!$this->Vars)
+        If(!$this->_Load())
+          Return False;
+      If(!IsSet($this->Vars['Procs'][$Proc]))
+        Return False;
+      Return $this->Vars['Procs'][$Proc]($Vars);
+    }
+  }
+?>

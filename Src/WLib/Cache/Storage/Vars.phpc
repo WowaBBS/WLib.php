@@ -1,0 +1,29 @@
+<?
+  $Loader->Parent_Class('/Cache/Storage/File');
+  $Loader->Load_Lib('/FS/Utils');
+  $Loader->Load_Module('/FS/IOFS');
+ 
+  Class C_Cache_Storage_Vars Extends C_Cache_Storage_File
+  {
+    Protected Function _Load()
+    {
+      $Name=$this->FullPath.'.vars';
+      $this->IsLoaded=True;
+      If(!Is_File($Name))
+        Return False;
+      $this->Vars=UnSerialize(LoadFile($Name));
+      Return $this->Vars? True:False;
+    }
+  
+    Protected Function _Save()
+    {
+      $FileName=$this->FullPath.'.vars';
+      $Vars=Serialize($this->Vars);
+      $Dir=ExtractFilePath($FileName);
+      If(!Is_Dir($Dir))
+        If(!CreatePath($Dir, $this->Manager->Vars['MkDir']['Mod']))
+          Return False;
+      Return SaveFile($FileName, $Vars);
+    }
+  }
+?>

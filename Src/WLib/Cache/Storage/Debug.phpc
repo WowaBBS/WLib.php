@@ -1,0 +1,18 @@
+<?
+  $Loader->Parent_Class('/Cache/Storage/Base');
+ 
+  Class C_Cache_Storage_Debug Extends C_Cache_Storage_Base
+  {
+    Protected Function _Load()
+    {
+      Return False;
+    }
+  
+    Protected Function _Save()
+    {
+      $Deb=$this->Get_Singleton('/Debug/Manager')->Get('Storage.deb');
+      $Deb->Debug($this->Vars);
+      Return True;
+    }
+  }
+?>

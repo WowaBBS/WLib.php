@@ -1,0 +1,18 @@
+<?
+  $Loader->Parent_Class('/Cache/Base');
+  ///
+  Class C_Cache_Sub Extends C_Cache_Base
+  {
+    Var $Path = '';
+    
+    Protected Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+    }
+    
+    Protected Function _Done()
+    {
+      Parent::_Done();
+    }
+  }
+?>

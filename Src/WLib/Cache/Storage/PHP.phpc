@@ -1,0 +1,42 @@
+<?
+  $Loader->Parent_Class('/Cache/Storage/File');
+  $Loader->Load_Lib('/FS/Utils');
+  $Loader->Load_Module('/FS/IOFS');
+  $Loader->Load_Lib('/FS/My');
+ 
+  Class C_Cache_Storage_PHP Extends C_Cache_Storage_File
+  {
+    Var $Defines=[];
+  
+    Protected Function _Load()
+    {
+      $Name=$this->FullPath.'.php';
+      $this->IsLoaded=True;
+      If(!Is_File($Name))
+        Return False;
+      $this->Vars=Include FS_EnCode($Name);
+      Return $this->Vars? True:False;
+    }
+  
+    Protected Function _SaveBody(&$Res) {}
+    Protected Function _Save()
+    {
+      $FileName=$this->FullPath.'.php';
+      $RndID=md5($FileName.MicroTime(1));
+   
+      $Res=[];
+      $Res[]='<?'."\n";
+   
+      $this->_SaveBody($Res);
+   
+      $Res[]=' Return ';
+      $Res[]=var_export($this->Vars, true);
+      $Res[]=";\n?".'>';
+      $Res=Implode('', $Res);
+      $Dir=ExtractFilePath($FileName);
+      If(!Is_Dir($Dir))
+        CreatePath($Dir, $this->Manager->Vars['MkDir']['Mod']);
+      Return SaveText($FileName, $Res);
+    }
+  }
+?>

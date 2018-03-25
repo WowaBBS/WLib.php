@@ -1,0 +1,12 @@
+<?
+//Error_Reporting(0);
+  $MovePath='';
+  $CurrentPath='./'.$MovePath;
+//$PathUnits=$CurrentPath.'libs/';
+//$PathUnits='D:/MyWeb/wowa/Units/';
+  $PathUnits='D:/MyWeb/';
+  Include_Once($PathUnits.'system.php');
+//$PathUnits='./';
+//Include_Once($PathUnits.'all.php');
+  $PathProg=$CurrentPath;
+?>

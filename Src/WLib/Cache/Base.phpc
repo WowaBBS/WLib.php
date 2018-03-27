@@ -75,7 +75,13 @@
 
     Function GetMap($Path='', $bBig=false, $Args=[])
     {
-      return $this->_Get($Path , $bBig?'/Cache/MapEx':'/Cache/Map');
+      if($bBig)
+        return $this->_Get($Path , '/Cache/MapEx');
+      else
+      {
+        $Storage=$this->GetStorage($Path.'Map');
+        return $this->_Get($Path , '/Cache/Map', ['Storage'=>$Storage]);
+      }
     }    
   //****************************************************************
   }

@@ -31,6 +31,20 @@
       $this->Vars=[];
       $this->IsLoaded=false ;
     }
+    
+    Function GetVars()
+    {
+      $this->Load();
+      return $Vars;
+    }
+    
+    Function SetVars($v)
+    {
+      $this->IsLoaded=true; // Fake load
+      $this->Vars=$v;
+      $this->MarkChanged();
+      return $this;
+    }
   
     Function Sub($Field)
     {

@@ -146,8 +146,8 @@
  
   // Нормализует путь $Path, удаляя ненужное
   // Если $ZTrim, то проверяет существование пути
-  Function NormPath($Path, $Add='', $ZTrim=False)
-  {
+  Function Deprecated_NormPath($Path, $Add='', $ZTrim=False)
+  { // TODO: See /Builder/Asset/FS/PathBase.phpc method NormPath
     If(Is_Array($Path))
     {
       $Res=Array();

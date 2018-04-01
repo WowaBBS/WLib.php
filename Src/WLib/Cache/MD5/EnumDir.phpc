@@ -5,14 +5,14 @@
   Class C_Cache_MD5_EnumDir extends C_Cache_EnumDir
   {
     Var $Storages=[];
-    Var $Objects=[];
   
     Function Get($BaseDir, $Prefix='')
     {
       if(IsSet($this->Storages[$BaseDir]))
         return $this->Storages[$BaseDir];
-      $CacheDir=$this->Alloc($BaseDir, $Prefix);
-      $Res=$this->GetMD5Storage($CacheDir.'_');
+     #$CacheDir=$this->AllocNum($BaseDir, $Prefix);
+     #$Res=$this->GetMD5Storage($CacheDir.'_');
+      $Res=$this->AllocMD5Storage($BaseDir, $Prefix);
     //echo $CacheDir,"\n";
       $this->Storages[$BaseDir]=$Res;
       return $Res;

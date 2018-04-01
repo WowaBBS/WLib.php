@@ -1,8 +1,8 @@
 <?
   /// Менеджер кеша, создаёт объекты упревления кешом.
-  $Loader->Parent_Class('/Cache/Map');
+  $Loader->Parent_Class('/Cache/MapFile');
   
-  Class C_Cache_MD5_Storage extends C_Cache_Map
+  Class C_Cache_MD5_Storage extends C_Cache_MapFile
   {
     Var $SaveOnChange = false;
 

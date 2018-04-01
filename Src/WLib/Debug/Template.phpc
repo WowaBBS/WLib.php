@@ -22,29 +22,30 @@
  
     Function Value($Ctx, $Value)
     {
-       If($Ctx->Level_End())
-       {
-         $Ctx->Write($this->Skip);
-         Return;
-       }
-       $_TOV=GetType($Value);
-       Switch($_TOV)
-       {
-       Case 'boolean'       : $this->Boolean  ($Ctx, $Value); break;
-       Case 'integer'       : $this->Integer  ($Ctx, $Value); break;
-       Case 'double'        : $this->Double   ($Ctx, $Value); break;
-       Case 'string'        : $this->String   ($Ctx, $Value); break;
-       Case 'object'        : $this->Object   ($Ctx, $Value); break;
-       Case 'array'         : $this->Array    ($Ctx, $Value); break;
-       Case 'NULL'          : $this->Null     ($Ctx, $Value); break;
-       Case 'resource'      : $this->Resource ($Ctx, $Value); break;
-       Case 'float'         : $this->Float    ($Ctx, $Value); break;
-       Case 'unknown type'  : $this->UnKnown  ($Ctx, $Value); break;
-       Case 'user function' : $this->Function ($Ctx, $Value); break;
-       Default:
-         $_f='T'.$_TOV;
-         $this->$_f($Ctx, $Value);
-       }
+    //$Ctx->Write('<'.$Ctx->Level.'>');
+      If($Ctx->Level_End())
+      {
+        $Ctx->Write($this->Skip);
+        Return;
+      }
+      $_TOV=GetType($Value);
+      Switch($_TOV)
+      {
+      Case 'boolean'       : $this->Boolean  ($Ctx, $Value); break;
+      Case 'integer'       : $this->Integer  ($Ctx, $Value); break;
+      Case 'double'        : $this->Double   ($Ctx, $Value); break;
+      Case 'string'        : $this->String   ($Ctx, $Value); break;
+      Case 'object'        : $this->Object   ($Ctx, $Value); break;
+      Case 'array'         : $this->Array    ($Ctx, $Value); break;
+      Case 'NULL'          : $this->Null     ($Ctx, $Value); break;
+      Case 'resource'      : $this->Resource ($Ctx, $Value); break;
+      Case 'float'         : $this->Float    ($Ctx, $Value); break;
+      Case 'unknown type'  : $this->UnKnown  ($Ctx, $Value); break;
+      Case 'user function' : $this->Function ($Ctx, $Value); break;
+      Default:
+        $_f='T'.$_TOV;
+        $this->$_f($Ctx, $Value);
+      }
     }
  
     Function Boolean  ($Ctx, $v) { $Ctx->Write($v? 'True':'False'); }

@@ -83,11 +83,15 @@
     
     Function Flush() {}
     
-    Function Debug($v)
+    Function Debug($v, $Level=false)
     {
+      $SaveLevel=$this->Level;
+      if($Level!==false)
+        $this->Level=$Level;
       $this->Value($v);
       $this->Stream->Write("\n");
       $this->Flush();
+      $this->Level=$SaveLevel;
     }
  
     Function Value($v)

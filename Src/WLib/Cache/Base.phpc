@@ -38,50 +38,50 @@
   //****************************************************************
   // Factory
   
-    Function _Get($Path, $Type, $Args=[])
+    Function _Get(String $Path, String $Type, Array $Args=[])
     {
       return $this->Manager->_Get($this->RelPath.$Path, $Type, $Args);
     }
 
-    Function GetStorage($Path, $Type=null, $Args=[])
+    Function GetStorage($Path, $Args=[])
     {
-      if(Is_Null($Type))
-        $Type=$this->Manager->StorageType;
+      if(!Is_Array($Args))
+        $Args=['Type'=>$Args];
+      $Type=$Args['Type']?? $this->Manager->StorageType;
       Return $this->_Get($Path, $Type, $Args);
     }
     
-    Function GetEnumDir($Path='')
+    Protected Function _Sg($Path, $Add, Array $Args)
     {
-      $Storage=$this->GetStorage($Path.'EnumDir');
-      return $this->_Get($Path ,'/Cache/EnumDir', ['Storage'=>$Storage]);
-    }
-
-    Function GetMD5Enum($Path='')
-    {
-      $Storage=$this->GetStorage($Path.'MD5_EnumDir');
-      return $this->_Get($Path ,'/Cache/MD5/EnumDir', ['Storage'=>$Storage]);
-    }
-
-    Function GetMD5Storage($Path='')
-    {
-      $Storage=$this->GetStorage($Path.'MD5');
-      return $this->_Get($Path ,'/Cache/MD5/Storage', ['Storage'=>$Storage]);
-    }
-
-    Function GetSub($Path='')
-    {
-      return $this->_Get($Path ,'/Cache/Sub');
-    }    
-
-    Function GetMap($Path='', $bBig=false, $Args=[])
-    {
-      if($bBig)
-        return $this->_Get($Path , '/Cache/MapEx');
-      else
+      $Storage=$Args['Storage']??[];
+      if(!Is_Object($Storage))
       {
-        $Storage=$this->GetStorage($Path.'Map');
-        return $this->_Get($Path , '/Cache/Map', ['Storage'=>$Storage]);
+        if(!Is_Array($Storage))
+        {
+          $Add=$Storage;
+          $Storage=[];
+        }
+        $Path.=$Add;
+        $Args['Storage']=$this->GetStorage($Path, $Storage);
       }
+      return $Args;
+    }
+    
+    Function GetEnumDir    ($Path='', $Args=[]) { return $this->_Get($Path ,'/Cache/EnumDir'     ,$this->_Sg($Path, 'EnumDir'     ,$Args)); }
+    Function GetMD5Enum    ($Path='', $Args=[]) { return $this->_Get($Path ,'/Cache/MD5/EnumDir' ,$this->_Sg($Path, 'MD5_EnumDir' ,$Args)); }
+    Function GetMD5Storage ($Path='', $Args=[]) { return $this->_Get($Path ,'/Cache/MD5/Storage' ,$this->_Sg($Path, 'MD5'         ,$Args)); }
+    Function GetMapFile    ($Path='', $Args=[]) { return $this->_Get($Path ,'/Cache/MapFile'     ,$this->_Sg($Path, 'Map'         ,$Args)); }
+    Function GetMapDir     ($Path='', $Args=[]) { return $this->_Get($Path ,'/Cache/MapDir'      ,$Args); }
+    Function GetSub        ($Path='', $Args=[]) { return $this->_Get($Path ,'/Cache/Sub'         ,$Args); }    
+    
+    Function GetMap($Path='', $Args=[])
+    {
+      if(!Is_Array($Args))
+        $Args=['Big'=>$Args];
+      if($Args['Big']?? false)
+        return $this->GetMapDir($Path, $Args);
+      else
+        return $this->GetMapFile($Path, $Args);
     }    
   //****************************************************************
   }

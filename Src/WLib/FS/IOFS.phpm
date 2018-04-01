@@ -81,10 +81,10 @@
         $Res[$k]=ExtractFileNick($Item);
       Return $Res;
     }
-    $Nic=ExtractFileName($Path);
-    If(Preg_Match('/(.*)\..*/Ss', $Nic, $Matches))
-      $Nic=$Matches[1];
-    Return $Nic;
+    $Nick=ExtractFileName($Path);
+    If(Preg_Match('/(.*)\..*/Ss', $Nick, $Matches))
+      $Nick=$Matches[1];
+    Return $Nick;
   }
  
   // Удаляет в конце слеш
@@ -215,17 +215,17 @@
     $Drv='';
     If((StrLen($dirname)>1)&&($dirname[1]==':'))
       $Drv=$dirname[0];
-    $Nic=$basename;
+    $Nick=$basename;
     If(!IsSet($extension))
       $extension='';
     Else
-      $Nic=SubStr($basename, 0, StrLen($basename)-1-StrLen($extension));
+      $Nick=SubStr($basename, 0, StrLen($basename)-1-StrLen($extension));
     Return [
       'Drive' =>$Drv       ,
       'Dir'   =>$dirname   ,
       'Name'  =>$basename  ,
       'Path'  =>$Path      ,
-      'Nic'   =>$Nic       ,
+      'Nick'  =>$Nick      ,
       'Ext'   =>$extension ,
     ];
   }

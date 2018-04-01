@@ -46,7 +46,7 @@
   //Var $StorageType='/Cache/Storage/Vars'  ;
     Var $StorageType='/Cache/Storage/PHP'   ;
     
-    Function _Get($Path, $Type, $Args=[])
+    Function _Get(String $Path, String $Type, Array $Args=[])
     {
       If(!IsSet($this->Cache[$Type]))
         $this->Cache[$Type]=[];

@@ -13,7 +13,17 @@
   $Loader->Begin_Module('/Array');
  
   // Подключение модулей
-  $Loader->Load_Module('/System');
+//$Loader->Load_Module('/System');
+  
+  Function Array_Shift_Checked(&$Arr)
+  {
+    if(Count($Arr)==0)
+      return null;
+    Reset($Arr);
+    if(Key($Arr)!==0)
+      UnSupported();
+    return Array_Shift($Arr);
+  }
  
   // Возвращает количество элементов в массиве
   // Значение может быть меньше чем Count
@@ -168,7 +178,7 @@
   Function ArrayAsRecord($Arr, $Rec, $Sub=0)
   {
     $Res=[];
-    If($Sub>0)                       s
+    If($Sub>0)
     {
       $Sub--;
       ForEach($Arr As $k=>$v)

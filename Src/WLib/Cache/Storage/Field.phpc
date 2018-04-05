@@ -35,7 +35,7 @@
       return $Res;
     }
   
-    Protected Function _Save($Data=NULL)
+    Protected Function _Save()
     {
       $this->Storage->_Save();
     }

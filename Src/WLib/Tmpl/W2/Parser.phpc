@@ -93,7 +93,7 @@
       If(!Is_Array($Tags))
         $Tags=[$Tags];
       ForEach($Tags As $Tag)
-        $this->TagsEmply[StrToLower($Tag)]=True;
+        $this->TagsEmpty[StrToLower($Tag)]=True;
     }
  
     Function Clear()
@@ -118,7 +118,7 @@
  
     Function _VeryEndTag($NewTag)
     {
-      $LastTags=$this->LastTags;
+      $LastTags=&$this->LastTags;
       For($i=Count($LastTags)-1; $i>=0; $i--)
         If($LastTags[$i]->tagName===$NewTag->tagName)
           Break;
@@ -139,7 +139,7 @@
         $Tmpl=$this->Rest.$Tmpl;
         $this->Rest='';
       }
-      $LastTags=$this->LastTags;
+      $LastTags=&$this->LastTags;
       $Len=0;
       $Count=Preg_Match_All($this->Match, $Tmpl, $_Tags, PREG_SET_ORDER);
     //Debug($_Tags);
@@ -173,7 +173,7 @@
   
           If($NewTag->_f)
             $this->_VeryEndTag($NewTag);
-          If(!$NewTag->_f&&!IsSet($this->TagsEmply[$tagName]))
+          If(!$NewTag->_f && !IsSet($this->TagsEmpty[$tagName]))
           {
             If(IsSet($this->TagsCData[$tagName]))
             {

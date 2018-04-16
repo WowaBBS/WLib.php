@@ -86,6 +86,7 @@
         If(!$this->IsCompiled($Id))
         {
           $Str=File_Get_Contents($FileName);
+          $Str=Str_Replace("\r",'', $Str); // LoadText()
           $this->_Complie($Str, $Id);
         }
         $this->LoadPhp($Id);

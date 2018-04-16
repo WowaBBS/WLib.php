@@ -3,7 +3,7 @@
   {
     Static $InnerTags=[];
  
-    Function MakeAttr(&$Tag)
+    Function MakeAttr($Tag)
     {
       If(!$Tag->HasAttributes())
         Return;
@@ -11,12 +11,12 @@
       If(IsSet($Var[0])) $Tag->SetAttr('Path'  , $Var[0]);
     }
  
-    Function MakePHP(&$Info, &$Tag, $Tags)
+    Function MakePHP($Builder, $Tag, $Tags)
     {
       $A=$Tag->GetAttr('Path');
-      $A=$Info->ParsePath($A);
+      $A=$Builder->ParsePath($A);
   
-      $Info->Out->Evaluate('Tmpl_Request(&'.$Info->Vars().','.$A.')');
+      $Builder->Out->Evaluate('Tmpl_Request('.$Builder->Vars().','.$A.')');
     }
   }
 ?>

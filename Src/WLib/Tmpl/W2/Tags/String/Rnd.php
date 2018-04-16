@@ -1,7 +1,7 @@
 <?
   Class T_W2_Tag_Rnd
   {
-    Function MakeAttr(&$Tag)
+    Function MakeAttr($Tag)
     {
       If(!$Tag->HasAttributes())
         Return;
@@ -18,16 +18,16 @@
       }
     }
  
-    Function MakePHP(&$Info, &$Tag, $Tags)
+    Function MakePHP($Builder, $Tag, $Tags)
     {
       $Min=$Tag->GetAttr('min');
       If($Min===False)
         $Min=0;
       $Max=$Tag->GetAttr('max');
       If($Max===False)
-        $Info->Out->Evaluate('Mt_Rand()');
+        $Builder->Out->Evaluate('Mt_Rand()');
       Else
-        $Info->Out->Evaluate('Mt_Rand('.$Min.','.$Max.')');
+        $Builder->Out->Evaluate('Mt_Rand('.$Min.','.$Max.')');
     }
   }
 ?>

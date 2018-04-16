@@ -92,13 +92,13 @@
  
     Function Evaluate($Data)
     {
-      $ov=&$this->Var;
+      $ov=$this->Var;
       If($ov)
         $this->Base->Add_Line($ov.'.='.$Data.';');
       Else
       {
         $this->Base->Add_Line($Data.';');
-      //$ov=$this->Var_Add('Res',Count($this->List)-1),
+      //$this->Var=$this->Var_Add('Res',Count($this->List)-1),
       //$this->Base->Add_Line($ov.'='.$Data.';');
       }
     }
@@ -112,7 +112,7 @@
       ];
       $TextE="'";
       $Text=Explode("\n",StrTr($Text, $R));
-      If((Count($Text)>1)&&($Text[Count($Text)-1]===''))
+      If(Count($Text)>1 && $Text[Count($Text)-1]==='')
        {
         UnSet($Text[Count($Text)-1]);
         $TextE="'".'."\\n"';

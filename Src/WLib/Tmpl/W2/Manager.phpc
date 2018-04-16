@@ -3,6 +3,7 @@
   $Loader->Using_Class('/Tmpl/W2/Document');
   $Loader->Using_Class('/System/Cache/Manager');
   $Loader->Using_Class('/Tmpl/W2/Template');
+  $Loader->Load_Lib('/FS/Utils');
  
   Class C_Tmpl_W2_Manager Extends C_Tmpl_Base_Manager
   {
@@ -51,31 +52,31 @@
       ];
       $Tmpl=$this->Create_Object('/Tmpl/W2/Document', $Args);
       $Tmpl->Parse($Str);
-      $Info=$this->Create_Object('/Tmpl/W2/PhpBr');
-      $Info->Head[]='<?'."\n";
-      $Info->Head[]=' Function '.$this->FuncName($Id).'(&'.$Info->Vars().")\n";
-      $Info->Head[]=' {'."\n";
-    //$Info->Head[]='$Res=[];'."\n";
-      $Info->Out->FBegin();
-      $Tmpl->FirstTag->MakePHP($Info);
-      $Info->Out->FEnd();
-    //$Info->Foot[]="Return Implode('',\$Res);\n";
-      $Info->Tab='';
-      $Info->Foot[]=' }'."\n";
-      $Info->Foot[]='?>';
+      $Builder=$this->Create_Object('/Tmpl/W2/Make/Php');
+      $Builder->Head[]='<?'."\n";
+      $Builder->Head[]=' Function '.$this->FuncName($Id).'(&'.$Builder->Vars().")\n";
+      $Builder->Head[]=' {'."\n";
+    //$Builder->Head[]='$Res=[];'."\n";
+      $Builder->Out->FBegin();
+      $Tmpl->FirstTag->MakePHP($Builder);
+      $Builder->Out->FEnd();
+    //$Builder->Foot[]="Return Implode('',\$Res);\n";
+      $Builder->Tab='';
+      $Builder->Foot[]=' }'."\n";
+      $Builder->Foot[]='?>';
       if(!Is_Dir($this->Cache))
         CreatePath($this->Cache);
-      if(!SaveText($this->FilePhp($Id), $Info->GetPHP()))
+      if(!SaveText($this->FilePhp($Id), $Builder->GetPHP()))
       {
         CreatePath($this->Cache);
-        SaveText($this->FilePhp($Id), $Info->GetPHP());
+        SaveText($this->FilePhp($Id), $Builder->GetPHP());
       }
-      $Info->Done();
+      $Builder->Done();
       $Tmpl->Done();
       $Tmpl=NULL;
     }
  
-    Function &Get_File($FileName, $Id=False)
+    Function Get_File($FileName, $Id=False)
     {
       $Stat=Stat($FileName);
       If(!$Id)
@@ -93,7 +94,7 @@
       Return $Res;
     }
  
-    Function &Get_String($Str, $Id=False)
+    Function Get_String($Str, $Id=False)
     {
       If(!$Id)
         $Id=md5($Str);

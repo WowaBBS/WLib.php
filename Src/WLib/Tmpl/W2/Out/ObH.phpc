@@ -77,15 +77,7 @@
  
     Function Evaluate($Data)
     {
-      $ov=&$this->Var;
-      If($ov)
-        $this->Base->Add_Line('Echo '.$Data.';');
-      Else
-      {
-        $this->Base->Add_Line($Data.';');
-      //$ov=$this->Var_Add('Res',Count($this->List)-1),
-      //$this->Base->Add_Line($ov.'='.$Data.';');
-      }
+      $this->Base->Add_Line('Echo '.$Data.';');
     }
  
     Function Text($Text)
@@ -97,7 +89,7 @@
       ];
       $TextE="'";
       $Text=Explode("\n",strtr($Text, $R));
-      If((Count($Text)>1)&&($Text[Count($Text)-1]===''))
+      If(Count($Text)>1 && $Text[Count($Text)-1]==='')
       {
         UnSet($Text[Count($Text)-1]);
         $TextE="'".'."\\n"';

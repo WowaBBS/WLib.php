@@ -6,7 +6,7 @@
       'From' => ['#Template'],
     ];
  
-    Function MakeAttr(&$Tag)
+    Function MakeAttr($Tag)
     {
       If(!$Tag->HasAttributes())
         Return;
@@ -15,18 +15,18 @@
       If(IsSet($Var[1])) $Tag->SetAttr('From' , $Var[1]);
     }
  
-    Function MakePHP(&$Info, &$Tag, $Tags)
+    Function MakePHP($Builder, $Tag, $Tags)
     {
       $Id=$Tag->Object_Id;
       $To   =$Tag->GetAttr('To'   );
       $From =$Tag->GetAttr('From' );
   
-      $vVar     =$Info->Var_Add('Var'     ,$Id);
-      $vMenuMan =$Info->Var_Add('MenuMan' ,$Id);
+      $vVar     =$Builder->Var_Add('Var'     ,$Id);
+      $vMenuMan =$Builder->Var_Add('MenuMan' ,$Id);
   
-      $Info->Add_Line($vVar.'='.$Info->Vars_Get($From).';');
-      $Info->Add_Line($vMenuMan.'=&'.$Info->Vars_Get('MenuMan').';');
-      $Info->Add_Line($vMenuMan."->SetMenu('".$To."',".$vVar.');');
+      $Builder->Add_Line($vVar.'='.$Builder->Vars_Get($From).';');
+      $Builder->Add_Line($vMenuMan.'=&'.$Builder->Vars_Get('MenuMan').';');
+      $Builder->Add_Line($vMenuMan."->SetMenu('".$To."',".$vVar.');');
     }
   }
 ?>

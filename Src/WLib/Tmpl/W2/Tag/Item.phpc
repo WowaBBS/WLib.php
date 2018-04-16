@@ -36,62 +36,61 @@
     
   //Function GetId() { return $this->Object_Id; }
  
-    Function ListFirst(&$ADocument)
+    Function ListFirst($ADocument)
     {
-      $this->Document = &$ADocument;
-      $F=False;
-      $this->ListPrev = &$F;
-      $this->ListNext = &$F;
-      $this->Document->FirstTag = &$this ;
-      $this->Document->LastTag  = &$this ;
+      $this->Document = $ADocument;
+      $this->ListPrev = False;
+      $this->ListNext = False;
+      $this->Document->FirstTag = $this ;
+      $this->Document->LastTag  = $this ;
     }
  
-    Function ListAdd(&$ATag)
+    Function ListAdd($ATag)
     {
-      $ATag->Document = &$this->Document ;
-      $ATag->ListPrev = &$this           ;
-      $ATag->ListNext = &$this->ListNext ;
-      $this->ListNext = &$ATag           ;
+      $ATag->Document = $this->Document ;
+      $ATag->ListPrev = $this           ;
+      $ATag->ListNext = $this->ListNext ;
+      $this->ListNext = $ATag           ;
     //If($this->Document->LastTag->Object_Id==$this->Object_Id)
       If($ATag->ListNext)
-        $ATag->ListNext->ListPrev=&$ATag;
+        $ATag->ListNext->ListPrev=$ATag;
       Else
-        $this->Document->LastTag=&$ATag;
+        $this->Document->LastTag=$ATag;
     }
  
-    Function ListInsert(&$ATag)
+    Function ListInsert($ATag)
     {
-      $ATag->Document = &$this->Document ;
-      $ATag->ListPrev = &$this->ListPrev ;
-      $ATag->ListNext = &$this           ;
-      $this->ListPrev = &$ATag           ;
+      $ATag->Document = $this->Document ;
+      $ATag->ListPrev = $this->ListPrev ;
+      $ATag->ListNext = $this           ;
+      $this->ListPrev = $ATag           ;
     //If($this->Document->LastTag->Object_Id==$this->Object_Id)
       If($ATag->ListPrev)
-        $ATag->ListPrev->ListNext=&$ATag;
+        $ATag->ListPrev->ListNext=$ATag;
       Else
-        $this->Document->FirstTag=&$ATag;
+        $this->Document->FirstTag=$ATag;
     }
  
-    Function &_Clear()
+    Function _Clear()
     {
-      $Res=&$this->ListNext;
-      $F1=False; $this->ListPrev=&$F1;
-      $F2=False; $this->ListNext=&$F2;
-      $F3=False; $this->Document=&$F3;
+      $Res=$this->ListNext;
+      $this->ListPrev=False;
+      $this->ListNext=False;
+      $this->Document=False;
       Return $Res;
     }
  
-    Function &ListDeleteTo(&$ETag)
+    Function ListDeleteTo($ETag)
     {
       If($this->ListPrev)
-        $this->ListPrev->ListNext=&$ETag->ListNext;
+        $this->ListPrev->ListNext=$ETag->ListNext;
       Else
-        $this->Document->FirstTag=&$ETag->ListNext;
+        $this->Document->FirstTag=$ETag->ListNext;
       If($ETag->ListNext)
-        $ETag->ListNext->ListPrev=&$this->ListPrev;
+        $ETag->ListNext->ListPrev=$this->ListPrev;
       Else
-        $this->Document->LastTag =&$this->ListPrev;
-      $LTag=&$this;
+        $this->Document->LastTag =$this->ListPrev;
+      $LTag=$this;
       $Id=$ETag->Object_Id;
       While($LTag->Object_Id!==$Id)
         $LTag=$LTag->_Clear();
@@ -99,22 +98,22 @@
       Return $Res;
     }
  
-    Function &ListDelete()
+    Function ListDelete()
     {
       If($this->ListPrev)
-        $this->ListPrev->ListNext=&$this->ListNext;
+        $this->ListPrev->ListNext=$this->ListNext;
       Else
-        $this->Document->FirstTag=&$this->ListNext;
+        $this->Document->FirstTag=$this->ListNext;
       If($this->ListNext)
-        $this->ListNext->ListPrev=&$this->ListPrev;
+        $this->ListNext->ListPrev=$this->ListPrev;
       Else
-        $this->Document->LastTag =&$this->ListPrev;
+        $this->Document->LastTag =$this->ListPrev;
       $Res=$this->_Clear();
       $this->Done();
       Return $Res;
     }
  
-    Function &Delete($ZSub=True)
+    Function Delete($ZSub=True)
     {
       Return $this->ListDelete();
     }

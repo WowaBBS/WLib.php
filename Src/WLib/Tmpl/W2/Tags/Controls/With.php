@@ -5,7 +5,7 @@
       '#data' => ['#Template','Default'],
     ];
  
-    Function MakeAttr(&$Tag)
+    Function MakeAttr($Tag)
     {
       If(!$Tag->HasAttributes())
         Return;
@@ -14,28 +14,28 @@
       If(IsSet($Var[1])) $Tag->SetAttr('Data' , $Var[1]);
     }
  
-    Function MakePHP(&$Info, &$Tag, $Tags)
+    Function MakePHP($Builder, $Tag, $Tags)
     {
       $Id=$Tag->Object_Id;
   
-      $vVar=$Info->Var_Add('Var', $Id);
+      $vVar=$Builder->Var_Add('Var', $Id);
   
       $Item=$Tag->GetAttr('Data');
       If($Item)
-        $Info->Add_Line($vVar.'=&'.$Info->Vars_Get($Tag->GetAttr('Var')).';');
+        $Builder->Add_Line($vVar.'=&'.$Builder->Vars_Get($Tag->GetAttr('Var')).';');
       Else
-        $Info->Add_Line($vVar.'='.$Info->Vars_Get($Tag->GetAttr('Var')).';');
-      $Info->Add_Line(' {');
-      $T=$Info->Tab;
-      $Info->Tab=$T.'  ';
+        $Builder->Add_Line($vVar.'='.$Builder->Vars_Get($Tag->GetAttr('Var')).';');
+      $Builder->Add_Line(' {');
+      $T=$Builder->Tab;
+      $Builder->Tab=$T.'  ';
       If($Item)
-        $Info->Vars_WithA([$Item=>'&'.$vVar]);
+        $Builder->Vars_WithA([$Item=>'&'.$vVar]);
       Else
-        $Info->Vars_WithV($vVar);
-      $Tags['#data'][0]->MakePHPInnerId($Info, $Tags['#data'][1]);
-      $Info->Vars_EndWith();
-      $Info->Tab=$T;
-      $Info->Add_Line(' }');
+        $Builder->Vars_WithV($vVar);
+      $Tags['#data'][0]->MakePHPInnerId($Builder, $Tags['#data'][1]);
+      $Builder->Vars_EndWith();
+      $Builder->Tab=$T;
+      $Builder->Add_Line(' }');
     }
   }
 ?>

@@ -68,13 +68,13 @@
         Return [];
       $Res=[];
       $Id=$ETag->Object_Id;
-      $LTag=&$this->ListNext;
+      $LTag=$this->ListNext;
       While($LTag->Object_Id!==$Id)
       {
-        $Res[]=&$LTag;
-        If(IsSet($LTag->EndTag)&&$LTag->EndTag)
-          $LTag=&$LTag->EndTag;
-        $LTag=&$LTag->ListNext;
+        $Res[]=$LTag;
+        If(IsSet($LTag->EndTag) && $LTag->EndTag)
+          $LTag=$LTag->EndTag;
+        $LTag=$LTag->ListNext;
       }
       Return $Res;
     }
@@ -93,16 +93,15 @@
       Return $Res;
     }
  
-    Function &_Clear()
+    Function _Clear()
     {
-      $F=False;
-      $this->EndTag=&$F;
+      $this->EndTag=False;
       $Res=parent::_Clear();
     //$Res=T_Tmpl_W2_Tag::_Clear();
       Return $Res;
     }
  
-    Function &Delete($ZSub=True, $ZMain=True)
+    Function Delete($ZSub=True, $ZMain=True)
     {
       If(!$this->EndTag)
         If($ZMain)
@@ -113,20 +112,20 @@
       {
         If($this->_f)
         {
-          $T1=&$this->EndTag;
-          $T2=&$this;
+          $T1=$this->EndTag;
+          $T2=$this;
         }
         Else
         {
-          $T1=&$this;
-          $T2=&$this->EndTag;
+          $T1=$this;
+          $T2=$this->EndTag;
         }
         If(!$ZMain)
         {
-          $T1=&$T1->ListNext;
+          $T1=$T1->ListNext;
           If($T1->Object_Id===$T2->Object_Id)
             Return $this;
-          $T2=&$T2->ListPrev;
+          $T2=$T2->ListPrev;
           $T1->ListDeleteTo($T2);
           Return $this;
         }
@@ -147,12 +146,12 @@
       If(!$ETag)
         Return '';
       $Res=[];
-      $LTag=&$this;
+      $LTag=$this;
       While($LTag->Object_Id!==$ETag->Object_Id)
       {
         If($LTag->tagName==='#text')
           $Res[]=$LTag->value;
-        $LTag=&$LTag->ListNext;
+        $LTag=$LTag->ListNext;
       }
       Return Implode('', $Res);
     }
@@ -165,12 +164,12 @@
       If(!$ETag)
         Return 0;
       $Res=0;
-      $LTag=&$this;
+      $LTag=$this;
       While($LTag->Object_Id!==$ETag->Object_Id)
       {
         If($LTag->tagName==='#text')
           $Res+=StrLen($LTag->value);
-        $LTag=&$LTag->ListNext;
+        $LTag=$LTag->ListNext;
       }
       Return $Res;
     }
@@ -192,19 +191,19 @@
       $this->ListAdd($NewTag);
     }
  
-    Function MakePHPInnerId(&$Info, $Id)
+    Function MakePHPInnerId($Builder, $Id)
     {
-      $LTag=&$this->ListNext;
+      $LTag=$this->ListNext;
       While($LTag->Object_Id!==$Id)
       {
-        $LTag->MakePHP($Info);
-        If(IsSet($LTag->EndTag)&&$LTag->EndTag)
-          $LTag=&$LTag->EndTag;
-        $LTag=&$LTag->ListNext;
+        $LTag->MakePHP($Builder);
+        If(IsSet($LTag->EndTag) && $LTag->EndTag)
+          $LTag=$LTag->EndTag;
+        $LTag=$LTag->ListNext;
       }
     }
  
-    Function MakePHPInner(&$Info)
+    Function MakePHPInner($Builder)
     {
       If($this->_f)
         Return [];
@@ -212,14 +211,14 @@
       If(!$ETag)
         Return [];
       $Id=$ETag->Object_Id;
-      $this->MakePHPInnerID($Info, $Id);
+      $this->MakePHPInnerID($Builder, $Id);
     }
  
-    Function MakePHP(&$Info)
+    Function MakePHP($Builder)
     {
       If($this->_f)
         Return;
-      $ti=$Info->Tags->Create($this->tagName);
+      $ti=$Builder->Tags->Create($this->tagName);
       $Tags=[];
       If($this->EndTag)
       {
@@ -227,10 +226,10 @@
   
         $IdE=$Id=$this->EndTag->Object_Id;
         $T1=Array_Keys($Sub);
-        $Tags=[$T1[0]=>[&$this, $IdE]];
+        $Tags=[$T1[0]=>[$this, $IdE]];
         $LLTag=$T1[0];
   
-        $LTag=&$this->ListNext;
+        $LTag=$this->ListNext;
         While($LTag->Object_Id!==$Id)
         {
           If(IsSet($Sub[$LTag->tagName]))
@@ -242,28 +241,28 @@
                 UnSet($Tags[$LTag->tagName]);
                 $T1=False;
               }
-              $Tags[$LTag->tagName]=[&$LTag, $LTag->EndTag->Id];
+              $Tags[$LTag->tagName]=[$LTag, $LTag->EndTag->Id];
             }
             Else
             {
               $Tags[$LLTag][1]=$LTag->Id;
-              $Tags[$LTag->tagName]=[&$LTag, $IdE];
+              $Tags[$LTag->tagName]=[$LTag, $IdE];
             }
             Break;
           }
-          If(IsSet($LTag->EndTag)&&$LTag->EndTag)
-            $LTag=&$LTag->EndTag; // TODO: Error
-          $LTag=&$LTag->ListNext;
+          If(IsSet($LTag->EndTag) && $LTag->EndTag)
+            $LTag=$LTag->EndTag; // TODO: Error
+          $LTag=$LTag->ListNext;
         }
   
       //Return "$Res[]='".PHP_AddSlashes($this->value)."';\n";
-      //$Info->Add_Line('//!!!');
+      //$Builder->Add_Line('//!!!');
       }
       $ti->MakeAttr($this);
-      $ti->MakePHP($Info, $this, $Tags);
+      $ti->MakePHP($Builder, $this, $Tags);
     //Else
     //{
-    //  $Info->Out->Evaluate('Tmpl_w2_Tag_'.$this->tagName.'($ Vars,'.$this->Attributes->MakePHP().')');
+    //  $Builder->Out->Evaluate('Tmpl_w2_Tag_'.$this->tagName.'($ Vars,'.$this->Attributes->MakePHP().')');
     //}
     }
   }

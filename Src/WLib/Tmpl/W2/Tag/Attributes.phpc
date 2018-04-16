@@ -115,9 +115,9 @@
       Return Implode(' ', $Res);
     }
  
-    Function MakePHP(&$Info)
+    Function MakePHP($Builder)
     {
-      Return VarToPHP($this->List, $Info->Tab.'  ');
+      Return VarToPHP($Builder->List, $Builder->Tab.'  ');
     }
   }
 ?>

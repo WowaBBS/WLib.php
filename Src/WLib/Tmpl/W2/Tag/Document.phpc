@@ -17,9 +17,9 @@
       Return $Res;
     }
  
-    Function MakePHP(&$Info)
+    Function MakePHP($Builder)
     {
-      $this->MakePHPInner($Info);
+      $this->MakePHPInner($Builder);
     }
   }
 ?>

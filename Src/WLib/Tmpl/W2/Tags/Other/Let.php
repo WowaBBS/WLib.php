@@ -5,22 +5,22 @@
       'item' => ['#Template','Default'],
     ];
  
-    Function MakeAttr(&$Tag)
+    Function MakeAttr($Tag)
     {
       If(!$Tag->HasAttributes())
         Return;
       $Tag->SetAttr('Params',  $Tag->Params);
     }
  
-    Function MakePHP(&$Info, &$Tag, $Tags)
+    Function MakePHP($Builder, $Tag, $Tags)
     {
       $Params=$Tag->GetAttr('Params');
   
-      $Info->Out->Capture();
-      $Tags['item'][0]->MakePHPInnerId($Info, $Tags['item'][1]);
-      $vOut=$Info->Out->Get();
-      $Info->Out->End(False);
-      $Info->Add_Line("  _put_var_(".$vOut.",'".$Params."'".','.$Info->Vars().');'."\n");
+      $Builder->Out->Capture();
+      $Tags['item'][0]->MakePHPInnerId($Builder, $Tags['item'][1]);
+      $vOut=$Builder->Out->Get();
+      $Builder->Out->End(False);
+      $Builder->Add_Line("  _put_var_(".$vOut.",'".$Params."'".','.$Builder->Vars().');'."\n");
     }
   }
 ?>

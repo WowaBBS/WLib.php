@@ -4,7 +4,7 @@
   $Loader->Parent_Class('/Object/Release');
   $Loader->Using_Class('/Tmpl/W2/Tag/Base');
   $Loader->Using_Class('/Tmpl/W2/Tag/Text');
-  $Loader->Using_Class('/Tmpl/W2/PhpBr');
+  $Loader->Using_Class('/Tmpl/W2/Make/Php');
   $Loader->Using_Module('/Strings');
  
   Define('idxW2TagAll'    ,0); // TODO: Const into class
@@ -75,8 +75,7 @@
     {
       $this->Rest='';
       $this->LastTags=[];
-      $F=False;
-      $this->LastTag=&$F;
+      $this->LastTag=False;
       $this->Mode=0;
       parent::_Done();
     }
@@ -101,8 +100,7 @@
     {
       $this->Rest='';
       $this->LastTags=[];
-      $F=False;
-      $this->LastTag=&$F;
+      $this->LastTag=False;
       $this->Mode=0;
       $this->CDataText=[];
     }
@@ -112,22 +110,22 @@
      *
      * @param T_Tmpl_W2_Tag $Tag
      */
-    Function AddTag(&$Tag)
+    Function AddTag($Tag)
     {
       $this->LastTag->ListAdd($Tag);
-      $this->LastTag=&$Tag;
+      $this->LastTag=$Tag;
     }
  
-    Function _VeryEndTag(&$NewTag)
+    Function _VeryEndTag($NewTag)
     {
-      $LastTags=&$this->LastTags;
+      $LastTags=$this->LastTags;
       For($i=Count($LastTags)-1; $i>=0; $i--)
         If($LastTags[$i]->tagName===$NewTag->tagName)
           Break;
       If($i>=0)
       {
-        $LastTags[$i]->EndTag=&$NewTag;
-        $NewTag->EndTag=&$LastTags[$i];
+        $LastTags[$i]->EndTag=$NewTag;
+        $NewTag->EndTag=$LastTags[$i];
         $Cnt=Count($LastTags);
         For($i=$i; $i<$Cnt; $i++) // ??
           UnSet($LastTags[$i]);
@@ -141,7 +139,7 @@
         $Tmpl=$this->Rest.$Tmpl;
         $this->Rest='';
       }
-      $LastTags=&$this->LastTags;
+      $LastTags=$this->LastTags;
       $Len=0;
       $Count=Preg_Match_All($this->Match, $Tmpl, $_Tags, PREG_SET_ORDER);
     //Debug($_Tags);
@@ -149,8 +147,7 @@
     //While(Preg_Match('/^'.Preg_Offset($Len).$Q.'/is', $Tmpl,$v))
     //While(Preg_Match('/'.$Q.'/is',$Tmpl,$v,0,$Len))
       {
-        $Tmp=False;
-        $NewTag=&$Tmp;
+        $NewTag=False;
         //Echo StrLen($v[0]),' ';
         $Len+=StrLen($v[0]);
         If($this->Mode===0)
@@ -160,7 +157,7 @@
             $NewTag=$this->Create_Object('/Tmpl/W2/Tag/Text', [$v[idxW2TagText]]);
             If($NewTag)
               $this->AddTag($NewTag);
-            $NewTag=&$Tmp;
+            $NewTag=False;
           }
           // pcdate cdate
           $tagName=StrToLower($v[idxW2TagName]);
@@ -183,7 +180,7 @@
               $this->Mode=1;
               $this->CDataText=[];
             }
-            $LastTags[Count($LastTags)]=&$NewTag;
+            $LastTags[Count($LastTags)]=$NewTag;
           }
         }
         ElseIf($this->Mode===1)
@@ -199,7 +196,7 @@
             $NewTag=$this->Create_Object('/Tmpl/W2/Tag/Text', [$Text]);
             If($NewTag)
               $this->AddTag($NewTag);
-            $NewTag=&$Tmp;
+            $NewTag=False;
   
             $tagName=StrToLower($v[idxW2TagName]);
             $NewTag=$this->Create_Object('/Tmpl/W2/Tag/Base', [

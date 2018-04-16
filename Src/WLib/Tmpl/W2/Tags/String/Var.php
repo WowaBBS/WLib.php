@@ -3,7 +3,7 @@
   {
     Static $InnerTags=[];
  
-    Function MakeAttr(&$Tag)
+    Function MakeAttr($Tag)
     {
       If(!$Tag->HasAttributes())
         Return;
@@ -11,9 +11,9 @@
       If(IsSet($Var[0])) $Tag->SetAttr('Var', $Var[0]);
     }
  
-    Function MakePHP(&$Info, &$Tag, $Tags)
+    Function MakePHP($Builder, $Tag, $Tags)
     {
-      $Info->Out->Evaluate($Info->Vars_GetS($Tag->GetAttr('Var')));
+      $Builder->Out->Evaluate($Builder->Vars_GetS($Tag->GetAttr('Var')));
     }
   }
 ?>

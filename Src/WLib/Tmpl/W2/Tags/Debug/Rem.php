@@ -5,7 +5,7 @@
       '#data' => ['#Template','Default'],
     ];
  
-    Function MakeAttr(&$Tag)
+    Function MakeAttr($Tag)
     {
      If(!$Tag->HasAttributes())
        Return;
@@ -14,13 +14,13 @@
        $Tag->SetAttr('Parse'  , $Var);
     }
  
-    Function MakePHP(&$Info, &$Tag, $Tags)
+    Function MakePHP($Builder, $Tag, $Tags)
     {
      $Parse=$Tag->GetAttr('Parse');
-     $T=$Info->Tab;
-     $Info->Tab=$T.'// ';
-     $Tags['#data'][0]->MakePHPInnerId($Info, $Tags['#data'][1]);
-     $Info->Tab=$T;
+     $T=$Builder->Tab;
+     $Builder->Tab=$T.'// ';
+     $Tags['#data'][0]->MakePHPInnerId($Builder, $Tags['#data'][1]);
+     $Builder->Tab=$T;
     }
   }
 ?>

@@ -31,7 +31,7 @@
       '#Data' => ['#Template','Default'],
     ];
  
-    Function MakeAttr(&$Tag)
+    Function MakeAttr($Tag)
     {
       If(!$Tag->HasAttributes())
         Return;
@@ -40,7 +40,7 @@
       If($Args===True)
       {
         $Args=[];
-        ForEach($this::$FuncInfo['FArgs'] As $a)
+        ForEach($this::$FuncInfo['FArgs']As $a)
           If($a[0]!==False)
             $Args[]=$a[0];
       }
@@ -54,12 +54,12 @@
           Break;
     }
  
-    Function MakePHP(&$Info, &$Tag, $Tags)
+    Function MakePHP($Builder, $Tag, $Tags)
     {
       $Args=[];
       $CArgs=0;
       $FuncInfo=&$this::$FuncInfo;
-      ForEach($FuncInfo['FArgs'] As $FArg)
+      ForEach($FuncInfo['FArgs']As $FArg)
       {
         If($FArg[0])
         {
@@ -71,13 +71,13 @@
         }
         Switch($FArg[1])
         {
-        Case 'Vars'  : $Val='&'.$Info->Vars(); Break;
-        Case 'Var'   : $Val=$Info->Vars_Get($Val); Break;
+        Case 'Vars'  : $Val='&'.$Builder->Vars(); Break;
+        Case 'Var'   : $Val=$Builder->Vars_Get($Val); Break;
         Case 'Val'   : Break;
         Case 'Str'   : $Val="'".$Val."'"; Break;
         Case 'Int'   : $Val=(Int)$Val; Break;
         Case 'Float' : $Val=(Float)$Val; Break;
-        Case 'Path'  : $Val=$Info->ParsePath($Val); Break;
+        Case 'Path'  : $Val=$Builder->ParsePath($Val); Break;
         };
         $Args[]=$Val;
       }
@@ -88,7 +88,7 @@
       If(Count($Args)>$CArgs)
         $Args=Array_Slice($Args, 0, $CArgs);
   
-      $Info->Out->Evaluate($FuncInfo['Name'].'('.Implode(',', $Args).')');
+      $Builder->Out->Evaluate($FuncInfo['Name'].'('.Implode(',', $Args).')');
     }
   }
 ?>

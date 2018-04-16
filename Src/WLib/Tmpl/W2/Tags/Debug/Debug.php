@@ -3,7 +3,7 @@
   {
     Static $InnerTags=[];
 
-    Function MakeAttr(&$Tag)
+    Function MakeAttr($Tag)
     {
       If(!$Tag->HasAttributes())
         Return;
@@ -12,17 +12,17 @@
       If(IsSet($Var[1])) $Tag->SetAttr('Limit' , $Var[1]);
     }
  
-    Function MakePHP(&$Info, &$Tag, $Tags)
+    Function MakePHP($Builder, $Tag, $Tags)
     {
       $Var=$Tag->GetAttr('Var');
       If($Var)
-        $Var=$Info->Vars_Get($Var);
+        $Var=$Builder->Vars_Get($Var);
       Else
-        $Var=$Info->Out->Get_Debug();
+        $Var=$Builder->Out->Get_Debug();
       $Limit=$Tag->GetAttr('Limit');
       If($Limit)
         $Var.=','.$Limit;
-      $Info->Add_Line('Debug('.$Var.');');
+      $Builder->Add_Line('Debug('.$Var.');');
     }
   }
 ?>

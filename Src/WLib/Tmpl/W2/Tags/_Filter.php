@@ -7,7 +7,7 @@
       '#Data' => ['#Template','Default'],
     ];
  
-    Function MakeAttr(&$Tag)
+    Function MakeAttr($Tag)
     {
       If(!$Tag->HasAttributes())
         Return;
@@ -15,16 +15,16 @@
       If(IsSet($Var[0])) $Tag->SetAttr('Var', $Var[0]);
     }
  
-    Function MakePHP(&$Info, &$Tag, $Tags)
+    Function MakePHP($Builder, $Tag, $Tags)
     {
       If(IsSet($Tags['#Data']))
       {
-        $Info->Out->Capture($this::$FuncFilter, True);
-        $Tags['#Data'][0]->MakePHPInnerId($Info, $Tags['#Data'][1]);
-        $Info->Out->End(True);
+        $Builder->Out->Capture($this::$FuncFilter, True);
+        $Tags['#Data'][0]->MakePHPInnerId($Builder, $Tags['#Data'][1]);
+        $Builder->Out->End(True);
       }
       Else
-        $Info->Out->Evaluate($this::$FuncFilter.'('.$Info->Vars_GetS($Tag->GetAttr('Var')).')');
+        $Builder->Out->Evaluate($this::$FuncFilter.'('.$Builder->Vars_GetS($Tag->GetAttr('Var')).')');
     }
   }
 ?>

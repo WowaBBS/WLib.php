@@ -37,7 +37,7 @@
       $ParserArgs=IsSet($Args['Parser'])? $Args['Parser']:[];
       $this->Parser=$this->Create_Object('/Tmpl/W2/Parser', $ParserArgs);
       $this->Clear();
-    //$Parser->SetDocument(&$this);
+    //$Parser->SetDocument($this);
     //$FirstTag
     }
  
@@ -49,10 +49,9 @@
         $this->FirstTag->ListDelete();
       }
       $this->Parser->Done();
-      $F=False;
-      $this->Parser   =&$F;
-      $this->FirstTag =&$F;
-      $this->LastTag  =&$F;
+      $this->Parser   =False;
+      $this->FirstTag =False;
+      $this->LastTag  =False;
       parent::_Done();
     }
  
@@ -65,15 +64,15 @@
       $Tag1=$this->Create_Object('/Tmpl/W2/Tag/Document');
       $Tag2=$this->Create_Object('/Tmpl/W2/Tag/Document');
 
-      $Tag1->EndTag=&$Tag2;
-      $Tag2->EndTag=&$Tag1;
+      $Tag1->EndTag=$Tag2;
+      $Tag2->EndTag=$Tag1;
  
       $Tag2->_f='/';
  
       $Tag1->ListFirst($this);
       $Tag1->ListAdd($Tag2);
  
-      $this->Parser->LastTag=&$Tag1;
+      $this->Parser->LastTag=$Tag1;
     }
  
     Function Parse($Tmpl)
@@ -87,11 +86,11 @@
     Function Build()
     {
       $Res=[];
-      $Tag=&$this->FirstTag;
+      $Tag=$this->FirstTag;
       While($Tag)
       {
         $Res[]=$Tag->TagBuild();
-        $Tag=&$Tag->ListNext;
+        $Tag=$Tag->ListNext;
       }
       Return Implode('', $Res);
     }

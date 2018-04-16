@@ -67,7 +67,7 @@
       return Implode("\n", $Res);
     }
   
-    Function MakePHP(&$Info)
+    Function MakePHP($Builder)
     {
       $Text=$this->value;
      
@@ -77,7 +77,7 @@
       $Text= $this->Pack_Def  ($Text);
      
       If($Text)
-        $Info->Out->Text($Text);
+        $Builder->Out->Text($Text);
     }
   }
 ?>

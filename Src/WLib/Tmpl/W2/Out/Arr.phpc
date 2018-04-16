@@ -90,13 +90,13 @@
  
     Function Evaluate($Data)
     {
-      $ov=&$this->Var;
+      $ov=$this->Var;
       If($ov)
         $this->Base->Add_Line($ov.'[]='.$Data.';');
       Else
       {
         $this->Base->Add_Line($Data.';');
-      //$ov=$this->Var_Add('Res',Count($this->List)-1),
+      //$this->Var=$this->Var_Add('Res',Count($this->List)-1),
       //$this->Base->Add_Line($ov.'=['.$Data.'];');
       }
     }

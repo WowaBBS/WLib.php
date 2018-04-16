@@ -1,12 +1,12 @@
 <?
-  $Loader->Begin_Class('/Tmpl/W2/PhpBr');
+  $Loader->Begin_Class('/Tmpl/W2/Make/Php');
  
   $Loader->Parent_Class('/Object/Release');
-  $Loader->Using_Module('/Script/PHP/Build/Vars');
+//$Loader->Using_Module('/Script/PHP/Build/Vars');
   $Loader->Using_Class('/Tmpl/W2/Out/Arr');
 //$Loader->Using_Class('/Tmpl/W2/Out/ObH');
  
-  Class C_Tmpl_W2_PhpBr Extends C_Object_Release
+  Class C_Tmpl_W2_Make_Php Extends C_Object_Release
   {
     Var $Head=[];
     Var $Body=[];
@@ -20,7 +20,7 @@
       parent::_Init($Args);
       $this->Out=$this->Create_Object('/Tmpl/W2/Out/Arr');
     //$this->Out=$this->Create_Object('/Tmpl/W2/Out/ObH');
-      $this->Out->Base=&$this;
+      $this->Out->Base=$this;
       $this->Tags=$this->Get_Singleton('/Tmpl/W2/Tag/Factory');
     }
  
@@ -84,7 +84,7 @@
     {
       $OldVars=$this->Vars();
       $NewVars=$this->Vars_New();
-      $this->Add_Line($NewVars.'=&Vars_With(&'.$OldVars.','.$Str.');');
+      $this->Add_Line($NewVars.'=Vars_With('.$OldVars.','.$Str.');');
     }
  
     Function Vars_WithA($Arr)
@@ -104,15 +104,15 @@
  
     Function Vars_EndWith()
     {
-      $this->Add_Line('Vars_EndWith(&'.$this->Vars().');');
+      $this->Add_Line('Vars_EndWith('.$this->Vars().');');
       $this->Vars_End();
     }
  
     Function Vars_Get($Name, $ASVars=False, $Type=False)
     {
       If(StrPos($Name,'|')!==False)
-        Return 'Vars_GetVarST'.($Type? '_'.$Type:'').'(&'.$this->Vars($ASVars).','."'".$Name."')";
-      Return 'Vars_GetVarFST'.($Type? '_'.$Type:'').'(&'.$this->Vars($ASVars).",Array('".Implode("','", Explode('.', $Name))."'))";
+        Return 'Vars_GetVarST'.($Type? '_'.$Type:'').'('.$this->Vars($ASVars).','."'".$Name."')";
+      Return 'Vars_GetVarFST'.($Type? '_'.$Type:'').'('.$this->Vars($ASVars).",Array('".Implode("','", Explode('.', $Name))."'))";
     }
  
     Function Vars_GetS($Name, $ASVars=False)

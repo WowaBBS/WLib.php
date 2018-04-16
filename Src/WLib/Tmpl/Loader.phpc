@@ -61,7 +61,7 @@
       Return Is_File($TmplName);
     }
  
-    Function &Load_Template(&$Vars, $TmplName)
+    Function Load_Template(&$Vars, $TmplName)
     {
       $FullName=$this->_Norm_Path($Vars, $TmplName);
       $FileName=$this->Router->File($FullName);
@@ -77,17 +77,17 @@
       Else
         $Res=$this->Types[$this->DefType]->Get_File($FileName);
       $Res->Vars[' CurPath']=New TPath(DirName($FullName).'/');
-      $this->Templates[$FileName]=&$Res;
+      $this->Templates[$FileName]=$Res;
       Return $Res;
     }
  
-    Function &String_Template(&$Vars, $Text)
+    Function String_Template(&$Vars, $Text)
     {
       $md5=md5($Text);
       If(IsSet($this->Templates[$md5]))
         Return $this->Templates[$md5];
       $Res=$this->Types[$this->DefType]->Get_String($Text);
-      $this->Templates[$md5]=&$Res;
+      $this->Templates[$md5]=$Res;
       Return $Res;
     }
   }

@@ -5,7 +5,7 @@
       'item' => ['#Template','Default'],
     ];
  
-    Function MakeAttr(&$Tag)
+    Function MakeAttr($Tag)
     {
       If(!$Tag->HasAttributes())
         Return;
@@ -16,7 +16,7 @@
       If(IsSet($Var[3])) $Tag->SetAttr('Type' , $Var[3]);
     }
  
-    Function MakePHP(&$Info, &$Tag, $Tags)
+    Function MakePHP($Builder, $Tag, $Tags)
     {
       $Id=$Tag->Object_Id;
   
@@ -25,18 +25,18 @@
       $Key =$Tag->GetAttr('Key' );
       $Type=$Tag->GetAttr('Type');
   
-      $vVar =$Info->Var_Add('Var' ,$Id);
-      $vm   =$Info->Var_Add('m'   ,$Id);
-      $vv   =$Info->Var_Add('v'   ,$Id);
+      $vVar =$Builder->Var_Add('Var' ,$Id);
+      $vm   =$Builder->Var_Add('m'   ,$Id);
+      $vv   =$Builder->Var_Add('v'   ,$Id);
   
-      $Info->Add_Line($vVar.'='.$Info->Vars_Get($Var).';');
-      $Info->Add_Line('If(Is_Array('.$vVar.'))');
-      $Info->Add_Line('ForEach('.$vVar.' As '.$vm.'=>'.$vv.')');
+      $Builder->Add_Line($vVar.'='.$Builder->Vars_Get($Var).';');
+      $Builder->Add_Line('If(Is_Array('.$vVar.'))');
+      $Builder->Add_Line('ForEach('.$vVar.' As '.$vm.'=>'.$vv.')');
       If($Type==='i')
-        $Info->Add_Line('  If(Is_Int('.$vm.'))');
+        $Builder->Add_Line('  If(Is_Int('.$vm.'))');
       If($Type==='I')
-        $Info->Add_Line('  If(!Is_Int('.$vm.'))');
-      $Info->Add_Line(' {');
+        $Builder->Add_Line('  If(!Is_Int('.$vm.'))');
+      $Builder->Add_Line(' {');
   
       $With=[];
       If($Key)
@@ -46,15 +46,15 @@
         $With[$Item]='&'.$vVar.'['.$vm.']';
     //Debug($With);
   
-      $T=$Info->Tab;
-      $Info->Tab=$T.'  ';
+      $T=$Builder->Tab;
+      $Builder->Tab=$T.'  ';
   
-      If($With) $Info->Vars_WithA($With);
-      $Tags['item'][0]->MakePHPInnerId($Info, $Tags['item'][1]);
-      If($With) $Info->Vars_EndWith();
+      If($With) $Builder->Vars_WithA($With);
+      $Tags['item'][0]->MakePHPInnerId($Builder, $Tags['item'][1]);
+      If($With) $Builder->Vars_EndWith();
   
-      $Info->Tab=$T;
-      $Info->Add_Line(' }');
+      $Builder->Tab=$T;
+      $Builder->Add_Line(' }');
     }
   }
 ?>

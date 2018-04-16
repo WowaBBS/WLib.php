@@ -8,12 +8,12 @@
     Function _Init(Array $Args)
     {
       parent::_Init($Args);
-      $this->Func=&$Args['Func'];
+      $this->Func=$Args['Func'];
     }
   
     Function Exec_To_Str(Array &$Vars)
     {
-      $V=$this->Init_Vars(&$Vars);
+      $V=$this->Init_Vars($Vars);
       $f=$this->Func;
       Return $f($V);
     }

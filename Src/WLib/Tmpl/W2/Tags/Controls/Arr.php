@@ -5,7 +5,7 @@
       'item' => ['#Template', 'Default'],
     ];
  
-    Function MakeAttr(&$Tag)
+    Function MakeAttr($Tag)
     {
       If(!$Tag->HasAttributes())
         Return;
@@ -14,36 +14,36 @@
       If(IsSet($Var[1])) $Tag->SetAttr('Item' , $Var[1]);
     }
 
-    Function MakePHP(&$Info, &$Tag, $Tags)
+    Function MakePHP($Builder, $Tag, $Tags)
     {
       $Id=$Tag->Object_Id;
       $Item=$Tag->GetAttr('Item');
   
-      $vVar =$Info->Var_Add('Var' ,$Id);
-      $vm   =$Info->Var_Add('m'   ,$Id);
-      $vv   =$Info->Var_Add('v'   ,$Id);
+      $vVar =$Builder->Var_Add('Var' ,$Id);
+      $vm   =$Builder->Var_Add('m'   ,$Id);
+      $vv   =$Builder->Var_Add('v'   ,$Id);
   
       If($Item)
-        $Info->Add_Line($vVar.'=&'.$Info->Vars_Get($Tag->GetAttr('Var')).';');
+        $Builder->Add_Line($vVar.'='.$Builder->Vars_Get($Tag->GetAttr('Var')).';');
       Else        
-        $Info->Add_Line($vVar.'='.$Info->Vars_Get($Tag->GetAttr('Var')).';');
-      $Info->Add_Line('If(Is_Array('.$vVar.'))');
-      $Info->Add_Line('ForEach('.$vVar.' As '.$vm.'=>'.$vv.')');
-      $Info->Add_Line('  If(Is_Integer('.$vm.'))');
-      $Info->Add_Line(' {');
-      $T=$Info->Tab;
-      $Info->Tab=$T.'  ';
+        $Builder->Add_Line($vVar.'='.$Builder->Vars_Get($Tag->GetAttr('Var')).';');
+      $Builder->Add_Line('If(Is_Array('.$vVar.'))');
+      $Builder->Add_Line('ForEach('.$vVar.' As '.$vm.'=>'.$vv.')');
+      $Builder->Add_Line('  If(Is_Integer('.$vm.'))');
+      $Builder->Add_Line(' {');
+      $T=$Builder->Tab;
+      $Builder->Tab=$T.'  ';
       If($Item)
-        $Info->Vars_WithA([$Item=>'&'.$vVar.'['.$vm.']']);
+        $Builder->Vars_WithA([$Item=>'&'.$vVar.'['.$vm.']']);
       Else
-        $Info->Vars_WithV($vVar.'['.$vm.']');
+        $Builder->Vars_WithV($vVar.'['.$vm.']');
       If(IsSet($Tags['item']))
-        $Tags['item'][0]->MakePHPInnerId($Info, $Tags['item'][1]);
+        $Tags['item'][0]->MakePHPInnerId($Builder, $Tags['item'][1]);
       Else
-        $Info->Add_Line('// Error Block not avalible');
-      $Info->Vars_EndWith();
-      $Info->Tab=$T;
-      $Info->Add_Line(' }');
+        $Builder->Add_Line('// Error Block not avalible');
+      $Builder->Vars_EndWith();
+      $Builder->Tab=$T;
+      $Builder->Add_Line(' }');
     }
   }
 ?>

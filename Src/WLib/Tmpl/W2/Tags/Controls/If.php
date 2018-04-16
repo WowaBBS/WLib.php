@@ -6,7 +6,7 @@
       'else' => ['#Template'],
     ];
  
-    Function MakeAttr(&$Tag)
+    Function MakeAttr($Tag)
     {
       If(!$Tag->HasAttributes())
         Return;
@@ -14,38 +14,38 @@
       If(IsSet($Var[0])) $Tag->SetAttr('Var'   , $Var[0]);
       If(IsSet($Var[1])) $Tag->SetAttr('Value' , $Var[1]);
       If(IsSet($Var[2])) $Tag->SetAttr('Then'  , $Var[2]);
-      If(IsSet($Var[3])) $Tag->SetAttr('Else'  , $Var[2]);
+      If(IsSet($Var[3])) $Tag->SetAttr('Else'  , $Var[3]);
     }
  
-    Function MakePHP(&$Info, &$Tag, $Tags)
+    Function MakePHP($Builder, $Tag, $Tags)
     {
       $Id=$Tag->Object_Id;
   
-      $vVar =$Info->Var_Add('Var', $Id);
+      $vVar =$Builder->Var_Add('Var', $Id);
   
-      $Info->Add_Line($vVar.'='.$Info->Vars_Get($Tag->GetAttr('Var')).';');
+      $Builder->Add_Line($vVar.'='.$Builder->Vars_Get($Tag->GetAttr('Var')).';');
       If($Tag->Attributes->Has('Value'))
-        $Info->Add_Line('If('.$vVar."=='".$Tag->GetAttr('Value')."')");
+        $Builder->Add_Line('If('.$vVar."=='".$Tag->GetAttr('Value')."')");
       Else
-        $Info->Add_Line('If('.$vVar.')');
+        $Builder->Add_Line('If('.$vVar.')');
       If(IsSet($Tags['then']))
       {
-        $Info->Add_Line(' {');
-        $T=$Info->Tab;
-        $Info->Tab=$T.'  ';
-        $Tags['then'][0]->MakePHPInnerId($Info, $Tags['then'][1]);
-        $Info->Tab=$T;
-        $Info->Add_Line(' }');
+        $Builder->Add_Line(' {');
+        $T=$Builder->Tab;
+        $Builder->Tab=$T.'  ';
+        $Tags['then'][0]->MakePHPInnerId($Builder, $Tags['then'][1]);
+        $Builder->Tab=$T;
+        $Builder->Add_Line(' }');
       }
       If(IsSet($Tags['else']))
       {
-        $Info->Add_Line('else');
-        $Info->Add_Line(' {');
-        $T=$Info->Tab;
-        $Info->Tab=$T.'  ';
-        $Tags['else'][0]->MakePHPInnerId($Info, $Tags['else'][1]);
-        $Info->Tab=$T;
-        $Info->Add_Line(' }');
+        $Builder->Add_Line('else');
+        $Builder->Add_Line(' {');
+        $T=$Builder->Tab;
+        $Builder->Tab=$T.'  ';
+        $Tags['else'][0]->MakePHPInnerId($Builder, $Tags['else'][1]);
+        $Builder->Tab=$T;
+        $Builder->Add_Line(' }');
       }
     }
   }

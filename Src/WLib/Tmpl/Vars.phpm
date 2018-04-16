@@ -18,7 +18,7 @@
       Return $Res->AsString();
     Case 'NULL':
     Default:
-      Trigger_Error("Varible no foundet ".$Name, E_USER_WARNING);
+      Trigger_Error('Varible no found '.$Name, E_USER_WARNING);
       Return 'Error';
     }
   }
@@ -38,7 +38,7 @@
       Return $Res->AsString();
     Case 'NULL':
     Default:
-      Trigger_Error("Varible no foundet ".Implode('.', $Path), E_USER_WARNING);
+      Trigger_Error('Varible no found '.Implode('.', $Path), E_USER_WARNING);
       Return 'Error';
     }
   }
@@ -49,7 +49,7 @@
     $Res=_Vars_Get($Name, $Vars);
     If($Res===NULL)
     {
-      Trigger_Error("Varible no foundet ".$Name, E_USER_WARNING);
+      Trigger_Error("Varible no found ".$Name, E_USER_WARNING);
       $Res='Error';
     }
     Return $Res;
@@ -61,7 +61,7 @@
     $Res=_Vars_GetR_($Path, $Vars);
     If($Res===NULL)
     {
-      Trigger_Error("Varible no foundet ".Implode('.', $Path), E_USER_WARNING);
+      Trigger_Error("Varible no found ".Implode('.', $Path), E_USER_WARNING);
       $Res='Error';
     }
     Return $Res;
@@ -82,10 +82,10 @@
     $With=_Vars_Get($Var, $Vars);
     If($With===NULL)
     {
-      Trigger_Error("Varible no foundet ".$Name, E_USER_WARNING);
+      Trigger_Error("Varible no found ".$Name, E_USER_WARNING);
       $With=[];
     }
-  //$R=Array_Merge(&$Vars, &$With);
+  //$R=Array_Merge($Vars, &$With);
     $R=$With;
     $R['']=&$Vars;
     $Vars=&$R;
@@ -94,12 +94,12 @@
   Function &Vars_With(Array &$Vars, $With):Array
   {
     If(Is_Array($With))
-    //$R=&Array_Merge(&$Vars, &$With);
+    //$R=&Array_Merge($Vars, &$With);
       $R=$With;
     Else
     {
     //$W=[];
-    //$R=&Array_Merge(&$Vars, &$W);
+    //$R=&Array_Merge($Vars, &$W);
       $R=[];
     }
     $R['']=&$Vars;
@@ -109,12 +109,12 @@
   Function Vars_WithR(Array &$Vars, $With):Array
   {
     If(Is_Array($With))
-    //$R=&Array_Merge(&$Vars, &$With);
+    //$R=&Array_Merge($Vars, &$With);
       $R=$With;
     Else
      {
     //$W=[];
-    //$R=&Array_Merge(&$Vars, &$W);
+    //$R=&Array_Merge($Vars, &$W);
       $R=[];
      }
     $R['']=$Vars;
@@ -129,8 +129,8 @@
 /*
   Function &_Vars_With_(&$With, &$Vars)
   {
-  //$R=ArrAdd(&$Vars,& $With);
-    $R=Array_Merge(&$Vars, &$With);
+  //$R=ArrAdd($Vars, $With);
+    $R=Array_Merge($Vars, $With);
     $R['']=$Vars;
     Return $R;
   }
@@ -170,8 +170,8 @@
         If($Res===NULL)
           Break;
       }
-    //ElseIf(IsProperty(&$Vars))
-    //  $Vars=&GetProperty(&$Vars,'');
+    //ElseIf(IsProperty($Vars))
+    //  $Vars=&GetProperty($Vars,'');
       Else
         Return $NULL;
     }
@@ -189,8 +189,8 @@
       $Res=$Res->GetVar($Path, tv_Any, $AVars);
     }
   
-    //While(IsProperty(&$Vars))
-    //  $Vars=&GetProperty(&$Vars,'');
+    //While(IsProperty($Vars))
+    //  $Vars=&GetProperty($Vars,'');
     Return $Res;
   }
  

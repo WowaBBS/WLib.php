@@ -10,7 +10,7 @@
     {
       If(!IsSet($this->Vars))
         Return $Vars;
-      $Res=&Vars_With(&$Vars, $this->Vars);
+      $Res=Vars_With($Vars, $this->Vars);
       Return $Res;
     }
   

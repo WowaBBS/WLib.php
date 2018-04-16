@@ -5,7 +5,7 @@
       'item' => ['#Template','Default'],
     ];
  
-    Function MakeAttr(&$Tag)
+    Function MakeAttr($Tag)
     {
       If(!$Tag->HasAttributes())
         Return;
@@ -14,30 +14,30 @@
       If(IsSet($Var[1])) $Tag->SetAttr('Op'   , $Var[1]);
     }
  
-    Function MakePHP(&$Info, &$Tag, $Tags)
+    Function MakePHP($Builder, $Tag, $Tags)
     {
       $Id=$Tag->Object_Id;
   
       $Name=$Tag->GetAttr('Name' );
       $Op  =$Tag->GetAttr('Op'   );
   
-      $vFrames =$Info->Var_Add('Frames' ,$Id);
-      $vFrame  =$Info->Var_Add('Frame'  ,$Id);
+      $vFrames =$Builder->Var_Add('Frames' ,$Id);
+      $vFrame  =$Builder->Var_Add('Frame'  ,$Id);
   
-      $Info->Out->Capture();
-      $Tags['item'][0]->MakePHPInnerId($Info, $Tags['item'][1]);
+      $Builder->Out->Capture();
+      $Tags['item'][0]->MakePHPInnerId($Builder, $Tags['item'][1]);
     //Debug($Op);
   
-      $Info->Add_Line($vFrames."=&".$Info->Vars_Get('Frame').';');
-      $Info->Add_Line($vFrame.'=&'.$vFrames."->GetFrame('".$Name."');");
-      $OutData=$Info->Out->Get();
+      $Builder->Add_Line($vFrames."=&".$Builder->Vars_Get('Frame').';');
+      $Builder->Add_Line($vFrame.'=&'.$vFrames."->GetFrame('".$Name."');");
+      $OutData=$Builder->Out->Get();
       If($Op==='-1')
-        $Info->Add_Line($vFrame.'->AddLeft('.$OutData.');');
+        $Builder->Add_Line($vFrame.'->AddLeft('.$OutData.');');
       If($Op==='0')
-        $Info->Add_Line($vFrame.'->Override('.$OutData.');');
+        $Builder->Add_Line($vFrame.'->Override('.$OutData.');');
       Else
-        $Info->Add_Line($vFrame.'->AddRight('.$OutData.');');
-      $Info->Out->End(False);
+        $Builder->Add_Line($vFrame.'->AddRight('.$OutData.');');
+      $Builder->Out->End(False);
     }
   }
 ?>

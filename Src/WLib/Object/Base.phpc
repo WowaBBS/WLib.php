@@ -63,10 +63,9 @@
     
     Function Debug($Var, $Level=-1)
     {
-      $Deb=$this->Loader->Get_Singleton('/Debug/Manager')->Get('Debug.txt');
-      $Deb->Debug($Var, $Level);
+      $Deb=$this->Loader->Debug($Var, $Level);
     }
-    
+
     Protected Function _Debug_Info(Array &$Res)
     {
       if($this->Loader!==null) unset($Res['Loader'        ]);

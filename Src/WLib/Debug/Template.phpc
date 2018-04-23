@@ -49,9 +49,9 @@
     }
  
     Function Boolean  ($Ctx, $v) { $Ctx->Write($v? 'True':'False'); }
-    Function Integer  ($Ctx, $v) { $Ctx->Write($v); }
-    Function Double   ($Ctx, $v) { $Ctx->Write($v); }
-    Function Float    ($Ctx, $v) { $Ctx->Write($v); }
+    Function Integer  ($Ctx, $v) { $Ctx->Write((String)$v); }
+    Function Double   ($Ctx, $v) { $Ctx->Write((String)$v); }
+    Function Float    ($Ctx, $v) { $Ctx->Write((String)$v); }
     Function Resource ($Ctx, $v) { $Ctx->Write('Resource '.get_resource_type($v).'('.$v.')'); }
     Function Null     ($Ctx, $v) { $Ctx->Write('Null'); }
     Function Function ($Ctx, $v) { $Ctx->Write('Function '.$v); }

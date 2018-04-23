@@ -5,6 +5,12 @@
   {
     Var $FHandle=NULL;
   
+    Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      $this->FHandle=$Args['Handle']??false;
+    }
+    
     Function Close()
     {
       If($this->FHandle)
@@ -56,7 +62,10 @@
     Function Write($Data)
     {
       if(!Is_String($Data) && !Is_Int($Data))
+      {
+        echo '[Error] Unsupported tyoe ',GetType($Data),"\n";
         Unsupported();
+      }
       Return FWrite($this->FHandle, $Data);
     }
   

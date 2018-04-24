@@ -1,1 +1,63 @@
-<?  $Loader->Parent_Class('/Object');  $Loader->Using_Module('/FS/IOFS');   Class C_Tmpl_W2_Tag_Factory Extends C_Object  {    Var $Tags=[];    Var $Loaded=False;      Function LoadAllFromPath(String $Path) // Load_W2_Tags    {      $l=ListDir($Path, False, 1);      ForEach($l As $f)        If($f[0]!=='.')          Include ($Path.$f);      $l=ListDir($Path, False, 2);      ForEach($l As $f)        If($f[0]!=='.')          $this->LoadAllFromPath($Path.$f.'/');    }       Function Get($Name) // Use_W2_Tag    {      $Tags=&$this->Tags;      If(IsSet($Tags[$Name]))        Return $Tags[$Name];      $N='T_w2_Tag_'.$Name;      If(Class_Exists($N))      {        $Tags[$Name]=$N;        Return $N;      }      If(!$this->Loaded)      {        $Path=DirName($this->Loader->_Find_Lib('/Tmpl/W2/Tag/Factory','.phpc'), 2).'/Tags/';      //$Path=UnitPath('Tmpl/W2/TTag').'tags/';        $this->LoadAllFromPath($Path);        $this->Loaded=True;        If(Class_Exists($N))        {          $Tags[$Name]=$N;          Return $N;        }      }      Return False;    }        Protected $Created=[];       Function Create($Name)    {      if(IsSet($this->Created[$Name]))        return $this->Created[$Name];      $a=$this->Get($Name);      If(!$a)        $a=$this->Get('_def');    //Echo $a,' T_w2_Tag_', $this->tagName,"\n";      $Res=New $a();      $this->Created[$Name]=$Res;      return $Res;    }  }?>
+<?
+  $Loader->Parent_Class('/Object');
+  $Loader->Using_Module('/FS/IOFS');
+ 
+  Class C_Tmpl_W2_Tag_Factory Extends C_Object
+  {
+    Var $Tags=[];
+    Var $Loaded=False;
+  
+    Function LoadAllFromPath(String $Path) // Load_W2_Tags
+    {
+      $l=ListDir($Path, False, 1);
+      ForEach($l As $f)
+        If($f[0]!=='.')
+          Include ($Path.$f);
+      $l=ListDir($Path, False, 2);
+      ForEach($l As $f)
+        If($f[0]!=='.')
+          $this->LoadAllFromPath($Path.$f.'/');
+    }
+   
+    Function Get($Name) // Use_W2_Tag
+    {
+      $Tags=&$this->Tags;
+      If(IsSet($Tags[$Name]))
+        Return $Tags[$Name];
+      $N='T_w2_Tag_'.$Name;
+      If(Class_Exists($N))
+      {
+        $Tags[$Name]=$N;
+        Return $N;
+      }
+      If(!$this->Loaded)
+      {
+        $Path=DirName($this->Loader->_Find_Lib('/Tmpl/W2/Tag/Factory','.phpc'), 2).'/Tags/';
+      //$Path=UnitPath('Tmpl/W2/TTag').'tags/';
+        $this->LoadAllFromPath($Path);
+        $this->Loaded=True;
+        If(Class_Exists($N))
+        {
+          $Tags[$Name]=$N;
+          Return $N;
+        }
+      }
+      Return False;
+    }
+    
+    Protected $Created=[];
+   
+    Function Create($Name)
+    {
+      if(IsSet($this->Created[$Name]))
+        return $this->Created[$Name];
+      $a=$this->Get($Name);
+      If(!$a)
+        $a=$this->Get('_def');
+    //Echo $a,' T_w2_Tag_', $this->tagName,"\n";
+      $Res=New $a();
+      $this->Created[$Name]=$Res;
+      return $Res;
+    }
+  }
+?>

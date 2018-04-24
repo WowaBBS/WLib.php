@@ -1,1 +1,18 @@
-<?  Include '../../Using.php';    $CM=$Loader->Create_Object('/Cache/Manager');  $MM=$CM->GetMD5Enum('');  $F=$MM->Get('../');  Echo $F->CalcMD5('Manager.phpc'), "\n";  Echo $F->CalcMD5('EnumDir.phpc'), "\n";  Echo $F->CalcMD5('Storage.phpc'), "\n";//$F->Done();  $F=$MM->Get('');  Echo $F->CalcMD5('Manager.phpc'), "\n";  Echo $F->CalcMD5('EnumDir.phpc'), "\n";  Echo $F->CalcMD5('Storage.phpc'), "\n";//$F->Done();//$MM->Done();  $CM->Done();?>
+<?
+  Include '../../Using.php';
+  
+  $CM=$Loader->Create_Object('/Cache/Manager');
+  $MM=$CM->GetMD5Enum('');
+  $F=$MM->Get('../');
+  Echo $F->CalcMD5('Manager.phpc'), "\n";
+  Echo $F->CalcMD5('EnumDir.phpc'), "\n";
+  Echo $F->CalcMD5('Storage.phpc'), "\n";
+//$F->Done();
+  $F=$MM->Get('');
+  Echo $F->CalcMD5('Manager.phpc'), "\n";
+  Echo $F->CalcMD5('EnumDir.phpc'), "\n";
+  Echo $F->CalcMD5('Storage.phpc'), "\n";
+//$F->Done();
+//$MM->Done();
+  $CM->Done();
+?>

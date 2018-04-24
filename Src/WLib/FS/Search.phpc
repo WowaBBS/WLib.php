@@ -1,1 +1,145 @@
-<?  $Loader->Parent_Class('/Object');  $Loader->Load_Lib('/FS/My');  class T_FS_Search_Item  {    const TYPE_NONE =0;    const TYPE_DIR  =1;    const TYPE_FILE =2;        Var $Name     ='';    Var $FullPath ='';    Var $LocPath  ='';    Var $Type     =0;    Var $Parent   =null;        Function __Construct($Name, $FullPath, $LocPath, $Type, $Parent)    {      $this->Name     = $Name     ;      $this->FullPath = $FullPath ;      $this->LocPath  = $LocPath  ;      $this->Type     = $Type     ;      $this->Parent   = $Parent   ;    }        Function IsDir() { return $this->Type==static::TYPE_DIR; }        Static Function First($FullPath, $LocPath)    {      return New T_FS_Search_Item('', $FullPath, $LocPath, Static::TYPE_DIR, null);    }    Static Function Child($Parent, $Name)    {      $FullPath =$Parent->FullPath .$Name;      if(Is_Dir  ($FullPath)) $Type=static::TYPE_DIR  ; else      if(Is_File ($FullPath)) $Type=static::TYPE_FILE ; else                              $Type=static::TYPE_NONE ;      if($Type===static::TYPE_DIR  )      {        $LocPath  =$Parent->LocPath  .$Name.'/';        $FullPath .='/';      }      else        $LocPath  =$Parent->LocPath  .$Name;          return New T_FS_Search_Item($Name, $FullPath, $LocPath, $Type, $Parent);    }  };    class C_FS_Search extends C_Object  {    Var $Mask      =false;    Var $ExclMask  =false;    Var $Hidden    =false;  //Var $Include   =[];    Var $Exclude   =[];  //Var $CheckFile ; //< Function // TODO:        Protected Function _Init(Array $Args)    {      Parent::_Init($Args);      $this->SetParams($Args);    }        Function SetParams($Args)    {      if(IsSet($Args['Mask'      ])) $this->SetMask     ($Args['Mask'      ]);      if(IsSet($Args['ExclMask'  ])) $this->SetExclMask ($Args['ExclMask'  ]);      if(IsSet($Args['Hidden'    ])) $this->Hidden      =$Args['Hidden'    ] ;    //if(IsSet($Args['Include'   ])) $this->SetInclude  ($Args['Include'   ]);      if(IsSet($Args['Exclude'   ])) $this->SetExclude  ($Args['Exclude'   ]);    //if(IsSet($Args['CheckFile' ])) $this->CheckFile   =$Args['CheckFile' ] ;    }      //Function SetInclude($v) { $this->Include=Array_Flip($v); }    Function SetExclude($v) { $this->Exclude=Array_Flip($v); }        Static Function _Mask($v)    {      if($v==False)        return False;            $v=Str_Replace('.','\.', $v);      $v=Str_Replace('*','.*', $v);      $v=Str_Replace('?','.?', $v);      $v=Str_Replace(';','||', $v);      $v='/^(?:'.$v.')$/iSs';      return $v;    }    Function SetMask     ($v) { $this->Mask     =Static::_Mask($v); }    Function SetExclMask ($v) { $this->ExclMask =Static::_Mask($v); }        Function GetListArray($Path, $Add='')    {      $Hidden=$this->Hidden;      $Stack  =[T_FS_Search_Item::First($Path, $Add)];      $Res=[];      While(IsSet($Stack[0]))      {        $Dir=Array_Pop($Stack);        If(!($Handle=FS_OpenDir($Dir->FullPath)))          Continue;              while(False !== ($Name=FS_ReadDir($Handle)))        {          if($Name[0]=='.')          {            if(!$Hidden) continue;            if($Name==='.'  ) continue;            if($Name==='..' ) continue;          }                    $Child=T_FS_Search_Item::Child($Dir, $Name);          if(!$this->CheckPath($Child))            continue;                      if($Child->IsDir())            Array_Push($Stack, $Child);                    if($this->CheckRes($Child))            $Res[]=$Child;        }        FS_CloseDir($Handle);      }      Return $Res;    }        Function CheckPath($File)    {      if(IsSet($this->Exclude[$File->LocPath])) return false;      return true;    }        Function CheckRes($File)    {      if($m=$this->ExclMask ) if( Preg_Match($m, $File->Name)) return false;      if($m=$this->Mask     ) if(!Preg_Match($m, $File->Name)) return false;      if($File->IsDir()) return false;      return true;    }  };?>
+<?
+  $Loader->Parent_Class('/Object');
+  $Loader->Load_Lib('/FS/My');
+
+  class T_FS_Search_Item
+  {
+    const TYPE_NONE =0;
+    const TYPE_DIR  =1;
+    const TYPE_FILE =2;
+    
+    Var $Name     ='';
+    Var $FullPath ='';
+    Var $LocPath  ='';
+    Var $Type     =0;
+    Var $Parent   =null;
+    
+    Function __Construct($Name, $FullPath, $LocPath, $Type, $Parent)
+    {
+      $this->Name     = $Name     ;
+      $this->FullPath = $FullPath ;
+      $this->LocPath  = $LocPath  ;
+      $this->Type     = $Type     ;
+      $this->Parent   = $Parent   ;
+    }
+    
+    Function IsDir() { return $this->Type==static::TYPE_DIR; }
+    
+    Static Function First($FullPath, $LocPath)
+    {
+      return New T_FS_Search_Item('', $FullPath, $LocPath, Static::TYPE_DIR, null);
+    }
+
+    Static Function Child($Parent, $Name)
+    {
+      $FullPath =$Parent->FullPath .$Name;
+      if(Is_Dir  ($FullPath)) $Type=static::TYPE_DIR  ; else
+      if(Is_File ($FullPath)) $Type=static::TYPE_FILE ; else
+                              $Type=static::TYPE_NONE ;
+      if($Type===static::TYPE_DIR  )
+      {
+        $LocPath  =$Parent->LocPath  .$Name.'/';
+        $FullPath .='/';
+      }
+      else
+        $LocPath  =$Parent->LocPath  .$Name;
+    
+      return New T_FS_Search_Item($Name, $FullPath, $LocPath, $Type, $Parent);
+    }
+  };
+  
+  class C_FS_Search extends C_Object
+  {
+    Var $Mask      =false;
+    Var $ExclMask  =false;
+    Var $Hidden    =false;
+  //Var $Include   =[];
+    Var $Exclude   =[];
+  //Var $CheckFile ; //< Function // TODO:
+    
+    Protected Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      $this->SetParams($Args);
+    }
+    
+    Function SetParams($Args)
+    {
+      if(IsSet($Args['Mask'      ])) $this->SetMask     ($Args['Mask'      ]);
+      if(IsSet($Args['ExclMask'  ])) $this->SetExclMask ($Args['ExclMask'  ]);
+      if(IsSet($Args['Hidden'    ])) $this->Hidden      =$Args['Hidden'    ] ;
+    //if(IsSet($Args['Include'   ])) $this->SetInclude  ($Args['Include'   ]);
+      if(IsSet($Args['Exclude'   ])) $this->SetExclude  ($Args['Exclude'   ]);
+    //if(IsSet($Args['CheckFile' ])) $this->CheckFile   =$Args['CheckFile' ] ;
+    }
+    
+  //Function SetInclude($v) { $this->Include=Array_Flip($v); }
+    Function SetExclude($v) { $this->Exclude=Array_Flip($v); }
+    
+    Static Function _Mask($v)
+    {
+      if($v==False)
+        return False;
+      
+      $v=Str_Replace('.','\.', $v);
+      $v=Str_Replace('*','.*', $v);
+      $v=Str_Replace('?','.?', $v);
+      $v=Str_Replace(';','||', $v);
+      $v='/^(?:'.$v.')$/iSs';
+      return $v;
+    }
+
+    Function SetMask     ($v) { $this->Mask     =Static::_Mask($v); }
+    Function SetExclMask ($v) { $this->ExclMask =Static::_Mask($v); }
+    
+    Function GetListArray($Path, $Add='')
+    {
+      $Hidden=$this->Hidden;
+      $Stack  =[T_FS_Search_Item::First($Path, $Add)];
+      $Res=[];
+      While(IsSet($Stack[0]))
+      {
+        $Dir=Array_Pop($Stack);
+        If(!($Handle=FS_OpenDir($Dir->FullPath)))
+          Continue;
+      
+        while(False !== ($Name=FS_ReadDir($Handle)))
+        {
+          if($Name[0]=='.')
+          {
+            if(!$Hidden) continue;
+            if($Name==='.'  ) continue;
+            if($Name==='..' ) continue;
+          }
+          
+          $Child=T_FS_Search_Item::Child($Dir, $Name);
+
+          if(!$this->CheckPath($Child))
+            continue;
+            
+          if($Child->IsDir())
+            Array_Push($Stack, $Child);
+          
+          if($this->CheckRes($Child))
+            $Res[]=$Child;
+        }
+        FS_CloseDir($Handle);
+      }
+      Return $Res;
+    }
+    
+    Function CheckPath($File)
+    {
+      if(IsSet($this->Exclude[$File->LocPath])) return false;
+      return true;
+    }
+    
+    Function CheckRes($File)
+    {
+      if($m=$this->ExclMask ) if( Preg_Match($m, $File->Name)) return false;
+      if($m=$this->Mask     ) if(!Preg_Match($m, $File->Name)) return false;
+      if($File->IsDir()) return false;
+      return true;
+    }
+  };
+?>

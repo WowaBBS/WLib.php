@@ -1,1 +1,69 @@
-<?  $Loader->Parent_Class('/Object');  class C_System_Reg extends C_Object  {    Function SearchParam($Reg, $Name=false, $Args=[])    {      $Add=['/reg:32','/reg:64'];      $Res=[];      $this->_SearchParam($Res, $Reg, $Name, $Add, $Args);      return $Res;    }      Function _SearchParam(&$Res, $Reg, $Name, $Add, $Args)    {      if(Is_Array($Reg))      {        ForEach($Reg As $_Reg)          $this->_SearchParam($Res, $_Reg, $Name, $Add, $Args);        return;      }      if(Is_Array($Name))      {        ForEach($Name As $_Name)          $this->_SearchParam($Res, $Reg, $_Name, $Add, $Args);        return;      }      if(Is_Array($Add))      {        ForEach($Add As $_Add)          $this->_SearchParam($Res, $Reg, $Name, $_Add, $Args);        return;      }        $Cmd=Implode('', [        'reg query "',$Reg,'"',        $Args['Recursive']??false? ' /S':'',        $Name !==false?' /v ' .$Name :'',        $Add  !==false?' '    .$Add  :'',        ' 2>nul',      ]);      $Output=[];      $Return=0;      $ErrCode=exec($Cmd, $Output, $Return);      ForEach($Output as $Str)      {        $S=SubStr($Str, 0, 4);        if($S==='HKEY') $Key=$Str; else        if($S==='    ')        {          $A=Explode(' REG_SZ', $Str, 2);          if(count($A)!=2)            $A=Explode(' REG_EXPAND_SZ', $Str, 2);          if(count($A)==2)          {            if(!IsSet($Res[$Key]))              $Res[$Key]=[];            $Res[$Key][Trim($A[0])]=Trim($A[1]);          }          else            echo "Unknown $Str\n";        }      //echo $Str, "\n";      //$Res[]=$Str;      }    }  };?>
+<?
+  $Loader->Parent_Class('/Object');
+
+  class C_System_Reg extends C_Object
+  {
+    Function SearchParam($Reg, $Name=false, $Args=[])
+    {
+      $Add=['/reg:32','/reg:64'];
+      $Res=[];
+      $this->_SearchParam($Res, $Reg, $Name, $Add, $Args);
+      return $Res;
+    }
+  
+    Function _SearchParam(&$Res, $Reg, $Name, $Add, $Args)
+    {
+      if(Is_Array($Reg))
+      {
+        ForEach($Reg As $_Reg)
+          $this->_SearchParam($Res, $_Reg, $Name, $Add, $Args);
+        return;
+      }
+      if(Is_Array($Name))
+      {
+        ForEach($Name As $_Name)
+          $this->_SearchParam($Res, $Reg, $_Name, $Add, $Args);
+        return;
+      }
+      if(Is_Array($Add))
+      {
+        ForEach($Add As $_Add)
+          $this->_SearchParam($Res, $Reg, $Name, $_Add, $Args);
+        return;
+      }
+  
+      $Cmd=Implode('', [
+        'reg query "',$Reg,'"',
+        $Args['Recursive']??false? ' /S':'',
+        $Name !==false?' /v ' .$Name :'',
+        $Add  !==false?' '    .$Add  :'',
+        ' 2>nul',
+      ]);
+      $Output=[];
+      $Return=0;
+      $ErrCode=exec($Cmd, $Output, $Return);
+      ForEach($Output as $Str)
+      {
+        $S=SubStr($Str, 0, 4);
+        if($S==='HKEY') $Key=$Str; else
+        if($S==='    ')
+        {
+          $A=Explode(' REG_SZ', $Str, 2);
+          if(count($A)!=2)
+            $A=Explode(' REG_EXPAND_SZ', $Str, 2);
+          if(count($A)==2)
+          {
+            if(!IsSet($Res[$Key]))
+              $Res[$Key]=[];
+            $Res[$Key][Trim($A[0])]=Trim($A[1]);
+          }
+          else
+            echo "Unknown $Str\n";
+        }
+      //echo $Str, "\n";
+      //$Res[]=$Str;
+      }
+    }
+  };
+
+?>

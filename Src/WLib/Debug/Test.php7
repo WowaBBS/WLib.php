@@ -1,1 +1,48 @@
-<?  // Taken from builder of UE, directory Builder/Lib/Debug  $a=[''=>1, null=>2, '1'=>3, 2=>4, 3.14=>5, 4=>6, '4'=>7, '2.1'=>8, 9];  $b=5;  echo '\\a',"{$b}\n";  Var_Dump($a);  foreach($a as $k=>$v)    echo GetType($k),'(',$k,')=',$v,"\n";  echo AddCSlashes("\0\1\2\3\4", "\0..\37!@\@\177..\377"), "\n";    Include '../Using.php';   $Manager =$Loader->Create_Object('/Debug/Manager'); //System/  $Manager->Template->ChunkLen=48;  $Manager->Template->StrMaxLen=56;  $Deb     =$Manager->Create();    Class TestClass  {    Var $a='Hello'."\0\t\r\n\"\\\\000";    Var $b=777;        Function __Construct($a='', $b=0)    {      $this->a=$a;      $this->b=$b;    }  };    $Deb    ->Classes=&$Classes;  $Inline ->Classes=&$Classes;  $Manager->Classes['TestClass']=    Function($Ctx, $Class, $v)    {      $Ctx->Inline_NewClass($Class, [$v->a, $v->b]);    };  $a[]=new TestClass('Hello'."\0\t\r\n\"\\\\000", 777);  $a[]=[];  $a[]="Hello\nWorld";  $b="\0Hello\nWorld\n";  $b=$b.$b.$b.$b;  $b=$b.$b.$b.$b;  $a[]=$b;  $a[]=new TestClass("Hello\nWorld\$", null);  echo '$a=';  $Deb->Debug($a);?>
+<?
+  // Taken from builder of UE, directory Builder/Lib/Debug
+  $a=[''=>1, null=>2, '1'=>3, 2=>4, 3.14=>5, 4=>6, '4'=>7, '2.1'=>8, 9];
+  $b=5;
+  echo '\\a',"{$b}\n";
+
+  Var_Dump($a);
+  foreach($a as $k=>$v)
+    echo GetType($k),'(',$k,')=',$v,"\n";
+  echo AddCSlashes("\0\1\2\3\4", "\0..\37!@\@\177..\377"), "\n";
+  
+  Include '../Using.php';
+ 
+  $Manager =$Loader->Create_Object('/Debug/Manager'); //System/
+  $Manager->Template->ChunkLen=48;
+  $Manager->Template->StrMaxLen=56;
+  $Deb     =$Manager->Create();
+  
+  Class TestClass
+  {
+    Var $a='Hello'."\0\t\r\n\"\\\\000";
+    Var $b=777;
+    
+    Function __Construct($a='', $b=0)
+    {
+      $this->a=$a;
+      $this->b=$b;
+    }
+  };
+  
+  $Deb    ->Classes=&$Classes;
+  $Inline ->Classes=&$Classes;
+  $Manager->Classes['TestClass']=
+    Function($Ctx, $Class, $v)
+    {
+      $Ctx->Inline_NewClass($Class, [$v->a, $v->b]);
+    };
+  $a[]=new TestClass('Hello'."\0\t\r\n\"\\\\000", 777);
+  $a[]=[];
+  $a[]="Hello\nWorld";
+  $b="\0Hello\nWorld\n";
+  $b=$b.$b.$b.$b;
+  $b=$b.$b.$b.$b;
+  $a[]=$b;
+  $a[]=new TestClass("Hello\nWorld\$", null);
+  echo '$a=';
+  $Deb->Debug($a);
+?>

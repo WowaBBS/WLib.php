@@ -1,1 +1,12 @@
-<?  Include '../Using.php';    $Exec=$Loader->Create_Object('/System/Exec');  $Exec->Env=$_SERVER;    $Exec->Env['TestEnv']='Hello World';    $Exec->Command='TestProcessSample.bat';  $Exec->Execute();  $Exec->Done();?>
+<?
+  Include '../Using.php';
+  
+  $Exec=$Loader->Create_Object('/System/Exec');
+  $Exec->Env=$_SERVER;
+  
+  $Exec->Env['TestEnv']='Hello World';
+  
+  $Exec->Command='TestProcessSample.bat';
+  $Exec->Execute();
+  $Exec->Done();
+?>

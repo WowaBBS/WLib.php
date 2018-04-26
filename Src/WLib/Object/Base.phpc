@@ -78,7 +78,13 @@
     Final Function __debugInfo()
     {
     //throw new Exception('!!!!!!!!!!!!!!!!!!!!');
-      $Res=Get_Object_Vars($this);
+    //$Res=Get_Object_Vars($this);
+      $Res=[];
+      ForEach((Array)$this As $k=>$v)
+      {
+        $k=Explode("\0", $k);
+        $Res[End($k)]=$v;
+      }
       $this->_Debug_Info($Res);
       return $Res;
     }

@@ -155,10 +155,16 @@
     
     Function GetObjectVars($Value)
     {
-      $v=Get_Object_Vars($Value);
+    //$Res=Get_Object_Vars($Value);
+      $Res=[];
+      ForEach((Array)$Value As $k=>$v)
+      {
+        $k=Explode("\0", $k);
+        $Res[End($k)]=$v;
+      }
       if(Method_Exists($Value, '_Debug_Serialize'))
-        $Value->_Debug_Serialize($v);
-      return $v;
+        $Value->_Debug_Serialize($Res);
+      return $Res;
     }
     
     Function ObjectDefault($Ctx, $Class, $Value)

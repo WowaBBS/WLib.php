@@ -23,6 +23,9 @@
       $this->Parent   = $Parent   ;
     }
     
+    Function GetLocalPath () { return $this->LocPath  ; }
+    Function GetFullPath  () { return $this->FullPath ; }
+    
     Function IsDir() { return $this->Type==static::TYPE_DIR; }
     
     Static Function First($FullPath, $LocPath)

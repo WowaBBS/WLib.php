@@ -35,7 +35,7 @@
     Function GetVars()
     {
       $this->Load();
-      return $Vars;
+      return $this->Vars;
     }
     
     Function SetVars($v)

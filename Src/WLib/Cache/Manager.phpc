@@ -54,7 +54,7 @@
         Return $this->Cache[$Type][$Path];
     //$FullPath=New TPath($this->FullPath);
     //$FullPath->Add($Path);
-      $FullPath=$this->FullPath.$Path;
+      $FullPath=Static::IsAbsolute($Path)? $Path:$this->FullPath.$Path;
       $Args['Manager'  ]=$this     ;
       $Args['FullPath' ]=$FullPath ;
       $Args['RelPath'  ]=$Path     ;

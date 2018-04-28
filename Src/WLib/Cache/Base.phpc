@@ -38,9 +38,21 @@
   //****************************************************************
   // Factory
   
+    Static Function IsAbsolute($Path)
+    {
+      return StrLen($Path)>1 &&(
+        SubStr($Path, 0, 1)=='/'   ||
+      //SubStr($Path, 0, 1)=='\\'  ||
+        SubStr($Path, 1, 1)==':'   ||
+      //SubStr($Path, 1, 1)=='.\\' ||
+        SubStr($Path, 0, 2)=='./'
+      );      
+    }
+    
     Function _Get(String $Path, String $Type, Array $Args=[])
     {
-      return $this->Manager->_Get($this->RelPath.$Path, $Type, $Args);
+      $FullPath=Static::IsAbsolute($Path)? $Path:$this->RelPath.$Path;
+      return $this->Manager->_Get($FullPath, $Type, $Args);
     }
 
     Function GetStorage($Path, $Args=[])

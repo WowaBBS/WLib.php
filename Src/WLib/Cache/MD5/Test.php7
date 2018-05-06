@@ -1,17 +1,35 @@
 <?
   Include '../../Using.php';
   
+  Function CheckMD5($F, $File, $Out=false)
+  {
+    if($Out===false)
+      $Out=$File;
+    Echo $F->CalcMD5($File),'  <',$Out, "\n";
+  }
+  
   $CM=$Loader->Create_Object('/Cache/Manager');
   $MM=$CM->GetMD5Enum('');
   $F=$MM->Get('../');
-  Echo $F->CalcMD5('Manager.phpc'), "\n";
-  Echo $F->CalcMD5('EnumDir.phpc'), "\n";
-  Echo $F->CalcMD5('Storage.phpc'), "\n";
+  CheckMD5($F, 'Manager.phpc');
+  CheckMD5($F, 'EnumDir.phpc');
+  CheckMD5($F, 'Storage.phpc');
 //$F->Done();
   $F=$MM->Get('');
-  Echo $F->CalcMD5('Manager.phpc'), "\n";
-  Echo $F->CalcMD5('EnumDir.phpc'), "\n";
-  Echo $F->CalcMD5('Storage.phpc'), "\n";
+  CheckMD5($F, 'Manager.phpc');
+  CheckMD5($F, 'EnumDir.phpc');
+  CheckMD5($F, 'Storage.phpc');
+  
+  CheckMD5($F, 'Test');
+  For($i=0; $i<4; $i++)
+  {
+    Exec('echo '.$i.' >Test');
+    CheckMD5($F, 'Test', Trim(File_Get_Contents('Test')));
+    sleep(1);
+  }
+  UnLink('Test');
+  CheckMD5($F, 'Test');
+  
 //$F->Done();
 //$MM->Done();
   $CM->Done();

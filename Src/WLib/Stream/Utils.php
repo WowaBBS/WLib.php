@@ -39,7 +39,7 @@
      If($AMode&omExclusive) $Res[]=['Lock'  ,LOCK_EX];
      If($AMode&omShareable) $Res[]=['Lock'  ,LOCK_SH];
      If($AMode&omClear    ) $Res[]=['Clear' ];
-     If($AMode&omAppEnd   ) $Res[]=['AppEnd'];
+     If($AMode&omAppend   ) $Res[]=['Append'];
      Return $Res;
    }
 
@@ -62,7 +62,7 @@
 
        Case 'a':
          $Res|=omWrite    ;
-         $Res|=omAppEnd   ;
+         $Res|=omAppend   ;
          $Res|=omCreate   ;
          Break;
 
@@ -101,7 +101,7 @@
    Define('omNotExist'  ,0x00000020); // Открывает не существующий файл      //
    Define('omExist'     ,0x00000040); // Открывает существующий файл         //
    Define('omClear'     ,0x00000080); // Делает нулевой размер файла         //
-   Define('omAppEnd'    ,0x00000100); // Переносит указатель в конец файла   //
+   Define('omAppend'    ,0x00000100); // Переносит указатель в конец файла   //
    Define('omMakePath'  ,0x00000200); // Create path                         //
 
    Define('omBinary'    ,0x00000400); // Двоичные данные                     //

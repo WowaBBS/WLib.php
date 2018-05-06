@@ -23,17 +23,17 @@
     
     Var $Files=[];
     
-    Function Get(String $FileName)
+    Function Get(String $FileName, $bAppend=false)
     {
       if(IsSet($this->Files[$FileName]))
         return $this->Files[$FileName];
-      $Res=$this->Create($FileName);
+      $Res=$this->Create($FileName, $bAppend);
     //Echo 'DebugCreate(',$FileName,")[",Implode(', ', Array_Keys($this->Files)),"]",$this->Object_Id,"\n";
       $this->Files[$FileName]=$Res;
       return $Res;
     }
     
-    Function Create($Stream=null)
+    Function Create($Stream=null, $bAppend=false)
     {
       if(Is_Null   ($Stream)) $Stream=$this->Stream_Default;
       if(Is_String ($Stream))
@@ -42,7 +42,9 @@
         $Stream=$this->Create_Object('/Stream/File',
           [
             'FileName'=>$Stream,
-            'OpenMode'=>omWrite|omCreate|omBinary|omClear
+            'OpenMode'=>($bAppend?
+              omWrite|omCreate|omBinary|omAppend|omExclusive:
+              omWrite|omCreate|omBinary|omClear)
           ]
         );
       }

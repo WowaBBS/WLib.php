@@ -56,6 +56,11 @@
     
     Function _Find_Lib(String $Name, String $Ext='')
     {
+      if($Name[0]!=='/')
+      {
+        echo '[Error] Lib`s name "',$Name,'" shoult be started with /',"\n";
+        $Name='/'.$Name;
+      }
       ForEach($this->_Paths as $__Path)
       {
         $_Path=$__Path.$Name.$Ext;
@@ -66,9 +71,10 @@
             $_RPath=StrTr(RealPath($_Path), '\\', '/');;
             if($_RPath!==$_Path)
             { // TODO: Error log
-              echo 'Excepted path ',$_RPath ,"\n";
-              echo 'Actual   path ',$_Path  ,"\n";
-              return false;
+              echo '[Error] _Find_Lib:',"\n";
+              echo '  Excepted path ',$_RPath ,"\n";
+              echo '  Actual   path ',$_Path  ,"\n";
+              return $_Path;
             }
           }
           return $_Path;
@@ -77,7 +83,40 @@
       return false;
     }
     
-    Function _Load_Lib(String $Name, Array $Mode=[], String $Ext='.php')
+    Function _Verify_Begin($Verify)
+    {
+     #ifdef Debug
+      switch($Verify)
+      {
+      case 'Class'     : return count(Get_Declared_Classes    ());
+      case 'Interface' : return count(Get_Declared_Interfaces ());
+      }
+     #endif // Debug
+      UnSupported();
+    }
+    
+    Function _Verify_End($Verify, $Var, $Class)
+    {
+     #ifdef Debug
+      switch($Verify)
+      {
+      case 'Class'     : $List=Get_Declared_Classes    (); $Class='C'.$Class; break;
+      case 'Interface' : $List=Get_Declared_Interfaces (); $Class='I'.$Class; break;
+      }
+      for($i=$Var, $c=Count($List); $i<$c; $i++)
+        if($List[$i]===$Class)
+          return true;
+      for($i=$Var, $c=Count($List); $i<$c; $i++)
+        if(StrCaseCmp($List[$i], $Class)===0)
+        {
+          echo '[Error] class name error: ',$Class, ' in not same ',$List[$i],"\n";
+          return true;
+        }
+      echo '[Error] class ',$Class," not found\n";
+     #endif // Debug
+    }
+    
+    Function _Load_Lib(String $Name, Array $Mode=[], String $Ext='.php', $Verify='')
     {
       $AZSafe=IsSet($Mode['Safe'])&& $Mode['Safe'];
     //$Name=StrToLower($Name);
@@ -90,8 +129,12 @@
       $_Path=$this->_Find_Lib($Name, $Ext);
       If($_Path===False) $Res=False; Else
       {
+        if($Verify)
+          $VerifyVars=$this->_Verify_Begin($Verify);
         If($AZSafe) { If(!Include_Once($_Path)) $Res=False; }
         Else        { If(!Require_Once($_Path)) $Res=False; }
+        if($Verify)
+          $this->_Verify_End($Verify, $VerifyVars, $Res);
       }
       If($Res)
         $this->Included_Files[$Name.$Ext]=$_Path;
@@ -111,9 +154,14 @@
  
     Function Load_Class($Name, Array $Mode=[])
     {
-      $Res=$this->_Load_Lib($Name, $Mode, '.phpc');
+      $Res=$this->_Load_Lib($Name, $Mode, '.phpc', 'Class');
       Return $Res? 'C'.$Res:$Res;
-    //Return $Res;
+    }
+ 
+    Function Load_Interface($Name, Array $Mode=[])
+    {
+      $Res=$this->_Load_Lib($Name, $Mode, '.phpi', 'Interface');
+      Return $Res? 'I'.$Res:$Res;
     }
  
     Function Create_Object($Name, Array $Args=[], Array $Mode=[])
@@ -126,6 +174,10 @@
       If(!IsSet($Args['Loader']))
         $Args['Loader']=&$this;
       $Res=New $Class_Name($Args);
+     #ifdef Debug
+     #if(get_class($Res)!==$Class_Name)
+     #  echo '[Error] Class name error: ',get_class($Res),'!==',$Class_Name,"\n";
+     #endif // Debug
       Return $Res;
     }
     
@@ -148,14 +200,17 @@
       // This is creating singleton from System/Singleton/
     }
     
-    Function Using_Class  ($Name) {}
-    Function Using_Module ($Name) { $this->Load_Module ($Name); }
-    Function Using_Type   ($Name) { $this->Load_Type   ($Name); }
+    Function Using_Class     ($Name) {}
+    Function Using_Interface ($Name) { $this->Load_Interface ($Name); }
+    Function Using_Module    ($Name) { $this->Load_Module    ($Name); } // TODO: Rename lib
+    Function Using_Type      ($Name) { $this->Load_Type      ($Name); } // TODO: Rename struct
     
-    Function Load_Module ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name, $Mode, '.phpm'); }
-    Function Load_Type   ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name, $Mode, '.phpt'); }
+    Function Load_Module ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name, $Mode, '.phpm'); } // TODO: Rename lib
+    Function Load_Type   ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name, $Mode, '.phpt'); } // TODO: Rename struct
  
-    Function Parent_Class($Name) { $this->Load_Class ($Name); }
+    Function Class_Implements ($Name) { $this->Load_Interface ($Name); }
+    Function Class_Extends    ($Name) { $this->Load_Class     ($Name); }
+    Function Parent_Class     ($Name) { $this->Load_Class     ($Name); }
     
     Function Begin_Module () {}
     Function Begin_Class  () {}

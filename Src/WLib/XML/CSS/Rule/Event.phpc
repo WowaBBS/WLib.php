@@ -1,0 +1,8 @@
+<?
+  $Loader->Load_Class('/XML/CSS/Rule');
+ 
+  Class C_XML_CSS_Rule_Event Extends C_XML_CSS_Rule
+  {
+ 
+  }
+?>

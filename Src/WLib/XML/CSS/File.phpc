@@ -1,0 +1,154 @@
+<?
+  $Loader->Load_Lib('/XML/CSS/Parser');
+  $Loader->Load_Class('/Object');
+  $Loader->Load_Class('/XML/CSS/Style');
+ 
+  Class C_XML_CSS_File Extends C_Object
+  {
+    Var $Styles=Array();
+    Var $Key=False;
+ 
+    Function _Done()
+    {
+      $this->Clear();
+      parent::_Done();
+    }
+ 
+    Function Clear()
+    {
+      ForEach($this->Styles As $k=>$tmp)
+        $this->Styles[$k]->_UnLock();
+      $this->Styles=Array();
+    }
+ 
+    Function AddKeyLeft($Key)
+    {
+      $St=$this->Styles;
+      ForEach($St As $k=>$v)
+      {
+        $S=$St[$k];
+        $nk1=Explode(',', $S->Key);
+        $nk2=Array();
+        ForEach($nk1 As $nki)
+          $nk2[]=$Key.' '.$nki;
+        $S->Key=Implode(',', $nk2);
+      }
+    }
+ 
+    Function AddArr($Arr)
+    {
+      If(!$Arr)
+        Return;
+      $Z=0;
+      $Key='';
+      $St=Array(Array(), Array());
+      ForEach($Arr[0]As $k=>$v)
+        If(StrLen($v)>2 && SubStr($v, 0, 2)==='/*')
+        {}
+        ElseIf($Arr[1][$k]==$v)
+        {
+          If($Z>9)
+          {
+            $St[0][]=$v;
+            $St[1][]=$Arr[1][$k];
+          }
+          ElseIf($Z)
+            $Key.=' ';
+        }
+        Else
+        {
+          If($v=='{')
+          {
+            If($Z>9)
+            {
+            //Trigger_Error('XML/CSS/File "{" in '.$k);
+              $Z++;
+              $St[0][]=$v;
+              $St[1][]=$Arr[1][$k];
+            }
+            Else
+            {
+              $Key=Trim($Key);
+              $Z=10;
+              $St=Array(Array(), Array());
+            }
+          }
+          ElseIf($Z>10)
+          {
+            If($v=='}')
+              $Z--;
+            $St[0][]=$v;
+            $St[1][]=$Arr[1][$k];
+          }
+          ElseIf($v=='}')
+          {
+            If($Z<10)
+              Trigger_Error('XML/CSS/File "}" in '.$k);
+            Else
+            {
+            //If(IsSet($this->Styles[$Key]))
+            //  UnSet($this->Styles[$Key]);
+            //$this->Styles[$Key]=$this->Loader->Create_Object('/XML/CSS/Style');
+            //$this->Styles[$Key]->AddArr($St);
+              If(StrNCmp(StrToLower($Key), '@media ', 7)==0)
+                $Style=$this->Loader->Create_Object('/XML/CSS/File');
+              Else
+                $Style=$this->Loader->Create_Object('/XML/CSS/Style');
+              $Style->Key=$Key;
+              $Style->AddArr($St);
+              $this->Styles[]=$Style;
+              $Z=0;
+              $Key='';
+            }
+          }
+          ElseIf($Z>9)
+          {
+            $St[0][]=$v;
+            $St[1][]=$Arr[1][$k];
+          }
+          ElseIf($Z)
+            $Key.=$v;
+          Else
+          {
+            $Key=$v;
+            $Z=1;
+          }
+        }
+    }
+ 
+    Function AddStr($Str)
+    {
+      $this->AddArr(ParseStyle($Str));
+    }
+ 
+    Function AddFile($Str)
+    {
+      $this->AddStr(File_Get_Contents($Str));
+    }
+ 
+    Function Delete_By_Key($Key)
+    {
+      $this->Styles[$Key]->Done();
+      UnSet($this->Styles[$Key]);
+    }
+ 
+    Function Make()
+    {
+      $Res=Array();
+      ForEach($this->Styles As $v)
+        $Res[]=$v->Make();
+      If($this->Key!==False)
+        $Res=Array($this->Key, '{', Implode("\n", $Res), '}');
+      Else
+        $Res[]='';
+      Return Implode("\n", $Res);
+    }
+ 
+    Function _Object_Info($Args=Array())
+    {
+      $Res=parent::_Object_Info($Args);
+      $Res[class_Interface]['xml/css/file']=True;
+      Return $Res;
+    }
+  }
+?>

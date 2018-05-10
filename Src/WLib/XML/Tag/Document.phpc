@@ -1,0 +1,27 @@
+<?
+  $Loader->Load_Class('/XML/Tag/Base');
+ 
+  Class C_XML_Tag_Document Extends C_XML_Tag_Base
+  {
+    Var $tagName     ='#document'; // Имя тега
+    
+  //Function _Init($Args)
+  //{
+  //  parent::_Init($Args);
+  //  $this->tagName='#document';
+  //}
+  
+    Function TagBuild()
+    {
+      Return '';
+    }
+  
+    Function TagBuildHash()
+    {
+      $Res=parent::TagBuildHash();
+      UnSet($Res['n']);
+      $Res['t']='d';
+      Return $Res;
+    }
+  }
+?>

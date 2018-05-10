@@ -1,0 +1,128 @@
+<?
+ #$Loader->Load_Lib('/Support/PHP4');
+  $Loader->Load_Class('/Object');
+ 
+  Class C_XML_Attributes Extends C_Object
+  {
+    Var $Attr=Array();
+ 
+    Function _Done()
+    {
+      $this->Clear();
+      parent::_Done();
+    }
+ 
+    Function Assign($Data)
+    {
+      If(Is_Object($Data))
+        $this->Attr=$Data->Attr;
+      Else
+        FAbstract();
+    }
+ 
+    Function Clear()
+    {
+      $this->Attr=Array();
+    }
+ 
+    Function IsAttr($Name)
+    {
+      Return IsSet($this->Attr[$Name]);
+    }
+ 
+    Function GetAttr($Name)
+    {
+      If(!IsSet($this->Attr[$Name]))
+        Return False;
+      $Res=$this->Attr[$Name];
+      If(!$Res)
+        Return '';
+      $C=SubStr($Res, 0, 1);
+      If(($C=='"')||($C=="'"))
+        $Res=Html_Entity_DeCode(SubStr($Res, 1, -1));
+      Return $Res;
+    }
+ 
+    Function SetAttr($Name, $Value, $ZDel=True)
+    {
+      If(!$Value && $ZDel)
+      {
+        UnSet($this->Attr[$Name]);
+        Return;
+      }
+      If(Is_String($Value))
+        If(!Preg_Match("/^[\w\d]*$/iS", $Value))
+          $Value='"'.HtmlEntities($Value, ENT_COMPAT).'"';
+    //$this->Attr[$Name]=$Value;
+      $this->_SetAttr($Name, $Value);
+    }
+ 
+    Function _SetAttr($Name, $Value)
+    {
+      $this->Attr[$Name]=$Value;
+    }
+ 
+    Function AddStr($Str)
+    {
+      // Одинарные кавычки
+    //$Qw ="'[^'\\\\]*?(?:\\\\'[^'\\\\]*?)*?'";
+      $Qw ="'[^']*'";
+     // Двойные ковычки
+    //$DQw='"[^"\\\\]*?(?:\\\\"[^"\\\\]*?)*?"';
+      $DQw='"[^"]*"';
+      $QAttr='/\\s*((?:'.$Qw.')|(?:'.$DQw.')|(?:[^\\s=]+)|(?:=))/isS';
+      $Cnt=Preg_Match_All($QAttr, $Str, $_Attr);
+      $Attr=Array();
+      $z=0;
+      $Key='';
+      ForEach($_Attr[1]As $A)
+        If($z==0)
+        {
+          $Key=$A;
+          $Key=StrToLower($Key);
+          $z=1;
+        }
+        ElseIf($z==1)
+        {
+          If($A!='=')
+          {
+            $z=0;
+          //$this->Attr[$Key]=True;
+            $this->_SetAttr($Key, True);
+            $Key=$A;
+            $z=1;
+          }
+          Else
+            $z=2;
+        }
+        Else
+        {
+        //$this->Attr[$Key]=$A;
+          $this->_SetAttr($Key, $A);
+          $z=0;
+          $Key='';
+        }
+      If($z)
+      //$this->Attr[$Key]=True;
+        $this->_SetAttr($Key, True);
+    }
+ 
+    Function Make()
+    {
+      $Res=Array();
+      ForEach($this->Attr As $k=>$v)
+        If($v===False)
+          {}
+        ElseIf($v===True)
+          $Res[]=$k;
+        Else
+          $Res[]=$k.'='.$v;
+      Return Implode(' ', $Res);
+    }
+ 
+    Function AsHash()
+    {
+      Return $this->Attr;
+    }
+  }
+?>

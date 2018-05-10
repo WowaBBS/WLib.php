@@ -1,0 +1,175 @@
+<?
+  $Loader->Load_Class('/Object');
+ 
+  $Loader->Load_Class('/XML/CSS/Rule');
+ 
+  Class C_XML_CSS_Rules Extends C_Object
+  {
+  //Var $Rules=Array();
+ 
+    Var $Rules=Array(
+    //$ID=>$Obj,
+    );
+    Var $Tg=Array(
+    //'tag'=>Array(1=>$Obj, );
+    );
+    Var $Id=Array(
+    //'id'=>Array(1=>$Obj, );
+    );
+    Var $Cl=Array(
+    //'class'=>Array(1=>$Obj, );
+    );
+  //Var $ToNext=Array(
+  ////  1 => $Obj, ;
+  //);
+ 
+    Function _Done()
+    {
+      $this->Clear();
+      parent::_Done();
+    }
+ 
+    Function Clear()
+    {
+      $Tg=Array();
+      $Id=Array();
+      $Cl=Array();
+      $R=$this->Rules;
+      $this->Rules=Array();
+      ForEach(Array_Keys($R)As $k)
+        $R[$k]->_UnLock();
+    }
+ 
+    Function Add_Rules($A_Rules)
+    {
+      ForEach($A_Rules As $k=>$Tmp)
+        $this->Add_Rule($A_Rules[$k]);
+    }
+ 
+    Function Add_Rule($A_Rule)
+    {
+      $ID=$A_Rule->Object_Id;
+      If(IsSet($this->Rules[$ID]))
+        Return True;
+      $this->Rules[$ID]=$A_Rule->_Lock();
+      $Rule=$A_Rule->Rule;
+  
+      If($A_Rule->Count==0)
+        $this->Tg['']=Array($ID=>1);
+  
+      If($a=Array_Shift($Rule))
+        If(!IsSet($this->Tg[$a]))
+          $this->Tg[$a]=Array($ID=>1);
+        Else
+          $this->Tg[$a][$ID]=1;
+  
+      If($a=Array_Shift($Rule))
+        If(!IsSet($this->Id[$a]))
+          $this->Id[$a]=Array($ID=>1);
+        Else
+          $this->Id[$a][$ID]=1;
+  
+      ForEach($Rule As $a)
+      {
+        If(!IsSet($this->Cl[$a]))
+          $this->Cl[$a]=Array($ID=>1);
+        Else
+          If(!IsSet($this->Cl[$a][$ID]))
+            $this->Cl[$a][$ID]=1;
+          Else
+            $this->Cl[$a][$ID]++;
+      }
+    }
+ 
+    Function Set_Event_On_Rules_Raw($A_Rules, $Event)
+    {
+      $ORule=False;
+      ForEach($A_Rules As $RuleArr)
+      {
+        $Rule=$this->Loader->Create_Object('/XML/CSS/Rule');
+        $Rule->_Set_Array($RuleArr);
+        If($ORule)
+          $ORule->NextSub[]=$Rule;
+        Else
+        {
+          $this->Add_Rule($Rule);
+          $Rule->_UnLock();
+        }
+        $ORule=$Rule;
+      }
+      $ORule->Events[]=$Event;
+    }
+ 
+    Function Process_Rules_For_Tag($A_Tag)
+    {
+      $R=Array();
+      If(IsSet($this->Tg['']))
+        $R[]=$this->Tg[''];
+      If(IsSet($this->Tg[$A_Tag->tagName]))
+        $R[]=$this->Tg[$A_Tag->tagName];
+      If(IsSet($A_Tag->Attributes) && $A_Tag->Attributes)
+      {
+        $Attr=$A_Tag->Attributes;
+        If($Attr->IsAttr('id'))
+        {
+          $a=$Attr->GetAttr('id');
+          If(IsSet($this->Id[$a]))
+            $R[]=$this->Id[$a];
+        }
+        If($Attr->IsAttr('class'))
+        {
+          $Class=$Attr->GetAttr('class');
+          $Class=Explode('.', Trim(Preg_Replace('/\\s+/is', '.', $Class)));
+          ForEach($Class As $a)
+            If(IsSet($this->Cl[$a]))
+              $R[]=$this->Cl[$a];
+        }
+      }
+      $Res=Array();
+      // Подсчёт результатов
+      ForEach($R As $r)
+        ForEach($r As $a=>$b)
+          If(IsSet($Res[$a]))
+            $Res[$a]+=$b;
+          Else
+            $Res[$a]=$b;
+      // Проверка результатов
+      $R=$this->Rules;
+      ForEach(Array_Keys($Res)As $k)
+        If($R[$k]->Count>$Res[$k])
+          UnSet($Res[$k]);
+        ElseIf($R[$k]->IsAddCheck)
+          If(!$R[$k]->Check_Proc($A_Tag))
+            UnSet($Res[$k]);
+      ForEach(Array_Keys($Res)As $k)
+      {
+        $R[$k]->OnEvent($A_Tag);
+        $Res[$k]=$R[$k];
+      }
+    //Debug($Res);
+      Return $Res;
+    }
+ 
+    Function Rules_For_Tag($A_Tag)
+    {
+      $Res=Array();
+      $R=$this->Rules;
+      ForEach($R As $k=>$Tmp)
+        If($R[$k]->IsInNextSub)
+          If(!IsSet($Res[$k]))
+            $Res[$k]=$R[$k]; // !!!
+      $RR=$this->Process_Rules_For_Tag($A_Tag);
+      ForEach($RR As $k=>$Tmp)
+      {
+        $Rr=$RR[$k]->Get_Next_Sub();
+        ForEach($Rr As $k1=>$Tmp)
+          If(!IsSet($Res[$Rr[$k1]->Object_Id]))
+            $Res[$Rr[$k1]->Object_Id]=$Rr[$k1];
+      }
+ 
+      $R=$this->Loader->Create_Object('/XML/CSS/Rules');
+      $R->Add_Rules($Res);
+      Return $R;
+    }
+  }
+?>

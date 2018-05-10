@@ -1,0 +1,130 @@
+<?
+  $Loader->Load_Lib('/XML/CSS/Parser');
+  $Loader->Load_Class('/Object');
+ 
+  Class C_XML_CSS_Style Extends C_Object
+  {
+    Var $Styles=Array();
+    Var $Key=False;
+ 
+    Function Clear()
+    {
+      $this->Styles=Array();
+    }
+ 
+    Function _AddValue($K, $V, $Z=False)
+    {
+      If(!IsSet($this->Styles[$K]))
+        $this->Styles[$K]=Array();
+      If($Z||!Count($this->Styles[$K]))
+      {
+        $this->Styles[$K][]=$V;
+        Return True;
+      }
+      $this->Styles[$K][Count($this->Styles[$K])-1].=$V;
+      Return False;
+    }
+ 
+    Function AddArr($Arr)
+    {
+      $Key='';
+      $Z=0;
+      ForEach($Arr[0]As $k=>$v)
+      {
+      //Debug('!'.$v.'! '.$Key.' '.$Z);
+        If(StrLen($v)>2 && SubStr($v, 0, 2)==='/*')
+        {}
+        ElseIf($Arr[1][$k]==$v)
+        {
+          If($Z>2)
+            $this->_AddValue($Key, ' ');
+          ElseIf($Z)
+            $Z=2;
+        }
+        Else
+          If(!$Z)
+            If($v==':')
+              $Z=1;
+            Else
+            {
+              If($Key)
+              {
+              //Trigger_Error('WLib/XML/CSS/Style/Aldsfds');
+              //Debug('!asdf');
+              }
+              $Key=$v;
+              $this->Styles[$Key]=Array();
+            }
+          Else
+            If($v==')')
+            {
+              $this->_AddValue($Key, $v);
+              If($Z<3)
+                Trigger_Error('WLib/XML/CSS/Style ")"');
+              ElseIf($Z==3)
+                $Z=1;
+              Else
+                $Z--;
+            }
+          //If($v==='}' && false)
+          //{
+          //  $this->_AddValue($Key, $v);
+          //  If($Z<3)
+          //    Trigger_Error('WLib/XML/CSS/Style "}"');
+          //  ElseIf($Z==3)
+          //    $Z=1;
+          //  Else
+          //    $Z--;
+          //}
+            ElseIf($Z>2)
+              $this->_AddValue($Key, $v);
+            ElseIf($v=='(')
+            {
+              $this->_AddValue($Key, $v);
+              If($Z<3)
+                $Z=3;
+              Else
+                $Z++;
+            }
+          //ElseIf($v=='{')
+          //{
+          //  $this->_AddValue($Key, $v);
+          //  If($Z<3)
+          //    $Z=3;
+          //  Else
+          //    $Z++;
+          //}
+            ElseIf($v==';')
+            {
+              $Z=0;
+              $Key='';
+            }
+            Else
+              If($this->_AddValue($Key, $v, $Z==2))
+                $Z=1;
+      }
+    }
+ 
+    Function AddStr($Str)
+    {
+      $this->AddArr(ParseStyle($Str));
+    }
+ 
+    Function Make()
+    {
+      $Res=Array();
+      ForEach($this->Styles As $k=>$v)
+        $Res[]=$k.':'.Implode(' ', $v).';';
+      If($this->Key!==False)
+        $Res=Array($this->Key, '{', Implode(' ', $Res), '}');
+      Return Implode(' ', $Res);
+    }
+ 
+    Function _Object_Info($Args=Array())
+    {
+      $Res=parent::_Object_Info($Args);
+      $Res[class_Interface]['xml/css/style']=True;
+      Return $Res;
+    }
+  }
+?>

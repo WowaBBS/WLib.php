@@ -1,0 +1,84 @@
+<?
+  $Loader->Load_Class('/Object');
+ 
+  Class C_XML_CSS_Rule Extends C_Object
+  {
+    Var $Count = 0 ; //  оличество правил, которое должно выполн€тьс€
+    Var $Rule  = Array('', ''); // Array('TagName', 'ID', 'Class1', 'Class2',);
+    Var $IsAddCheck=False; // “ребуетс€ ли дополнительна€ проверка
+    Var $Events=Array(); // —обыйти€, которые должны отработать, при выполнении услови€
+    Var $NextSub=Array(); // ƒл€ проверки подтегов
+    Var $IsInNextSub=True;
+ 
+    Function _Init($Args)
+    {
+      parent::_Init($Args);
+    }
+ 
+    Function _Done()
+    {
+      $this->Clear();
+      parent::_Done();
+    }
+ 
+    Function Clear()
+    {
+      $Tg=Array();
+      $Id=Array();
+      $Cl=Array();
+      $R=$this->NextSub;
+      $this->NextSub=Array();
+      ForEach(Array_Keys($R)As $k)
+        $R[$k]->_UnLock();
+    }
+ 
+    Function Get_Next_Sub()
+    {
+      $Res=$this->NextSub;
+    //If($this->IsInNextSub)
+    //  $Res[]=$this;
+      Return $Res;
+    }
+ 
+    Function _Set_Key_Str($A_Str)
+    {
+      $this->Count = 0 ;
+      $this->Rule  = Array('', '');
+      If($A_Str=='*')
+        Return;
+      Preg_Match_All('/([\\.#:]?)(\w)+/Ss', $A_Str, $Res);
+      ForEach($Res[0]As $k->$tmp)
+        Switch($Res[1][$k])
+        {
+        Case '' : If($this->Rule[0]!=='') $this->Count++; $this->Rule[0]=$Res[2][$k]; Break;
+        Case '#': If($this->Rule[1]!=='') $this->Count++; $this->Rule[1]=$Res[2][$k]; Break;
+        Case '.':                         $this->Count++; $this->Rule[] =$Res[2][$k]; Break;
+        Default :                         $this->Count++;
+        }
+    }
+ 
+    Function _Set_Array($A_Arr)
+    {
+      $this->Count = Count($A_Arr) ;
+      If(!$A_Arr[0]) $this->Count--;
+      If(!$A_Arr[1]) $this->Count--;
+      If(IsSet($A_Arr['*'])) { $this->IsInNextSub=$A_Arr['*']; UnSet($A_Arr['*']); }
+      $this->Rule  = $A_Arr;
+    }
+ 
+    Function OnEvent($A_Tag)
+    {
+      ForEach($this->Events As $Event)
+      {
+        $Args=$Event[1];
+        $Args['Tag']=$A_Tag;
+        Call_User_Func_Array ($Event[0], Array($Args));
+      }
+    }
+ 
+    Function Check_Proc($A_Tag)
+    {
+      Return True;
+    }
+  }
+?>

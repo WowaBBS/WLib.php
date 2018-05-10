@@ -1,0 +1,31 @@
+<?
+  $Loader->Load_Class('/XML/Tag' );
+ 
+  Class C_XML_Tag_Text Extends C_XML_Tag
+  {
+    Var $tagName ='#text'; // Имя тега
+    Var $value   ; // Содержимое
+  
+    Function _Init($Args)
+    {
+      parent::_Init($Args);
+    //$this->tagName='#text';
+      $this->value=$Args[0];
+    }
+  
+    Function _Done()
+    {
+      parent::_Done();
+    }
+  
+    Function TagBuild()
+    {
+      Return $this->value;
+    }
+  
+    Function TagBuildHash()
+    {
+      Return Array('t'=>'t', 'v'=>$this->value);
+    }
+  }
+?>

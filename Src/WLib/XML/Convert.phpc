@@ -1,0 +1,342 @@
+<?
+  $Loader->Load_Class('/Object');
+  $Loader->Load_Class('/XML/Document');
+  $Loader->Load_Class('/XML/CSS/File');
+  $Loader->Load_Type('/Inet/Mime/Header');
+  $Loader->Load_Type('/Inet/URL/Link'   );
+ 
+  Class C_XML_Convert Extends C_Object
+  {
+    Var $On_Covert_Link=False;
+ 
+    Var $Z_Convert_Links=True;
+ 
+    Var $Tags_CData=Array('Style', 'Script', 'Title');
+    Var $Tags_Empty=Array('br', 'hr');
+    Var $Tags_Link=Array(
+       'img'    => Array('src'    ),
+       'a'      => Array('href'   ),
+       'form'   => Array('action' ),
+       'link'   => Array('href'   ,'src'),
+       'script' => Array('src'    ),
+       'area'   => Array('href'   ),
+       'base'   => Array('href'   ),
+       'frame'  => Array('src'    ),
+       'iframe' => Array('src'    ),
+       'input'  => Array('src'    ),
+       'applet' => Array('code', 'codebase'),
+       'object' => Array('code', 'codebase'),
+       'param'  => Array('pluginspage'),
+       'embed'  => Array('src', 'pluginspage'),
+     );
+ 
+    Var $Tags_Del=Array();
+    Var $XML_Preg_Replace=Array(
+    //Array('/(<script[^>]*>)(.*?)(<\\/script[^>]*>)/siS', 'CData', True),
+    );
+    Var $XML_Tags_Delete=Array();
+    Var $XML_Tags_Leave =Array(''=>Array('/.*/'));
+ 
+    Var $CData_List=Array();
+    Var $Header=NULL;
+    Var $BaseUrl=NULL;
+ 
+    Function _Init($Args)
+    {
+      parent::_Init($Args);
+      $this->Header  =New T_Inet_MIME_Header();
+      $this->BaseURL =New T_Inet_URL_Link();
+    }
+ 
+    Function Clear()
+    {
+      $this->CData_List=Array();
+    }
+ 
+    Function _Convert($FileFrom, $FileTo)
+    {
+      $XML=$this->Loader->Create_Object('/XML/Document');
+      $XML->Parser->AddTagCData($this->Tags_CData);
+      $XML->Parser->AddTagEmpty($this->Tags_Empty);
+      $XML->LoadFromFile($FileFrom);
+  
+      $ID=mt_rand();
+      $Info=Array(
+        'Title'   => False ,
+        'CharSet' => False ,
+      );
+      $Data=
+       Array(
+        'f'     => $ID,
+        'e'     => $ID,
+        'CssID' => mt_rand(),
+        'Info'  => $Info,
+       );
+      $this->Convert_XML($XML, $Data);
+  
+      $Res=$XML->Build();
+      $Res=Explode($ID, $Res);
+      $Links=Array();
+      ForEach($Res As $k=>$v)
+        If($k&1)
+        {
+          $Links[]=$v;
+          $Res[$k]='<?=$Vars[\'Url\']->Get('.PHP_KeyToStr($v).');?'.'>';
+        }
+      Sort($Links);
+      $Links=Array_Flip(Array_Flip($Links));
+      $FNC='Content_'.$ID;
+      $FNL='Links_'.$ID;
+      Array_UnShift($Res, '<? Function '.$FNC.'($Vars){'."\n".'?>');
+      $Stat=Stat($FileFrom);
+      $Attr=Array();
+      $Attr['MTime']=$Stat['mtime'];
+      $Attr['Size' ]=$Stat['size' ];
+      $Attr['Type' ]='Xml_Convert';
+      $Attr['Ver'  ]='V1x0';
+      $Ret=Array(
+        'Func'  => $FNC   ,
+        'Links' => $FNL   ,
+        'Info'  => &$Info ,
+        'Attr'  => $Attr  ,
+        'ID'    => Implode('/', $Attr),
+      );
+      $Res[]='<? }'."\n";
+      $Res[]=' Function '.$FNL.'(){'."\n";
+      $Res[]='   Return ';
+      $Res[]=VarToPHP($Links, '   ');
+      $Res[]=';'."\n";
+      $Res[]=' }'."\n".' Return ';
+      $Res[]=VarToPHP($Ret);
+      $Res[]=';'."\n".'?'.'>';
+    //'Array(\'Func\'=>'.PHP_KeyToStr($FN).'); ?'.'>';
+    //$Res[0]='<? Function '.$FN.'($Vars){ ?'.'>'.$Res[0];
+      $Res=Implode('', $Res);
+      SaveText($FileTo, $Res);
+      $XML->Done();
+      $XML=NULL;
+    }
+ 
+    Function _Convert_XML_Str($Str, $CssID=True)
+    {
+      ForEach($this->XML_Preg_Replace As $XML_PR_Rule)
+        If(IsSet($XML_PR_Rule[2]))
+          $Str=Preg_Replace_CallBack(
+            $XML_PR_Rule[0],
+            Array($this, 'CPCB_'.$XML_PR_Rule[1]),
+            $Str);
+        Else
+          $Str=Preg_Replace($XML_PR_Rule[0], $XML_PR_Rule[1], $Str);
+  
+      $XML=$this->Loader->Create_Object('/XML/Document');
+      $XML->Parser->AddTagCData($this->Tags_CData);
+      $XML->Parser->AddTagEmpty($this->Tags_Empty);
+      $XML->Clear();
+      $XML->Parse($Str);
+  
+      $ID=mt_rand();
+      $Info=Array(
+        'Title'   => False ,
+        'CharSet' => False ,
+      );
+      $Data=
+       Array(
+        'f'     => $ID,
+        'e'     => $ID,
+        'CssID' => $CssID?mt_rand():False,
+        'Info'  => &$Info,
+       );
+      $this->Convert_XML($XML, $Data);
+  
+      $Res=$XML->Build();
+      $XML->Done();
+      $XML=NULL;
+      Return $Res;
+    }
+ 
+    Function _Convert_CSS_Str($Str, $CssID=True)
+    {
+      $ID=mt_rand();
+      $Info=Array(
+      //'Title'   => False ,
+      //'CharSet' => False ,
+      );
+      $Data=
+       Array(
+        'f'     => $ID,
+        'e'     => $ID,
+        'CssID' => $CssID?mt_rand():False,
+        'Info'  => &$Info,
+       );
+      $CSS=$this->Loader->Create_Object('/XML/CSS/File');
+      $CSS->AddStr($Str);
+      $this->Convert_CSS($CSS, $Data);
+      $Res=$CSS->Make();
+      $CSS->Done();
+      Return $Res;
+    }
+ 
+    Function Convert_XML($XML, $Data)
+    {
+      $ZHead=False;
+      $ZStyle=False;
+      $TagsLink=$this->Tags_Link;
+  
+      $Tag=$XML->FirstTag;
+      While($Tag)
+      {
+        If($Tag->tagName=='meta')
+        {
+          If($Tag->Attributes->IsAttr('http-equiv'))
+          {
+            $n=StrToLower($Tag->Attributes->GetAttr('http-equiv'));
+            $v=$Tag->Attributes->GetAttr('content');
+          //Debug($v);
+            $this->Header->Add($n, $v);
+          }
+        }
+        If($Tag->tagName=='base')
+        {
+          If($Tag->Attributes->IsAttr('href'))
+          {
+            $this->BaseUrl->Assign($Tag->Attributes->GetAttr('href'));
+          }
+        }
+        If(IsSet($this->Tags_Del[$Tag->tagName]))
+        {
+          If(!(IsSet($Tag->EndTag) && $Tag->EndTag && !$Tag->_f))
+          {
+            $Tag=$Tag->Delete($this->Tags_Del[$Tag->tagName]);
+            Continue;
+          }
+        }
+        If($Tag->tagName=='style')
+        {
+          $ZStyle=!$Tag->_f;
+          If($ZStyle)
+          {
+            $CSS=$this->Loader->Create_Object('/XML/CSS/File');
+            $CSS->AddStr($Tag->GetCData(True));
+            $this->Convert_CSS($CSS, $Data);
+            $Tag->PutCData($CSS->Make(), '');
+            $CSS->Done();
+            $CSS=NULL;
+          }
+          $Tag=$Tag->ListNext;
+          Continue;
+        }
+        If(IsSet($Tag->Attributes))
+        {
+          If($Tag->Attributes->IsAttr('style'))
+          {
+            $Style=$this->Loader->Create_Object('/XML/CSS/Style');
+            $Style->AddStr($Tag->Attributes->GetAttr('style'));
+            $this->Convert_Style($Style, $Data,
+              Array(
+                'tagName'=>$Tag->tagName,
+                'Attribute'=>'style',
+              )
+            );
+            $Tag->Attributes->SetAttr('style', $Style->Make());
+            $Style->Done();
+          }
+          If($this->Z_Convert_Links)
+          {
+            If($Tag->Attributes->IsAttr('background'))
+            {
+              $Link=$Tag->Attributes->GetAttr('background');
+              $Link=$this->Convert_Link(
+                $Link, $Data,
+                Array(
+                  'tagName'=>$Tag->tagName,
+                  'Tag'=>$Tag,
+                  'Attribute'=>'background',
+                )
+              );
+              $Tag->Attributes->SetAttr('background', $Link);
+            }
+            If(IsSet($TagsLink[$Tag->tagName]))
+              ForEach($TagsLink[$Tag->tagName]As $AN)
+                If($Tag->Attributes->IsAttr($AN))
+                {
+                  $Link=$Tag->Attributes->GetAttr($AN);
+                  $Link=$this->Convert_Link(
+                    $Link, $Data,
+                    Array(
+                      'tagName'=>$Tag->tagName,
+                      'Tag'=>$Tag,
+                      'Attribute'=>$AN,
+                    )
+                  );
+                  $Tag->Attributes->SetAttr($AN, $Link);
+                }
+          }
+        }
+        $Tag=$Tag->ListNext;
+      }
+    }
+ 
+    Function Convert_CSS($CSS, $Data, $TagInfo=Array('tagName'=>'style'))
+    {
+      $KeyLeft=$Data['CssID'];
+      If($KeyLeft)
+        $CSS->AddKeyLeft($KeyLeft);
+      ForEach($CSS->Styles As $k=>$Tmp)
+      {
+        $v=$CSS->Styles[$k];
+        $i=$v->_Object_Info();
+        $TagInfo['_Style']=$v;
+        If(IsSet($i[class_Interface]['xml/css/file']))
+          $this->Convert_CSS($v, $Data, $TagInfo);
+        If(IsSet($i[class_Interface]['xml/css/style']))
+          $this->Convert_Style($v, $Data, $TagInfo);
+      }
+    }
+ 
+    Function Convert_Style($Style, $Data, $TagInfo=Array('tagName'=>'style'))
+    {
+      $this->_Convert_Style_CallBack_Data=$Data;
+      $this->_Convert_Style_CallBack_TagInfo=&$TagInfo;
+      If($this->Z_Convert_Links)
+        ForEach($Style->Styles As $k1=>$v)
+        {
+          $TagInfo['Style']=$k1;
+          $Style->Styles[$k1]=
+            Preg_Replace_CallBack(
+              '/(URL\\()([^\\)]*?)(\\))/isS',
+              Array($this, '_Convert_Style_CallBack'), $v);
+        }
+      $this->_Convert_Style_CallBack_Data=null;
+      $this->_Convert_Style_CallBack_TagInfo=null;
+    }
+ 
+    Function _Convert_Style_CallBack($V)
+    {
+      $Data=$this->_Convert_Style_CallBack_Data;
+      $TagInfo=$this->_Convert_Style_CallBack_TagInfo;
+      $Link=$V[2];
+      $ZQw=False;
+      $l=StrLen($Link)-1;
+      If($l>0)
+        If($Link{0}==='"' && $Link{$l}==='"')
+          $ZQw='"';
+        ElseIf($Link{0}==="'" && $Link{$l}==="'")
+          $ZQw="'";
+      If($ZQw)
+        $Link=SubStr($Link, 1, $l-1);
+      $Link=$this->Convert_Link(
+        $Link, $Data, $TagInfo
+      );
+      If($ZQw)
+        Return $V[1].$ZQw.$Link.$ZQw.$V[3];
+      Return $V[1].$Link.$V[3];
+    }
+ 
+    Function Convert_Link($Link, $Data, $TagInfo)
+    {
+      If($this->On_Covert_Link)
+        Return Call_User_Func($this->On_Covert_Link, $this, $Link, $Data, $TagInfo);
+      Return $Data['f'].$Link.$Data['e'];
+    }
+  }
+?>

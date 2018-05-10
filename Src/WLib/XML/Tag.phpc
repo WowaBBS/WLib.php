@@ -1,0 +1,425 @@
+<?
+  $Loader->Load_Class('/Object');
+ 
+  Define('OnXmlTagDelete', 1);
+ 
+  Class C_XML_Tag Extends C_Object
+  {
+    Var $ID          ; // Идентификтор
+    Var $tagName     ; // Имя тега
+ 
+    Var $Document    ; // XML файл
+    Var $ListNext = False ; // Следующий тег в списке
+    Var $ListPrev = False ; // Предыдущий тег в списке
+ 
+  //Var $childNodes  ; // Список детей
+ 
+  //Var $firstChild  ; // Первый ребёнок
+  //Var $lastChild   ; // Последний ребёнок
+  //Var $nextSibling ; // Следующий узел дерева
+  //Var $parentNode  ; // Отец данного узла
+ 
+    Function parentNode($C=1)
+    {
+      $Tag=$this->_parent();
+      While($Tag)
+      {
+        $C--;
+        If(!$C)
+          Return $Tag;
+        $Tag=$this->_parent();
+      }
+      Return $Tag;
+    }
+ 
+    Function parentTo($tagName)
+    {
+      $Tag=$this->_parent();
+      While($Tag)
+      {
+        If($Tag->tagName==$tagName)
+          Return $Tag;
+        $Tag=$this->_parent();
+      }
+      Return $Tag;
+    }
+ 
+    Function _Begin_Tag()
+    {
+      If($this->Is_End_Tag())
+        Return $this->EndTag;
+      Return $this;
+    }
+ 
+    Function _End_Tag()
+    {
+      If($this->Is_Begin_Tag())
+        Return $this->EndTag;
+      Return $this;
+    }
+ 
+    Function Is_Begin_Tag()
+    {
+      Return IsSet($this->EndTag) && $this->EndTag && !$this->_f;
+    }
+ 
+    Function Is_End_Tag()
+    {
+      Return IsSet($this->EndTag) && $this->EndTag && $this->_f;
+    }
+ 
+    Function Is_One_Tag()
+    {
+      Return !IsSet($this->EndTag)||!$this->EndTag;
+    }
+ 
+    Function Typ_Tag()
+    {
+      If(!IsSet($this->EndTag))
+        Return 0;
+      If(!$this->EndTag)
+        Return 0;
+      Return $this->_f?-1:1;
+    }
+ 
+    Function _parent()
+    {
+      $Tag=$this->_Begin_Tag();
+      $Tag=$Tag->ListPrev;
+      While($Tag)
+      {
+        If(IsSet($Tag->EndTag) && $Tag->EndTag)
+          If($Tag->_f)
+            $Tag=$Tag->EndTag;
+          Else
+            Return $Tag;
+        $Tag=$Tag->ListPrev;
+      }
+      Return $Tag;
+    }
+ 
+    Function _bottom()
+    {
+      If(IsSet($this->EndTag) && $this->EndTag && !$this->_f)
+        $Tag=$this->EndTag->ListNext;
+      Else
+        $Tag=$this->ListNext;
+      If(IsSet($Tag->EndTag) && $Tag->EndTag && $Tag->_f)
+        Return null;
+      Return $Tag;
+    }
+ 
+    Function _top()
+    {
+    //If(IsSet($this->EndTag) && $this->EndTag && $this->_f)
+    //  $Tag=$this->EndTag->ListPrev;
+    //Else
+        $Tag=$this->ListPrev;
+      If(IsSet($Tag->EndTag) && $Tag->EndTag)
+        If($Tag->_f)
+          $Tag=$Tag->EndTag;
+        Else
+          Return null;
+      Return $Tag;
+    }
+ 
+    Function _child()
+    {
+      If(!IsSet($this->EndTag)||!$this->EndTag)
+      {
+        $NULL=NULL;
+        Return $NULL;
+      }
+ 
+    //If($this->_f)
+    //  $Tag=$this->EndTag->ListNext;
+    //Else
+      $Tag=$this->ListNext;
+      If($this->EndTag->Object_Id===$Tag->Object_Id)
+      {
+        $NULL=NULL;
+        Return $NULL;
+      }
+      Return $Tag;
+    }
+ 
+    Function _childL()
+    {
+      If(!IsSet($this->EndTag)||!$this->EndTag)
+        Return null;
+ 
+    //If($this->_f)
+    //  $Tag=$this->ListPrev;
+    //Else
+      $Tag=$this->EndTag->ListPrev;
+      If($this->Object_Id===$Tag->Object_Id)
+      {
+        $NULL=NULL;
+        Return $NULL;
+      }
+      Return $Tag;
+    }
+ 
+    Function _Cmd($Cmd)
+    {
+      Switch($Cmd)
+      {
+      Case 't' : $Tag=$this->_top();    Break;
+      Case 'b' : $Tag=$this->_bottom(); Break;
+      Case 'c' : $Tag=$this->_child();  Break;
+      Case 'cl': $Tag=$this->_childL(); Break;
+      Case 'p' : $Tag=$this->_parent(); Break;
+      Case 'r' : $Tag=$this->ListNext;  Break;
+      Case 'l' : $Tag=$this->ListPrev;  Break;
+      Default  : Trigger_Error('Unknown command');
+      }
+      Return $Tag;
+    }
+ 
+    Function Go($Cmds)
+    {
+      $NULL=NULL;
+      $Tag=$this;
+      ForEach($Cmds As $Cmd)
+      {
+        $C0=$Cmd[0];
+        If(IsSet($Cmd[1]))
+        {
+          $C1=$Cmd[1];
+          If(Is_Integer($C1))
+          {
+            $i=$C1;
+            While($i--)
+            {
+              $Tag=$Tag->_Cmd($C0);
+              If(!$Tag)
+                Break 2;
+            }
+          }
+          ElseIf(Is_String($C1))
+          {
+            $Tag=$Tag->_Cmd($C0);
+            While($Tag)
+            {
+              If(!IsSet($Tag->_f)||!$Tag->_f)
+                If($Tag->tagName==$C1)
+                  Break;
+              $Tag=$Tag->_Cmd($C0);
+            }
+          }
+        }
+        Else
+          $Tag=$Tag->_Cmd($C0);
+        If(!$Tag)
+          Break;
+      }
+      Return $Tag;
+    }
+ 
+    Function Delete_Left()
+    {
+      If(IsSet($Tag->EndTag) && $Tag->EndTag && $Tag->_f)
+        Return $Tag->EndTag->Delete_Left();
+      While($Tag=$this->ListPrev)
+      {
+        If(IsSet($Tag->EndTag) && $Tag->EndTag)
+          If(!$Tag->_f)
+            Return $Tag;
+        $Tag->Delete(True);
+      }
+      Return $Tag;
+    }
+ 
+    Function Delete_Right()
+    {
+      If(IsSet($this->EndTag) && $this->EndTag && !$this->_f)
+      {
+        $Res=$this->EndTag->Delete_Right();
+        Return $Res;
+      }
+      While($Tag=$this->ListNext)
+      {
+        If(IsSet($Tag->EndTag) && $Tag->EndTag)
+          If($Tag->_f)
+            Return $Tag;
+        $Tag->Delete(True);
+      }
+      Return $Tag;
+    }
+ 
+    Function ListFirst($ADocument)
+    {
+      $this->Document = $ADocument;
+      $this->ListPrev = false;
+      $this->ListNext = false;
+      $this->Document->FirstTag = $this ;
+      $this->Document->LastTag  = $this ;
+    }
+ 
+    Function ListAdd($ATag)
+    {
+      $ATag->Document = $this->Document ;
+      $ATag->ListPrev = $this           ;
+      $ATag->ListNext = $this->ListNext ;
+      $this->ListNext = $ATag           ;
+    //If($this->Document->LastTag->Object_Id===$this->Object_Id)
+      If($ATag->ListNext)
+        $ATag->ListNext->ListPrev=$ATag;
+      Else
+        $this->Document->LastTag=$ATag;
+    }
+ 
+    Function ListAddL($ATag)
+    {
+      $ATag->Document = $this->Document ;
+      $ATag->ListPrev = $this->ListPrev ;
+      $ATag->ListNext = $this           ;
+      $this->ListPrev = $ATag           ;
+    //If($this->Document->LastTag->Object_Id===$this->Object_Id)
+      If($ATag->ListPrev)
+        $ATag->ListPrev->ListNext=$ATag;
+      Else
+        $this->Document->FirstTag=$ATag;
+    }
+ 
+    Function ListInsert($ATag)
+    {
+      $ATag->Document = $this->Document ;
+      $ATag->ListPrev = $this->ListPrev ;
+      $ATag->ListNext = $this           ;
+      $this->ListPrev = $ATag           ;
+    //If($this->Document->LastTag->Object_Id===$this->Object_Id)
+      If($ATag->ListPrev)
+        $ATag->ListPrev->ListNext=$ATag;
+      Else
+        $this->Document->FirstTag=$ATag;
+    }
+ 
+    Function _Clear()
+    {
+      $Res=$this->ListNext;
+      $this->ListPrev=false;
+      $this->ListNext=false;
+      $this->Document=false;
+      UnSet($this->parentNode);
+      Return $Res;
+    }
+ 
+    Function OnEvent($Name, $Data=False)
+    {
+      If(!IsSet($this->_Events))
+        Return;
+      If(!IsSet($this->_Events[$Name]))
+        Return;
+      ForEach($this->_Events[$Name]As $Proc)
+        Call_User_Func($Proc, $this, $Data);
+    }
+ 
+    Function Event_Add($Name, $Proc, $ID=False)
+    {
+      If(!IsSet($this->_Events))
+        $this->_Events=Array();
+      $e=$this->_Events;
+      If(!IsSet($e[$Name]))
+        $e[$Name]=Array();
+      $e[$Name][]=$Proc;
+      If($ID)
+        FAbstract();
+    }
+ 
+    Function Event_Del($ID=False)
+    {
+      FAbstract();
+    }
+ 
+    Function ListDeleteTo($ETag)
+    {
+    /* */
+      $Id=$ETag->Object_Id;
+      $T=$this;
+      While($T && $T->Object_Id!==$Id)
+        $T=$T->ListDelete();
+      If($T)
+        $T=$T->ListDelete();
+      Return $T;
+    /* * /
+      $Id=$ETag->Object_Id;
+      $LTag=$this;
+      While($LTag->Object_Id!==$Id)
+      {
+        $LTag->OnEvent(OnXmlTagDelete);
+        $LTag=$LTag->ListNext;
+      }
+ 
+      If($this->ListPrev)
+        $this->ListPrev->ListNext=$ETag->ListNext;
+      Else
+        $this->Document->FirstTag=$ETag->ListNext;
+      If($ETag->ListNext)
+        $ETag->ListNext->ListPrev=$this->ListPrev;
+      Else
+        $this->Document->LastTag =$this->ListPrev;
+      $LTag=$this;
+      While($LTag->Object_Id!=$Id)
+      {
+        $LTag2=$LTag->_Clear();
+        $LTag->Done();
+        $LTag=$LTag2;
+      }
+      $Res=$LTag->_Clear();
+      $LTag->Done();
+      Return $Res;
+    /* */
+    }
+ 
+    Function ListDelete()
+    {
+      $this->OnEvent(OnXmlTagDelete);
+      If($this->ListPrev)
+        $this->ListPrev->ListNext=$this->ListNext;
+      Else
+        $this->Document->FirstTag=$this->ListNext;
+      If($this->ListNext)
+        $this->ListNext->ListPrev=$this->ListPrev;
+      Else
+        $this->Document->LastTag =$this->ListPrev;
+      $Res=$this->_Clear();
+      $this->Done();
+      Return $Res;
+    }
+ 
+    Function Delete($ZSub=True)
+    {
+      Return $this->ListDelete();
+    }
+ 
+    Function _Done()
+    {
+      If($this->Document)
+        $this->Delete(False);
+      parent::_Done();
+    }
+ 
+    Function _Debug()
+    {
+      $Res=parent::_Debug();
+      UnSet($Res['Document']);
+      UnSet($Res['ListNext']);
+      UnSet($Res['ListPrev']);
+      Return $Res;
+    }
+ 
+    Function asHTML($ETagID)
+    {
+      $Res=Array();
+      $LTag=$this;
+      While($LTag->Object_Id!=$ETagID)
+      {
+        $Res[]=$LTag->tagBuild();
+        $LTag=$LTag->ListNext;
+      }
+      $Res[]=$LTag->tagBuild();
+      Return Implode('', $Res);
+    }
+  }
+?>

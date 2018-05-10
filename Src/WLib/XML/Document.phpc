@@ -1,0 +1,197 @@
+<?
+  //*************************************************************************\\
+  // Unit    : C_XML_Document                                                \\
+  // Date    : 17.10.2002                                                    \\
+  // Creator : Wowa Savin <wowa@activesolutions.info>                        \\
+  //*************************************************************************\\
+ 
+  // Подключение модулей
+  $Loader->Load_Class('/Object');
+  $Loader->Load_Class('/XML/Parser');
+  $Loader->Load_Class('/XML/Tag/Document');
+ 
+  // ***************************************************************************************
+  Class C_XML_Document Extends C_Object
+  {
+    Var $FirstTag = False ;
+    Var $LastTag  = False ;
+    Var $Parser   = False ;
+ 
+    Function _Init($Args)
+    {
+      parent::_Init($Args);
+      $this->Parser=$this->Loader->Create_Object('/XML/Parser');
+      $this->Clear();
+    //$Parser->SetDocument($this);
+    //$FirstTag
+    }
+ 
+    Function _Done()
+    {
+      While($this->FirstTag)
+      {
+      //Echo '(', $this->FirstTag->Object_Id, ')';
+        $this->FirstTag->ListDelete();
+      //$this->FirstTag->Done();
+      }
+      $this->Parser->Done();
+      $this->Parser   =false;
+      $this->FirstTag =false;
+      $this->LastTag  =false;
+      parent::_Done();
+    }
+ 
+    Function Clear()
+    {
+      $this->Parser->Clear();
+      While($this->FirstTag)
+        $this->FirstTag->ListDelete();
+  
+      $Tag1=$this->Loader->Create_Object('/XML/Tag/Document');
+      $Tag2=$this->Loader->Create_Object('/XML/Tag/Document');
+  
+      $Tag2->_f='/';
+  
+      $Tag1->EndTag=$Tag2;
+      $Tag2->EndTag=$Tag1;
+  
+      $Tag1->ListFirst($this);
+      $Tag1->ListAdd($Tag2);
+  
+      $this->Parser->LastTag=$Tag1;
+    }
+ 
+    Function Parse($XML)
+    {
+      $this->Clear();
+      $this->Parser->Parse($XML);
+      $this->Parser->EndParse();
+      $this->Parser->Clear();
+    }
+ 
+    Function Build()
+    {
+      $Res=Array();
+      $Tag=$this->FirstTag;
+      While($Tag)
+      {
+        $Res[]=$Tag->TagBuild();
+        $Tag=$Tag->ListNext;
+      }
+      Return Implode('', $Res);
+    }
+ 
+    Function BuildHash()
+    {
+      Return $this->FirstTag->TagBuildHash();
+    }
+ 
+    Function LoadFromFile($FileName)
+    {
+      $this->Clear();
+      $this->Parse(File_Get_Contents($FileName));
+    }
+ 
+    Function SaveToFile($FileName)
+    {
+      File_Put_Contents($FileName, $this->Build());
+    }
+ 
+    Function _Export()
+    {
+      $Idx=0;
+      $Idxs=Array();
+  
+      $Tag=$this->FirstTag;
+      While($Tag)
+      {
+        $Idxs[$Tag->Object_Id]=$Idx;
+        $Idx++;
+        $Tag=$Tag->ListNext;
+      }
+ 
+      $Res=Array();
+      $Idx=0;
+      $Tag=$this->FirstTag;
+      While($Tag)
+      {
+        $Res[]=$Tag->_Export($Idx);
+        $Idx++;
+        $Tag=$Tag->ListNext;
+      }
+      Return $Res;
+    }
+ 
+    Function _Debug()
+    {
+      $Res=parent::_Debug();
+      UnSet($Res['FirstTag']);
+      UnSet($Res['LastTag' ]);
+      $Tags=Array();
+      $Tag=$this->FirstTag;
+      While($Tag)
+      {
+        $Tags[$Tag->Object_Id]=$Tag;
+        $Tag=$Tag->ListNext;
+      }
+      $Res['Tags']=$Tags;
+      Return $Res;
+    }
+ 
+    Function Process_Parent()
+    {
+      $Prnt=NULL;
+      $Tag=$this->FirstTag;
+      While($Tag)
+      {
+        If(IsSet($Tag->EndTag) && $Tag->EndTag)
+          If($Tag->_f)
+          {
+            $Prnt=$Tag->EndTag->parentNode;
+            $Tag->parentNode=$Prnt;
+          }
+          Else
+          {
+            $Tag->parentNode=$Prnt;
+            $Prnt=$Tag;
+          }
+        Else
+          $Tag->parentNode=$Prnt;
+        $Tag=$Tag->ListNext;
+      }
+    }
+ 
+    Function Rules_Process($A_Rules)
+    {
+      $Tag=$this->FirstTag;
+    //$Tag->Rules=$A_Rules->_Lock();
+      $Rules=$A_Rules->_Lock();
+    //$Tag=$Tag->ListNext;
+      While($Tag)
+      {
+        If(IsSet($Tag->EndTag) && $Tag->EndTag)
+          If($Tag->_f)
+          {
+            $Rules->_UnLock();
+            $Rules=$Tag->EndTag->Rules;
+            UnSet($Tag->EndTag->Rules);
+          }
+          Else
+          {
+            $Tag->Rules=$Rules;
+            $Rules=$Rules->Rules_For_Tag($Tag);
+          //Debug(Array($Tag, $Rules));
+          }
+        Else
+        {
+          If(!$Tag->_f)
+            $Rules->Process_Rules_For_Tag($Tag);
+        }
+         $Tag=$Tag->ListNext;
+       }
+      $Rules->_UnLock();
+    }
+  }
+ 
+  // ***************************************************************************************
+?>

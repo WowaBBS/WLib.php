@@ -1,0 +1,72 @@
+<?
+  $Loader->Load_Class('/Object');
+ 
+  Class C_XML_CSS_Keys Extends C_Object
+  {
+    Var $Keys=Array();
+ 
+    Function Clear()
+    {
+      $this->Keys=Array();
+    }
+ 
+    Function ParseKey($Str)
+    {
+      $Sp='\\t\\r\\n\\s';
+      $Key=Preg_Replace('\(?>['.$Sp.']*)>['.$Sp.']*\isS', '>', $Str);
+      $Key=Preg_Replace('\['.$Sp.']*\isS', ' ', $Key);
+      $Key=Trim($Key);
+      Preg_Match_All('\(?:['.$Sp.'>]|[^'.$Sp.'>]*)\isS', $Key, $List);
+      $List=$List[0];
+      $L2=Array();
+      $Typ=0;
+      ForEach($List As $k)
+        If($k==' ')
+          $Typ=0;
+        ElseIf($k=='>')
+          $Typ=1;
+        Else
+        {
+          $Kw='\w\d_';
+          Preg_Match_All('\(?>[^'.$Kw.']*['.$Kw.']+)\isS', $k, $L);
+          $L3=Array(' '=>$Typ);
+          ForEach($L As $v)
+            $L3[$v]=True;
+          $L2[]=$L3;
+        }
+      Return $L2;
+    }
+ 
+    Function AddKey($Key)
+    {
+      If(Is_String($Key))
+        $Key=$this->ParseKey($Key);
+      $this->Keys[]=$Key;
+    //Preg_Match_All('\[\\t\\r\\n\\s>]\is', $Key);
+    }
+ 
+    Function AddStr($Str)
+    {
+      $Lst=Explode(',', $Str);
+      ForEach($Lst As $Key)
+        $this->AddKey($Key);
+    }
+ 
+    Function Make()
+    {
+      $Res=Array();
+      ForEach($this->Keys As $L2)
+      {
+        $R2=Array();
+        ForEach($L2 As $L3)
+        {
+          $T=$L3[' '];
+          UnSet($L3[' ']);
+          $R2[]=($T?'>':'').Implode('', Array_Keys($L3));
+        }
+        $Res[]=Implode(' ', $R2);
+      }
+      Return Implode(', ', $Res);
+    }
+  }
+?>

@@ -1,0 +1,10 @@
+<?
+  $Loader->Load_Class('/XML/CSS/Rule');
+ 
+  Class C_XML_CSS_Rule_Class Extends C_XML_CSS_Rule
+  {
+    Function Set_Class($AClass)
+    {
+    }
+  }
+?>

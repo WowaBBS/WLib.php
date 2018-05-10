@@ -1,0 +1,219 @@
+<?
+  $Loader->Load_Class('/XML/Tag'       );
+  $Loader->Load_Class('/XML/Attributes');
+ 
+  Class C_XML_Tag_Base Extends C_XML_Tag
+  {
+    Var $EndTag = False ; // Завершение/Начало тега
+ 
+    Var $_f; // Строка в начале тега, в основном для завершающихся тегов равна ,,/'', а для открывающихся - пустая строка, напр </a>
+    Var $_e; // Строка в конце тега, в основном для одиночных тегов равна ,,/'', а для остальных - пустая строка, напр <br/>
+  //Var $Attributes ;
+ 
+    Function _Init($Args)
+    {
+      parent::_Init($Args);
+      If(IsSet($Args['tagName']))
+      {
+        $this->tagName = $Args['tagName'   ];
+        If($Args['_f']!=='/')
+        {
+          $this->Attributes=$this->Loader->Create_Object('/XML/Attributes');
+          $this->Attributes->AddStr($Args['Attributes']);
+        }
+        $this->_f = $Args['_f'        ];
+        $this->_e = $Args['_e'        ];
+      }
+      Else
+        $this->Attributes=$this->Loader->Create_Object('/XML/Attributes');
+    }
+ 
+    Function _Done()
+    {
+      If(IsSet($this->Attributes) && $this->Attributes)
+      {
+        $this->Attributes->Done();
+        $this->Attributes=NULL;
+      }
+      parent::_Done();
+    }
+ 
+    Function TagBuild()
+    {
+      $Res=Array(
+        '<',
+        $this->_f,
+        $this->tagName,
+        (IsSet($this->Attributes) && $this->Attributes->Attr? ' '.$this->Attributes->Make():''),
+        $this->_e,
+        '>'
+      );
+      Return Implode('', $Res);
+    }
+ 
+    Function Chields()
+    {
+      If($this->_f)
+        Return Array();
+      $ETag=$this->EndTag;
+      If(!$ETag)
+        Return Array();
+      $Res=Array();
+      $Id=$ETag->Object_Id;
+      $LTag=$this->ListNext;
+      While($LTag->Object_Id!=$Id)
+      {
+        $Res[]=$LTag;
+        If(IsSet($LTag->EndTag) && $LTag->EndTag)
+          $LTag=$LTag->EndTag;
+        $LTag=$LTag->ListNext;
+      }
+      Return $Res;
+    }
+ 
+    Function TagBuildHash()
+    {
+      $Res=Array('t'=>'b', 'n'=>$this->tagName);
+      If($this->EndTag)
+      {
+        $Childs=$this->Chields();
+        $R=Array();
+        ForEach($Childs As $k=>$v)
+          $R[]=$Childs[$k]->TagBuildHash();
+        $Res['c']=$R;
+      }
+      Return $Res;
+    }
+ 
+    Function _Clear()
+    {
+      If($this->EndTag)
+      {
+        $this->EndTag->EndTag=null;
+        $this->EndTag=null;
+      }
+      $Res=parent::_Clear();
+    //$Res=T_XML_Tag::_Clear();
+      Return $Res;
+    }
+ 
+    Function Delete($ZSub=True, $ZMain=True)
+    {
+      If(!$this->EndTag)
+        If($ZMain)
+          Return $this->ListDelete();
+        Else
+          Return $this;
+      If($ZSub)
+      {
+        If($this->_f)
+        {
+          $T1=$this->EndTag;
+          $T2=$this;
+        }
+        Else
+        {
+          $T1=$this;
+          $T2=$this->EndTag;
+        }
+        If(!$ZMain)
+        {
+          $T1=$T1->ListNext;
+          If($T1->Object_Id===$T2->Object_Id)
+            Return $this;
+          $T2=$T2->ListPrev;
+          $T1->ListDeleteTo($T2);
+          Return $this;
+        }
+ 
+        Return $T1->ListDeleteTo($T2);
+      }
+      If(!$ZMain)
+        Return $this;
+      $this->EndTag->ListDelete();
+      Return $this->ListDelete();
+    }
+ 
+    Function innerText()
+    {
+      If($this->_f)
+        Return '';
+      $ETag=$this->EndTag;
+      If(!$ETag)
+        Return '';
+      $Res=Array();
+      $LTag=$this;
+      While($LTag->Object_Id!==$ETag->Object_Id)
+      {
+        If($LTag->tagName=='#text')
+          $Res[]=$LTag->value;
+        $LTag=$LTag->ListNext;
+      }
+      Return Implode('', $Res);
+    }
+ 
+    Function innerHTML()
+    {
+      If($this->_f)
+        Return '';
+      $ETag=$this->EndTag;
+      If(!$ETag)
+        Return '';
+      $Res=Array();
+      $LTag=$this;
+      $LTag=$LTag->ListNext;
+      While($LTag->Object_Id!==$ETag->Object_Id)
+      {
+        $Res[]=$LTag->tagBuild();
+        $LTag=$LTag->ListNext;
+      }
+      Return Implode('', $Res);
+    }
+ 
+    Function innerText_Length()
+    {
+      If($this->_f)
+        Return 0;
+      $ETag=$this->EndTag;
+      If(!$ETag)
+        Return 0;
+      $Res=0;
+      $LTag=$this;
+      While($LTag->Object_Id!==$ETag->Object_Id)
+      {
+        If($LTag->tagName=='#text')
+          $Res+=StrLen($LTag->value);
+        $LTag=$LTag->ListNext;
+      }
+      Return $Res;
+    }
+ 
+    Function GetCData($SkipComment=False)
+    {
+      $Res=$this->innerText();
+      If($SkipComment)
+        $Res=Preg_Replace('/^[\\s\\t\\n]*<!--(.*)-->[\\s\\t\\n]*$/is', '\\1', $Res);
+      Return $Res;
+    }
+ 
+    Function PutCData($Data, $AddComment=False)
+    {
+      $this->Delete(True, False);
+      If($AddComment!==False)
+        $Data="\n<!--\n".$Data.$AddComment."-->\n";
+      $NewTag=$this->Loader->Create_Object('/XML/Tag/Text', Array($Data));
+      $this->ListAdd($NewTag);
+    }
+ 
+    Function _Debug()
+    {
+      $Res=parent::_Debug();
+      If($Res['EndTag'])
+      {
+        UnSet($Res['EndTag']);
+        $Res['EndTag']=$this->EndTag->Object_Id;
+      }
+      Return $Res;
+    }
+  }
+?>

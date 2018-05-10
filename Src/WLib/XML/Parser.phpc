@@ -1,0 +1,286 @@
+<?
+  //*************************************************************************\\
+  // Unit    : T_XML_Parser                                                  \\
+  // Date    : 17.10.2002                                                    \\
+  // Creator : Wowa Savin <wowa@activesolutions.info>                        \\
+  //*************************************************************************\\
+ 
+  $Loader->Load_Class('/Object'   );
+  $Loader->Load_Class('/XML/Tag/Base'    );
+  $Loader->Load_Class('/XML/Tag/Comment' );
+  $Loader->Load_Class('/XML/Tag/Script'  );
+  $Loader->Load_Class('/XML/Tag/Text'    );
+ #$Loader->Load_Lib('/Support/PHP5');
+ 
+  Define('idxTagAll'    ,0);
+  Define('idxTagText'   ,1);
+  Define('idxTagTag'    ,2);
+  Define('idxTagRem'    ,3);
+  Define('idxTagScript' ,4);
+  Define('idxTagFirst'  ,5);
+  Define('idxTagName'   ,6);
+  Define('idxTagAttr'   ,7);
+  Define('idxTagEnd'    ,8);
+ 
+  Class C_XML_Parser Extends C_Object
+  {
+    Var $LastTag=False ; // Тег, после которого будет добавляться новый!
+    Var $Rest = ''    ; // Остаток необработанного текста
+    Var $LastTags=Array(); // Теги требующие своего завершения
+    Var $Mode = 0     ; // Режим парсера
+    Var $CDataText = Array(); // Данные CData
+    Var $TagConv='StrToLower';
+ 
+    Var $TagsCData=Array('style'=>True, 'script'=>True, 'title'=>True);
+    Var $TagsEmpty=Array('br'=>True, 'hr'=>True);
+ 
+  //Var $TagsCData=Array();
+  //Var $TagsEmpty=Array();
+ 
+    Var $CData_List=Array();
+    Var $Unique_ID=False; // TODO
+ 
+    Function _Init($Args)
+    {
+      parent::_Init($Args);
+      $this->Unique_ID='('.mt_rand().')'; // TODO
+      $this->Clear();
+    }
+ 
+    Function _Done()
+    {
+      $this->Rest='';
+      $this->LastTags=Array();
+      $this->LastTag=false;
+      $this->Mode=0;
+      parent::_Done();
+    }
+ 
+    Function Clear()
+    {
+      $this->Rest='';
+      $this->LastTags=Array();
+      $this->LastTag=false;
+      $this->Mode=0;
+      $this->CDataText=Array();
+    }
+ 
+    Function TagConv($Str)
+    {
+      $T=$this->TagConv;
+      Return $T($Str);
+    }
+ 
+    Function AddTagCData($Tags=Array())
+    {
+      If(!Is_Array($Tags))
+        $Tags=Array($Tags);
+      ForEach($Tags As $Tag)
+        $this->TagsCData[$this->TagConv($Tag)]=True;
+    }
+ 
+    Function AddTagEmpty($Tags=Array())
+    {
+      If(!Is_Array($Tags))
+        $Tags=Array($Tags);
+      ForEach($Tags As $Tag)
+        $this->TagsEmply[$this->TagConv($Tag)]=True;
+    }
+ 
+    /**
+     * Добавляет тег в конец
+     *
+     * @param T_XML_Tag $Tag
+     */
+    Function AddTag($Tag)
+    {
+      $this->LastTag->ListAdd($Tag);
+      $this->LastTag=$Tag;
+    }
+ 
+    Function _VeryEndTag($NewTag)
+    {
+      $LastTags=&$this->LastTags;
+      For($i=Count($LastTags)-1;$i>=0;$i--)
+        If($LastTags[$i]->tagName==$NewTag->tagName)
+          Break;
+      If($i>=0)
+      {
+        $LastTags[$i]->EndTag=$NewTag;
+        $NewTag->EndTag=$LastTags[$i];
+        $Cnt=Count($LastTags);
+        For($i=$i;$i<$Cnt;$i++) // ??
+          UnSet($LastTags[$i]);
+      }
+    }
+ 
+    Function Replace_CData($V)
+    {
+    //Debug($V);
+      If(IsSet($V[5]) && $V[5])
+        Return $V[5];
+      $UID=$this->Unique_ID;
+      $ID=Count($this->CData_List);
+      $this->CData_List[]=$V[3];
+      Return $V[1].$UID.$ID.$UID.$V[4];
+    }
+ 
+    Function Parse($XML)
+    {
+      If($this->Rest)
+      {
+        $XML=$this->Rest.$XML;
+        $this->Rest='';
+      }
+      // Внутритежное пространство
+    //$Vnutr='[^\\/<>\'"]*?';
+    //$Vnutr='[^\\/<>\'"]*';
+      $Vnutr='[^\\/>]*';
+      // Одинарные кавычки
+    //$Qw ="'[^'\\\\]*?(?:\\\\'[^'\\\\]*?)*?'";
+      $Qw ="'[^']*'";
+      // Двойные ковычки
+    //$DQw='"[^"\\\\]*?(?:\\\\"[^"\\\\]*?)*?"';
+      $DQw='"[^"]*"';
+      // Внутритежное пространство
+    //$Vnutr='(?:'.$Vnutr.'|'.$Qw.'|'.$DQw.')*?'.$Vnutr;
+    //$Vnutr='(?:'.$Vnutr.'|'.$Qw.'|'.$DQw.')*'.$Vnutr;
+      $Vnutr='(?:'.$Vnutr.'|=\s*(?:'.$Qw.'|'.$DQw.')|\\/[^>])*'.$Vnutr;
+      // Тэг обычный
+    //$Tag='<(\/)?(!?[\\?\#\:\w]+)('.$Vnutr.')(\/?)>';
+      $Tag='<(\/?)(\\!?[\\?\#\:\w]+)('.$Vnutr.')(\/?)>';
+      // Тэг комментарий
+      $TagC='<!--(.*?)-->';
+      // Тэг скрипт
+      $TagS='<\\?1234asdf(.*?)\\?1234asdf'.'>';
+      // Тэг другой
+    //$TagN='<!(.*?)>';
+      $Q='(.*?)((?:'.$TagC.')|(?:'.$TagS.')|(?:'.$Tag.'))';
+    //$Q='(.*?)((?:'.$TagC.')|(?:'.$Tag.'))';
+      $LastTags=&$this->LastTags;
+  
+      $XML=Preg_Replace_CallBack(
+        '/(?:(<('.
+          Implode('|', Array_Keys($this->TagsCData)).
+          ')[^>]*>)(.*?)(<\\/\\2[^>]*>)|(<!--.*?-->))/siS',
+        Array($this, 'Replace_CData'), $XML
+      );
+      $Len=0;
+      $Count=Preg_Match_All('/'.$Q.'/isS', $XML, $_Tags, PREG_SET_ORDER);
+      $LE=Preg_Last_Error();
+      Switch($LE)
+      {
+      Case PREG_NO_ERROR              : $LE= False ;            Break;
+      Case PREG_INTERNAL_ERROR        : $LE='Internal'        ; Break;
+      Case PREG_BACKTRACK_LIMIT_ERROR : $LE='BackTrack limit' ; Break;
+      Case PREG_RECURSION_LIMIT_ERROR : $LE='Recursion limit' ; Break;
+      Case PREG_BAD_UTF8_ERROR        : $LE='Bad utf8'        ; Break;
+      }
+      If($LE)
+        Trigger_Error('Xml/Parser/Preg_Last_Error: '.$LE);
+    //Debug($_Tags);
+      For($i=0;$i<$Count;$i++)
+    //ForEach($_Tags As $v)
+    //While(Preg_Match('/^'.Preg_Offset($Len).$Q.'/is', $XML, $v))
+    //While(Preg_Match('/'.$Q.'/is', $XML, $v, 0, $Len))
+      {
+        $v=$_Tags[$i];
+        UnSet($_Tags[$i]);
+        $NewTag=false;
+      //Echo Implode(',', $v), "\n";
+      //Echo StrLen($v[0]), ' ';
+        $Len+=StrLen($v[0]);
+        If($this->Mode==0)
+        {
+          If($v[idxTagText   ])
+            $this->Add_Tag_Text($v[idxTagText]);
+          // pcdate cdate
+          If($v[idxTagRem    ])
+            $NewTag=$this->Loader->Create_Object('/XML/Tag/Comment' ,Array($v[idxTagRem   ]));
+          ElseIf($v[idxTagScript ])
+            $NewTag=$this->Loader->Create_Object('/XML/Tag/Script'  ,Array($v[idxTagScript]));
+          Else
+          {
+            $tagName=$this->TagConv($v[idxTagName]);
+  
+            $NewTag=$this->Loader->Create_Object('/XML/Tag/Base', Array(
+              'tagName'    => $tagName,
+              'Attributes' => $v[idxTagAttr  ],
+              '_f'         => $v[idxTagFirst ],
+              '_e'         => $v[idxTagEnd   ],
+            ));
+            If($NewTag->_f)
+              $this->_VeryEndTag($NewTag);
+            If(!$NewTag->_f && !$NewTag->_e && !IsSet($this->TagsEmply[$tagName]))
+            {
+              If(IsSet($this->TagsCData[$tagName]))
+              {
+                $this->Mode=1;
+                $this->CDataText=Array();
+              }
+              $LastTags[Count($LastTags)]=$NewTag;
+            }
+          }
+        }
+        ElseIf($this->Mode==1)
+        {
+          If($v[idxTagRem    ])
+            $this->CDataText[]=$v[idxTagAll];
+          ElseIf($v[idxTagScript ])
+            $this->CDataText[]=$v[idxTagAll];
+          ElseIf(!$v[idxTagFirst ]||($this->TagConv($v[idxTagName])!=$this->LastTag->tagName))
+            $this->CDataText[]=$v[idxTagAll];
+          Else
+          {
+            $this->CDataText[]=$v[idxTagText];
+            $Text=Implode('', $this->CDataText);
+            $this->CDataText=Array();
+  
+            $this->Add_Tag_Text($Text);
+  
+            $tagName=$this->TagConv($v[idxTagName]);
+            $NewTag=$this->Loader->Create_Object('/XML/Tag/Base', Array(
+              'tagName'    => $tagName,
+              'Attributes' => $v[idxTagAttr  ],
+              '_f'         => $v[idxTagFirst ],
+              '_e'         => $v[idxTagEnd   ],
+            ));
+ 
+            $this->_VeryEndTag($NewTag);
+            $this->Mode=0;
+          }
+        //$this->Rest
+        }
+        If($NewTag)
+          $this->AddTag($NewTag);
+      }
+      If($Len<>StrLen($XML))
+        $this->Rest=SubStr($XML, $Len, StrLen($XML)-$Len);
+      Else
+        $this->Rest='';
+    //Debug($this->Rest);
+    //File_Put_Contents('ttt', $this->Rest);
+    }
+ 
+    Function Add_Tag_Text($Text)
+    {
+      $T=Explode($this->Unique_ID, $Text); // TODO:
+      $CT=Count($T);
+      If($CT>1)
+      {
+        For($i=1;$i<$CT;$i+=2)
+          $T[$i]=$this->CData_List[$T[$i]];
+        $Text=Implode('', $T);
+      }
+      $NewTag=$this->Loader->Create_Object('/XML/Tag/Text', Array($Text));
+      $this->AddTag($NewTag);
+    }
+ 
+    Function EndParse()
+    {
+      If($this->Rest)
+        $this->Add_Tag_Text($this->Rest);
+      $this->Rest='';
+    }
+  }
+?>

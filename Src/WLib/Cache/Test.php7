@@ -4,11 +4,11 @@
   $CM=$Loader->Create_Object('/Cache/Manager');
   $F=$CM->GetEnumDir('', ['Cfg'=>['T2'=>['Pad'=>2, 'NoZero'=>true, 'Split'=>'_']]]);
   $List=[
-    [1,''],
-    [2,''],
-    [3,''],
-    [4,'T2'],
-    [6,'T2'],
+    [1, ''],
+    [2, ''],
+    [3, ''],
+    [4, 'T2'],
+    [6, 'T2'],
   ];
   
   shuffle($List);

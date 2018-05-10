@@ -28,7 +28,7 @@
       if(IsSet($this->Files[$FileName]))
         return $this->Files[$FileName];
       $Res=$this->Create($FileName, $bAppend);
-    //Echo 'DebugCreate(',$FileName,")[",Implode(', ', Array_Keys($this->Files)),"]",$this->Object_Id,"\n";
+    //$this->Log('Debug', 'DebugCreate(', $FileName, ")[", Implode(', ', Array_Keys($this->Files)), "]", $this->Object_Id);
       $this->Files[$FileName]=$Res;
       return $Res;
     }
@@ -68,7 +68,7 @@
  
     Function ProcessClass($Ctx, $Class, $Value)
     {
-    //If(Method_Exists($Value,'_Debug'))
+    //If(Method_Exists($Value, '_Debug'))
     //  $v=$Value->_Debug();
     //Else
       $Func=$this->GetClass($Class);

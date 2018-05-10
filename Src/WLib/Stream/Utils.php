@@ -31,13 +31,13 @@
    {
      $Res=[];
      If($AMode&omMakePath ) $Res[]=['CreatePath'];
-     If($AMode&omExist    ) $Res[]=['Exists',True ];
-     If($AMode&omNotExist ) $Res[]=['Exists',False];
-     Else                   $Res[]=['Open'  ,OpW2C($AMode)];
-     If($AMode&omCreate   ) $Res[]=['Open'  ,'w+'];
+     If($AMode&omExist    ) $Res[]=['Exists' ,True ];
+     If($AMode&omNotExist ) $Res[]=['Exists' ,False];
+     Else                   $Res[]=['Open'   ,OpW2C($AMode)];
+     If($AMode&omCreate   ) $Res[]=['Open'   ,'w+'];
                             $Res[]=['TestOpen'   ];
-     If($AMode&omExclusive) $Res[]=['Lock'  ,LOCK_EX];
-     If($AMode&omShareable) $Res[]=['Lock'  ,LOCK_SH];
+     If($AMode&omExclusive) $Res[]=['Lock'   ,LOCK_EX];
+     If($AMode&omShareable) $Res[]=['Lock'   ,LOCK_SH];
      If($AMode&omClear    ) $Res[]=['Clear' ];
      If($AMode&omAppend   ) $Res[]=['Append'];
      Return $Res;

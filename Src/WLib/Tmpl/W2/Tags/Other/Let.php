@@ -2,7 +2,7 @@
   Class T_W2_Tag_Let
   {
     Static $InnerTags=[
-      'item' => ['#Template','Default'],
+      'item' => ['#Template', 'Default'],
     ];
  
     Function MakeAttr($Tag)
@@ -20,7 +20,7 @@
       $Tags['item'][0]->MakePHPInnerId($Builder, $Tags['item'][1]);
       $vOut=$Builder->Out->Get();
       $Builder->Out->End(False);
-      $Builder->Add_Line("  _put_var_(".$vOut.",'".$Params."'".','.$Builder->Vars().');'."\n");
+      $Builder->Add_Line("  _put_var_(".$vOut.", '".$Params."'".', '.$Builder->Vars().');'."\n");
     }
   }
 ?>

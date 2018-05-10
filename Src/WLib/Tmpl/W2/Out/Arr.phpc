@@ -16,7 +16,7 @@
  
     Function FEnd()
     {
-      $this->Base->Add_Line("Return Implode('',\$Res);");
+      $this->Base->Add_Line("Return Implode('', \$Res);");
     }
  
     Function Capture($Func=NULL, $Size=False)
@@ -60,7 +60,7 @@
     {
       $ov=$this->Var;
       $this->Var=False;
-      $Res="Implode('',".$ov.')';
+      $Res="Implode('', ".$ov.')';
       $ol=$this->List;
       If($ol)
       {
@@ -96,7 +96,7 @@
       Else
       {
         $this->Base->Add_Line($Data.';');
-      //$this->Var=$this->Var_Add('Res',Count($this->List)-1),
+      //$this->Var=$this->Var_Add('Res', Count($this->List)-1),
       //$this->Base->Add_Line($ov.'=['.$Data.'];');
       }
     }
@@ -109,7 +109,7 @@
         "\r" => "'".'."\\r".'."'",
       ];
       $TextE="'";
-      $Text=Explode("\n",strtr($Text, $R));
+      $Text=Explode("\n", StrTr($Text, $R));
       If(Count($Text)>1 && $Text[Count($Text)-1]==='')
       {
         UnSet($Text[Count($Text)-1]);

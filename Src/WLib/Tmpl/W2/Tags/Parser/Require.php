@@ -16,7 +16,7 @@
       $A=$Tag->GetAttr('Path');
       $A=$Builder->ParsePath($A);
   
-      $Builder->Out->Evaluate('Tmpl_Request('.$Builder->Vars().','.$A.')');
+      $Builder->Out->Evaluate('Tmpl_Request('.$Builder->Vars().', '.$A.')');
     }
   }
 ?>

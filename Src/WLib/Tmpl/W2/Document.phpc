@@ -4,13 +4,6 @@
   // Date    : 17.10.2002                                                    \\
   // Creator : Wowa Savin <wowa@activesolutions.info>                        \\
   //*************************************************************************\\
-  //
-  //
-  //
-  //
- 
-  // Описание глобальных переменных
-  // Global $VarM_Tmpl_W2;
  
   // Определение модуля
   $Loader->Begin_Class('/Tmpl/W2/Document');
@@ -45,7 +38,7 @@
     {
       While($this->FirstTag)
       {
-      //Echo $this->FirstTag->TagBuild(),' ';
+      //Echo $this->FirstTag->TagBuild(), ' ';
         $this->FirstTag->ListDelete();
       }
       $this->Parser->Done();

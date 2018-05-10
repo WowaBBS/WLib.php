@@ -3,7 +3,7 @@
   {
     Static $InnerTags=[];
  
-    Function SetAttr(&$Tag)
+    Function SetAttr($Tag)
     {
       If($Tag->Attributes->Attr)
         Return;

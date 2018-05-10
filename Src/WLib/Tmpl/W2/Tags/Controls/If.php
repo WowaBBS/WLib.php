@@ -2,7 +2,7 @@
   Class T_W2_Tag_If
   {
     Static $InnerTags=[
-      'then' => ['#Template','Default'],
+      'then' => ['#Template', 'Default'],
       'else' => ['#Template'],
     ];
  

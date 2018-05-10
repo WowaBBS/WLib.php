@@ -71,7 +71,7 @@
     Function Vars_New()
     {
       Array_Push($this->Vars_Stack, $this->Vars_Name);
-      $this->Vars_Name=$this->Var_Add('Vars',' _');
+      $this->Vars_Name=$this->Var_Add('Vars', ' _');
       Return $this->Vars();
     }
  
@@ -84,7 +84,7 @@
     {
       $OldVars=$this->Vars();
       $NewVars=$this->Vars_New();
-      $this->Add_Line($NewVars.'=Vars_With('.$OldVars.','.$Str.');');
+      $this->Add_Line($NewVars.'=Vars_With('.$OldVars.', '.$Str.');');
     }
  
     Function Vars_WithA($Arr)
@@ -110,15 +110,15 @@
  
     Function Vars_Get($Name, $ASVars=False, $Type=False)
     {
-      If(StrPos($Name,'|')!==False)
-        Return 'Vars_GetVarST'.($Type? '_'.$Type:'').'('.$this->Vars($ASVars).','."'".$Name."')";
-      Return 'Vars_GetVarFST'.($Type? '_'.$Type:'').'('.$this->Vars($ASVars).",Array('".Implode("','", Explode('.', $Name))."'))";
+      If(StrPos($Name, '|')!==False)
+        Return 'Vars_GetVarST'.($Type? '_'.$Type:'').'('.$this->Vars($ASVars).', '."'".$Name."')";
+      Return 'Vars_GetVarFST'.($Type? '_'.$Type:'').'('.$this->Vars($ASVars).", Array('".Implode("', '", Explode('.', $Name))."'))";
     }
  
     Function Vars_GetS($Name, $ASVars=False)
     {
     //Return '(String)'.$this->Vars_Get($Name, $ASVars);
-      Return $this->Vars_Get($Name, $ASVars,'String');
+      Return $this->Vars_Get($Name, $ASVars, 'String');
     }
  
     // Paths
@@ -140,7 +140,7 @@
         $Res=Implode('.', $Path);
       Else
         $Res="''";
-    //If(StrPos($Path,'|')!==False)
+    //If(StrPos($Path, '|')!==False)
     //  $Res='_ParsePath('.$Res.', $ Vars)';
       Return $Res;
     }

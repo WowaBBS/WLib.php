@@ -2,7 +2,7 @@
   Class T_W2_Tag_Frame
   {
     Static $InnerTags=[
-      'item' => ['#Template','Default'],
+      'item' => ['#Template', 'Default'],
     ];
  
     Function MakeAttr($Tag)
@@ -29,7 +29,7 @@
     //Debug($Op);
   
       $Builder->Add_Line($vFrames."=&".$Builder->Vars_Get('Frame').';');
-      $Builder->Add_Line($vFrame.'=&'.$vFrames."->GetFrame('".$Name."');");
+      $Builder->Add_Line($vFrame.'='.$vFrames."->GetFrame('".$Name."');");
       $OutData=$Builder->Out->Get();
       If($Op==='-1')
         $Builder->Add_Line($vFrame.'->AddLeft('.$OutData.');');

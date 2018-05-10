@@ -5,7 +5,7 @@
   {
     Function SearchParam($Reg, $Name=false, $Args=[])
     {
-      $Add=['/reg:32','/reg:64'];
+      $Add=['/reg:32', '/reg:64'];
       $Res=[];
       $this->_SearchParam($Res, $Reg, $Name, $Add, $Args);
       return $Res;
@@ -33,7 +33,7 @@
       }
   
       $Cmd=Implode('', [
-        'reg query "',$Reg,'"',
+        'reg query "', $Reg, '"',
         $Args['Recursive']??false? ' /S':'',
         $Name !==false?' /v ' .$Name :'',
         $Add  !==false?' '    .$Add  :'',
@@ -58,7 +58,7 @@
             $Res[$Key][Trim($A[0])]=Trim($A[1]);
           }
           else
-            echo "Unknown $Str\n";
+            $this->Log('Error', 'Unknown ', $Str);
         }
       //echo $Str, "\n";
       //$Res[]=$Str;

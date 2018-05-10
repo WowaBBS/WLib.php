@@ -5,10 +5,6 @@
   // Creator : Wowa Savin <wowa@ssu.samara.ru>                               \\
   // (c) Active solutions                                                    \\
   //*************************************************************************\\
-  //
-  // Главный модуль
-  // Содержит базовые функции
-  //
  
   $Loader->Begin_Module('FS/IOFS');
  
@@ -26,7 +22,7 @@
         $Res[$k]=ExtractFilePath($Item);
       Return $Res;
     }
-    $Path=Str_Replace("\\",'/', $Path);
+    $Path=Str_Replace("\\", '/', $Path);
     $Names=Explode('/', $Path);
     If(Count($Names)>1)
       $Path=$Names[0];
@@ -47,7 +43,7 @@
         $Res[$k]=ExtractFileName($Item);
       Return $Res;
     }
-    $Path=Str_Replace("\\",'/', $Path);
+    $Path=Str_Replace("\\", '/', $Path);
     $Names=Explode('/', $Path);
     Return $Names[Count($Names)-1];
   }
@@ -116,9 +112,9 @@
   // Проверяет, соответствует ли строка $File маске $Mask
   Function Wild($File, $Mask)
   {
-    $Mask=Str_Replace('.','\.', $Mask);
-    $Mask=Str_Replace('*','.*', $Mask);
-    $Mask=Str_Replace('?','.?', $Mask);
+    $Mask=Str_Replace('.', '\.', $Mask);
+    $Mask=Str_Replace('*', '.*', $Mask);
+    $Mask=Str_Replace('?', '.?', $Mask);
     $Mask='/^'.$Mask.'$/Ss';
     Return Preg_Match($Mask, $File);
   }
@@ -155,7 +151,7 @@
         $Res[$k]=NormPath($Item, $Host);
       Return $Res;
     }
-    $Path=Str_Replace('\\','/', $Path);
+    $Path=Str_Replace('\\', '/', $Path);
     $Tmp=Explode('/', $Path);
     $List=Array('');
     ForEach($Tmp As $v)
@@ -208,7 +204,7 @@
   //$Path=Str_Replace("\\", '/', $Path);
     $Path=StrTr(Trim($Path), '\\', '/');
     If($Path&&($Path[StrLen($Path)-1])=='/')
-      $Res=Array('dirname'=>SubStr($Path,0,StrLen($Path)-1),'basename'=>'');
+      $Res=Array('dirname'=>SubStr($Path, 0, StrLen($Path)-1), 'basename'=>'');
     Else
       $Res=PathInfo($Path);
     Extract($Res);
@@ -235,11 +231,11 @@
   // Загружает текстовый файл
   Function LoadText($FileName)
   {
-    If(!($fh=@FOpen($FileName,'r')))
+    If(!($fh=@FOpen($FileName, 'r')))
       Return False;
     $Res='';
     While(!FEof($fh))
-      $Res.=Str_Replace("\r",'',FRead($fh,256*256));
+      $Res.=Str_Replace("\r", '', FRead($fh, 256*256));
     FClose($fh);
     Return $Res;
   }
@@ -247,11 +243,11 @@
   // Загружает бинарный файл
   Function LoadFile($FileName)
   {
-    If(!($fh=@FOpen($FileName,'r')))
+    If(!($fh=@FOpen($FileName, 'r')))
       Return False;
     $Res='';
     While(!FEof($fh))
-      $Res.=FRead($fh,256*256);
+      $Res.=FRead($fh, 256*256);
     FClose($fh);
     Return $Res;
   }
@@ -271,7 +267,7 @@
   {
     If(!($fh=@FOpen($FileName, 'w')))
       Return False;
-    $Res=FWrite($fh,$Data)==StrLen($Data);
+    $Res=FWrite($fh, $Data)==StrLen($Data);
     FClose($fh);
     Return $Res;
   }
@@ -494,9 +490,9 @@
   {
     If($Mask)
     {
-      $Mask=Str_Replace('.','\.', $Mask);
-      $Mask=Str_Replace('*','.*', $Mask);
-      $Mask=Str_Replace('?','.?', $Mask);
+      $Mask=Str_Replace('.', '\.', $Mask);
+      $Mask=Str_Replace('*', '.*', $Mask);
+      $Mask=Str_Replace('?', '.?', $Mask);
       $Mask='/^'.$Mask.'$/iSs';
     }
     $Dir=@OpenDir($Path);

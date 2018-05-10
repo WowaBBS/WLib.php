@@ -2,7 +2,7 @@
   Class T_W2_Tag__Def
   {
     Static $InnerTags=[
-      '#data' => ['#Template','Default'],
+      '#data' => ['#Template', 'Default'],
     ];
  
     Function MakeAttr($Tag)
@@ -33,7 +33,7 @@
         {
           $vRes=$Builder->Var_Add('Res', $Id);
           $Builder->Add_Line($vRes."=''; _cmd_".$Tag->tagName.'_('.
-            "'".$Tag->GetAttr('Params')."'".','.$vRes.', '.$Builder->Vars().');');
+            "'".$Tag->GetAttr('Params')."'".', '.$vRes.', '.$Builder->Vars().');');
           $Builder->Out->Evaluate($vRes);
         }
         Else

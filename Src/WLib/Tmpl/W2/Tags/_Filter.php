@@ -4,7 +4,7 @@
     Static $FuncFilter='';
  
     Static $InnerTags=[
-      '#Data' => ['#Template','Default'],
+      '#Data' => ['#Template', 'Default'],
     ];
  
     Function MakeAttr($Tag)

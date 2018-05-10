@@ -34,7 +34,7 @@
   
       $this->Var=$Func!==False;
   
-      $this->Base->Add_Line('Ob_Start('.($Func? "'".$Func."'":'Null').','.($Size? $Size:'False').');');
+      $this->Base->Add_Line('Ob_Start('.($Func? "'".$Func."'":'Null').', '.($Size? $Size:'False').');');
       $this->Base->Add_Line(' {');
       $this->Base->Tab=$T.'  ';
       $this->List[]=$Item;
@@ -88,7 +88,7 @@
         "\r" => "'".'."\\r".'."'",
       ];
       $TextE="'";
-      $Text=Explode("\n",strtr($Text, $R));
+      $Text=Explode("\n", StrTr($Text, $R));
       If(Count($Text)>1 && $Text[Count($Text)-1]==='')
       {
         UnSet($Text[Count($Text)-1]);

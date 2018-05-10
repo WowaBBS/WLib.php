@@ -2,7 +2,7 @@
   Class T_W2_Tag_Skin
   {
     Static $InnerTags=[
-      'item' => ['#Template','Default'],
+      'item' => ['#Template', 'Default'],
     ];
  
     Function MakeAttr($Tag)
@@ -18,7 +18,7 @@
   
       $OldVars=$Builder->Vars();
       $NewVars=$Builder->Vars_New();
-      $Builder->Add_Line($NewVars.'=Tmpl_Skin_Begin('.$OldVars.','."'".$Params."');");
+      $Builder->Add_Line($NewVars.'=Tmpl_Skin_Begin('.$OldVars.', '."'".$Params."');");
       $Builder->Out->Capture(False);
       $Tags['item'][0]->MakePHPInnerId($Builder, $Tags['item'][1]);
       $Builder->Out->End(False);

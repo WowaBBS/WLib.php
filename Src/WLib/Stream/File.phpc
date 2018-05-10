@@ -56,7 +56,7 @@
           Array_Pop($Path);
           $Path=Implode('/', $Path);
         //$this->Loader->Path->Make($Path);
-          CreatePath($Path,IsSet($this->MkDir)? $this->MkDir:0700);
+          CreatePath($Path, IsSet($this->MkDir)? $this->MkDir:0700);
           Break;
         Case 'Open':
           If(!$this->FHandle)
@@ -82,7 +82,7 @@
           $this->Truncate(0);
           Break;
         Case 'AppEnd':
-          $this->Seek(0,2);
+          $this->Seek(0, 2);
           Break;
         }
       Return $this->FHandle!=False;
@@ -114,7 +114,7 @@
         Return 0;
       }
     //#EndIf
-      Return $this->Seek(-$ASize,1);
+      Return $this->Seek(-$ASize, 1);
     }
   
     Function Seek($AOffset=0, $AWhence=0)
@@ -150,7 +150,7 @@
     Function Length()
     {
       $Pos=FTell($this->FHandle);
-      FSeek($this->FHandle,0,SEEK_END);
+      FSeek($this->FHandle, 0, SEEK_END);
       $Res=FTell($this->FHandle);
       FSeek($this->FHandle, $Pos, SEEK_SET);
       Return $Res;

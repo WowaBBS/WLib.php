@@ -5,7 +5,7 @@
   {
     if($Out===false)
       $Out=$File;
-    Echo $F->CalcMD5($File),'  <',$Out, "\n";
+    Echo $F->CalcMD5($File), '  <', $Out, "\n";
   }
   
   $CM=$Loader->Create_Object('/Cache/Manager');

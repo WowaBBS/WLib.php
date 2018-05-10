@@ -1,5 +1,5 @@
 <?
- $Loader->Load_Class('Stream/File');
+ $Loader->Load_Class('/Stream/File');
 
   Class C_System_Thread_Mutex Extends C_Stream_File
   {

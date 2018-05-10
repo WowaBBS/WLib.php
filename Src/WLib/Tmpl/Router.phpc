@@ -18,7 +18,7 @@
     Function _Init(Array $Args)
     {
       parent::_Init($Args);
-    //$this->Paths=&$GLOBALS['Paths'];
+    //$this->Paths=$GLOBALS['Paths'];
       $this->Paths=$this->Create_Object('/URI/Paths');
       $this->Paths->AddPath('./', 'Unknown'); // TODO
     }
@@ -171,12 +171,12 @@
           $PMF=$this->File($Mode.'/'.$L['Exec']);
         Else
           $PMF=$this->File($L['Exec']);
-      //Debug([$Mode.'/'.$L['Exec'], $PMF, $Mode]);
+      //$this->Debug([$Mode.'/'.$L['Exec'], $PMF, $Mode]);
         Include($PMF);
       }
       If($Fld==='')
         Return True;
-    //Echo $Fld2,"/n";
+    //Echo $Fld2, "/n";
       If($Fld!=$Fld2)
         $Mode=$this->CalcMode($Fld, $Mode);
       ElseIf($Mode!=='')

@@ -18,7 +18,7 @@
     //ForEach($this->Path->Path As $i=>$v)
     //  If(!$i||($v!=='')&&($v!=='.'))
     //    //$Res[]=$v;
-    //    $Res[]=Preg_Replace('/:/','', $v);
+    //    $Res[]=Preg_Replace('/:/', '', $v);
     //$this->Path->Path=$Res;
       
     }

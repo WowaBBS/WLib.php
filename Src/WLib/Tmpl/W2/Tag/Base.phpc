@@ -184,7 +184,7 @@
  
     Function PutCData($Data, $AddComment=False)
     {
-      $this->Delete(True,False);
+      $this->Delete(True, False);
       If($AddComment!==False)
         $Data="\n<!--\n".$Data.$AddComment."-->\n";
       $NewTag=$this->Create_Object('/Tmpl/W2/Tag/Text', [$Data]);
@@ -262,7 +262,7 @@
       $ti->MakePHP($Builder, $this, $Tags);
     //Else
     //{
-    //  $Builder->Out->Evaluate('Tmpl_w2_Tag_'.$this->tagName.'($ Vars,'.$this->Attributes->MakePHP().')');
+    //  $Builder->Out->Evaluate('Tmpl_w2_Tag_'.$this->tagName.'($ Vars, '.$this->Attributes->MakePHP().')');
     //}
     }
   }

@@ -13,7 +13,7 @@
       {
         $v=$Args[0]; // TODO: Is_Array;
         if(Is_String ($v)) $this->AddStr($v); else
-        if(!Is_Null  ($v)) Unsupported();
+        if(!Is_Null  ($v)) $this->Log('Fatal', 'The first parameter should be string type');
       }
     }
     

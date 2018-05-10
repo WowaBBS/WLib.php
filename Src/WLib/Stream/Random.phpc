@@ -22,7 +22,7 @@
     {
       $Res=Str_Repeat(' ', $ASize);
       For($i=$ASize; $i;)
-        $Res{--$i}=Chr(Rand(0,255));
+        $Res{--$i}=Chr(Rand(0, 255));
       Return $Res;
     }
   

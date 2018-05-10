@@ -28,7 +28,7 @@
     ];
  
     Static $InnerTags=[
-      '#Data' => ['#Template','Default'],
+      '#Data' => ['#Template', 'Default'],
     ];
  
     Function MakeAttr($Tag)
@@ -88,7 +88,7 @@
       If(Count($Args)>$CArgs)
         $Args=Array_Slice($Args, 0, $CArgs);
   
-      $Builder->Out->Evaluate($FuncInfo['Name'].'('.Implode(',', $Args).')');
+      $Builder->Out->Evaluate($FuncInfo['Name'].'('.Implode(', ', $Args).')');
     }
   }
 ?>

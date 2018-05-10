@@ -2,7 +2,7 @@
   Class T_W2_Tag_ForEach
   {
     Static $InnerTags=[
-      'item' => ['#Template','Default'],
+      'item' => ['#Template', 'Default'],
     ];
  
     Function MakeAttr($Tag)

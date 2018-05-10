@@ -12,12 +12,42 @@
     
     Function Create_Object($Name, Array $Args=[], Array $Mode=[])
     {
+      $Args['Outer']=$this;
       return $this->Loader->Create_Object($Name, $Args, $Mode);
     }
 
     Function Get_Singleton($Name, Array $Args=[], Array $Mode=[])
     {
       return $this->Loader->Get_Singleton($Name, $Args, $Mode);
+    }
+    
+    //****************************************************************
+    // Debug And Log
+    
+    Function Debug($Var, $Level=-1) { Return $this->Loader->Debug($Var, $Level); }
+    Function Log() { return $this->Loader->_Log($this, func_get_args()); }
+
+    Protected Function _Debug_Info(Array &$Res)
+    {
+      if($this->Loader!==null) unset($Res['Loader']);
+      if($this->Object_Inited) unset($Res['Inited']);
+    }
+    
+    /// Debug manager
+    Final Function _Debug_Serialize(Array &$Res) { $this->_Debug_Info($Res); }
+    
+    Final Function __debugInfo()
+    {
+    //throw new Exception('!!!!!!!!!!!!!!!!!!!!');
+    //$Res=Get_Object_Vars($this);
+      $Res=[];
+      ForEach((Array)$this As $k=>$v)
+      {
+        $k=Explode("\0", $k);
+        $Res[End($k)]=$v;
+      }
+      $this->_Debug_Info($Res);
+      return $Res;
     }
     
     //****************************************************************
@@ -33,7 +63,14 @@
       $this->_Init($Args);
       if(!$this->Object_Inited)
         throw new Exception('Initializing is not fully');
-        //Trigger_Error('Initializing is not fully', E_USER_ERROR); // WARNING
+    //Trigger_Error('Initializing is not fully', E_USER_ERROR); // WARNING
+    }
+  
+    Final Function __Destruct()
+    {
+      // TODO: Check locking
+      if($this->Object_Inited)
+        $this->Done();
     }
   
     Protected Function _Init(Array $Args)
@@ -58,37 +95,6 @@
     Function _Lock() { return $this; }
     Function _UnLock() {}
  
-    //****************************************************************
-    // Debug
-    
-    Function Debug($Var, $Level=-1)
-    {
-      $Deb=$this->Loader->Debug($Var, $Level);
-    }
-
-    Protected Function _Debug_Info(Array &$Res)
-    {
-      if($this->Loader!==null) unset($Res['Loader'        ]);
-      if($this->Object_Inited) unset($Res['Object_Inited' ]);
-    }
-    
-    /// Debug manager
-    Final Function _Debug_Serialize(Array &$Res) { $this->_Debug_Info($Res); }
-    
-    Final Function __debugInfo()
-    {
-    //throw new Exception('!!!!!!!!!!!!!!!!!!!!');
-    //$Res=Get_Object_Vars($this);
-      $Res=[];
-      ForEach((Array)$this As $k=>$v)
-      {
-        $k=Explode("\0", $k);
-        $Res[End($k)]=$v;
-      }
-      $this->_Debug_Info($Res);
-      return $Res;
-    }
-    
     //****************************************************************
     // Clone
 

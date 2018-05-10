@@ -27,7 +27,7 @@
       If($Max===False)
         $Builder->Out->Evaluate('Mt_Rand()');
       Else
-        $Builder->Out->Evaluate('Mt_Rand('.$Min.','.$Max.')');
+        $Builder->Out->Evaluate('Mt_Rand('.$Min.', '.$Max.')');
     }
   }
 ?>

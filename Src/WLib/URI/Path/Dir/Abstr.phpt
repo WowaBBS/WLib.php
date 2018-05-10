@@ -27,7 +27,7 @@
        {
          $this->Assign($APath);
          $this->Add($AFile);
-       //Debug([$this->Make(),$this->IsFile()]);
+       //Debug([$this->Make(), $this->IsFile()]);
          If($this->IsDir())
            Return [$k];
        }

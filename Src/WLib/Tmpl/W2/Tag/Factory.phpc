@@ -32,7 +32,7 @@
       }
       If(!$this->Loaded)
       {
-        $Path=DirName($this->Loader->_Find_Lib('/Tmpl/W2/Tag/Factory','.phpc'), 2).'/Tags/';
+        $Path=DirName($this->Loader->_Find_Lib('/Tmpl/W2/Tag/Factory', '.phpc'), 2).'/Tags/';
       //$Path=UnitPath('Tmpl/W2/TTag').'tags/';
         $this->LoadAllFromPath($Path);
         $this->Loaded=True;
@@ -54,7 +54,7 @@
       $a=$this->Get($Name);
       If(!$a)
         $a=$this->Get('_def');
-    //Echo $a,' T_w2_Tag_', $this->tagName,"\n";
+    //Echo $a, ' T_w2_Tag_', $this->tagName, "\n";
       $Res=New $a();
       $this->Created[$Name]=$Res;
       return $Res;

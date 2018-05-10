@@ -105,7 +105,7 @@
 
  Function CreatePath($Path, $Attr=0700)
  {
- //Echo 'CP ',$Path,"\n";
+ //Echo 'CP ', $Path, "\n";
    If($Path==='' || $Path==='/')
      Return True;
    If(FS_Is_Dir($Path))

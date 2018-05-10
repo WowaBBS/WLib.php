@@ -144,11 +144,11 @@
       $Count=Preg_Match_All($this->Match, $Tmpl, $_Tags, PREG_SET_ORDER);
     //Debug($_Tags);
       ForEach($_Tags As $v)
-    //While(Preg_Match('/^'.Preg_Offset($Len).$Q.'/is', $Tmpl,$v))
-    //While(Preg_Match('/'.$Q.'/is',$Tmpl,$v,0,$Len))
+    //While(Preg_Match('/^'.Preg_Offset($Len).$Q.'/is', $Tmpl, $v))
+    //While(Preg_Match('/'.$Q.'/is', $Tmpl, $v, 0, $Len))
       {
         $NewTag=False;
-        //Echo StrLen($v[0]),' ';
+      //Echo StrLen($v[0]), ' ';
         $Len+=StrLen($v[0]);
         If($this->Mode===0)
         {

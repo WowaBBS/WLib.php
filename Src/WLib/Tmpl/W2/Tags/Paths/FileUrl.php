@@ -18,7 +18,7 @@
       $Path=$Tag->Attributes->GetAttr('Var'  );
       $Path=$Builder->ParsePath($Path);
   
-      $Builder->Out->Evaluate('Get_FileUrl('.$Path.',&'.$Builder->Vars().')');
+      $Builder->Out->Evaluate('Get_FileUrl('.$Path.', '.$Builder->Vars().')');
     }
   }
 ?>

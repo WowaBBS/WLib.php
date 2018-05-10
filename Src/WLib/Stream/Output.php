@@ -2,15 +2,15 @@
   Function _Unit_Stream_MOutput()
   {
     Global $FOutput;
-    $FOutput=@FOpen('php://output','wb');
-    Stream_Set_Blocking($FOutput,False);
+    $FOutput=@FOpen('php://output', 'wb');
+    Stream_Set_Blocking($FOutput, False);
     Stream_Output_Lock(True);
   }
  
   Function Stream_Output_Handler($Str)
   {
     If($Str!=='')
-      Trigger_Error('Output "'.$Str.'"',E_USER_WARNING);
+      Trigger_Error('Output "'.$Str.'"', E_USER_WARNING);
     Return '';
   //Return $Str;
   }
@@ -31,7 +31,7 @@
       Return;
     If($z)
     {
-      $Res=@Ob_Start('Stream_Output_Handler',1);
+      $Res=@Ob_Start('Stream_Output_Handler', 1);
     //Debug('a'.$Res);
     //Debug(ob_list_handlers());
     }

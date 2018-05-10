@@ -3,6 +3,7 @@
  
   $Loader->Using_Module('/System/Prop');
  
+//Class T_Inet_URL_Path
   Class TPath Extends T_Property
   {
     Var $Path=[];
@@ -11,12 +12,17 @@
     {
       If(Is_Array  ($APath)) Return $APath;
       If(Is_Object ($APath)) Return Self::PathAsArray($APath->Path);
-      If(Is_String ($APath)) Return Explode('/',StrTr(Trim($APath),'\\','/'));
+      If(Is_String ($APath)) Return Explode('/', StrTr(Trim($APath), '\\', '/'));
       If(Is_Numeric($APath)) Return [''.$APath];
       throw New Exception('Unknown path');
       Return [];
     }
    
+    Function _Debug_Serialize(&$Res)
+    {
+      $Res=$this->Make();
+    }
+    
     Function __Construct($APath=False)
     {
       $this->Clear();
@@ -78,7 +84,7 @@
     Function IsDir()
     {
       If($this->Path)
-        Return $this->Path[Count($this->Path)-1]==='';
+        Return $this->Path[Count($this->Path)-1]===''; // TODO: End($this->Path)===''
       Else
         Return True;
     }
@@ -171,7 +177,7 @@
           If($i>0)
           {
             $i--;
-            $this->Del($i,2);
+            $this->Del($i, 2);
           }
           Else
             $this->Del(0);

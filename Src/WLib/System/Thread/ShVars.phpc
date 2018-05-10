@@ -1,5 +1,5 @@
 <?
-  $Loader->Load_Class('System/Thread/ShMem');
+  $Loader->Load_Class('/System/Thread/ShMem');
  
   Class C_System_ShVars Extends C_System_ShMem
   {

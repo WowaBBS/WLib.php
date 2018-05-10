@@ -25,9 +25,9 @@
     Function Open($AStream)
     {
       parent::Open($AStream);
-    //$this->Debug->Open('./proxy_'.$this->Idx.'.log','a+');
+    //$this->Debug->Open('./proxy_'.$this->Idx.'.log', 'a+');
     //$this->Debug->Lock();
-      $this->Set_Mode('Open','Ok');
+      $this->Set_Mode('Open', 'Ok');
     }
 
     Function Set_Mode($AMode, $Info='')
@@ -49,7 +49,7 @@
 
     Function Flush()
     {
-      $this->Set_Mode('Flush','Ok');
+      $this->Set_Mode('Flush', 'Ok');
       Return parent::Flush();
     }
 
@@ -72,7 +72,7 @@
     {
       If($this->Mode!='Close')
       {
-        $this->Set_Mode('Close','Ok');
+        $this->Set_Mode('Close', 'Ok');
       //$this->Debug->UnLock();
       //$this->Debug->Close();
       //$this->Debug->Done();

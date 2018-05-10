@@ -123,7 +123,7 @@
               $Empty=false;
             else
             {
-              echo 'RemoveCache ', $Key, "\n";
+              $this->Log('Log', 'RemoveCache ', $Key);
               FS_UnLink($DirName);
             }
           }

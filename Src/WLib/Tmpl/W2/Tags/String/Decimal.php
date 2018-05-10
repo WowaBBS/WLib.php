@@ -4,7 +4,7 @@
     Static $FuncInfo=[
       'Name'=>'Str_Pad',
       'FArgs'=>[
-        ['Var'   ,'Var'  ,False,'Str'],
+        ['Var'   ,'Var'  ,False ,'Str'],
         ['Len'   ,'Int'  ,8    ],
         ['Char'  ,'Str'  ,'0'  ],
         [''      ,'Val'  ,'STR_PAD_LEFT'],

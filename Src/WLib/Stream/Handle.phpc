@@ -38,7 +38,7 @@
       $Res='';
       Do
       {
-        $Out=@FRead($fp,1);
+        $Out=@FRead($fp, 1);
         If($Out===False)
           If(StrLen($Res))
             Return $Res;
@@ -62,10 +62,7 @@
     Function Write($Data)
     {
       if(!Is_String($Data) && !Is_Int($Data))
-      {
-        echo '[Error] Unsupported tyoe ',GetType($Data),"\n";
-        Unsupported();
-      }
+        $this->Log('Fatal', 'Unsupported type ', GetType($Data));
       Return FWrite($this->FHandle, $Data);
     }
   

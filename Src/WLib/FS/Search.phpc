@@ -84,10 +84,10 @@
       if($v==False)
         return False;
       
-      $v=Str_Replace('.','\.', $v);
-      $v=Str_Replace('*','.*', $v);
-      $v=Str_Replace('?','.?', $v);
-      $v=Str_Replace(';','||', $v);
+      $v=Str_Replace('.', '\.', $v);
+      $v=Str_Replace('*', '.*', $v);
+      $v=Str_Replace('?', '.?', $v);
+      $v=Str_Replace(';', '||', $v);
       $v='/^(?:'.$v.')$/iSs';
       return $v;
     }

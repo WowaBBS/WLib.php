@@ -13,17 +13,17 @@
 
     Function TryLock()
     {
-    //Return @FLock($this->FHandle,LOCK_EX|LOCK_NB);
+    //Return @FLock($this->FHandle, LOCK_EX|LOCK_NB);
     }
 
     Function Lock()
     {
-    //Return @FLock($this->FHandle,LOCK_EX);
+    //Return @FLock($this->FHandle, LOCK_EX);
     }
 
     Function UnLock()
     {
-    //Return @FLock($this->FHandle,LOCK_UN);
+    //Return @FLock($this->FHandle, LOCK_UN);
     }
   }
 ?>

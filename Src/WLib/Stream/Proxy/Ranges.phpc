@@ -29,7 +29,7 @@
       $this->Range  = $ARanges[0];
       $this->Pos    = 0  ;
       $this->Length = $L ;
-      $this->Seek(0,0);
+      $this->Seek(0, 0);
     }
   
     //Function Recv_Count() { Return $this->FStream->Recv_Count(); }

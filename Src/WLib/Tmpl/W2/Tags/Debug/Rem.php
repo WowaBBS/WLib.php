@@ -2,7 +2,7 @@
   Class T_W2_Tag_Rem
   {
     Static $InnerTags=[
-      '#data' => ['#Template','Default'],
+      '#data' => ['#Template', 'Default'],
     ];
  
     Function MakeAttr($Tag)

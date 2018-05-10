@@ -2,7 +2,7 @@
   Class T_W2_Tag_SetMenu // ???
   {
     Static $InnerTags=[
-      'To'   => ['#Template','Default'],
+      'To'   => ['#Template', 'Default'],
       'From' => ['#Template'],
     ];
  
@@ -25,8 +25,8 @@
       $vMenuMan =$Builder->Var_Add('MenuMan' ,$Id);
   
       $Builder->Add_Line($vVar.'='.$Builder->Vars_Get($From).';');
-      $Builder->Add_Line($vMenuMan.'=&'.$Builder->Vars_Get('MenuMan').';');
-      $Builder->Add_Line($vMenuMan."->SetMenu('".$To."',".$vVar.');');
+      $Builder->Add_Line($vMenuMan.'='.$Builder->Vars_Get('MenuMan').';');
+      $Builder->Add_Line($vMenuMan."->SetMenu('".$To."', ".$vVar.');');
     }
   }
 ?>

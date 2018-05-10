@@ -94,12 +94,12 @@
   Function &Vars_With(Array &$Vars, $With):Array
   {
     If(Is_Array($With))
-    //$R=&Array_Merge($Vars, &$With);
+    //$R=Array_Merge($Vars, $With);
       $R=$With;
     Else
     {
     //$W=[];
-    //$R=&Array_Merge($Vars, &$W);
+    //$R=Array_Merge($Vars, $W);
       $R=[];
     }
     $R['']=&$Vars;
@@ -109,12 +109,12 @@
   Function Vars_WithR(Array &$Vars, $With):Array
   {
     If(Is_Array($With))
-    //$R=&Array_Merge($Vars, &$With);
+    //$R=Array_Merge($Vars, $With);
       $R=$With;
     Else
      {
     //$W=[];
-    //$R=&Array_Merge($Vars, &$W);
+    //$R=Array_Merge($Vars, $W);
       $R=[];
      }
     $R['']=$Vars;
@@ -171,7 +171,7 @@
           Break;
       }
     //ElseIf(IsProperty($Vars))
-    //  $Vars=&GetProperty($Vars,'');
+    //  $Vars=&GetProperty($Vars, '');
       Else
         Return $NULL;
     }
@@ -189,8 +189,8 @@
       $Res=$Res->GetVar($Path, tv_Any, $AVars);
     }
   
-    //While(IsProperty($Vars))
-    //  $Vars=&GetProperty($Vars,'');
+  //While(IsProperty($Vars))
+  //  $Vars=&GetProperty($Vars, '');
     Return $Res;
   }
  

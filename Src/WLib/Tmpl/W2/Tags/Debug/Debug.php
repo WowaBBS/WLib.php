@@ -21,7 +21,7 @@
         $Var=$Builder->Out->Get_Debug();
       $Limit=$Tag->GetAttr('Limit');
       If($Limit)
-        $Var.=','.$Limit;
+        $Var.=', '.$Limit;
       $Builder->Add_Line('Debug('.$Var.');');
     }
   }

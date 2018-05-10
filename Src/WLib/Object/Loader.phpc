@@ -16,11 +16,11 @@
         return;
       }
       $Path=StrTr(RealPath($Path), '\\', '/');
-      if(SubStr($Path,-1)=='/')
-        $Path=SubStr($Path,0,-1);
-    //if(SubStr($Path,-1)!='/')
+      if(SubStr($Path, -1)=='/')
+        $Path=SubStr($Path, 0, -1);
+    //if(SubStr($Path, -1)!='/')
     //  $Path.='/';
-    //echo 'AddSearchPath ', $Path,"\n";
+    //$this->Log('Log', 'AddSearchPath ', $Path);
       $this->_Paths[]=$Path;
     }
  
@@ -48,6 +48,7 @@
    
       //$this->Load_Lib('/Support/PHP4');
         $this->Load_Class('/Object/Base');
+        $this->Load_Type('/Log/Item');
       //$this->Loader_Info=&$this->Loader_Info;
       }
     //Register_ShutDown_Function([&$this, 'ShutDown']);
@@ -58,7 +59,7 @@
     {
       if($Name[0]!=='/')
       {
-        echo '[Error] Lib`s name "',$Name,'" shoult be started with /',"\n";
+        $this->Log('Error', 'Lib`s name "', $Name, '" shoult be started with /');
         $Name='/'.$Name;
       }
       ForEach($this->_Paths as $__Path)
@@ -70,10 +71,11 @@
           {
             $_RPath=StrTr(RealPath($_Path), '\\', '/');;
             if($_RPath!==$_Path)
-            { // TODO: Error log
-              echo '[Error] _Find_Lib:',"\n";
-              echo '  Excepted path ',$_RPath ,"\n";
-              echo '  Actual   path ',$_Path  ,"\n";
+            { 
+              $this->Log('Error', ' _Find_Lib:', "\n",
+                '  Excepted path ', $_RPath ,"\n",
+                '  Actual   path ', $_Path  
+              );
               return $_Path;
             }
           }
@@ -92,7 +94,7 @@
       case 'Interface' : return count(Get_Declared_Interfaces ());
       }
      #endif // Debug
-      UnSupported();
+      $this->Log('Fatal', 'Unreachable place');
     }
     
     Function _Verify_End($Verify, $Var, $Class)
@@ -109,10 +111,10 @@
       for($i=$Var, $c=Count($List); $i<$c; $i++)
         if(StrCaseCmp($List[$i], $Class)===0)
         {
-          echo '[Error] class name error: ',$Class, ' in not same ',$List[$i],"\n";
+          $this->Log('Error', 'class name error: ', $Class, ' in not same ', $List[$i]);
           return true;
         }
-      echo '[Error] class ',$Class," not found\n";
+      $this->Log('Error', 'class ', $Class, ' not found');
      #endif // Debug
     }
     
@@ -171,12 +173,12 @@
         Return $Res;
       $Class_Name=$Res;
   
-      If(!IsSet($Args['Loader']))
-        $Args['Loader']=&$this;
+      If(!IsSet($Args['Outer'  ])) $Args['Outer'  ]=&$this;
+      If(!IsSet($Args['Loader' ])) $Args['Loader' ]=&$this;
       $Res=New $Class_Name($Args);
      #ifdef Debug
      #if(get_class($Res)!==$Class_Name)
-     #  echo '[Error] Class name error: ',get_class($Res),'!==',$Class_Name,"\n";
+     #  this->Log('Error', 'Class name error: ', get_class($Res), '!==', $Class_Name);
      #endif // Debug
       Return $Res;
     }
@@ -185,7 +187,7 @@
     {
       $Key=Count($Args)? $Name.Serialize($Args):$Name;
       $S=&$this->_Singleton;
-    //Echo 'GetSinlgeton(',$Key,')[',Implode(', ', Array_Keys($S)),"]\n";
+    //this->Log('Log', 'GetSinlgeton(', $Key ,')[', Implode(', ', Array_Keys($S)), ']');
       if(IsSet($S[$Key]))
         $Res=$S[$Key];
       else
@@ -204,9 +206,11 @@
     Function Using_Interface ($Name) { $this->Load_Interface ($Name); }
     Function Using_Module    ($Name) { $this->Load_Module    ($Name); } // TODO: Rename lib
     Function Using_Type      ($Name) { $this->Load_Type      ($Name); } // TODO: Rename struct
+    Function Using_Struct    ($Name) { $this->Load_Struct    ($Name); } // TODO: Rename struct
     
     Function Load_Module ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name, $Mode, '.phpm'); } // TODO: Rename lib
     Function Load_Type   ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name, $Mode, '.phpt'); } // TODO: Rename struct
+    Function Load_Struct ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name, $Mode, '.phpt'); } // TODO: Rename struct
  
     Function Class_Implements ($Name) { $this->Load_Interface ($Name); }
     Function Class_Extends    ($Name) { $this->Load_Class     ($Name); }
@@ -222,12 +226,20 @@
     Function End_Type   () {}
     Function End_Lib    () {}
 
-    Function Debug($Var, $Level=-1)
+    //****************************************************************
+    // Debug And Log
+    
+    Function Debug($Var, $Level=-1) // TODO: Return Debug object
     {
       $Deb=$this->Get_Singleton('/Debug/Manager')->Get('Debug.txt');
-      $Deb->Debug($Var, $Level);
+      return $Deb->Debug($Var, $Level);
     }
     
+    Function Log() { return $Deb=$this->_Log($this, func_get_args()); }
+    Function _Log($Outer, Array $List) { return New T_Log_Item($Outer, null, $List); } // TODO: Logger
+
+    //****************************************************************
+    Function Done() {} // TODO:
   }
 
 ?>

@@ -353,7 +353,7 @@
     $Tmp=[];
     ForEach($Arr As $k=>$v)
     {
-      $s=Preg_Replace('/\d+/Ss','', $v);
+      $s=Preg_Replace('/\d+/Ss', '', $v);
       If(IsSet($Tmp[$s]))
         $Tmp[$s][$k]=$v;
       Else
@@ -376,7 +376,7 @@
     $Tmp=Array();
     ForEach($Arr As $v)
     {
-      $s=Preg_Replace('/\d+/Ss','', $v);
+      $s=Preg_Replace('/\d+/Ss', '', $v);
       If(IsSet($Tmp[$s]))
         $Tmp[$s][]=$v;
       Else
@@ -399,7 +399,7 @@
     $Tmp=[];
     ForEach($Arr As $k=>$v)
     {
-      $s=Preg_Replace('/\d+/Ss','', $k);
+      $s=Preg_Replace('/\d+/Ss', '', $k);
       If(IsSet($Tmp[$s]))
         $Tmp[$s][$k]=$v;
       Else
@@ -407,7 +407,7 @@
     }
     ForEach($Tmp As $k=>$v)
       If(Count($v)>1)
-        UKSort($Tmp[$k],'strnatcmp');
+        UKSort($Tmp[$k], 'strnatcmp');
     $Res=[];
     ForEach($Tmp As $t)
       ForEach($t As $k=>$v)

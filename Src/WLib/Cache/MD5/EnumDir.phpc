@@ -13,7 +13,7 @@
      #$CacheDir=$this->AllocNum($BaseDir, $Prefix);
      #$Res=$this->GetMD5Storage($CacheDir.'_');
       $Res=$this->AllocMD5Storage($BaseDir, $Prefix);
-    //echo $CacheDir,"\n";
+    //echo $CacheDir, "\n";
       $this->Storages[$BaseDir]=$Res;
       return $Res;
     }

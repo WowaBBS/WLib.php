@@ -11,7 +11,7 @@
     Var $Paths =[];
     Var $URLs  =[];
  
-    Function Assign_Paths(&$APaths)
+    Function Assign_Paths($APaths)
     {
       $this->Paths =$APaths->Paths ;
       $this->URLs  =$APaths->URLs  ;

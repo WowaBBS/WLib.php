@@ -2,9 +2,9 @@
   $Loader->Parent_Class('/Object');
   $Loader->Load_Lib('/Stream/Utils');
  
-  Define('x2x16',0x10000);
-  Define('x2x32',x2x16*x2x16);
-  Define('x2x48',x2x32*x2x16);
+  Define('x2x16' ,0x10000);
+  Define('x2x32' ,x2x16*x2x16);
+  Define('x2x48' ,x2x32*x2x16);
   Define('Double_Machne_Big_Endian', 1); // TODO:
  
   Class C_Stream_Base extends C_Object
@@ -130,9 +130,9 @@
     {
       $bs=$this->_BS;
       $bt=$this->_BT;
-      $fo=FOpen('php://output','wb');
-    //$fo=FOpen('php://stdout','wb');
-    //Stream_Set_Blocking ($fo,false);
+      $fo=FOpen('php://output', 'wb');
+    //$fo=FOpen('php://stdout', 'wb');
+    //Stream_Set_Blocking ($fo, false);
       $Res=True;
       Do
        {
@@ -144,7 +144,7 @@
       //Ignore_User_Abort(0);
       //Flush();
       //Debug(Connection_Status().'.'.Connection_Aborted());
-      //Debug(FWrite($fo,'').'.'.Connection_Status().'.'.Connection_Aborted());
+      //Debug(FWrite($fo, '').'.'.Connection_Status().'.'.Connection_Aborted());
       //$R=0;
         $R=FWrite($fo, $r, StrLen($r));
       //Echo $r;
@@ -167,7 +167,7 @@
   
     Function Skip($ASize)
     {
-      Return $this->Seek($ASize,1);
+      Return $this->Seek($ASize, 1);
     }
   
     Function Length()

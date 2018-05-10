@@ -32,7 +32,7 @@
       
      #If(IsSet($Args['Pad'    ])||
      #   IsSet($Args['NoZero' ]))
-     #  UnSupported();
+     #  $this->Log('Fatal', 'Pagging setup is not allowed here');
          
       parent::_Init($Args);
     }

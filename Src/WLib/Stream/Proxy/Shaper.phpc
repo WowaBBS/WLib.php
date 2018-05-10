@@ -34,7 +34,7 @@
    
       $DTime=GetMicroTime()-$Time;
       $Time+=$DTime;
-      $Size=Max($Size-$Limit*$DTime,0);
+      $Size=Max($Size-$Limit*$DTime, 0);
    /*
       $QS=2; // Частота пауз в секнуду.
       $QT=4; // Частота задержек в секнуду.

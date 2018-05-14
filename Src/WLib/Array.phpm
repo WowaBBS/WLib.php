@@ -15,6 +15,13 @@
   // Подключение модулей
 //$Loader->Load_Module('/System');
   
+  Function &SetDefault(&$Vars,$Key,$Value)
+  {
+    If(!IsSet($Vars[$Key]))
+      $Vars[$Key]=$Value;
+    Return $Vars[$Key];
+  }
+ 
   Function Array_Shift_Checked(&$Arr)
   {
     if(Count($Arr)==0)

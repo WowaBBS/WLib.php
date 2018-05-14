@@ -1,0 +1,42 @@
+<?
+  $Loader->Load_Class('/Object');
+  
+  $Loader->Load_Module('/BD/Sql/Utils');
+ 
+  Class C_BD_Query_Sorts extends C_Object
+  {
+    Var $Sorts=[];
+ 
+    // Сортировать по полю
+    Function AddField($Field, $z=True)
+    {
+      If(Is_Array($Field))
+        $Field=Implode('.', $Field);
+      If(IsSet($this->Sorts[$Field]))
+        $this->Sorts[$Field]=$z;
+    }
+ 
+    Function Add($Fields, $z=True)
+    {
+      If(!Is_Array($Fields))
+        $Fields=[$Fields=>$z];
+      $Res=[];
+      ForEach($Fields As $k=>$v)
+        $this->AddField($v, Is_Integer($k)? $z:$v);
+    }
+ 
+    Function GetUFields($UFields)
+    {
+      $UFields->Add(Array_Keys($this->Sorts));
+    }
+ 
+    Function GetSQL()
+    {
+      Return sqlListOrder($this->Sorts);
+    }
+ 
+    Function PutSQL($Sql)
+    {
+    }
+  } 
+?>

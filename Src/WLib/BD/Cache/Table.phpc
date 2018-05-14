@@ -1,0 +1,113 @@
+<?
+  $Loader->Load_Class('/Object');
+
+  Class C_BD_Cache_Table extends C_Object
+  {
+    Var $Data      = [];
+    Var $Indices   = [];
+    Var $IdxByName = [];
+    Var $Primary   = null;
+ 
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $Fields=$Args['Fields']?? [' ID'];
+    }
+ 
+    Function Clear()
+    {
+    //parent::Clear();
+      $this->Data=[];
+      ForEach($this->Indices As $Index)
+        $Index->Clear();
+    }
+ 
+    Function Put($Data)
+    {
+      $this->Data=$Data;
+      ForEach($this->Indices As $Index)
+        $Index->Put($Data);
+    }
+    
+    Function AddRec($Rec)
+    {
+      $Primary=$this->Primary;
+      If($Idx=$Primary? $Primary->SearchRec($Rec):[])
+      {
+        $Idx=Array_Keys($Idx)[0];
+        ForEach($this->Indices As $Index)
+          $Index->DelRec($Idx);
+        $this->Data[$Idx]=$Rec;
+      }
+      Else
+      {
+        $this->Data[]=$Rec;
+        End($this->Data);
+        $Idx=Key($this->Data);
+      }
+      ForEach($this->Indices As $Index)
+        $Index->AddRec($Idx, $Rec);
+    }
+ 
+    Function Add($Data)
+    {
+      ForEach($Data As $Item)
+        $this->AddRec($Item);
+    }
+ 
+    Function _GetIndex($Fields, $bCreate=false)
+    {
+      If(!Is_Array($Fields)) $Fields=[$Fields];
+      Sort($Fields);
+      $K=Implode(',', $Fields); // $K=Serialize($Fields);
+      If(!IsSet($this->Indices[$K]))
+      {
+        if(!$bCreate)
+        {
+          $this->Log('Log', 'Cache table hasn`t index for columns ', $K);
+          return NULL;
+        }
+        $Res=$this->Create_Object('/BD/Cache/Index', ['Fields'=>$Fields]);
+        $Res->Put($this->Data);
+        $this->Indices[$K]=$Res;
+      }
+      else
+        $Res=$this->Indices[$K];
+      return $Res;
+    }
+    
+    // Создаёт индекс
+    Function Create_Index($Fields, $Name=True)
+    {
+      $Res=$this->_GetIndex($Fields, true);
+      If($Name===True  ) $Name=Implode(',', $Res->Fields);
+      If($Name!==False ) $this->IdxByName[$Name]=$Res;
+      return $Res;
+    }
+ 
+    Function Create_Primary($Fields, $Name=True)
+    {
+      $Res=$this->Create_Index($Fields, $Name);
+      $this->Primary=$Res;
+      Return $Res;
+    }
+    
+    Function Query($Where=[])
+    {
+      If(!$Where)
+        Return $this->Data;
+      $Res=[];
+      KSort($Where);
+      If($Index=$this->_GetIndex(Array_Keys($Where)))
+        ForEach($Index->Search(Array_Values($Where)) As $k=>$v)
+          $Res[]=$this->Data[$k];
+      Return $Res;
+    }
+ 
+    Function QueryFields($Fields)
+    {
+      $Index=$this->_GetIndex($Fields);
+      Return $Index? $Index->FieldValues():[];
+    }
+  }
+?>

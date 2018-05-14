@@ -1,0 +1,45 @@
+<?
+  $Loader->Load_Class('/BD/Base/Field/Base');
+ 
+  Class C_BD_Base_Field_Char Extends C_BD_Base_Field_Base
+  {
+    Function FromSQL (&$Value) { $Value=(Int)$Value; }
+    Function AsSql   (&$Value) { $Value=(Int)$Value; }
+ 
+    Function GetSQL()
+    {
+      $Field=$this->Field;
+      $ZDef=$Field['Def']!==NULL;
+      If($ZDef)
+      {
+        $Def=$Field['Def'];
+        $this->Put($Def);
+      }
+      If($Field['sSize'])
+      {
+        If($Field['sSize']>24) $AType='Long'   ;  Else
+        If($Field['sSize']>16) $AType='Medium' ;  Else
+        If($Field['sSize']> 8) $AType=''       ;  Else
+                               $AType='Tiny';
+        $AType=$Field['Binary']? 'Blob':'Text';
+        $ASize='';
+        $AAttr='';
+      }
+      Else
+      {
+        $AType=$Field['Variable']? 'VarChar':'Char';
+        $ASize='('.$Field['bSize'].')';
+        $AAttr=$Field['Binary']? 'Binary':'';
+      }
+      Return [
+        $AType,
+        $ASize,
+        $AAttr,
+        ($ZDef? 'Default':''),
+        ($ZDef? $Def:''),
+        (IsSet($Field['IsNull'])?($Field['IsNull']? 'Null':'Not Null'):''),
+        (IsSet($Field['Attr'  ])?($Field['Attr']=='+'? 'Auto_Increment':''):''),
+      ];
+    }
+  }
+?>

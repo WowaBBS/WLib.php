@@ -1,0 +1,9 @@
+<?
+  $Loader->Load_Class('/BD/Base/Field/Base');
+
+  Class C_BD_Base_Field_Int Extends C_BD_Base_Field_Base
+  {
+    Function TransGet(&$Value) { $Value=(Int)$Value; }
+    Function TransPut(&$Value) { $Value=(Int)$Value; }
+  }
+?>

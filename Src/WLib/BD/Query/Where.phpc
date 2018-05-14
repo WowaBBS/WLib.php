@@ -1,0 +1,112 @@
+<?
+  $Loader->Load_Class('/Object');
+
+  $Loader->Load_Module('/BD/Sql/Utils');
+  $Loader->Load_Module('/Strings');
+ 
+  Class C_BD_Query_Where extends C_Object
+  {
+    Var $Where =[];
+    Var $Type  ='And';
+ 
+    Function Unused_Assign($Data)
+    {
+      If(Is_Object($Data))
+      {
+        $this->Where   = $Data->Data    ;
+        $this->Type    = $Data->Type    ;
+      //$this->UFields = $Data->UFields ;
+      }
+    }
+ 
+    Function GetUFields($UFields)
+    {
+      ForEach($this->Where As $V)
+        $UFields->Add($V['Field']);
+    }
+ 
+    Function _Add($Field, $Cmd, $Value=NULL)
+    {
+      If($Field===False   ) $Field=[[]]; Else
+      If(!Is_Array($Field)) $Field=[$Field];
+      
+      $this->Where[]=[
+        'Field' => $Field ,
+        'Cmd'   => $Cmd   ,
+        'Value' => $Value ,
+      ];
+      
+      return $this;
+    }
+ 
+    Function Eq       ($Field, $Value  ) { Return $this->_Add($Field     ,'Eq'       ,$Value); }
+    Function EqField  ($F1, $F2        ) { Return $this->_Add([$F1, $F2] ,'Eq'              ); }
+    Function RegExp   ($Field, $Value  ) { Return $this->_Add($Field     ,'RegExp'   ,$Value); }
+    Function Like     ($Field, $Value  ) { Return $this->_Add($Field     ,'Like'     ,$Value); }
+    Function Between  ($Field, $V1, $V2) { Return $this->_Add($Field     ,'Between'  ,[$V1, $V2]); }
+    Function FullText ($Field, $Str    ) { Return $this->_Add($Field     ,'FullText' ,$Str  ); }
+ 
+    Function CreateSub($Type)
+    {
+      $Res=$this->Create_Object('/BD/Query/Where');
+      $Res->Type    =$Type;
+    //$Res->UFields =$this->UFields;
+      $this->_Add(False, 'Where', $Res);
+      Return $Res;
+    }
+ 
+    Function SubAnd () { return $this->CreateSub('And' ); } 
+    Function SubOr  () { return $this->CreateSub('Or'  ); }
+ 
+    Function Search($Fields, $Str)
+    {
+      If(!Is_Array($Fields)) $Fields=[$Fields];
+      
+      $Str=StrTr($Str, "\n\r\t", '   ');
+      $Str=Like_AddSlashes($Str);
+      $Str=MTrim(Trim($Str));
+      If(!$Str)
+        Return '';
+      $Str=Explode(' ', $Str);
+      ForEach($Str As $v)
+      {
+        $Item=[];
+        $W=$this->SubOr();
+        ForEach($Fields As $Field)
+          $W->Like($Field, '%'.$v.'%');
+      }
+    }
+ 
+    Function GetSQL()
+    {
+      $W=[];
+      ForEach($this->Where As $Item)
+      {
+      //ForEach($Item['Field']As $k=>$Fl) $Item['Field'][$k]=$Fl;
+        $F0=Array_Shift($Item['Field']);
+        Switch($Item['Cmd'])
+        {
+        Case 'Eq':
+          ForEach($Item['Field']As $F)
+            $W[]=$F0.'='.$F;
+          $W[]=sqlWhere_One($F0, $Item['Value']);
+        Break;
+        Case 'Between':
+          $W[]=$F0.' Between '.
+            sqlStr($Item['Value'][0]).' And '.
+            sqlStr($Item['Value'][1]);
+        Break;
+        Case 'Where' : $W[]=$Item['Value']->GetSql();Break;
+        Case 'Like'  : $W[]=$F0.' Like '.sqlStr($Item['Value']);Break;
+        }
+      }
+      If(!$W)
+        Return $this->Type==='And'? 1:0;
+      Return '('.Implode(')'.$this->Type.'(', $W).')';
+    }
+ 
+    Function PutSQL($Sql)
+    {
+    }
+  }
+?>

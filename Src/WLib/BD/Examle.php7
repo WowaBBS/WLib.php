@@ -1,0 +1,128 @@
+<?
+  Include '../Using.php';
+  
+  $BaseData=$Loader->Get_Singleton('/BD/Manager')->Create('MySql://root@localhost/ssu_umk');
+
+//Uses('Uni/TBase');
+ 
+//UseModule('BD'  );
+//UseModule('Doc' );
+  //Uses('Uni/UMK/UBase');
+  //Include('../../config/db.php');
+ 
+  $p='ssu_';
+  $tblFacs        =$BaseData->GetTable($p .'Facs'        ); # список факультетов
+  $tblChairs      =$BaseData->GetTable($p .'Chairs'      ); # список кафедр
+  $tblSpecs       =$BaseData->GetTable($p .'Specs'       ); # список специальностей
+  $tblGroups      =$BaseData->GetTable($p .'Groups'      ); # список групп
+  $tblSemesters   =$BaseData->GetTable($p .'Semesters'   ); # список cеместров
+  $tblDisciplines =$BaseData->GetTable($p .'Disciplines' ); # список дисциплин
+  $tblCurrGroups  =$BaseData->GetTable($p .'CurrGroups'  ); # группы дициплин учебного плана
+  $tblUmkDiscip   =$BaseData->GetTable('Umk_Discip'      ); # учебный план
+  $tblUmkHours    =$BaseData->GetTable('Umk_Hours'       ); # учебные часы
+ 
+  $tblChairs      ->GAddLink(['Fac'    ,'Fields'=>'FacID'      ], ['Chairs'   ,$tblFacs         ]);
+  $tblSpecs       ->GAddLink(['Fac'    ,'Fields'=>'FacID'      ], ['Specs'    ,$tblFacs         ]);
+  $tblSemesters   ->GAddLink(['Spec'   ,'Fields'=>'SpecID'     ], ['Sem'      ,$tblSpecs        ]);
+  $tblDisciplines ->GAddLink(['Chair'  ,'Fields'=>'ChairID'    ], ['Discip'   ,$tblChairs       ]);
+  $tblCurrGroups  ->GAddLink(['Spec'   ,'Fields'=>'SpecID'     ], ['CGroups'  ,$tblSpecs        ]);
+  $tblCurrGroups  ->GAddLink(['Parent' ,'Fields'=>'ParentID'   ], ['CGroups'  ,$tblCurrGroups   ,'Fields'=>'CGroupID']);
+  $tblUmkDiscip   ->GAddLink(['CGroup' ,'Fields'=>'CGroupID'   ], ['CDiscip'  ,$tblCurrGroups   ]);
+  $tblUmkDiscip   ->GAddLink(['Spec'   ,'Fields'=>'SpecID'     ], ['CDiscip'  ,$tblSpecs        ]);
+  $tblUmkDiscip   ->GAddLink(['Discip' ,'Fields'=>'DiscipID'   ], ['CDiscip'  ,$tblDisciplines  ]);
+  $tblUmkHours    ->GAddLink(['Curr'   ,'Fields'=>'CurrID'     ], ['UmkHours' ,$tblUmkDiscip    ]);
+  $tblUmkHours    ->GAddLink(['Sem'    ,'Fields'=>'SemesterID' ], ['UmkHours' ,$tblSemesters    ]);
+ 
+  $tblChairs      ->AddLink('ChairID'    ,[$tblDisciplines]);
+  $tblFacs        ->AddLink('FacID'      ,[$tblSpecs, $tblChairs]);
+  $tblSpecs       ->AddLink('SpecID'     ,[$tblGroups, $tblSemesters, $tblCurrGroups, $tblUmkDiscip]);
+  $tblDisciplines ->AddLink('DiscipID'   ,[$tblUmkDiscip ]);
+  $tblSemesters   ->AddLink('SemesterID' ,[$tblUmkHours  ]);
+  $tblCurrGroups  ->AddLink('CGroupID'   ,[[$tblCurrGroups, 'ParentID'], $tblUmkDiscip]);
+  $tblUmkDiscip   ->AddLink('CurrID'     ,[$tblUmkHours  ]);
+ 
+  $SexList=Array(
+    '',
+    'Мужской',
+    'Женский',
+  );
+ 
+  $YesNo=Array(
+    'Нет',
+    'Да',
+  );
+ 
+  $StepenList=Array(
+    'Нет',
+    'Доктор',
+    'Кандидат',
+  );
+ 
+  $ZvanList=Array(
+    'Нет',
+    'Младший научный сотрудник',
+    'Ассистент',
+    'Доцент',
+    'Старший научный сотрудник',
+    'Профессор',
+  );
+ 
+  $FamyleTypes=Array(
+    'Другие'  ,
+    'Мать'    ,
+    'Отец'    ,
+    'Сестра'  ,
+    'Брат'    ,
+    'Сын'     ,
+    'Дочь'    ,
+    'Жена'    ,
+    'Муж'     ,
+    'Дедушка' ,
+    'Бабушка' ,
+  );
+ 
+  $HoursTypes=[
+    100 => 'Трудоёмкость по Гос'        ,
+    200 => 'Всего часов'                ,
+    210 => '* Всего аудиторных часов'   ,
+    211 => '* * Лекции'                 ,
+    212 => '* * Практическая работа'    ,
+    213 => '* * Лабораторные работы'    ,
+    220 => '* Самостоятельное обучение' ,
+    310 => 'Курсовые работы'            ,
+    320 => 'Экзамены'                   ,
+    330 => 'Зачёты'                     ,
+    340 => 'Контрольные работы'         ,
+  ];
+ 
+  $UMKDiscipTypes=[
+    Array('ID'=>0,'Title'=>''  ,'Name'=>'' ),
+    Array('ID'=>1,'Title'=>'Ф.','Name'=>'F'),
+    Array('ID'=>2,'Title'=>'Р.','Name'=>'R'),
+    Array('ID'=>3,'Title'=>'В.','Name'=>'V'),
+  ];
+ 
+  $Vars['SexList' ] = $SexList     ;
+  $Vars['YesNo'   ] = $YesNo       ;
+  $Vars['KursList']=Array(1=>1,2,3,4,5,6,7,8);
+ 
+  if(false)
+  $Vars['Uni']=New T_Uni_Base([
+    'Facs'       => $tblFacs        ,
+    'Chairs'     => $tblChairs      ,
+    'Specs'      => $tblSpecs       ,
+    'Discip'     => $tblDisciplines ,
+    'Groups'     => $tblGroups      ,
+    'Semesters'  => $tblSemesters   ,
+    'CurrGroups' => $tblCurrGroups  ,
+    'UmkDiscip'  => $tblUmkDiscip   ,
+    'UmkHours'   => $tblUmkHours    ,
+  ]);
+
+  $Loader->Debug($tblFacs);
+  $W=$tblFacs->View();
+  $List=$W->GetList();
+  $Loader->Debug($List);
+  $Path=['Specs'];
+  $Loader->Debug($List[0]->GetVar($Path)->GetList()); // Get virtual field
+?>

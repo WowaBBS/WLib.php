@@ -1,0 +1,77 @@
+<?
+  //*************************************************************************\\
+  // Unit    : MMySql                                                        \\
+  // Date    : 01.08.2002                                                    \\
+  // Creator : Wowa Savin <wowa@activesolutions.info>                        \\
+  // (c) Active solutions                                                    \\
+  //*************************************************************************\\
+ 
+  // Определение модуля
+  $Loader->Load_Class('/BD/Base/Connection');
+ 
+  // ***************************************************************************************
+ 
+ // Class clDataBaseMySql
+  Class C_BD_MySql_Old_Connection Extends C_BD_Base_Connection
+  {
+    Var $Host     ; // Хост
+    Var $Login    ;
+    Var $Password ;
+    Var $DataBase ;
+    Protected $_link    ; // Хендл подключения
+ 
+    Protected Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $Link=$Args[0] ?? $Args['Link'];
+      $this->Host     =$Link->Domain.($Link->Port? ':'.$Link->Port:'') ;
+      $this->Login    =$Link->User     ;
+      $this->Password =$Link->Password ;
+      $this->DataBase =$Link->Path->Get(1) ;
+      $this->_link=False;
+    }
+ 
+    Function DebugInfo() { return 'MySql://'.$this->Host.'/'.$this->DataBase; }
+    
+    Function Close()
+    {
+      Parent::Close();
+      If(!$this->_link) return;
+      MySql_Close($this->_link);
+      $this->_link=False;
+    }
+    
+    Function Connect()
+    {
+    //$this->_link=MySql_PConnect($this->Host, $this->Login, $this->Password);
+      $this->_link=MySql_Connect($this->Host, $this->Login, $this->Password, True);
+      If($this->DataBase)
+        MySql_Select_Db($this->DataBase, $this->_link);
+      If($this->CodePage)
+        @MySql_Query('SET CHARACTER SET '.$this->BaseData->CodePage, $this->_link);
+    }
+ 
+    Function _InsertId     () { Return MySql_Insert_Id     ($this->_link); }
+    Function _AffectedRows () { Return MySql_Affected_Rows ($this->_link); }
+ 
+    Function SqlQuery($Data)
+    {
+      If(!$this->_link)
+        $this->Connect();
+      If(IsSet($GLOBALS['BD_LOG_QUERY'])) // TODO:
+        $this->Log($Data);
+    //Debug($Data);
+      $Res=@MySql_Query($Data, $this->_link);
+    //If(MySql_ErrNo($this->_link))
+    //  LogStr(MySql_ErrNo().': '.MySql_Error($this->_link));
+      If(MySql_ErrNo($this->_link))
+      {
+        $this->Error($Data);
+        $this->Error(MySql_ErrNo($this->_link).': '.MySql_Error($this->_link));
+      }
+      $Res=$this->Create_Object('/BD/MySql/Old/Response', [$Res, 'Connect'=>$this]);
+      Return $Res;
+    }
+  }
+  // ***************************************************************************************
+?>

@@ -1,0 +1,9 @@
+<?
+  $Loader->Load_Class('/BD/Base/Field/Base');
+
+  Class C_BD_Base_Field_Float Extends C_BD_Base_Field_Base
+  {
+    Function TransGet  (&$Value) { $Value=(Float)$Value; }
+    Function Normalize (&$Value) { $Value=(Float)$Value; }
+  }
+?>

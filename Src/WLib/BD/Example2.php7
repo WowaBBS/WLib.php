@@ -1,0 +1,20 @@
+<?
+  Include '../Using.php';
+  
+  $BaseData=$Loader->Get_Singleton('/BD/Manager')->Create('MySql://localhost/ssu_umk');
+
+  $tblFiles    =$BaseData->GetTable('files'    );
+  $tblPhotos   =$BaseData->GetTable('photos'   );
+  $tblRubrics  =$BaseData->GetTable('rubrics'  );
+  $tblContents =$BaseData->GetTable('contents' );
+ 
+  $tblFiles    ->GAddLink(['Rubric'  ,'Fields'=>'rubric_id'  ], ['Files'      ,$tblRubrics  ]);
+  $tblFiles    ->GAddLink(['Content' ,'Fields'=>'content_id' ], ['Files'      ,$tblContents ]);
+  $tblPhotos   ->GAddLink(['Rubric'  ,'Fields'=>'rubric_id'  ], ['Photos'     ,$tblRubrics  ]);
+  $tblPhotos   ->GAddLink(['Content' ,'Fields'=>'content_id' ], ['Photos'     ,$tblContents ]);
+  $tblRubrics  ->GAddLink(['Parent'  ,'Fields'=>'parent_id'  ], ['SubRubrics' ,$tblRubrics  , 'Fields'=>'rubric_id']);
+  $tblContents ->GAddLink(['Rubric'  ,'Fields'=>'rubric_id'  ], ['Contents'   ,$tblRubrics  ]);
+ 
+  $tblContents ->AddLink('content_id'   ,[$tblPhotos, $tblFiles]);
+  $tblRubrics  ->AddLink('rubric_id'    ,['parent_id'=>$tblRubrics, $tblContents, $tblPhotos, $tblFiles]);
+?>

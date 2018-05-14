@@ -1,0 +1,26 @@
+<?
+ Include('../../Using.php');
+
+ $Q=$Loader->Create_Object('/BD/Query/Request');
+
+ $Q->Table='Curriculum';
+
+ $Q->Sorts->Add('DiscipName');
+ $Q->Fields->Add(Array('*', 'Discip'));
+ $Q->Limit(10);
+
+  $Q->Where->Eq('DefID',3);
+  $Q->Where->Eq('Type',Array(1,3,5,7));
+  $Q->Where->Eq('TagName','area');
+  $Q->Where->EqField('DefID','a.DefID');
+$Q->Where->RegExp('a.Name','/.*/i');
+  $Q->Where->Like('b.Title','%Test%');
+  $Q->Where->Between('b.Type',3,6);
+  $Q->Where->FullText('Text','One two');
+ $Q->Where->Search(Array('a.Name','b.Title'),'One two');
+
+ //Echo $Q->Where->GetSql();
+ Echo $Q->GetSql();
+
+ $Loader->Debug($Q);
+?>

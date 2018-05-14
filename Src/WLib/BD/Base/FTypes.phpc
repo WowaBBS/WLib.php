@@ -1,0 +1,83 @@
+<?
+  $Loader->Load_Class('/Object');
+ 
+  Class C_BD_Base_FTypes Extends C_Object
+  {
+    Var $Types=[];
+
+    Protected Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      $this->Init();
+    }
+
+    Function AddType($Name, $Info)
+    {
+      If(!IsSet($this->Types[$Name]))
+      {
+        $this->Types[$Name]=$Info;
+        Return;
+      }
+      $Type=&$this->Types[$Name];
+      ForEach($Info As $k=>$v)
+        $Type[$k]=$v;
+    }
+ 
+    Function Init()
+    {
+     $this->AddType('Int'     ,['DefBSize'=>16                 ]);
+     $this->AddType('UInt'    ,['Type'=>'Int'   ,'Sign'=>True  ]);
+     $this->AddType('SInt'    ,['Type'=>'Int'   ,'Sign'=>False ]);
+ 
+     $this->AddType('Int8'    ,['Type'=>'Int'   ,'bSize'=>8    ]);
+     $this->AddType('UInt8'   ,['Type'=>'Int8'  ,'Sign'=>True  ]);
+     $this->AddType('SInt8'   ,['Type'=>'Int8'  ,'Sign'=>False ]);
+ 
+     $this->AddType('Int16'   ,['Type'=>'Int'   ,'bSize'=>16   ]);
+     $this->AddType('UInt16'  ,['Type'=>'Int16' ,'Sign'=>True  ]);
+     $this->AddType('SInt16'  ,['Type'=>'Int16' ,'Sign'=>False ]);
+ 
+     $this->AddType('Int24'   ,['Type'=>'Int'   ,'bSize'=>24   ]);
+     $this->AddType('UInt24'  ,['Type'=>'Int24' ,'Sign'=>True  ]);
+     $this->AddType('SInt24'  ,['Type'=>'Int24' ,'Sign'=>False ]);
+ 
+     $this->AddType('Int32'   ,['Type'=>'Int'   ,'bSize'=>32   ]);
+     $this->AddType('UInt32'  ,['Type'=>'Int32' ,'Sign'=>True  ]);
+     $this->AddType('SInt32'  ,['Type'=>'Int32' ,'Sign'=>False ]);
+ 
+     $this->AddType('Int48'   ,['Type'=>'Int'   ,'bSize'=>48   ]);
+     $this->AddType('UInt48'  ,['Type'=>'Int48' ,'Sign'=>True  ]);
+     $this->AddType('SInt48'  ,['Type'=>'Int48' ,'Sign'=>False ]);
+ 
+     $this->AddType('Int64'   ,['Type'=>'Int'   ,'bSize'=>64   ]);
+     $this->AddType('UInt64'  ,['Type'=>'Int64' ,'Sign'=>True  ]);
+     $this->AddType('SInt64'  ,['Type'=>'Int64' ,'Sign'=>False ]);
+                                                               
+     $this->AddType('Float'   ,[                               ]);
+ 
+     $this->AddType('Char'    ,['DefBSize'=>1                  ]);
+     $this->AddType('Byte'    ,['Type'=>'Char','Binary'=>True  ]);
+ 
+     $this->AddType('_VarChar',['Type'=>'Char','Variable'=>True]);
+     $this->AddType('_VarByte',['Type'=>'Byte','Variable'=>True]);
+ 
+     $this->AddType('VarChar' ,['Type'=>'_VarChar'             ]);
+     $this->AddType('VarByte' ,['Type'=>'_VarByte'             ]);
+ 
+     $this->AddType('Text'    ,['Type'=>'_VarChar','sSize'=>16 ]);
+     $this->AddType('Blob'    ,['Type'=>'_VarByte','sSize'=>16 ]);
+    }
+ 
+    Function TransType(&$AField)
+    {
+      While(IsSet($Types[$AField['Type']]))
+      {
+        $Type=$Types[$AField['Type']];
+        ForEach($Type As $k=>$v)
+          $AField[$k]=$v;
+        If(!IsSet($Type['Type']))
+          Break;
+      }
+    }
+  }
+?>

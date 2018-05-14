@@ -1,0 +1,9 @@
+<?
+  $Loader->Load_Class('/BD/Base/Field/Base');
+
+ Class C_BD_MySql_Field_Base Extends C_BD_Base_Field_Base
+ {
+   Function TransGet(&$Value) {}
+   Function TransPut(&$Value) {}
+ }
+?>

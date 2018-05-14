@@ -1,0 +1,25 @@
+<?
+  Include '../Using.php';
+  
+  $BaseData=$Loader->Get_Singleton('/BD/Manager')->Create('MySql://localhost/ssu_umk');
+
+  $tblObjects=$BaseData->GetTable('idx_Objects');
+
+  $tblObjects->AddLink('ObjID', [
+    //!!!!!!!!!!!!!!!!
+  //'IdxID'  => $tblObjects,
+  //'FromID' => $tblObjects,
+  //'ToID'   => $tblObjects,
+    [$tblObjects ,'IdxID'  ],
+    [$tblObjects ,'FromID' ],
+    [$tblObjects ,'ToID'   ],
+  ]);
+
+  $Params=Array(
+    'tblObjects'=>$tblObjects,
+  );
+
+  If(False)
+    $Vars['IObjects']==New T_IObjects_BD_Provider($Params);
+
+?>

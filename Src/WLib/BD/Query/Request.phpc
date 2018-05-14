@@ -1,0 +1,70 @@
+<?
+  $Loader->Load_Class('/Object');
+ 
+  Class C_BD_Query_Request extends C_Object
+  {
+    Var $Request =[];
+ 
+    Var $Table   ; // Таблица
+  //Var $UFields ; // Используемые поля
+    Var $Fields  ; // Запрашиваемые поля
+    Var $Where   ;
+    Var $Having  ;
+    Var $Sorts   ;
+    Var $Limit   =[];
+ 
+    Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+    //$this->UFields = $this->Create_Object('/BD/Query/UFields' );
+      $this->Where   = $this->Create_Object('/BD/Query/Where'   );
+      $this->Having  = $this->Create_Object('/BD/Query/Where'   );
+      $this->Fields  = $this->Create_Object('/BD/Query/Fields'  );
+      $this->Sorts   = $this->Create_Object('/BD/Query/Sorts'   );
+    }
+ 
+    Function Assign($Request='')
+    {
+      If(Is_Array  ($Request)) $this->Request=$Request; Else
+      If(Is_Object ($Request)) $this->Request=$Request->Request;
+    }
+ 
+    Function Limit($Count, $Beg=0)
+    {
+      $this->Limit=$Beg? [$Count, $Beg]:[$Count];
+    }
+ 
+    Function GetUFields($UFields)
+    {
+    //$this->Table   ;
+    //$this->UFields ;
+      $this->Fields ->GetUFields($UFields);
+      $this->Where  ->GetUFields($UFields);
+      $this->Having ->GetUFields($UFields);
+      $this->Sorts  ->GetUFields($UFields);
+    //$this->Limit   =[];
+    }
+ 
+    Function GetSql()
+    {
+      $F=$this->Fields ->GetSql();
+      $S=$this->Sorts  ->GetSql();
+      $G=False;
+      $L=Implode(',', Array_Reverse($this->Limit));
+      $T=$this->Table ;
+      $W=$this->Where ->GetSql();
+      $H=$this->Having->GetSql();
+      If(!$F)
+        $F='*';
+      $T=sqlTable($T);
+      $Q='Select '.$F."\n";
+      $Q.=' From '.$T."\n";
+      If($W&&$W!=1) $Q.=' Where '.$W."\n";
+      If($G       ) $Q.=' Group By '.sqlListAll($G)."\n";
+      If($H&&$H!=1) $Q.=' Having '.$H."\n";
+      If($S       ) $Q.=' Order By '.$S."\n";
+      If($L       ) $Q.=' Limit '.$L."\n";
+      Return $Q;
+    }
+  }
+?>

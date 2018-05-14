@@ -1,0 +1,173 @@
+<?
+  $Loader->Load_Class('/Object');
+  $Loader->Load_Module('/BD/Utils');
+  
+ #Uses('BD/Query/TCache');
+
+  Class C_BD_Base_View extends C_Object
+  {
+    Var $Table  ; // Таблица
+    Var $Where  ; // Дополнительные параметры
+    Var $Links  ; // Дополнительные параметры
+    Var $UpView ; // Основной запросник
+   #Var $Cache  =False;
+ 
+    Protected Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      $this->Table=$Args['Table'];
+      $this->Where=$Args['Where']??[];
+      $this->Links=$Args['Links']??[];
+    }
+ 
+    Protected Function _Debug_Info(Array &$Res)
+    {
+      Parent::_Debug_Info($Res);
+      $Res['Table']=$Res['Table']->DebugInfo();
+    }
+
+    Function DebugInfo() { return $this->Table->DebugInfo(); }
+    
+    // Получение списка полей и их типов
+    Function GetFields()
+    {
+      Return $this->Table->ReqFields();
+    }
+ 
+    // Получение названия поля первичного автоинкрементного ключа
+    Function KeyName()
+    {
+      $Flds=$this->GetFields();
+      ForEach($Flds As $F)
+        If($F['Extra']=='auto_increment')
+          Return $F['Field'];
+      Return '';
+    }
+ 
+    // Получение значения полей по умолчанию
+    Function _GetDef()
+    {
+      $Table=&$this->Table;
+    //$Res=$Table->ReqDefaultValues();
+      $Res=[];
+      $Flds=$this->GetFields();
+      ForEach($Flds As $F)
+        If($F['Extra']=='auto_increment')
+          $Res[$F['Field']]=0;
+        Else
+          $Res[$F['Field']]=$F['Default'];
+      Return $Res;
+    }
+    
+    Protected Function _Create_Row($Rec, $ZLink)
+    {
+      Return $this->Create_Object('/BD/Base/Row', [
+        'View'  =>$this  ,
+        'Rec'   =>$Rec   ,
+        'ZLink' =>$ZLink ,
+      ]);
+    }
+ 
+    // Получение значения полей по умолчанию в виде объекта
+    Function GetDef() { return $this->_Create_Row($this->_GetDef(), False); }
+ 
+    // Получение предиката связи, по её названии.
+    Function _GetLinks($Link)
+    {
+      $Res =$this->Links;
+      $W   =$this->Where;
+      If(!$Res&&!$W)
+        Return [];
+      $C=Count($Res);
+      $TA='a'.$C;
+      $C++;
+      $TB='a'.$C;
+      ForEach($Link[1]['Fields']As $k=>$Field)
+        $W[]=$TA.'.'.$Field.'='.$TB.'.'.$Link[1]['Fields'][$k];
+      $Res[]=[$TA, '1', $this->Table, [], $W];
+      Return $Res;
+    }
+ 
+    // Получение списка строк таблицы
+    Function GetList($Where=[], $Sort=False, $Count=0, $Pos=0)
+    {
+      $Table=&$this->Table;
+    //Debug($Table,2);
+      $Q=[];
+    //$Q[]=bdSort('b.DateEvent',False);
+      $Links=$this->Links;
+      $Q[]=bdTable(
+        'a'.Count($Links),
+        '0',
+        $Table,
+        ['*'],
+        $this->Where
+      );
+      ForEach($Links As $Link)
+        $Q[]=bdTable($Link[0], $Link[1], $Link[2], $Link[3], $Link[4]);
+      If($Sort)
+        $Q[]=bdSort($Sort, False);
+      //$Q[]=bdGroupBy('a.ID');
+      If($Count)
+        $Q[]=bdLimit($Pos, $Count);
+      $Res=$Table->SelectAll($Q);
+    //$this->Debug($Res);
+      ReIndexs($Res, (Int)$Pos+1);
+      $R=[];
+      ForEach($Res As $Item)
+        $R[]=$this->_Create_Row($Item, True);
+      Return $R;
+     }
+ 
+    // Получение элемента
+    Function &GetItem($ID)
+    {
+      $Table=$this->Table;
+      $KeyName=$this->KeyName();
+  
+      $Q=[];
+      $Q[]=bdTable('a', '0', $Table, ['*'], [$KeyName=>$ID]);
+      $Res=$Table->Select($Q);
+      If(!$Res)
+        $Res=$this->_GetDef();
+      $Res=$this->_Create_Row($Res, False);
+    //$Res['Chairs']=$this->Parent->Chairs->CloneAs(['ID'=>$ID]);
+    //$Res['Specs' ]=$this->Parent->Specs ->CloneAs(['ID'=>$ID]);
+      Return $Res;
+    }
+ 
+    Function Save($Data)
+    {
+      $Table=$this->Table;
+      $KeyName=$this->KeyName();
+  
+      If(!$Data[$KeyName])
+        $Data[$KeyName]=$Table->Insert($Data);
+      Else
+        $Table->Replace($Data);
+  
+      $ID=$Data[$KeyName] ;
+      Return $ID;
+    }
+ 
+    Function Del($ID)
+    {
+      $Table=$this->Table;
+      $KeyName=$this->KeyName();
+      Return $Table->Delete([$KeyName=>$ID]);
+    }
+ 
+    Function &GetVar(&$Path, $Type=tv_Any, $Vars=[])
+    {
+      If(Count($Path)==0)
+        Return $this;
+      $Res=NULL;
+      $Dir=Array_Shift($Path);
+      If(Is_Numeric($Dir))
+        $Res=&$this->GetItem($Dir);
+      ElseIf($Dir=='List')
+        $Res=$this->GetList();
+      Return $Res;
+    }
+  }
+?>

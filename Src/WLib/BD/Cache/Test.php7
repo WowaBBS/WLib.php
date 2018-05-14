@@ -1,0 +1,61 @@
+<?
+  Include './../../../using.php';
+  
+  Function Row_Pad(Array $Cols, Array $Lens, Array $Row)
+  {
+    $Res=[];
+    ForEach($Cols As $Key=>$Name)
+      $Res[$Key]=Str_Pad($Row[$Key]??'', $Lens[$Key]);
+    return $Res;
+  }
+  
+  Function DebTable($Data)
+  {
+    if(!$Data)
+      return [];
+    $Cols=[];
+    $Lens=[];
+    ForEach($Data As $Row)
+      ForEach($Row As $i=>$v)
+      {
+        $Lens[$i]=Max($Lens[$i]??0, StrLen($v));
+        $Cols[$i]=true;
+      }
+    $Cols=Array_Keys($Cols);
+    $Res=[];
+  //$Res[]=Implode(' | ', Row_Pad($Cols, $Lens, $Cols));
+    ForEach($Data As $Row)
+      $Res[]=Implode(' , ', Row_Pad($Cols, $Lens, $Row));
+    echo Implode("\n", $Res), "\n";
+    Return $Res;
+  }
+  
+  $W=$Loader->Create_Object('/BD/Cache/Table');
+  $W->Create_Primary(0);
+  $W->Put([
+    [0, 1, 'mftypes.php'     ],
+    [1, 2, 'table.php'       ],
+    [2, 3, 'tdriver.php'     ],
+    [3, 1, 'tindex.php'      ],
+    [4, 2, 'trawrequest.php' ],
+    [5, 3, 'ttable.php'      ],
+  ]);
+  $W->Create_Index(1,'Group');
+//$Loader->Debug($W);
+                 DebTable($W->Query(      )) ; //<Hasn`t index
+  $Loader->Debug(DebTable($W->Query([   3])));
+  echo 'Search: Conumn 2 = 3', "\n";
+  $Loader->Debug(DebTable($W->Query([1=>3])));
+  echo 'Add 2, 2, tdriver.php!', "\n";
+  $W->Add([
+    [2, 2, 'tdriver.php!'    ],
+  ]);
+  Echo "Full:\n";DebTable($W->Query(      )) ;
+  echo 'Search: Conumn 2 = 2', "\n";
+  $Loader->Debug(DebTable($W->Query([1=>2])));
+//$Loader->Debug(DebTable($W->Query([2])));
+  $Loader->Debug($W->QueryFields([1]));
+  echo 'Search: Conumn 2 = 3', "\n";
+  $Loader->Debug(DebTable($W->Query([1=>3])));
+//$Loader->Debug($W);
+?>

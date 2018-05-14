@@ -1,0 +1,64 @@
+<?
+  $Loader->Load_Module('/BD/Sql/Utils');
+ 
+  Function sqlNormNameFields(&$Res, $Fields, $Name)
+  {
+    ForEach($Fields As $k=>$v)
+      If(Is_Integer($k))
+      {
+        If($v=='*')
+          $Res[]=$Name.'.'.$v;
+        Else
+          $Res[$v]=$Name.'.'.$v;
+      }
+      Else
+        $Res[$k]=$v;
+  }
+ 
+  Function sqlAddWhere(&$RWhere, $Where)
+  {
+    ForEach($Where As $k=>$v)
+      If(Is_Integer($k))
+        $RWhere[]=$v;
+      Else
+        $RWhere[$k]=$v;
+  }
+ 
+  Function sqlTraceSelect($Cmds)
+  {
+    $Tables='';
+    $Where =[];
+    $Fields=[];
+    $Having=[];
+    $Groups=[];
+    $Sorts =[];
+    $Limit='';
+    ForEach($Cmds As $V)
+      Switch($V[0])
+      {
+      Case 'Where'  :       sqlAddWhere($Where  ,$V[1]         ); Break; //$Where  = $V[1] ;
+      Case 'Having' :                   $Having =$V[1]          ; Break;
+      Case 'Fields' : sqlNormNameFields($Fields ,$V[1], ''     ); Break; //$Fields = $V[1] ;
+      Case 'Group'  : $Groups  =ArrConc($Groups ,$V[1]         ); Break;
+      Case 'Limit'  :                   $Limit  =$V[1].','.$V[2]; Break;
+      Case 'Sort'   : $Sorts    =ArrAdd($Sorts  ,$V[1]         ); Break;
+      Case 'Table'  : [$Tmp, $S, $T, $N, $F, $W]=$V;
+        Switch($T)
+        {
+        Case '0': $Tables  =               $N.' '.$S."\n";  $Fields=[]; $Where= $W ; sqlNormNameFields($Fields, $F, $S); Break;
+        Case '1': $Tables .=      ' Join '.$N.' '.$S."\n";  sqlAddWhere($Where, $W); sqlNormNameFields($Fields, $F, $S); Break;
+        Case '?': $Tables .= ' Left Join '.$N.' '.$S.' On '.sqlWhere   ($W)."\n"   ; sqlNormNameFields($Fields, $F, $S); Break;
+        }
+        Break;
+      }
+    Return [
+      'T'=>$Tables ,
+      'W'=>$Where  ,
+      'F'=>Array_Reverse($Fields, True),
+      'H'=>$Having ,
+      'G'=>$Groups ,
+      'S'=>$Sorts  ,
+      'L'=>$Limit  ,
+    ];
+  }
+?>

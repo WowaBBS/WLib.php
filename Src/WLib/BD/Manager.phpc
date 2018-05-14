@@ -1,0 +1,36 @@
+<?
+  //*************************************************************************\\
+  // Unit    : MAbsBD                                                        \\
+  // Date    : 02.11.2002                                                    \\
+  // Creator : Wowa Savin <wowa@activesolutions.info>                        \\
+  //*************************************************************************\\
+
+ #Uses('BD/MUtils');
+ #Uses('BD/Query/TWhere');
+  $Loader->Load_Class('/Object');
+  $Loader->Load_Type('/Uri/Url/Base');
+//Uses('BD/TTable');
+
+  // ***************************************************************************************
+  
+  Class C_BD_Manager extends C_Object
+  {
+    Var $Managers=[];
+    
+    Function GetManager($Type)
+    {
+      If(IsSet($this->Managers[$Type]))
+        return $this->Managers[$Type];
+      Return $this->Managers[$Type]=$this->Create_Object('/BD/'.$Type.'/Manager');
+    }
+  
+    Function Create($Link, $Args=[])
+    {
+      $Link=TUrl::Create($Link);
+      $Args['Link']=$Link;
+      Return $this->GetManager($Link->Protocol)->Create_BaseData($Args);
+    }
+  }
+ 
+  // ***************************************************************************************
+?>

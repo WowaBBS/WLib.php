@@ -1,0 +1,36 @@
+<?
+  $Loader->Load_Class('/Object');
+ 
+  Class C_BD_Base_Manager Extends C_Object
+  {
+    Static $DriverName='BASE';
+    Var $Bases=[]; // TODO
+
+  //Var $Manager=null;
+ 
+    Protected Function _Init($Args)
+    {
+      parent::_Init($Args);
+    //$this->Manager=$Args['Manager'];
+    }
+    
+    Function Create_Table($BD, $Name, $Args=[]): C_BD_Base_Table
+    {
+      $Args['BaseData' ]=$BD   ;
+      $Args['Connect'  ]=$BD->Connect ;
+      $Args['Name'     ]=$Name ;
+      return $this->Create_Object('/BD/'.Static::$DriverName.'/Table', $Args);
+    }
+
+    Function Create_Connect($Args): C_BD_Base_Connection
+    {
+      return $this->Create_Object('/BD/'.Static::$DriverName.'/Connection', $Args);
+    }
+
+    Function Create_BaseData(Array $Args)
+    {
+      $Args['Manager']=$this;
+      return $this->Create_Object('/BD/Base/BaseData', $Args);
+    }
+  }
+?>

@@ -1,0 +1,38 @@
+<?
+  $Loader->Load_Class('/Object');
+ 
+  Class C_BD_Base_BaseData Extends C_Object
+  {
+    Var $Tables=[]; // Определённые объекты
+    Var $CodePage='cp1251'; // TODO: UTF8
+    Var $Connect;
+    Var $Manager;
+ 
+    Protected Function _Init($Args)
+    {
+      parent::_Init($Args);
+      $this->Manager=$Args['Manager'];
+      $Args['BaseData']=$this;
+      $this->Connect=$this->Manager->Create_Connect($Args);
+    }
+
+    Function DebugInfo() { return 'BD/BaseData'.$this->Object_Id; }
+    
+    Protected Function _Done()
+    {
+      parent::_Done();
+    }
+    
+    Function GetTable($Name): C_BD_Base_Table
+    {
+      If(!IsSet($this->Tables[$Name]))
+        $this->Tables[$Name]=$this->Manager->Create_Table($this, $Name);
+      Return $this->Tables[$Name];
+    }
+
+    Function SqlQuery($Data)
+    {
+      $this->Connect->SqlQuery($Data);
+    }
+  }
+?>

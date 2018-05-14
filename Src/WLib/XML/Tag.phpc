@@ -126,20 +126,14 @@
     Function _child()
     {
       If(!IsSet($this->EndTag)||!$this->EndTag)
-      {
-        $NULL=NULL;
-        Return $NULL;
-      }
+        Return null;
  
     //If($this->_f)
     //  $Tag=$this->EndTag->ListNext;
     //Else
       $Tag=$this->ListNext;
       If($this->EndTag->Object_Id===$Tag->Object_Id)
-      {
-        $NULL=NULL;
-        Return $NULL;
-      }
+        Return null;
       Return $Tag;
     }
  
@@ -153,10 +147,7 @@
     //Else
       $Tag=$this->EndTag->ListPrev;
       If($this->Object_Id===$Tag->Object_Id)
-      {
-        $NULL=NULL;
-        Return $NULL;
-      }
+        Return null;
       Return $Tag;
     }
  
@@ -178,7 +169,6 @@
  
     Function Go($Cmds)
     {
-      $NULL=NULL;
       $Tag=$this;
       ForEach($Cmds As $Cmd)
       {

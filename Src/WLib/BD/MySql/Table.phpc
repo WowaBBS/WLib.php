@@ -1,0 +1,191 @@
+<?
+  $Loader->Load_Class('/BD/Base/Table');
+  $Loader->Load_Module('/BD/Utils');
+  $Loader->Load_Module('/BD/MySql/Utils');
+
+  Class C_BD_MySql_Table Extends C_BD_Base_Table
+  {
+    Function SqlQuery($Data)
+    {
+    //LogStr($Data);
+      $this->LastQuery=$Data;
+      $Res=$this->Connect->SqlQuery($Data);
+      Return $Res;
+    }
+ 
+    Function _Delete($Where)
+    {
+      $Q='Delete From '.$this->Name."\n";
+      If($Where) $Q.=' Where '.sqlWhere($Where)."\n";
+    //LogStr($Q);
+    //Return 0;
+      $R=$this->SqlQuery($Q);
+      If($R->IsError())
+        Return 0;
+      $Res=$R->AffectedRows();
+      $R->Free();
+      Return $Res;
+    }
+ 
+    Function _Select($Fields,$Where)
+    {
+      $Q='Select '.sqlFields($Fields)."\n";
+      $Q.=' From '.$this->Name."\n";
+      If($Where)
+        $Q.=' Where '.sqlWhere($Where)."\n";
+      $R=$this->SqlQuery($Q);
+      If($R->IsError())
+        Return False;
+      $Res=$R->AsArray();
+      $R->Free();
+      Return $Res;
+    }
+ 
+    Function Insert($Vars)
+    {
+      while(True)
+      {
+        [$i, $Fields, $Values]=sqlInsReplData($Vars);
+        $Q='Insert Into '.$this->Name."\n";
+        If($Fields)
+          $Q.='('.$Fields.')'."\n";
+        $Q.=' Values'."\n".$Values;
+        $R=$this->SqlQuery($Q);
+        If($R->IsError())
+          Return 0;
+        $Res=$R->InsertId();
+        $R->Free();
+        If(!$i)
+          Break;
+        Array_Splice($Vars, 0, $i);
+      }
+      Return $Res;
+    }
+ 
+    Function Replace($Vars)
+    {
+      while(True)
+      {
+        [$i, $Fields, $Values]=sqlInsReplData($Vars);
+        $Q='Replace Into '.$this->Name;
+        If($Fields)
+          $Q.='('.$Fields.')';
+        $Q.=' Values'."\n".$Values;
+        $R=$this->SqlQuery($Q);
+        If($R->IsError())
+          Return 0;
+        $Res=$R->InsertId();
+        $R->Free();
+        If(!$i)
+          Break;
+        Array_Splice($Vars, 0, $i);
+      }
+      Return $Res;
+    }
+ 
+    Function Update($Values,$Where='')
+    {
+      $Q='Update '.$this->Name.' Set '.sqlSet($Values)."\n";
+      If($Where)
+        $Q.=' Where '.sqlWhere($Where)."\n";
+      $R=$this->SqlQuery($Q);
+      If($R->IsError())
+        Return 0;
+      $Res=$R->AffectedRows();
+      $R->Free();
+      Return $Res;
+    }
+ 
+    Function SelectQuery($Q)
+    {
+      Extract($Q);
+      If(!$F)
+        $F='*';
+      $F=sqlFields($F);
+      $T=sqlTable ($T);
+      $Q='Select '.$F."\n";
+      $Q.=' From '.$T."\n";
+      If($W) $Q.=' Where '    .sqlWhere     ($W)."\n";
+      If($G) $Q.=' Group By ' .sqlListAll   ($G)."\n";
+      If($H) $Q.=' Having '   .sqlWhere     ($H)."\n";
+      If($S) $Q.=' Order By ' .sqlListOrder ($S)."\n";
+      If($L) $Q.=' Limit '    .$L."\n";
+      Return $Q;
+    //$Res=SqlQuery($Q);//Or Die($Q);
+    }
+ 
+    Function SelectAll($Cmds=[])
+    {
+      Array_UnShift($Cmds, bdTable('a', '0', $this));
+      $Q=sqlTraceSelect($Cmds);
+      $Q=$this->SelectQuery($Q);
+      $R=$this->SqlQuery($Q);
+    //$this->Debug($R);
+      If($R->IsError())
+        Return False;
+      $Res=$R->AsArray();
+      $R->Free();
+      Return $Res;
+    }
+ 
+    Function SelectCount($Cmds=Array())
+    {
+      Array_UnShift($Cmds, bdTable('a', '0', $this));
+      $Q=sqlTraceSelect($Cmds);
+      $Q['F']=['CountAll'=>'Count(*)'];
+      $Q=$this->SelectQuery($Q);
+      $R=$this->SqlQuery($Q);
+      If($R->IsError())
+        Return False;
+      $Res=$R->AsRow();
+      $R->Free();
+      Return $Res['CountAll'];
+    }
+ 
+    Function SelectRow($Cmds=[], $Row=0)
+    {
+      Array_UnShift($Cmds,
+        bdTable('a', '0', $this),
+        bdLimit($Row, 1)
+      );
+      $Q=sqlTraceSelect($Cmds);
+      $Q=$this->SelectQuery($Q);
+      $R=$this->SqlQuery($Q);
+      If($R->IsError())
+        Return False;
+      $Res=$R->AsRow();
+      $R->Free();
+      Return $Res;
+    }
+ 
+    Function Select($Cmds=[], $Row=0)
+    {
+      Return $this->SelectRow($Cmds, $Row);
+    }
+ 
+    Function ReqFields()
+    {
+      $Q='Show fields from '.$this->Name;
+      $R=$this->SqlQuery($Q);
+      If($R->IsError())
+        Return False;
+      $Res=$R->AsArray();
+      $R->Free();
+      Return $Res;
+    }
+ 
+    Function ReqDefaultValues()
+    {
+      $Q='Show fields from '.$this->Name;
+      $R=$this->SqlQuery($Q);
+      If($R->IsError())
+        Return False;
+      $Rs=$R->AsArray();
+      $R->Free();
+      $Res=Array();
+      ForEach($Rs As $v)
+        $Res[$v['Field']]=$v['Default'];
+      Return $Res;
+    }
+  }
+?>

@@ -24,23 +24,10 @@
   // Переводит размер файла в строку
   Function SizeToStr($Size)
   {
-    If($Size<1024)
-      Return $Size;
-    $Size/=1024;
-    If($Size<10)
-      Return Number_Format($Size, 1, '.', '').'K';
-    If($Size<1024)
-      Return (Int)$Size.'K';
-    $Size/=1024;
-    If($Size<10)
-      Return Number_Format($Size, 1, '.', '').'M';
-    If($Size<1024)
-      Return (Int)$Size.'M';
-    $Size/=1024;
-    If($Size<10)
-      Return Number_Format($Size, 1, '.', '').'G';
-    If($Size<1024)
-      Return (Int)$Size.'G';
+                                                                           If($Size<1024) Return      $Size    ;
+    $Size/=1024; If($Size<10) Return Number_Format($Size, 1, '.', '').'K'; If($Size<1024) Return (Int)$Size.'K';
+    $Size/=1024; If($Size<10) Return Number_Format($Size, 1, '.', '').'M'; If($Size<1024) Return (Int)$Size.'M';
+    $Size/=1024; If($Size<10) Return Number_Format($Size, 1, '.', '').'G'; If($Size<1024) Return (Int)$Size.'G';
   }
  
   // ***************************************************************************************

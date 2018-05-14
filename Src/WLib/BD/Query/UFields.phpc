@@ -1,0 +1,37 @@
+<?
+  $Loader->Load_Class('/Object');
+  
+  Class C_BD_Query_UFields extends C_Object
+  {
+    Var $UFields=[];
+ 
+    Function AddField($Field)
+    {
+      If(!Is_Array($Field))
+        $Field=Explode('.', $Field);
+      $LF=&$this->UFields;
+      ForEach($Field As $F)
+      {
+        If(!IsSet($LF[$F]))
+          $LF[$F]=[];
+        $LF=&$LF[$F];
+      }
+    }
+ 
+    Function Add($Fields)
+    {
+      ForEach($Fields As $Field)
+        $this->AddField($Field);
+    }
+ 
+    Function Fields()
+    {
+    }
+ 
+    Function CmdOr($Data)
+    {
+      While(Is_Object($Data))
+        $Data=$Data->UFields;
+    }
+  }
+?>

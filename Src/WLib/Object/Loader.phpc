@@ -59,7 +59,7 @@
     {
       if($Name[0]!=='/')
       {
-        $this->Log('Error', 'Lib`s name "', $Name, '" shoult be started with /');
+        $this->Log('Error', 'Lib`s name "', $Name, '" should be started with /');
         $Name='/'.$Name;
       }
       ForEach($this->_Paths as $__Path)
@@ -120,19 +120,24 @@
     
     Function _Load_Lib(String $Name, Array $Mode=[], String $Ext='.php', $Verify='')
     {
-      $AZSafe=IsSet($Mode['Safe'])&& $Mode['Safe'];
+      $AZSafe=$Mode['Safe'] ?? False;
     //$Name=StrToLower($Name);
+      if($Name[0]!=='/')
+      {
+        $this->Log('Error', 'Lib`s name "', $Name, '" should be started with /');
+        $Name='/'.$Name;
+      }
       $_Libs=&$this->_Libs;
       If(IsSet($_Libs[$Name]))
         Return $_Libs[$Name];
       $Res=Str_Replace('/', '_', $Name);
-      $Loader=&$this;
       //////
       $_Path=$this->_Find_Lib($Name, $Ext);
       If($_Path===False) $Res=False; Else
       {
         if($Verify)
           $VerifyVars=$this->_Verify_Begin($Verify);
+        $Loader=&$this;
         If($AZSafe) { If(!Include_Once($_Path)) $Res=False; }
         Else        { If(!Require_Once($_Path)) $Res=False; }
         if($Verify)

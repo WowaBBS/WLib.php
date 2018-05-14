@@ -1,0 +1,242 @@
+<?
+  $Loader->Load_Class('/Object');
+  $Loader->Load_Module('/Array');
+  
+  // TODO: ArrayFromRecords
+ 
+//Uses('BD/Base/TView');
+ 
+  Class C_BD_Base_Table Extends C_Object
+  {
+    Var $Name    ; // Имя таблицы
+    Var $Connect ; // Ссылка на базу данных // TODO: Connection
+    Var $Fields  ; // Поля
+    Var $VFields ; // Виртуальные поля
+    Var $Links   ; // Связи по запросу
+    Var $DLinks  ; // Связи по удалению
+ 
+    Protected Function _Debug_Info(Array &$Res)
+    {
+      Parent::_Debug_Info($Res);
+      $Res['Connect']=$Res['Connect']->DebugInfo();
+      ForEach($Res['Links']As $k=>&$v)
+      {
+        $v[0]['Table']=$v[0]['Table']->DebugInfo();
+        $v[1]['Table']=$v[1]['Table']->DebugInfo();
+      }
+      ForEach($Res['DLinks']As $k1=>&$v1)
+        ForEach($v1 As $k=>&$v)
+          $v['']=$v['']->DebugInfo();
+    }
+    
+    Function DebugInfo() { return $this->Name; }
+    
+    Protected Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      $Name=$Args[0]??$Args['Name'];
+      $this->Connect = $Args['Connect'];
+      $this->Name    = $Name ;
+      $this->Links   = [];
+      $this->DLinks  = [];
+      $this->Fields  = [];
+      $this->NFields = [];
+    }
+ 
+    Function _Delete($Where)
+    {
+      Return 0;
+    }
+ 
+    Function _Select($Fields, $Where) { Return []; }
+    
+    //****************************************************************
+    // Removing
+ 
+    Function Delete($Where=false)
+    {
+      $DLinks=$this->DLinks;
+      if(!$DLinks)
+        return;
+      $Fields=Array_Keys($DLinks);
+      $z=Count($Fields)===1 && Count($Where)===1; // TODO: Check condition
+      If($z)
+        $z=IsSet($Where[$Fields[0]]);
+      $z=False;
+      If(!$z)
+        $List=$Fields? $this->_Select($Fields, $Where):False;
+      $Res=$this->_Delete($Where);
+      If(!$z && !$List)
+        Return $Res;
+      If($z)
+        ForEach($DLinks[$Fields[0]] As $Fs)
+        {
+          $Table=$Fs[''];
+          ForEach($Fs As $F=>$Tmp)
+            if($F!=='')
+              $Table->Delete([$F=>$Where[$Fields[0]]]);
+        }
+      Else
+      {
+        ForEach($DLinks As $Field=>$Tables)
+        {
+          $Search=ArrayFromRecords($List, $Field);
+          ForEach($Tables As $Fs)
+          {
+            $Table=$Fs[''];
+            ForEach($Fs As $F=>$Tmp)
+              if($F!=='')
+                $Table->Delete([$F=>$Search]);
+          }
+        }
+      }
+      Return $Res;
+    }
+ 
+    Function AddLink(String $Name, Array $Tables)
+    {
+      $Link=&SetDefault($this->DLinks, $Name, []);
+      ForEach($Tables As $k=>$Table)
+      {
+        If(Is_Array($Table))
+        {
+          If(Is_String($k) || count($Table)!==2 || !Isset($Table[0]) || !Isset($Table[1]))
+            $this->Log('Fatal', 'Invalid');
+          $_Name = $Table[1];
+          $Table = $Table[0];
+        }
+        Else
+        {
+          $_Name = Is_String($k)? $k:$Name;
+        }
+  
+        $Fs=&SetDefault($Link, $Table->Object_Id, [''=>$Table]);
+        $Fs[$_Name]=true;
+      }
+    }
+
+    //****************************************************************
+    // Fields
+    
+    Protected Function _AddField($Name, $type, $Field)
+    {
+      $Field['Name' ]=$Name;
+      $Field['type' ]=$type; // TODO: Rename
+      $Field['idx'  ]=Count($this->Fields);
+      $this->Fields[]=$Field;
+      $this->AFields[$Name]=$Field;
+    }
+ 
+    // Real field
+    Function AddField($Name, $Type, $Len, $Def, $Attr)
+    {
+      return $this->_AddField($Name, 'field', [
+        'Type' => $Type , 
+        'Len'  => $Len  ,
+        'Def'  => $Def  ,
+        'Attr' => $Attr ,
+      ]);
+    }
+ 
+    // Virtual field
+    Function AddVField($Name, $Value) // TODO: Value is not used
+    {
+      return $this->_AddField($Name, 'value', []);
+    }
+ 
+    // Joined with table field
+    //(a) Left join (b) on(u1) Left join (c) on(u2)
+    //'1*', Array     , Имя массива   ,  ->
+    //'1?', Left join , Название поля ,  ->
+    //'11', Data      , Название поля , <->
+    //'?1', Data      , Название поля , <-
+    //'*1', Data      , Название поля , <-
+    Function Add_Link($Name, $Table, $TName, $Type, $Where)
+    {
+      return $this->_AddField($Name, 'link', [
+        'Type'  =>  $Type  ,
+        'Table' =>  $Table ,
+        'TName' =>  $TName ,
+        'Where' =>  $Where ,
+      ]);
+    }
+ 
+    Function _GAddLink($L)
+    {
+      If(IsSet($this->Links[$L[0]['VField']]))
+        $this->Log('Fatal', 'Link hven`t virtual field name');
+      $this->Links[$L[0]['VField']]=$L;
+    }
+ 
+    // Добавляет ссылку между $T1 и $T2
+    // T1=Define local  connection
+    // T2=Define remote connection
+    //    0 or VField or V   => Virtual field name
+    //    1 or Table  or Tbl => Table
+    //    2 or Fields or F   => List of fields of one field name
+    //    3 of Type   or T   => * of ? or 1
+    //    4 of Where  or W   => Where condition ???
+    //    5 of Del    or D   => ???
+    //    6 of Pr     or P   => ???
+    //    7 of Def    or Df  => ???
+    Function GAddLink($T1, $T2)
+    {
+      if(!IsSet($T1['Fields']))
+        $this->Log('Fatal', "Hasn`t \$T1['Fields']");
+    
+      $this->GLinkExtr($T1, ['' ,$this ,''            ,'*' ,[], False, 0, []]);
+      $this->GLinkExtr($T2, ['' ,''    ,$T1['Fields'] ,'?' ,[], True , 1, []]);
+  
+      If(!Is_Array($T1['Fields'])) $T1['Fields']=[$T1['Fields']];
+      If(!Is_Array($T2['Fields'])) $T2['Fields']=[$T2['Fields']];
+  
+      $T1['Table']->_GAddLink([$T1, $T2]);
+      $T2['Table']->_GAddLink([$T2, $T1]);
+    }
+ 
+    Private Static Function GLinkExtr(&$Res, $Default)
+    {
+      Static $F=[
+        'VField' =>[0 ,'V'  ,],
+        'Table'  =>[1 ,'Tbl',],
+        'Fields' =>[2 ,'F'  ,],
+        'Type'   =>[3 ,'T'  ,],
+        'Where'  =>[4 ,'W'  ,],
+        'Del'    =>[5 ,'D'  ,],
+        'Pr'     =>[6 ,'P'  ,],
+        'Def'    =>[7 ,'Df' ,],
+      ];
+      ForEach($F As $Key=>$List)
+      {
+        ForEach($List As $Alias)
+          if(IsSet($Res[$Alias]))
+          {
+            if(IsSet($Res[$Key]))
+              $this->Log('Error', 'Key already exists for '.$l[0]);
+            $Res[$Key]=$Res[$Alias];
+            UnSet($Res[$Alias]);
+          }
+        if(!IsSet($Res[$Key]))
+          $Res[$Key]=$Default[$List[0]];
+      }
+    }
+    
+    Function View($Args=[])
+    {
+      $Args['Table']=$this;
+      $Res=$this->Create_Object('/BD/Base/View', $Args);
+      Return $Res;
+    }
+ 
+    Function &GetVar(&$Path, $Type=tv_Any, $Vars=[])
+    {
+      If(Count($Path)===0)
+        Return $this;
+      $Res=NULL;
+      $Dir=Array_Shift($Path);
+      If($Dir==='View')
+        $Res=&$this->View();
+      Return $Res;
+    }
+  }
+?>

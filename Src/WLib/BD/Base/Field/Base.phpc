@@ -1,0 +1,11 @@
+<?
+  $Loader->Load_Class('/Object');
+  
+  Class C_BD_Base_Field_Base Extends C_Object
+  {
+    Var $Field=[];
+ 
+    Function TransGet(&$Value) {}
+    Function TransPut(&$Value) {}
+  }
+?>

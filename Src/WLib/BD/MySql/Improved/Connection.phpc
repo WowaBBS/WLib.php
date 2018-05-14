@@ -1,0 +1,77 @@
+<?
+  //*************************************************************************\\
+  // Unit    : MMySql                                                        \\
+  // Date    : 01.08.2002                                                    \\
+  // Creator : Wowa Savin <wowa@activesolutions.info>                        \\
+  // (c) Active solutions                                                    \\
+  //*************************************************************************\\
+ 
+  // Определение модуля
+  $Loader->Load_Class('/BD/Base/Connection');
+ 
+  // ***************************************************************************************
+ 
+ // Class clDataBaseMySql
+  Class C_BD_MySql_Improved_Connection Extends C_BD_Base_Connection
+  {
+    Var $Host     ; // Хост
+    Var $Port     ; // Хост
+    Var $Login    ;
+    Var $Password ; // TODO: Security
+    Var $DataBase ;
+    Protected $_link    ; // Хендл подключения
+ 
+    Protected Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      $Link=$Args[0] ?? $Args['Link'];
+      $this->Host     =$Link->Domain ; //=='localhost'? '127.0.0.1':$Link->Domain;
+      $this->Port     =$Link->Port? $Link->Port:3306;
+      $this->Login    =$Link->User     ;
+      $this->Password =$Link->Password ;
+      $this->DataBase =$Link->Path->Get(1) ;
+      $this->_link=False;
+    }
+ 
+    Function DebugInfo() { return 'MySql://'.$this->Host.':'.$this->Port.'/'.$this->DataBase; }
+    
+    Function Close()
+    {
+      Parent::Close();
+      If(!$this->_link) return;
+
+      MySqlI_Close($this->_link);
+      $this->_link=False;
+    }
+    
+    Function Connect()
+    {
+      $this->_link=MySqlI_Connect($this->Host, $this->Login, $this->Password, $this->DataBase, $this->Port);
+      If($this->BaseData->CodePage)
+        $this->_link->Set_CharSet($this->BaseData->CodePage);
+    }
+ 
+    Function _InsertId     () { Return MySqlI_Insert_Id     ($this->_link); }
+    Function _AffectedRows () { Return MySqlI_Affected_Rows ($this->_link); }
+ 
+    Function SqlQuery($Data)
+    {
+      If(!$this->_link)
+        $this->Connect();
+      If(IsSet($GLOBALS['BD_LOG_QUERY'])) // TODO:
+        $this->Log($Data);
+    //Debug($Data);
+      $Res=$this->_link->Query($Data);
+    //If(MySqlI_ErrNo($this->_link))
+    //  LogStr(MySqlI_ErrNo().': '.MySqlI_Error($this->_link));
+      If(MySqlI_ErrNo($this->_link))
+      {
+        $this->Error($Data);
+        $this->Error(MySqlI_ErrNo($this->_link).': '.MySqlI_Error($this->_link));
+      }
+      $Res=$this->Create_Object('/BD/MySql/Improved/Response', [$Res, 'Connect'=>$this]);
+      Return $Res;
+    }
+  }
+  // ***************************************************************************************
+?>

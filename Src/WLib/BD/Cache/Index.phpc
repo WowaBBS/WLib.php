@@ -1,0 +1,96 @@
+<?
+  $Loader->Load_Class('/Object');
+  
+  Class C_BD_Cache_Index extends C_Object
+  {
+    Var $ByKey  = []; // По ключу находит индексы
+    Var $Index  = []; // По индексу находит ключ
+    Var $Fields = [];
+ 
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+    //$this->Fields=(Array)$Args['Fields'];
+      $Fields=$Args['Fields'];
+      $this->Fields=Is_Array($Fields)? $Fields:[$Fields];
+    }
+ 
+    Function Clear()
+    {
+      $this->ByKey=[];
+      $this->Index=[];
+    }
+ 
+    Function Search($Key)
+    {
+      $Key=Serialize($Key);
+      return $this->ByKey[$Key] ?? [];
+    }
+ 
+    Function SearchRec($Rec)
+    {
+      $Key=$this->_KeyByRec($Rec);
+      Return $this->ByKey[$Key] ?? [];
+    }
+ 
+    Function FieldValues()
+    {
+      $Res=[];
+      ForEach($this->ByKey As $k=>$v)
+        $Res[]=UnSerialize($k);
+      Return $Res;
+    }
+ 
+    Function _KeyByRec($Rec)
+    {
+      $Key=[];
+      ForEach($this->Fields As $k=>$v)
+        $Key[$k]=$Rec[$v];
+      Return Serialize($Key);
+    }
+ 
+    Function AddRec($Idx, $Rec)
+    {
+      $Key=$this->_KeyByRec($Rec);
+      If(IsSet($this->Index[$Idx]))
+      {
+        $K=$this->Index[$Idx];
+        If($Key==$K)
+          Return;
+        UnSet($this->ByKey[$this->Index[$Idx]][$Idx]);
+      }
+      If(!IsSet($this->ByKey[$Key]))
+        $this->ByKey[$Key]=[$Idx=>1];
+      Else
+        $this->ByKey[$Key][$Idx]=1;
+      $this->Index[$Idx]=$Key;
+    }
+ 
+   #Function Add($Idx, $Data)
+   #{
+   #  ForEach($Data As $k=>$v)
+   #    $this->AddRec($Idx++, $Data[$k]);
+   #}
+ 
+    Function Put($Data)
+    {
+      $this->Clear();
+      ForEach($Data As $k=>$v)
+        $this->AddRec($k, $Data[$k]);
+    }
+ 
+    Function DelRec($Idx)
+    {
+      If(!IsSet($this->Index[$Idx]))
+      { // TODO: $this->Log('Error', ...);
+        $this->Debug(['Key '.$Idx.' not found'=>$this]);
+        Return False;
+      }
+    //Echo 'DelRec ', $Idx, ' By Key ',$this->Index[$Idx], "\n";
+      UnSet($this->ByKey[$this->Index[$Idx]][$Idx]);
+      UnSet(             $this->Index[$Idx]       );
+      Return True;
+    }
+  }
+
+?>

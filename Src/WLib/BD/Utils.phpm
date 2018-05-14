@@ -1,0 +1,87 @@
+<?
+  $Loader->Load_Module('/Strings');
+
+  // ***************************************************************************************
+  Function dbSearchStr($Fields, $Str, $Where='')
+  {
+    If(!Is_Array($Fields)) $Fields=[$Fields];
+    $Str=StrTr($Str, "\n\r\t", '   ');
+    $Str=Like_AddSlashes($Str);
+    $Str=MTrim(Trim($Str));
+    If(!$Str)
+      Return '';
+    $Str=Explode(' ', $Str);
+    ForEach($Str As $v)
+    {
+      $Item=[];
+      ForEach($Fields As $f)
+        $Item[]=$f.' Like '.'"%'.$v.'%"';
+      $Where[]=$Item;
+    }
+   Return $Where;
+  }
+ 
+  // $Name - Псевдоним таблицы (Имя подтаблицы)
+  // $Type - Тип присоединения
+  //    0 - главная
+  //    1 - связная для каждого значения
+  //    ? - связная для одного необязательного значения
+  //    * - связная подтаблица (пока не реализована)
+  // $Table  - Имя таблицы
+  // $Fields - Список полей
+  // $Where  - Условия связи
+  Function bdTable($Name, $Type, $Table, $Fields=[], $Where=[])
+  {
+    If(!Is_Array($Where  )) $Where  =[$Where];
+    If(!Is_Array($Fields )) $Fields =[$Fields];
+    If(Is_Object($Table  )) $Table  =$Table->Name;
+
+    Return ['Table', $Name, $Type, $Table, $Fields, $Where];
+  }
+ 
+  // Условия выборки из таблиц(ы)
+  Function bdWhere($Where)
+  {
+   If(!Is_Array($Where)) $Where=[$Where];
+   
+   Return ['Where', $Where];
+  }
+ 
+  // Пост условия выборки из таблиц(ы)
+  Function bdHaving($Having)
+  {
+    If(!Is_Array($Having)) $Having=[$Having];
+    Return ['Having', $Having];
+  }
+ 
+  // Группировать по полю(-ям)
+  Function bdGroupBy($Group)
+  {
+    If(!Is_Array($Group)) $Group=[$Group];
+   
+    Return ['Group', $Group];
+  }
+ 
+  // Сортировать по полю
+  Function bdSort($Sort,$z=True)
+  {
+    If(!Is_Array($Sort)) $Sort=[$Sort=>$z];
+    $Res=[];
+    ForEach($Sort As $k=>$v)
+      $Res[Is_Integer($k)? $v:$k]=$z;
+        
+    Return ['Sort', $Sort];
+  }
+ 
+  Function bdFields($Fields)
+  {
+    If(!Is_Array($Fields)) $Fields=[$Fields];
+   
+    Return ['Fields', $Fields];
+  }
+ 
+  Function bdLimit($Beg, $Count)
+  {
+    Return ['Limit', $Beg, $Count];
+  }
+?>

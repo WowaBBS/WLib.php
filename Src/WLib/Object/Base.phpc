@@ -30,7 +30,7 @@
     Protected Function _Debug_Info(Array &$Res)
     {
       if($this->Loader!==null) unset($Res['Loader']);
-      if($this->Object_Inited) unset($Res['Inited']);
+      if($this->Object_Inited) unset($Res['Object_Inited']);
     }
     
     /// Debug manager

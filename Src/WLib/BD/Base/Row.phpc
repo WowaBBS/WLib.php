@@ -1,0 +1,89 @@
+<?
+  $Loader->Load_Class('/Object');
+ 
+  Class C_BD_Base_Row Extends C_Object
+  {
+    Var $View  ; // Таблица
+    Var $Rec   ; // Данные
+    Var $ZLink ; // Признак связи с View
+ 
+    Protected Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      $this->View  = $Args['View'  ];
+      $this->Rec   = $Args['Rec'   ];
+      $this->ZLink = $Args['ZLink' ];
+    }
+ 
+    Protected Function _Debug_Info(Array &$Res)
+    {
+      Parent::_Debug_Info($Res);
+      $Res['View']=$Res['View']->DebugInfo();
+    }
+    
+    Function &GetVar(&$Path, $Type=tv_Any, $Vars=[])
+    {
+      If(Count($Path)==0)
+        Return $this;
+      $Res=NULL;
+      $Dir=Array_Shift($Path);
+      If(IsSet($this->Rec[$Dir]))
+        $Res=$this->Rec[$Dir];
+      ElseIf(IsSet($this->View->Table->Links[$Dir]))
+      {
+        $Link=$this->View->Table->Links[$Dir];
+      //Debug($Link);
+        $Table=$Link[1]['Table'];
+        If($this->ZLink)
+          Switch($Link[1]['Type'])
+          {
+          Case '*':
+            $Links=$this->View->_GetLinks($Link);
+            $View=$Table->View(['Links'=>$Links]);
+            $Res=$View;
+            Break;
+          Case '?':
+          Case '1':
+            $Links=$this->View->_GetLinks($Link);
+            $View=$Table->View(['Links'=>$Links]);
+            $Lst=$View->GetList();
+            If($Lst)
+              $Res=$Lst[0];
+            Else
+              $Res=$View->GetDef();
+            Break;
+          } // Switch
+        Else
+          Switch($Link[1]['Type'])
+          {
+          Case '*':
+            $Where=[];
+            ForEach($Link[1]['Fields']As $k=>$Field)
+              $Where[$Field]=$this->Rec[$Link[0]['Fields'][$k]];
+          //Debug([
+          //  'Rec'=>$this->Rec,
+          //  'Fields'=>$Link[1]['Fields'],
+          //  'AFields'=>$Link[0]['Fields'],
+          //  'Where'=>$Where,
+          //]);
+            $View=&$Table->View(['Where'=>$Where]);
+            $Res=&$View;
+            Break;
+          Case '?':
+          Case '1':
+            $Where=[];
+            ForEach($Link[1]['Fields']As $k=>$Field)
+              $Where[$Field]=$this->Rec[$Link[1]['Fields'][$k]];
+            $View=&$Table->View(['Where'=>$Where]);
+            $Lst=$View->GetList();
+            If($Lst)
+              $Res=$Lst[0];
+            Else
+              $Res=$View->GetDef();
+            Break;
+          } // Switch
+      }
+      Return $Res;
+    }
+  }
+?>

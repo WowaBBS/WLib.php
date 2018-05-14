@@ -1,0 +1,57 @@
+<?
+  //*************************************************************************\\
+  // Unit    : MParsSQL                                                      \\
+  // Date    : 28.10.2002                                                    \\
+  // Creator : Wowa Savin <wowa@activesolutions.info>                        \\
+  // (c) Active solutions                                                    \\
+  //*************************************************************************\\
+
+  // Подключение модулей
+ #Uses('MSystem');
+ #Uses('MSysUtil');
+ 
+  // ***************************************************************************************
+ 
+  Function OddCountSlashs($Str)
+  {
+    $Res=True;
+    $Len=StrLen($Str);
+    For($i=StrLen($Str)-1; $i>=0; $i--)
+      If($Str[$i]='\\')
+        $Res=!$Res;
+      Else
+        Break;
+    Return $Res;
+  }
+ 
+  Function SplitSQL($Text)
+  {
+    $Res=[];
+    $Str1='(?:"(?:[^"\\\\]*|\\\\.)*")';
+    $Str2="(?:'(?:[^'\\\\]*|\\\\.)*')";
+    $Str3="(?:#[^\n]*\n)";
+    $Sl=Preg_AddSlashes('"\';#');
+    $Str0='(?:[^'.$Sl.']*)';
+    $Count=Preg_Match_All('/((?:;|'.$Str0.'|'.$Str1.'|'.$Str2.'|'.$Str3.'))/im', $Text, $List);
+    Array_Shift($List);
+    $List=$List[0];
+    $Str='';
+    For($i=0; $i<$Count; $i++)
+    {
+      $S=$List[$i];
+      UnSet($List[$i]);
+      If($S)
+        If($S[0]!='#')
+          $Str.=$S;
+      If($S==';')
+      {
+        $Res[]=Trim($Str);
+        $Str='';
+      }
+    }
+    $Str=Trim($Str);
+    If($Str)
+      $Res[]=$Str;
+    Return $Res;
+  }
+?>

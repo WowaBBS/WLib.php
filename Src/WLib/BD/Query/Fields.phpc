@@ -1,0 +1,41 @@
+<?
+  $Loader->Load_Class('/Object');
+
+  $Loader->Load_Module('/BD/Sql/Utils');
+ 
+  Class C_BD_Query_Fields extends C_Object
+  {
+    Var $Fields=[];
+ 
+    Function AddField($Field, $Alias=False)
+    {
+      If(Is_Array($Field)) $Field=Implode('.', $Field);
+      
+      If($Alias!==False) $Alias=$Field;
+      
+      $this->Fields[$Field]=$Alias;
+    }
+ 
+    Function Add($Fields)
+    {
+      If(!Is_Array($Fields)) $Fields=[$Fields];
+      
+      ForEach($Fields As $k=>$v)
+        $this->Fields[Is_Integer($k)? $v:$k]=$v;
+    }
+ 
+    Function GetUFields($UFields)
+    {
+      $UFields->Add($this->Fields);
+    }
+ 
+    Function GetSQL()
+    {
+      Return sqlFields($this->Fields);
+    }
+ 
+    Function PutSQL($Sql)
+    {
+    }
+  }
+?>

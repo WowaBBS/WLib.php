@@ -1,0 +1,176 @@
+<?
+  //*************************************************************************\\
+  // Unit    : /BD/Sql/MUtils                                                \\
+  // Date    : 03.11.2002                                                    \\
+  // Creator : Wowa Savin <wowa@activesolutions.info>                        \\
+  // (c) Active solutions                                                    \\
+  //*************************************************************************\\
+ 
+  // Подключение модулей
+ #Uses('MSystem' );
+ #Uses('MSysUtil');
+  $Loader->Load_Module('/Strings');
+ #Uses('MArray'  );
+ 
+  // ***************************************************************************************
+ 
+  Function sqlAsIs($v)
+  {
+    Return ['AsIs'=>1, 'Value'=>$v];
+  }
+ 
+  Function sqlIsAsIs($v)
+  {
+    If(!Is_Array($v       )) Return False;
+    If(!IsSet($v['AsIs'  ])) Return False;
+    If(!IsSet($v['Value' ])) Return False;
+    Return True;
+  }
+ 
+  Function sqlGetAsIs($v)
+  {
+    Return $v['Value'];
+  }
+ 
+  // Представляет скалярное значение в формат SQL
+  Function sqlStr($v)
+  {
+    If(Is_String ($v)) Return '"'.SQL_AddSlashes($v).'"';
+    If(Is_Bool   ($v)) Return $v? 'True':'False';
+    If($v===NULL     ) Return 'NULL';
+    If(sqlIsAsIs ($v)) Return sqlGetAsIs($v);
+                       Return $v;
+  }
+ 
+  // Представляет массив скалярных значений в список Sql
+  Function sqlListStr(Array $Arr)
+  {
+    $Res=[];
+    ForEach($Arr As $i)
+      $Res[]=sqlStr($i);
+    Return Implode(', ', $Res);
+  }
+ 
+  // Представляет массив строк в список имён
+  Function sqlListAll($Arr) // TODO: Array?
+  {
+    Return Is_Array($Arr)? Implode(', ', $Arr):$Arr;
+  }
+ 
+  // Готовит список полей для сортировки
+  Function sqlListOrder($Arr)
+  {
+    If(!Is_Array($Arr)) Return $Arr;
+    $Res=[];
+    ForEach($Arr As $k=>$v)
+      $Res[]=Is_Integer($k)? $v:$k.' '.($v? 'Desc':'Asc');
+    Return Implode(', ', $Arr);
+  }
+ 
+  // Готовит поле для проверки в While/Having/On
+  Function sqlWhere_One($k, $v)
+  {
+    If(Is_Int($k)) Return $v;
+    If(Is_Array($v))
+      Return Count($v)>0? $k.' In('.sqlListStr($v).')':'0';
+    If($v===NULL)
+      Return $k.' IS NULL';
+    Return $k.'='.sqlStr($v);
+  }
+ 
+  // Готовит список полей для проверки в While/Having/On объеденяя по Or
+  Function sqlWhere_Or($Vars)
+  {
+    return sqlWhere($Vars, False);
+  }
+ 
+  // Готовит список полей для проверки в While/Having/On объеденяя по And
+  Function sqlWhere($Vars, $NotOr=true)
+  {
+    If(!Is_Array($Vars)) Return $Vars;
+    If(!         $Vars ) Return '';
+
+    $Res=[];
+    $ToOr=!$NotOr;
+    ForEach($Vars As $k=>$v)
+      If(Is_Int($k) && Is_Array($v))
+        $Res[]='('.sqlWhere_Or($v, $ToOr).')';
+      Else
+        $Res[]='('.sqlWhere_One($k, $v).')';
+    
+    Return Implode($NotOr? 'And':'Or', $Res);
+  }
+ 
+  Function sqlSet($Vars)
+  {
+    If(!Is_Array($Vars)) Return $Vars;
+    If(!         $Vars ) Return '';
+    $Res=[];
+    ForEach($Vars As $k=>$v)
+      $Res[]=IsIntStr($k)? $v:$k.'='.sqlStr($v);
+    Return Implode(', ', $Res);
+  }
+ 
+  Function sqlFields($Vars)
+  {
+    If(!Is_Array($Vars)) Return $Vars;
+    If(!         $Vars ) Return '';
+    $Res=[];
+    ForEach($Vars As $k=>$v)
+      $Res[]=Is_String($k) && $k!==$v? $v.' As '.$k:$v;
+    Return Implode(', ', $Res);
+  }
+ 
+  Function sqlTable($Vars)
+  {
+    If(!Is_Array($Vars)) Return $Vars;
+    If(!$Vars)
+      Return '';
+    $Res=[];
+    ForEach($Vars As $k=>$v)
+      $Res[]=Is_String($k)? $v.' '.$k:$v;
+    Return Implode(',', $Res);
+  }
+ 
+  Function sqlGetFields($Vars)
+  {
+    If(Is_String($Vars))
+      Return '';
+    Return sqlListAll(Array_Keys($Vars));
+  }
+ 
+  Function sqlGetValues($Vars)
+  {
+    If(Is_String($Vars))
+      Return $Vars;
+    Return sqlListStr(Array_Values($Vars));
+  }
+ 
+  Function sqlInsReplData($Vars, $Limit=524288)
+  {
+    $c=Count($Vars);
+    $Res=0;
+    If($c)
+    {
+      $Fields=sqlGetFields($Vars[0]);
+      $Vs=[];
+      $Len=0;
+      For($i=0; $i<$c; $i++)
+      {
+        $Len+=StrLen($Vs[]='('.sqlGetValues($Vars[$i]).')')+3;
+        If($Len>$Limit)
+        {
+          $Res=$i;
+          Break;
+        }
+      }
+      $Values=Implode(",\n", $Vs)."\n";
+    }
+    Else
+    {
+      $Fields=sqlGetFields($Vars);
+      $Values='('.sqlGetValues($Vars).')';
+    }
+    Return [$Res, $Fields, $Values];
+  }
+?>

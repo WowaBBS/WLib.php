@@ -1,0 +1,44 @@
+<?
+  //*************************************************************************\\
+  // Unit    : MMySql                                                        \\
+  // Date    : 01.08.2002                                                    \\
+  // Creator : Wowa Savin <wowa@activesolutions.info>                        \\
+  // (c) Active solutions                                                    \\
+  //*************************************************************************\\
+ 
+  // Определение модуля
+  $Loader->Load_Class('/BD/Base/Manager');
+ 
+  // ***************************************************************************************
+ 
+ // Class clDataBaseMySql
+  Class C_BD_MySql_Manager Extends C_BD_Base_Manager
+  {
+    Static $DriverName='MySql';
+    
+    Var $Connect_Class='';
+    
+    Static Function TryDl($Ext)
+    {
+      if(extension_loaded($Ext)) return True;
+      if(Function_Exists('dl') && dl($Ext)) return True;
+      return false;
+    }
+    
+    Protected Function _Init($Args)
+    {
+      parent::_Init($Args);
+      If(Function_Exists('mysql_connect' )) $Type='Old'      ; else
+      If(Static  ::TryDl('mysqli'        )) $Type='Improved' ; else
+      If(Static  ::TryDl('pdo_mysql'     )) $Type='PDO'      ; else
+                                            $Type='Emulate'  ;
+      $this->Connect_Class='/BD/MySql/'.$Type.'/Connection'  ;
+    //$this->Manager=$Args['Manager'];
+    }
+    
+    Function Create_Connect($Args): C_BD_Base_Connection
+    {
+      return $this->Create_Object($this->Connect_Class, $Args);
+    }
+  }
+?>

@@ -1,0 +1,52 @@
+<?
+  $Loader->Load_Class('/Object');
+  
+  Class C_BD_MySql_Old_Response extends C_Object
+  {
+    Var $Result  ;
+    Var $Connect ;
+    
+    Protected Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      $this->Result  = $Args[0];
+      $this->Connect = $Args['Connect'];
+    }
+ 
+    Protected Function _Done()
+    {
+      Parent::_Done();
+      $this->Free();
+    }
+ 
+    Function InsertId     () { Return $this->Connect->InsertId     (); }
+    Function AffectedRows () { Return $this->Connect->AffectedRows (); }
+ 
+    Function IsError()
+    {
+      Return $this->Result? False:True;
+    }
+ 
+    Function AsArray()
+    {
+      $Res=[];
+      While($Item=MySql_Fetch_Array($this->Result, MYSQL_ASSOC))
+        $Res[]=$Item;
+      Return $Res;
+    }
+ 
+    Function AsRow($Row=-1)
+    {
+      If($Row>=0)
+        ;
+      Return MySql_Fetch_Array($this->Result, MYSQL_ASSOC);
+    }
+ 
+    Function Free()
+    {
+      If(!$this->Result) return;
+      MySql_Free_Result($this->Result);
+      $this->Result=false;
+    }
+  }
+?>

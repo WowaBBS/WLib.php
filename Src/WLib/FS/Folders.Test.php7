@@ -1,0 +1,18 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+
+  $F=$Loader->Create_Object('/FS/Folders', [
+    'Folders'=>[
+      '.',
+    ],
+  ]);
+
+  $F->Process(
+    Function($Files, $Info) Use($Loader)
+    {
+    //Var_Dump($Info);
+      echo $Info['RelPath'],"\n";
+    //echo $Info['FileName'],"\n";
+    }
+  );
+?>

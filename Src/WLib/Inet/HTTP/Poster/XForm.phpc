@@ -1,0 +1,39 @@
+<?
+  $Loader->Load_Class('/Inet/HTTP/Poster/Base' );
+ 
+  Class C_Inet_HTTP_Poster_XForm Extends C_Inet_HTTP_Poster_Base
+  {
+    Var $Post ; // T_Inet_HTTP_GetRequest
+   
+    Function _Init($Args)
+    {
+      parent::_Init($Args);
+      If(IsSet($Args['Post']))
+        $this->Post=$Args['Post'];
+      Else
+        $this->Post=New T_Inet_HTTP_GetReqquest();
+    }
+   
+  //Function _Done()
+  //{
+  // $this->Post->Done();
+  // parent::_Done();
+  //}
+   
+    Function Method()
+    {
+      Return 'POST';
+    }
+   
+    Function Header_Make(&$Header)
+    {
+      $Header->Put('Content-Type', 'application/x-www-form-urlencoded');
+      $Header->Put('Content-Length', $this->Post->Length());
+    }
+   
+    Function Save_To_Stream(&$Sock)
+    {
+      $this->Post->Save_To_Stream(&$Sock);
+    }
+  }
+?>

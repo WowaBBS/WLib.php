@@ -1,0 +1,70 @@
+<?
+  $Loader->Load_Class('/System/Object');
+  $Loader->Load_Class('/Stream/File');
+  $Loader->Load_Type('/Type/Map/Multi');
+ 
+  Class C_Inet_HTTP_Files Extends C_System_Object
+  {
+    Var $Map;
+
+    Function _Init($Args)
+    {
+      parent::_Init($Args);
+      $this->Map=New T_Type_Map_Multi();
+    }
+
+    Function _Done()
+    {
+      ForEach($this->Map->GetItems() As $Item)
+        If(Is_Object($Item->Value[3]))
+          $Item->Value[3]->_UnLock();
+      parent::_Done();
+    }
+
+    Function Count()
+    {
+      Return $this->Map->Count();
+    }
+
+    Function AddStream($AFieldName, $AFileName, $AStream, $AContentType='')
+    {
+      $Rec=[$AFieldName, $AFileName, $AContentType, $AStream->_Lock()];
+      Return $this->Map->Add($AFieldName, $Rec);
+    }
+
+    Function AddFile($AFieldName, $AFileName, $AContentType='', $AFilePath='')
+    {
+      If(!$AFilePath)
+        $AFilePath=$AFileName;
+    //$_File=&New C_Stream_File();
+      $_File=$this->Loader->Create_Object('/Stream/File');
+      If($Res=$_File->Open($AFilePath, omReadOnly|omBinary))
+        $this->AddStream($AFieldName, $AFileName, $_File, $AContentType);
+      $_File->_UnLock();
+      Return $Res;
+    }
+
+    Function Load_Self()
+    {
+      ForEach($_FILES As $Name=>$File)
+        $this->AddFile($Name, $File['name'], $File['type'], $File['tmp_name']);
+    }
+
+    Function Save_To_Mime($AMime)
+    {
+      ForEach($this->Map->GetItems() As $Item)
+      {
+        $v=$Item->Value;
+        $_Part=$AMime->Create_New_Part();
+        $_Part->Header->Add(
+          'Content-Disposition',
+          'form-data; name="'.$v[0].'";'.
+             ' filename="'.$v[1].'"'
+        );
+        $_Part->Header->Add('Content-Type', $v[2]);
+        $_Part->Data=$v[3]->_Lock();
+        $_Part->_UnLock();
+      }
+    }
+  }
+?>

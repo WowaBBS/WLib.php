@@ -3,31 +3,30 @@
   {
     Var $Outer    = null;
     Var $Logger   = null;
-    Var $Type     = 'Log';
+    Var $Level    = 'Log';
     Var $Message  = [];
     Var $Fatal    = false;
     Var $Finished = false;
     
-    Function __Construct($Outer, $Logger, $List)
+    Function __Construct($Outer, $Logger, $Level, $List)
     {
       $this->Outer  = $Outer  ;
       $this->Logger = $Logger ;
-      static $Types=[//         Show   Fatal
+      static $Levels=[//         Show         Fatal
         'Debug'   =>['Debug'   ,'[Debug] '   ,false ,],
         'Log'     =>['Log'     , False       ,false ,],
         'Warning' =>['Warning' ,'[Warning] ' ,false ,],
         'Error'   =>['Error'   ,'[Error] '   ,false ,],
         'Fatal'   =>['Fatal'   ,'[Fatal] '   ,true  ,],
       ];
-      $Type=Array_Shift($List);
-      if(IsSet($Types[$Type]))
-        $Info=$Types[$Type];
+      if(IsSet($Levels[$Level]))
+        $Info=$Levels[$Level];
       else
       {
-        $this->Add('[Error] ', 'Type "', $Type, '" is not supported by logger');
-        $Info=$Types['Fatal'];
+        $this->Add('[Error] ', 'LogLevel "', $Level, '" is not supported by logger');
+        $Info=$Levels['Fatal'];
       }
-      $Type=$Info[0];
+      $Level=$Info[0];
       if($Info[1]!==false)
         Array_Unshift($List, $Info[1]);
       $this->AddArr($List);
@@ -49,14 +48,14 @@
       return $this;
     }
     
-    Function Add()
+    Function Add(... $Args)
     {
-      return $this->AddArr(Func_Get_Args());
+      return $this->AddArr($Args);
     }
     
-    Function __invoke()
+    Function __invoke(... $Args)
     {
-      return $this->AddArr(Func_Get_Args());
+      return $this->AddArr($Args);
     }
     
     Function AddArr(Array $v)

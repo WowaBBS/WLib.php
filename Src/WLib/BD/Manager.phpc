@@ -8,7 +8,7 @@
  #Uses('BD/MUtils');
  #Uses('BD/Query/TWhere');
   $Loader->Load_Class('/Object');
-  $Loader->Load_Type('/Uri/Url/Base');
+  $Loader->Load_Type('/Inet/Url');
 //Uses('BD/TTable');
 
   // ***************************************************************************************

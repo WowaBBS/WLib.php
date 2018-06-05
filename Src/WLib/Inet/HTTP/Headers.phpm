@@ -1,0 +1,55 @@
+<?
+  Function _Http_Headers()
+  {
+    $Others=Array(
+      'CONTENT_LENGTH' => True,
+      'CONTENT_TYPE'   => True,
+      'REDIRECT_AUTHORIZATION'=>'Authorization',
+    );
+    ForEach($_SERVER as $Name=>$Value)
+      If(IsSet($Others[$Name]))
+      {
+        $Other=$Others[$Name];
+        If($Other===True    ) $Headers[$Name]=$Value;Else
+        If($Other===False   ) Continue;    Else
+        If(Is_String($Other)) $Headers[$Other]=$Value;
+      }
+      ElseIf(SubStr($Name,0,5) == 'HTTP_')
+        $Headers[
+        //Str_Replace(' ', '-',
+        //  UCWords(StrToLower(Str_Replace(
+        //   '_', ' ',
+        //    SubStr($Name, 5)))))
+          SubStr($Name, 5)
+        ] = $Value;
+    Return $Headers;
+  }
+ 
+  Function Http_Headers()
+  {
+    Static $Res=False;
+    If($Res!==False)
+      Return $Res;
+    If(Function_Exists('GetAllHeaders'))
+      $R=GetAllHeaders();
+    Else
+      $R=_Http_Headers();
+    $Res=Array();
+    ForEach($R As $Name=>$Value)
+    {
+      $Name=StrTr(
+          UCWords(
+            StrToLower(
+              StrTr(
+                $Name,
+                '_-', '  '
+              )
+            )
+          ),
+          ' ', '-'
+        );
+      $Res[$Name] = $Value;
+    }
+    Return $Res;
+  }
+?>

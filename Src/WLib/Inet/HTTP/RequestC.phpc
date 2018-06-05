@@ -1,0 +1,106 @@
+<?
+  $Loader->Load_Class('/Inet/HTTP/Request' );
+  $Loader->Load_Type('/Inet/Url' );
+ 
+  Class C_Inet_HTTP_RequestC Extends C_Inet_HTTP_Request
+  {
+    Function Convert_Domain($Domain)
+    {
+      Return Implode('/', Array_Values(Array_Reverse(Explode('.', StrToLower($Domain)))));
+    }
+  
+    Function &Get_Cache_Link($Link, $Add=Array())
+    {
+      If(!Is_Array($Add))
+        $Add=Array($Add);
+      $Cache=$this->Loader->Create_Object('/Web/Search/BD/Cache');
+      $URL=TUrl::Create($Link);
+      $Domain=$URL->Domain();
+      $Domain=$this->Convert_Domain($Domain);
+      Array_UnShift($Add, $URL->Param->ToString());
+      Array_UnShift($Add, 'I/'.$Domain.'/#'.$URL->Path->ToString());
+      $Res=$Cache->GetA($Add);
+      $Cache->_UnLock();
+      Return $Res;
+    }
+  
+    Function _Re_Request($A_Req)
+    {
+      $Res=False;
+      $Sock=&$this->_Create_Sock(True);
+      If(!$Sock)
+        Return $Res;
+      $Sock->Write($A_Req);
+      $Sock->Flush();
+      $_Res=$Sock->Get_Content();
+      $Sock->ShutDown('a');
+    //$Sock->Close();
+      $Sock->_UnLock();
+      Return $_Res;
+    }
+  
+    Function Cache_Old($A_Z_Result)
+    {
+      $Sock=$this->Loader->Create_Object('/Stream/Fifo');
+      $Sock=$this->_Send_Request($Sock, $A_Z_Result);
+      $_Req=$Sock->Get_Content();
+      $Sock->_UnLock();
+    //Echo $_Req;
+    //Echo '-----------------------';
+   
+      $Hash=MD5($_Req);
+      $Cache=&$this->Get_Cache_Link($this->URL, Array(False, $Hash, '.result'));
+      $Cache->Lock();
+      $D=$Cache->Load();
+      $ZTO=$Cache->IsTimeOut(0);
+      $Cache->UnLock();
+      $Cache->Delete();
+      $Cache->_UnLock();
+  
+      If($ZTO||!IsSet($D['Res']) || !$D['Res'])
+      {
+        If(!$this->Proxy)
+          Return False;
+        $Proxy=$this->Proxy;
+        $this->Proxy=False;
+        $Res=$this->Cache_Old($A_Z_Result);
+        $this->Proxy=$Proxy;
+        Return $Res;
+      }
+      Return $D['Res'];
+    }
+  
+    Function &Request($A_Z_Result=False)
+    {
+      If(($this->Method!='GET')||!$A_Z_Result)
+      {
+        $Res=&parent::Request($A_Z_Result);
+        Return $Res;
+      }
+  
+      $Sock=&$this->Loader->Create_Object('/Stream/Fifo');
+      $Sock=&$this->_Send_Request(&$Sock, $A_Z_Result);
+      $_Req=$Sock->Get_Content();
+   
+      $Cache=&$this->Get_Cache_Link($this->URL, Array($this->ReqHash.'.result'));
+      $Cache->Lock();
+      //$ZTO=$Cache->IsTimeOut(30*24*60*60);
+      $ZTO=$Cache->IsTimeOut(0);
+      $D=$Cache->Load();
+      If($ZTO||!IsSet($D['Res'])||!$D['Res'])
+      {
+        $R=$this->Cache_Old($A_Z_Result);
+        If(!$R)
+          $R=$this->_Re_Request($_Req);
+        $D['Res']=$R;
+        $Cache->UpDate_Time();
+        $Cache->Save($D);
+      }
+      $Cache->UnLock();
+      $Cache->_UnLock();
+      $Sock->Write($D['Res']);
+      $Res=&$this->_Create_Response(&$Sock, $A_Z_Result);
+      Return $Res;
+    }
+  }
+?>

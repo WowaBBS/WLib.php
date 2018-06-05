@@ -1,0 +1,14 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $Loader->Load_Type('/FS/Path');
+
+  $CP=TPath::Create('dissovet/');
+  Echo $CP->ToString()."\n";
+  $MP=TPath::Create('Zaschita');
+  Echo $MP->ToString()."\n";
+  $MP->PathFrom($CP);
+  Echo $MP->ToString()."\n";
+  $MP->Add('/index.html');
+  Echo $MP->ToString()."\n";
+?>

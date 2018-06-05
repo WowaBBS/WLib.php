@@ -1,0 +1,22 @@
+<?
+  header('Content-Type: text/html; charset=windows-1251');
+?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+  <meta http-equiv=Content-Type content="text/html; charset=windows-1251">
+ </head>
+ <body>
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+
+  $Request =$Loader->Get_Singleton('/Inet/Web/Request' );
+  $Files   =$Loader->Get_Singleton('/Inet/Web/Files'   ); //,['Global', false]);
+//          $Loader->Create_Object('/Inet/Web/File'    );
+  $Loader->Debug($Request);
+  $Loader->Debug($Files);
+
+  $Html=$Loader->Create_Object('/Inet/Web/Debug/Html');
+  $Html->Print();
+?>
+ </body>

@@ -1,0 +1,38 @@
+
+  // See
+d:\MyWeb\cms\IpBoard\upload\admin\setup\sources\base\ipsRegistry_setup.php
+d:\MyWeb\cms\IpBoard\upload\admin\sources\base\ipsRegistry.php
+d:\MyWeb\cms\IpBoard\upload\admin\sources\classes\output\publicOutput.php
+d:\MyWeb\cms\IpBoard\upload\public\min\lib\Minify.php
+d:\MyWeb\cms\IpBoard\upload\public\min\lib\Minify\Controller\Groups.php
+
+d:\MyWeb\sipkro\prg\myisam\a\smartpix.php
+
+d:\MyWeb\wiki\img_auth.php
+d:\MyWeb\wiki\includes\DefaultSettings.php
+d:\MyWeb\wiki\includes\libs\IEUrlExtension.php
+d:\MyWeb\wiki\includes\MediaWiki.php
+d:\MyWeb\wiki\includes\WebRequest.php
+
+// TODO: Add PATH_INFO
+
+WebDav:
+d:\MyWeb\_files\_see\_php\WebDav\WebDavPhp\Server.php
+d:\MyWeb\WebDavPhp\inc\HTTP\WebDAV\Server.php
+d:\MyWeb\Project11\inc\HTTP\WebDAV\Server.php
+
+See: d:\MyWeb\Project11\task\freak\xajax\xajax.inc.php
+
+ See:
+| 'AUTO'            Default - auto detects
+| 'PATH_INFO'       Uses the PATH_INFO
+| 'QUERY_STRING'    Uses the QUERY_STRING
+| 'REQUEST_URI'     Uses the REQUEST_URI
+| 'ORIG_PATH_INFO'  Uses the ORIG_PATH_INFO 
+ In:
+d:\MyWeb\work\tinytds\save\001\web\domains\tds.soft-fast-sale.com\public_html\application\config\config.php
+d:\MyWeb\work\tinytds\save\001\web\domains\tds.soft-fast-sale.com\public_html\system\core\URI.php
+d:\MyWeb\work\tinytds\tinytds\application\config\config.php
+d:\MyWeb\work\tinytds\tinytds\system\core\URI.php
+//d:\MyWeb\work\tinytds\web\domains\tds.soft-fast-sale.com\public_html\application\config\config.php
+d:\MyWeb\work\tinytds\web\domains\tds.soft-fast-sale.com\public_html\system\core\URI.php

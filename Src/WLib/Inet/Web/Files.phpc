@@ -1,0 +1,117 @@
+<?
+  //*************************************************************************\\
+  // Модуль : MUpLoad                                                        \\
+  // Тип    : Unit                                                           \\
+  // Создан : 09.09.2002                                                     \\
+  // Автор  : Савин Владимир Иванович                                        \\
+  // e-mail : wowa_savin@mail.ru                                             \\
+  // fido   : 2:5057/21.69 & 2:5057/21.777                                   \\
+  //*************************************************************************\\
+
+  $Loader->Parent_Class('/Object');
+  
+  class C_Inet_Web_Files extends C_Object
+  {
+    Protected $List=[];
+  
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      switch($Args[0]??$Args['Type']??'Global')
+      {
+      case 'Post'   : $this->LoadPost   ($Args[1]??$Args['Post'   ]); break;
+      case 'Global' : $this->LoadGlobal ($Args[1]??$Args['Remove' ]??true); break;
+      }
+    }
+    
+    Function IsEmpty() { return $this->List===[]; }
+    
+    Function LoadGlobal($bRemove=true)
+    {
+      $Files=$_FILES; //$GLOBALS['HTTP_POST_FILES']
+      if($bRemove)
+        $_FILES=[];
+      $this->LoadPost($Files);
+    }
+ 
+    Function LoadPost($Files)
+    {
+      $List=&$this->List;
+      ForEach($Files As $k=>$v)
+        $this->_LoadPost($List, [], $k, $v);
+    }
+ 
+    Function _LoadPost(&$List, Array $Path, $Name, $Vars)
+    {
+      if(!IsSet($List[$Name]))
+        $List[$Name]=[];
+      $List=&$List[$Name];
+      $Path[]=$Name;
+      if(!Is_Array($Vars['name']))
+        return $List=$this->Create_Object('/Inet/Web/File', ['Post', $Vars, 'Var'=>$Path]);
+      ForEach($Vars['name'] As $k=>$v)
+        $this->_LoadPost($List, $Path, $k,[
+          'name'     =>$Vars['name'     ][$k],
+          'type'     =>$Vars['type'     ][$k],
+          'tmp_name' =>$Vars['tmp_name' ][$k],
+          'error'    =>$Vars['error'    ][$k],
+          'size'     =>$Vars['size'     ][$k],
+        ]);
+    }
+    
+    Function &Select($Path)
+    {
+      $List=&$this->List;
+      while(count($Path))
+      {
+        $Key=Array_Shift($Path);
+        if(!IsSet($List[$Key]))
+          $List[$Key]=[];
+        $List=&$List[$Key];
+      }
+      return $List;
+    }
+    
+    Function Add($Path, $File)
+    {
+      $Item=$this->Select($Path);
+      $Item=$File;
+    }
+    
+    Function Get($Path)
+    {
+      $List=$this->Select($Path);
+      return Is_Object($List)? $List:null;
+    }
+    
+    Function _GetList(&$Res, $List, $Path=false) //Static
+    {
+      if(Is_Object($List))
+      {
+        if($Path===false)
+          $Res[]=$List;
+        else
+          $Res[$Path]=$List;
+        return;
+      }
+      if($Path===false)
+      {
+        ForEach($List As $k=>$v)
+          Static::_GetList($Res, $v, $k);
+      }
+      else
+      {
+        ForEach($List As $k=>$v)
+          Static::_GetList($Res, $v, $Path.'['.$k.']');
+      }
+    }
+    
+    Function GetList($Path=[])
+    {
+      $List=$this->Select($Path);
+      $Res=[];
+      $this->_GetList($Res, $List);
+      return $Res;
+    }
+  }
+?>

@@ -1,0 +1,91 @@
+<?
+  $Loader->Load_Class('/Inet/HTTP/Cookie/List'    );
+ 
+  $Loader->Load_Class('/Inet/HTTP/Coding/Chunked' );
+  $Loader->Load_Class('/Inet/HTTP/Coding/Close'   );
+  $Loader->Load_Class('/Inet/HTTP/Coding/Size'    );
+  $Loader->Load_Class('/Inet/HTTP/Coding/Raw'     );
+ 
+  $Loader->Load_Class('/System/Object');
+ 
+  $Loader->Load_Type('/Inet/MIME/Header'       );
+ 
+  Class C_Inet_HTTP_Response Extends C_System_Object
+  {
+    Var $FStream    =NULL; // Данные
+    Var $Response_Code   ; // Статус (200 - Ok, >400 Error)
+    Var $Request_Version ; // HTTP/1.1
+    Var $Header          ; // Заголовок
+    Var $Cookies         ; // Куки
+ 
+    Function _Init($Args)
+    {
+      parent::_Init($Args);
+      $this->Header=&New T_Inet_MIME_Header();
+      $this->Cookies=&$this->Loader->Create_Object('/Inet/HTTP/Cookie/List');
+    }
+ 
+    Function _Done()
+    {
+      If($this->FStream)
+        $this->FStream->_UnLock();
+      $this->Cookies->Done();
+      parent::_Done();
+    }
+ 
+    Function Open(&$AStream)
+    {
+      $this->FStream=&$AStream->_Lock();
+    //Debug($AStream->Read(1000));
+      $Line=$AStream->Get_Line();
+      $Line=Explode(' ', $Line);
+      If(Count($Line)<2)
+      {
+        $Line=Implode('', $Line);
+        Trigger_Error('HTTP Response error '.$Line, E_USER_WARNING);
+        $this->Header->Add(' Raw', $Line);
+        Return False;
+      }
+      $this->Response_Code=$Line[1];
+      $this->Request_Version=$Line[0];
+      $this->Header->Load_From_Stream($AStream);
+      Return True;
+    }
+ 
+    Function &Get_Stream()
+    {
+      $_Mode=3;
+    //If($this->Header->Get('transfer-coding')=='chunked')
+      If($this->Header->Get('transfer-encoding')=='chunked')
+      {
+        $Res=&$this->Loader->Create_Object('/Inet/Http/Coding/Chunked');
+        $Res->Open($this->FStream);
+      }
+      ElseIf($this->Header->Get('Content-Length'))
+      {
+        $Res=&$this->Loader->Create_Object('/Inet/Http/Coding/Size');
+        $Res->Open($this->FStream, $this->Header->Get('Content-Length'));
+      }
+      ElseIf($this->Header->Get(' Raw'))
+      {
+        $Res=&$this->Loader->Create_Object('/Inet/Http/Coding/Raw');
+        $Res->Open($this->FStream, $this->Header->Get(' Raw'));
+      }
+      Else
+      {
+        $Res=&$this->Loader->Create_Object('/Inet/Http/Coding/Close');
+        $Res->Open($this->FStream);
+      }
+      Return $Res;
+    }
+ 
+    Function Get_Content()
+    {
+      $Stream=&$this->Get_Stream();
+      $Res=$Stream->Get_Content();
+      $Stream->_UnLock();
+      Return $Res;
+    }
+  }
+ 
+?>

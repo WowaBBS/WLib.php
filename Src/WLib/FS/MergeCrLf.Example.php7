@@ -1,0 +1,44 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+
+  $F=$Loader->Create_Object('/FS/Folders', [
+    'Folders'=>[
+     #'From' =>'d:\Proj\My\CrashRpt',
+     #'To'   =>'d:\Proj\My\CrashRpt',
+    ], 
+  ]);
+
+  $F->Process(
+    Function($Files, $Info) Use($Loader)
+    {
+    //$Loader->Debug($Info['RelPath']);
+      If($Info['AllFiles'])
+      {
+        if(($FS=FileSize($Files['From' ]))>1000000) return;
+        if(($TS=FileSize($Files['To'   ]))>1000000) return;
+        if($FS===$TS) return;
+        if($FS>$TS) return;
+        $Loader->Debug($Info['RelPath'].' ('.$FS.', '.$TS.')');
+        $Loader->Log('Debug', $Info['RelPath'], ' (', $FS, ', ', $TS, ')');
+        $T=File_Get_Contents($Files['To'   ]);
+        $T=Str_Replace("\r", '', $T);
+        if(StrLen($T)!==$FS) return;
+        $F=File_Get_Contents($Files['From' ]);
+        if($T!=$F) return;
+        Echo "Copy\n";
+        $From =$Files['From' ];
+        $To   =$Files['To'   ];
+        if(true) // TODO: IsWin
+        {
+          $From =StrTr($From ,'/' ,'\\');
+          $To   =StrTr($To   ,'/' ,'\\');
+        }
+      //Echo('Copy "'.$From.'" "'.$To.'"');
+        System('Copy "'.$From.'" "'.$To.'"');
+      //System('Copy /?');
+        return;
+      }
+      Return $Info['AllFolders'];
+    }
+  );
+?>

@@ -1,0 +1,123 @@
+<?php
+  $Loader->Load_Class('/Stream/Base');
+ 
+  TODO: Refactoring
+  
+  Class C_Inet_Sock_Socket Extends C_Stream_Base
+  {
+    Var $Link;
+    Var $Sock;
+    Var $IsEOF=False;
+ 
+    Function Open($ALink)
+    {
+      $this->Link=$ALink;
+  
+      $AddrIP=GetHostByName($ALink->Domain());
+      If(!$AddrIP)
+        Return False;
+  
+      $this->Sock=Socket_Create(AF_INET, SOCK_STREAM, SOL_TCP);
+      If(!$this->Sock)
+        Return False;
+  
+      If(!@Socket_Connect($this->Sock, $AddrIP ,$ALink->Port))
+      {
+        $this->Close();
+        Return False;
+      }
+  
+      Return True;
+    }
+ 
+    Function Close()
+    {
+      Socket_Close($this->Sock);
+    }
+ 
+    Function Set_Blocking($ZBlocking=False)
+    {
+      If($ZBlocking)
+        Return Socket_Set_Block($this->Sock) ;
+      Else
+        Return Socket_Set_NonBlock($this->Sock);
+    }
+ 
+    Function Set_ReUse_Addr($Z)
+    {
+      Return Socket_Set_Option($this->Sock, SOL_SOCKET, SO_REUSEADDR, $Z?1:0);
+    }
+ 
+    Function Set_Time_Out($ATimeSec)
+    {
+      Return Stream_Set_TimeOut($this->Sock, $ATimeSec);
+    }
+ 
+    Function Recv_Count()
+    { // PHP 4.3.0
+    //$Res=Stream_Get_Meta_Data($this->FHandle);
+    //Return $Res['unread_bytes'];
+    }
+ 
+    Function EOF()
+    {
+    //Return Socket_Read($this->Sock, 0)==False;
+      Return $this->IsEOF;
+    }
+ 
+    Function Read($Size)
+    {
+      $Res=Socket_Read($this->Sock, $Size);
+      If($Res===False)
+        $this->IsEOF=True;
+      If($Size>0)
+      If($Res==='')
+        $this->IsEOF=True;
+      Return $Res;
+    }
+ 
+    Function Get_Line($Size=1024) // TODO: Remove
+    {
+      $Sock=$this->Sock;
+      $Res='';
+      Do
+      {
+        $Out=@Socket_Read($this->Sock, 1);
+        If(($Out==='')||($Out===False))
+        {
+          $this->IsEOF=True;
+          Break;
+        }
+        Switch($Out)
+        {
+        Case "\r": Break;
+        Case "\n": Break 2;
+        Default  : $Res.=$Out;
+        }
+      }
+      While(True); 
+      Return $Res;
+    }
+ 
+    Function Write($Data)
+     {
+     Return Socket_Write($this->Sock, $Data);
+    }
+ 
+    Function ShutDown($typ='w')
+    {
+      Switch($typ)
+      {
+    //Case 'w': Case 'W': $typ=STREAM_SHUT_WR;   Break;
+    //Case 'r': Case 'R': $typ=STREAM_SHUT_RD;   Break;
+    //Case 'a': Case 'A': $typ=STREAM_SHUT_RDWR; Break;
+      Case 'r': Case 'R': $typ=0; Break;
+      Case 'w': Case 'W': $typ=1; Break;
+      Case 'a': Case 'A': $typ=2; Break;
+      }
+    //stream_socket_shutdown($this->FHandle, $typ);
+      Socket_ShutDown($this->Sock, $typ);
+    }
+  }
+ 
+?>

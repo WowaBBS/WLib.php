@@ -240,8 +240,8 @@
       return $Deb->Debug($Var, $Level);
     }
     
-    Function Log() { return $Deb=$this->_Log($this, func_get_args()); }
-    Function _Log($Outer, Array $List) { return New T_Log_Item($Outer, null, $List); } // TODO: Logger
+    Function Log($LogLevel, ...$Args) { return $Deb=$this->_Log($this, $LogLevel, $Args); }
+    Function _Log($Outer, $LogLevel, Array $List) { return New T_Log_Item($Outer, null, $LogLevel, $List); } // TODO: Logger
 
     //****************************************************************
     Function Done() {} // TODO:

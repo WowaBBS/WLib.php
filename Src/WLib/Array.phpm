@@ -200,19 +200,18 @@
   }
  
   // Последовательно обьеденяет массив массивов в массив
-  Function ArrConc()
+  Function ArrConc(... $Args)
   {
-    $a=Func_Get_Args();
-    If(Count($a)==0)
+    If(Count($Args)==0)
       Return [];
-    If(Count($a)==1)
-      $a=$a[0];
+    If(Count($Args)==1)
+      $Args=$Args[0];
     $Res=[];
-    If(Is_Array($a) && Count($a)>0)
-      ForEach($a As $s)
-        If(Is_Array($s) && Count($s)>0)
-          ForEach($s As $v)
-            $Res[]=$v;
+    If(Is_Array($Args) && Count($Args)>0)
+      ForEach($Args As $Sub)
+        If(Is_Array($Sub) && Count($Sub)>0)
+          ForEach($Sub As $Value)
+            $Res[]=$Value;
     Return $Res;
   }
  

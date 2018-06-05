@@ -1,0 +1,129 @@
+<?
+  $Loader->Begin_Module('/Tmpl/Navigator');
+  
+  $Loader->Using_Module('/Tmpl/HtAccess');
+ 
+  Function GetCurrentURL()
+  {
+   Global $Web_HtAccess;
+   Return $Web_HtAccess->CurURL->Make();
+  }
+ 
+  Function &_GetThreadSession($URL)
+  {
+   $Nav=GetSession('Navigation', []);
+   If(!IsSet($Nav['Thread']))
+     $Nav['Thread']=[];
+   $ThreadS=&$Nav['Thread'];
+   If(!IsSet($ThreadS[$URL]))
+     $ThreadS[$URL]=[];
+   Return $ThreadS[$URL];
+  }
+ 
+  Function Load_Thread_Session_Sets()
+  {
+   $GLOBALS['TSSet']=Get_Thread_Session('TSSet', []);
+   LoadVars(['Set'=>[]], $LVars);
+   AssignSSet($GLOBALS['TSSet'], $LVars['Set']);
+ 
+   Global $Web_HtAccess;
+   $TURL=$Web_HtAccess->CurURL->Make();
+   $FURL=$Web_HtAccess->Referer->Make();
+   Copy_Thread_Session($FURL, $TURL);
+  }
+ 
+  // Загружает переменные в $Data и записывает в Thread_Session,
+  // по шаблону $List из переменных GET и POST или Session,
+  Function TSLoadVars($List, &$Data)
+  {
+   If(!Is_Array($List))
+     Return;
+   If(Count($List)<1)
+     Return;
+   ForEach($List As $k=>$v)
+     $Data[$k]=TSLoadVar($k, $v);
+  }
+ 
+  // Возвращает и записывает в Thread_Session переменную $Name
+  // из переменных GET и POST или Session, по умолчанию $Def
+  Function &TSLoadVar($Name, $Def='')
+  {
+   If(!IsSet($GLOBALS['TSSet']))
+     Load_Thread_Session_Sets();
+   If(!IsSet($GLOBALS['TSSet'][$Name]))
+     $GLOBALS['TSSet'][$Name]=$Def;
+   $Res=&$GLOBALS['STSet'][$Name];
+   $D=SLoadVar($Name, NULL);
+   If($D!==NULL)
+     $Res=$D;
+   Return $Res;
+  }
+ 
+  Function &Get_Thread_Session($Name, $Def=Null, $URL=False)
+  {
+   If($URL===False)
+     $URL=GetCurrentURL();
+   $TS=_GetThreadSession($URL);
+   If(!IsSet($TS[$Name]))
+     $TS[$Name]=$Def;
+   Return $TS[$Name];
+  }
+ 
+  Function Copy_Thread_Session($FURL, $TURL)
+  {
+   If(!$FURL)
+     Return;
+   If($FURL==$TURL)
+     Return;
+   $SF=_GetThreadSession($FURL);
+   $ST=_GetThreadSession($TURL);
+   $ST=$SF;
+ //$ST['Referer']=$FURL;
+  }
+ 
+  Function GetURLNavigation()
+  {
+   Global $Web_HtAccess;
+   $CurURL=$Web_HtAccess->CurURL->Make();
+   $BaseURL=$Web_HtAccess->BaseURL->Make();
+   $URL=Get_Thread_Session('OldURL', $BaseURL, $CurURL);
+   Copy_Thread_Session($CurURL, $URL);
+   $Res=$URL;
+   $URL=GetCurrentURL();
+   Return $Res;
+  }
+ 
+  Function RegURLNavigation($URL=False)
+  {
+    If($URL===False)
+      $URL=GetCurrentURL();
+    Global $Vars;
+    $ns=$Vars['ns'];
+    $Nav=GetSession('Navigation', []);
+  //Debug($Nav);
+    If(!$ns)
+    {
+    //$Nav['OldURL']=$URL;
+      $OldURL=Get_Thread_Session('OldURL', $URL);
+      $OldURL=$URL;
+    }
+  //$ns=LoadVar('ns', 0);
+  //$OURL=GetSession('OldURL', '');
+  //If(!$ns)
+  //{
+  //  $OURL=$URL;
+  ////Debug(['Reg'=>$URL]);
+  //}
+  }
+ 
+  /*
+  Function _Unit_Tmpl_MNavigator()
+  {
+    Load_Thread_Session_Sets();
+  //Global $Web_HtAccess;
+  //$TURL=$Web_HtAccess->CurURL->Make();
+  //$FURL=$Web_HtAccess->Referer->Make();
+  //Copy_Thread_Session($FURL, $TURL);
+  }
+  */
+?>

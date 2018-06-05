@@ -1,0 +1,109 @@
+<?
+  Class C_XML_Builder Extends C_Object
+  {
+    Protected $Stream          =null;
+    Protected $Tab             ='  ';
+    Protected $EndLine         ="\n";
+    Protected $Tags            =[];
+    Protected $Fresh           =true  ;
+    Protected $Text            =false ;
+    Protected $AttrAlwaysQuote =true  ;
+    Protected $AttrType        =ENT_COMPAT;
+  
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $Stream=$Args[0] ?? $Args['Stream'] ?? null;
+      if(Is_Null   ($Stream))  $this->Stream=$this->Create_Object('/Stream/Fifo')->_Lock(); else
+      if(Is_String ($Stream))  $this->Stream=$this->Create_Object('/Stream/File', [$Stream, True])->_Lock(); else
+                               $this->Stream=$Stream->_Lock();
+    }
+    
+    Function _Done()
+    {
+      parent::_Done();
+      $this->Stream->_UnLock();
+    }
+    
+    Function _Write(... $Args)
+    {
+      ForEach($Args As $Arg)
+        $this->Stream->Write($Arg); // TODO: Optimize
+    }
+    
+    Function XML() // TODO Encoding
+    {
+      if(!$this->Fresh || $this->Tags)
+        $this->Log('Fatal', 'Attr not for tag -- logical error');
+      $this->_Write("\xEF\xBB\xBF");
+      $this->_Write('<?xml');
+      $this->Attr('version'  ,'1.0');
+      $this->Attr('encoding' ,'utf-8'); // TODO: Customize
+      $this->_Write('?>', $this->EndLine);
+      $this->Fresh=false;
+      return $this;
+    }
+    
+    Function _OutOfTag()
+    {
+      if($this->Fresh)
+        $this->_Write('>', $this->EndLine);
+    }
+    
+    Function _OutOfTag2()
+    {
+      if($this->Fresh)
+        $this->_Write('>');
+    }
+    
+    Function Tag($Name)
+    {
+      $this->_OutOfTag();
+      $this->_Write(Str_Repeat($this->Tab, count($this->Tags)), '<', $Name);
+      $this->Tags[]=$Name;
+      $this->Fresh=true;
+      return $this;
+    }
+ 
+    Function End()
+    {
+      $Name=Array_Pop($this->Tags);
+      if($this->Fresh)
+        $this->_Write('/>', $this->EndLine);
+      else
+      {
+        if($this->Text)
+          $this->Text=false;
+        else
+          $this->_Write(Str_Repeat($this->Tab, count($this->Tags)));
+        $this->_Write('</', $Name, '>', $this->EndLine);
+      }
+      $this->Fresh=false;
+      return $this;
+    }
+    
+    Function Attr($Name, $Value=false)
+    {
+      if(!$this->Fresh)
+        $this->Log('Fatal', 'Attr not for tag -- logical error');
+      $this->_Write(' ', $Name);
+      if($Value!==false)
+      {
+        If($this->AttrAlwaysQuote || !Preg_Match("/^[\w\d]*$/iS", $Value))
+          $Value='"'.HtmlEntities($Value, $this->AttrType).'"';
+        $this->_Write('=', $Value);
+      }
+      return $this;
+    }
+    
+    Function Text($Value)
+    {
+      $this->_OutOfTag2();
+      $this->Text=true;
+      $this->Fresh=false;
+      $this->_Write(HtmlEntities($Value)); // TODO
+    //ENT_NOQUOTES
+      return $this;
+    }
+  }
+?>

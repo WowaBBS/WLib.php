@@ -1,0 +1,42 @@
+<?php
+   $Loader->Load_Class('/Stream/Proxy');
+
+   Class C_Inet_HTTP_Coding_Raw Extends C_Stream_Proxy
+   {
+     Var $Buf='';
+
+     Function Open(&$AStream, $ABuf='')
+     {
+       parent::Open($AStream);
+       $this->Buf=$ABuf;
+     }
+
+     Function Recv_Count()
+     {
+       Return parent::Recv_Count()+StrLen($this->Buf);
+     }
+
+     Function Read($Size) TODO: Recv
+     {
+       $Buf=&$this->Buf;
+       If($Buf!=='')
+       {
+         If($Size<=StrLen($Buf))
+         {
+           $Res=SubStr($Buf, 0, $Size);
+           $Buf=SubStr($Buf,    $Size);
+           Return $Res;
+         }
+         $Res=$Buf;
+         $this->Buf='';
+         $Size-=StrLen($Res);
+         $R=parent::Read($Size);
+         If($R!==False)
+           Return $Res.$R;
+         Return $Res;
+       }
+       Return parent::Read($Size);
+     }
+ }
+
+?>

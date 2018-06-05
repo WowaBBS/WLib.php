@@ -1,0 +1,81 @@
+<?
+  $Loader->Parent_Class('/Object');
+  $Loader->Load_Lib('/FS/My');
+  $Loader->Load_Lib('/FS/Utils');
+  $Loader->Load_Type('/FS/Search/Item');
+
+  class C_FS_Search_Folder extends C_Object
+  {
+    Var $Filter=null;
+    Var $Hidden=false; // TODO: Remove
+    
+    Protected Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      
+      if($Filter=$Args['Filter'] ?? false)
+      {
+        if(Is_Array($Filter))
+          if(!IsSet($Filter[0]))
+          {
+            if(Count($Filter)!=1)
+              $this->Log('Fatal', 'Unsupported more then one filters');
+            else
+            {
+              $FArgs=End($Filter);
+              $Class=Key($Filter);
+              if($Class[0]!=='/')
+                $Class='/FS/Search/Filter/'.$Class;
+              $Filter=$this->Create_Object($Class, ['Param'=>$FArgs]);
+            }
+          }
+      }
+      else
+        $Filter=$this->Get_Singleton('/FS/Search/Filter/Base'); // Null
+      $this->Filter=$Filter;
+    }
+    
+    Function GetListArray($Path, $Add='')
+    {
+      $Hidden=$this->Hidden;
+      $Filter=$this->Filter;
+      $Stack =[];
+      $Res   =[];
+      
+      {
+        $Child=T_FS_Search_Item::First($Path, $Add);
+        $Filter($Child);
+        if($Child->IsSubDir ()) $Stack []=$Child; //?
+        if($Child->IsAddRes ()) $Res   []=$Child;
+        if($Child->IsAbort  ()) return;
+      }
+      
+      While(IsSet($Stack[0]))
+      {
+        $Dir=Array_Pop($Stack);
+        If(!($Handle=FS_OpenDir($Dir->FullPath)))
+          Continue;
+      
+        while(False !== ($Name=FS_ReadDir($Handle)))
+        {
+          if($Name[0]=='.')
+          {
+            if(!$Hidden) continue;
+            if($Name==='.'  ) continue;
+            if($Name==='..' ) continue;
+          }
+          
+          $Child=T_FS_Search_Item::Child($Dir, $Name);
+          
+          $Filter($Child);
+          
+          if($Child->IsSubDir ()) $Stack []=$Child;
+          if($Child->IsAddRes ()) $Res   []=$Child;
+          if($Child->IsAbort  ()) Break 2;
+        }
+        FS_CloseDir($Handle);
+      }
+      Return $Res;
+    }
+  };
+?>

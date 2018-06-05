@@ -1,0 +1,217 @@
+<?
+  $Loader->Define_Class('/Tmpl/Skin/Node');
+  $Loader->Parent_Class('/Object');
+ 
+  $Loader->Use_Class('/Tmpl/Skin/Frames');
+  $Loader->Use_Class('/Tmpl/Skin/MenuMan');
+ 
+  Class C_Tmpl_Skin_Node Extends C_Object
+  {
+    Var $Type    ;
+    Var $Info    ;
+    Var $Path    ;
+    Var $URL     ;
+  //Var $Frames  ;
+  //Var $MenuMan ;
+    Var $Name    ;
+  //Var $Base    ;
+    Var $Parent  ;
+    Var $Nodes   =[];
+    Var $Extends =False;
+  
+    Var $Paths   =NULL;
+  
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      
+      $this->Path    =  $Args['Path'   ];
+      $this->URL     =  $Args['URL'    ];
+      $this->Name    =  $Args['Name'   ];
+      If($this->URL===False)
+      {
+        Global $Paths;
+        $LFile=$Paths->GetFile($this->Path);
+        $this->Path =$LFile[0];
+        $this->URL  =$LFile[1];
+      }
+   
+    //$this->Base=$Args['Base'];
+      $Parent=$Args['Parent' ];
+      $this->Parent  = $Parent;
+   
+      If($Parent)
+      {
+        $this->Nodes['..'    ]=$Parent;
+        $this->Nodes[' root' ]=$Parent->Nodes[' root' ];
+        $this->Nodes[' def'  ]=$Parent->Nodes[' def'  ];
+      }
+      Else
+      {
+        $this->Nodes['..'    ]=$this;
+        $this->Nodes[' root' ]=$this;
+        $this->Nodes[' def'  ]=$this;
+      }
+    //$this->Nodes['' ]=$this->Base->Root;
+      $this->_Load_Info();
+    }
+  
+    Function _Load_Info()
+    {
+    //Debug('Load Skin '.$this->Path.'info.php');
+      If(Is_File($this->Path.'info.php'))
+        Include($this->Path.'info.php');
+      Else
+      {
+        $Info=[];
+      //Trigger_Error('Error Loading Skin '.$this->Path.'info.php');
+      }
+      If(!IsSet($Info['Extends']))
+        $Info['Extends']=['/_'];
+      ElseIf(!Is_Array($Info['Extends']))
+        $Info['Extends']=[$Info['Extends']];
+      $this->Info = $Info;
+    }
+  
+    Function IsExists()
+    {
+      Return Is_Dir($this->Path);
+    }
+  
+    Function IsSkin()
+    {
+      If(!IsSet($this->Info['Type']))
+        Return False;
+      Return $this->Info['Type']=='skin';
+    }
+  
+    Function Get_Extends()
+    {
+      If($this->Extends!==False)
+        Return $this->Extends;
+      $E=$this->Info['Extends'];
+      $Res=[];
+      ForEach($E As $e)
+      {
+        $R=$this->Get_Skin($e);
+        $Res[$R->Name]=$R;
+      }
+      $this->Extends=$Res;
+      Return $Res;
+    }
+  
+    Function _Get_Node($AName)
+    {
+      If(IsSet($this->Nodes[$AName]))
+        Return $this->Nodes[$AName];
+      $Path=$this->Path.$AName;
+    //If(!Is_Dir($Path))
+    //  Return $this->Nodes[' def'];
+      $Args=[
+        'Path'   => $Path.'/',
+        'URL'    => $this->URL.'/'.$AName,
+        'Name'   => $this->Name.'/'.$AName,
+      //'Base'   => $this->Base,
+        'Parent' => $this,
+      ];
+      $Res=New T_Tmpl_Skin_Node($Args);
+      $this->Nodes[$AName]=$Res;
+      Return $Res;
+    }
+  
+    Function Get_Skin($AName)
+    {
+      $AName=Explode('/', StrToLower($AName));
+      If($AName[0]==='')
+        $AName[0]=' root';
+      $Res=$this;
+      ForEach($AName As $Name)
+        $Res=$Res->_Get_Node($Name);
+      Return $Res;
+    }
+  
+    Function _Get_Paths()
+    {
+    //$Res=[[$this->Path, $this->URL]];
+      $R=[$this->Name=>$this];
+      $Res=[];
+      WHile($R)
+      {
+        $R2=[];
+        ForEach($R As $k=>$v)
+        {
+          $Res[$v->Name]=[$v->Path, $v->URL];
+          $E=Array_Reverse($v->Get_Extends());
+          ForEach($E As $k2=>$v2)
+          {
+            If(IsSet($Res[$v2->Name]))
+              Continue;
+            $R2[$v2->Name]=$v2;
+          }
+        }
+        $R=$R2;
+      }
+      Return Array_Reverse($Res);
+    }
+  
+    Function Get_Paths()
+    {
+      If($this->Paths)
+        Return $this->Paths;
+      Global $Paths;
+      $Res=New T_URI_Paths();
+      $Res->Assign_Paths($Paths);
+      $P=$this->_Get_Paths();
+    //Debug($P);
+      ForEach($P As $p)
+        $Res->AddPath($p[0], $p[1]);
+      $this->Paths=$Res;
+      Return $Res;
+    }
+  
+    Function InitVars(&$Vars)
+    {
+      $Vars['Frame'   ]=$this->GetVar(['Frames' ], tv_Any, $Vars);
+      $Vars['MenuMan' ]=$this->GetVar(['Menu'   ], tv_Any, $Vars);
+    }
+  
+    Function Parse(&$Vars, $AName='full.html')
+    {
+      Return Parse('/skin/'.$AName, $Vars);
+    }
+  
+    Function &GetVar(Array &$Path, $Type=tv_Any, Array &$Vars=[])
+    {
+      $Res=parent::GetVar($Path, $Type, $Vars);
+      If($Res!==NULL)
+        Return $Res;
+      If(Count($Path)==0)
+        Return $Res;
+      $Dir=Array_Shift($Path);
+      Switch($Dir)
+      {
+      Case 'Type'    : $Res =  $this->Type   ; Break;
+      Case 'Info'    : $Res =  $this->Info   ; Break;
+      Case 'Path'    : $Res =  $this->Path   ; Break;
+      Case 'URL'     : $Res =  $this->URL    ; Break;
+      Case 'Frames'  :
+      Case 'Frame'   :
+      //Debug($this->Info, 3);
+        $Res=$this->Create_Object('/Tmpl/Skin/Frames', ['List'=>$this->Info['Frames']]);
+        $this->Vars['Frames']=$Res;
+        $this->Vars['Frame' ]=$Res;
+        Break;
+      //Case 'MenuMan' :
+      Case 'Menu'    :
+        $Res=$this->Create_Object('/Tmpl/Skin/MenuMan');
+        $this->Vars['MenuMan' ]=$Res;
+        $this->Vars['Menu'    ]=$Res;
+        Break;
+      Case 'Name'    : $Res =  $this->Name   ; Break;
+      }
+      Return $Res;
+    }
+  }
+  
+  $Loader->Defined_Class('/Tmpl/Skin/Node');
+?>

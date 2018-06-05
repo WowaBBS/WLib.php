@@ -1,0 +1,14 @@
+<?
+ #If(!Extension_Loaded('sockets')) dl('sockets');
+  
+  If(Function_Exists('socket_connect'))
+  {
+    $Loader->Load_Class('/Inet/Socket/Socket');
+    Class C_Inet_Sock Extends C_Inet_Sock_Socket {}
+  }
+  Else
+  {
+    $Loader->Load_Class('/Inet/Socket/Handle');
+    Class C_Inet_Sock Extends C_Inet_Sock_Handle {}
+  }
+?>

@@ -1,0 +1,44 @@
+<?php
+ $Loader->Load_Class('/Stream/Proxy');
+
+ Class C_Inet_HTTP_Coding_Size Extends C_Stream_Proxy
+ {
+   Var $ChunkLen=-1;
+
+   Function Open(&$AStream, $ASize=NULL)
+   {
+     parent::Open($AStream);
+     If($ASize!==NULL)
+       $this->ChunkLen=$ASize;
+   }
+
+   Function Recv_Count()
+   {
+     Return $this->ChunkLen;
+   }
+
+   Function EOF()
+   {
+     Return $this->ChunkLen==0;
+   }
+
+   Function Read($Size)
+   {
+     $ChunkLen=&$this->ChunkLen;
+     If(!$ChunkLen)
+       Return '';
+     $S=Min($ChunkLen, $Size);
+     $R=parent::Read($S);
+     $S=StrLen($R);
+     If(!$S && parent::EOF())
+     {
+       $ChunkLen=0;
+       Return '';
+     }
+     $Size-=$S;
+     $ChunkLen-=$S;
+     Return $R;
+   }
+ }
+
+?>

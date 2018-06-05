@@ -1,0 +1,25 @@
+<?
+  $Loader->Parent_Class('/Object');
+
+  class C_FS_Search_Filter_Base extends C_Object
+  {
+    Function Check($File)
+    {
+    }
+  
+    Function __invoke(... $Args) { return $this->Check(... $Args); }
+    
+    Static Function _Mask($v)
+    {
+      if($v==False)
+        return False;
+      
+      $v=Str_Replace('.', '\.', $v);
+      $v=Str_Replace('*', '.*', $v);
+      $v=Str_Replace('?', '.?', $v);
+      $v=Str_Replace(';', '||', $v);
+      $v='/^(?:'.$v.')$/iSs';
+      return $v;
+    }
+  };
+?>

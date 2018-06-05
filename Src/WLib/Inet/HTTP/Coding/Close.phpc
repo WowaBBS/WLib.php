@@ -1,0 +1,7 @@
+<?
+  $Loader->Load_Class('/Stream/Proxy');
+
+  Class C_Inet_HTTP_Coding_Close Extends C_Stream_Proxy
+  {
+  }
+?>

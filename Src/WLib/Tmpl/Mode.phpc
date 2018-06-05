@@ -1,0 +1,119 @@
+<?
+  $Loader->Parent_Class('/Object');
+  $Loader->Load_Type('/FS/Path');
+
+  Class C_Tmpl_Mode Extends C_Object
+  {
+    Var $Router ;
+    Var $Hash   ; ///< Хеш режимов
+    Var $Mode=''; ///< Текущий режим
+    Var $Path   ; ///< Текущий путь
+ 
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $this->Router = $Args['Router' ];
+      $this->Assign($Args['Vars'   ], $Args['Mode'   ]);
+    }
+ 
+    Function Assign(&$Vars, $AMode)
+    {
+      $AMode=$this->Mode('/'.$AMode);
+      $Path=$this->Router->GetLocation($Vars, $AMode);
+ 
+      $this->Mode=$AMode;
+      $this->Path=$Path;
+      $this->Hash=[];
+      If($AMode)
+      {
+        $LParams=Explode('/', $AMode);
+        $AMode='';
+        While($LParams)
+        {
+          $Field=$LParams[0];
+          $NMode=($AMode? '/'.$Field:$Field);
+          $this->Hash[$AMode.$NMode]=True;
+          $AMode.=$NMode;
+          Array_Shift($LParams);
+        }
+      }
+    }
+ 
+    Function Mode($Mode='/')
+    {
+      Return $this->Router->CalcMode($Mode, $this->Mode);
+    }
+ 
+    Function URL($Mode='/', $z=False)
+    {
+      Global $TypeModeURL;
+      Global $Web_HtAccess;
+  
+    //Debug($Mode);
+      $Mode=$this->Mode($Mode);
+    //If($Mode!=='' && $Mode{0}!='/')
+    //  $Mode='/'.$Mode;
+  
+    //Debug($Mode);
+  
+      Switch($TypeModeURL)
+      {
+      Case 0: Return '?Mode='.$Mode.($z? '&':'');
+      Case 1: Return $Web_HtAccess->BasePath->Make().StrToLower($Mode.($Mode===''? '':'/').($z? '?':''));
+      Case 2:
+        $CP=&$Web_HtAccess->CurPath;
+        $MP=TPath::Create($Mode);
+        $MP->PathFrom($CP);
+        $MP->Add('/');
+        Return StrToLower($MP->Make()).($z? '?':'');
+      Case 3:
+        $CP=clone $Web_HtAccess->CurPath;
+        //!!!!!!
+        If($CP->Len()>1)
+        //\!!!!!!
+          $CP->Add('/');
+        $MP=TPath::Create($Mode);
+      //$MP->Add('/');
+      //$Deb=[];
+      //$Deb[]=$MP->Make();
+      //$Deb[]=$CP->Make();
+      //$Deb[]=$GLOBALS['CurPath']->Make();
+      //$Deb[]=$Mode;
+      //Debug([
+      //  $GLOBALS['CurPath']->Make(),
+      //  $CP->Make(),
+      //  $Mode,
+      //  $MP->Make(),
+      //]);
+      //$Tmp=$MP->Make();
+        $MP->Add('/index.html');
+      //$Deb[]=$MP->Make();
+        $MP->PathFrom($CP, False);
+      //Debug($CP->Make().' '.$Tmp.' '.$MP->Make());
+      //$Deb[]=$MP->Make();
+      //Debug($Deb);
+        Return StrToLower($MP->Make()).($z? '?':'');
+      }
+      Return '';
+    }
+ 
+    Function File($AFile='')
+    {
+      $Res=$this->Router->File($this->Path.($this->Path? '/':'').$AFile);
+      Return $Res;
+    }
+ 
+    Function FileURL($AFile='')
+    {
+      $Res=$this->Router->FileURL($this->Path.($this->Path? '/':'').$AFile);
+      Return $Res[1];
+    }
+ 
+    Function &Get(&$Vars, $AMode)
+    {
+      $R=$this->Router->Get($Vars, $this->Mode($AMode));
+      Return $R;
+    }
+  }
+//$Loader->Using_Class('/Tmpl/Router');
+?>

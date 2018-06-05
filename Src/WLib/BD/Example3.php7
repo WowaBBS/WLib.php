@@ -1,5 +1,5 @@
 <?
-  Include '../Using.php';
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
   $BaseData=$Loader->Get_Singleton('/BD/Manager')->Create('MySql://localhost/ssu_umk');
 

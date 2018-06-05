@@ -1,0 +1,188 @@
+<?
+  $Loader->Parent_Class('/Object');
+  $Loader->Load_Type('/Inet/Url');
+
+  // ************************************************************************
+  // * Поддержка путей с .htaccess                                          *
+  // ************************************************************************
+    
+  Class C_Inet_Web_Request Extends C_Object
+  {
+    Var $CurURL   ; // http://wowa.ssu.samara.ru/ssu/odot/test/b/c/b/a/c/a.h // Полный запрашиваемый URL
+    Var $BaseURL  ; // http://wowa.ssu.samara.ru/ssu/odot/test/ // Реальный запрашиваемый URL
+    Var $CurPath  ; // b/c/b/a/c/  // Запрашиваемый путь, относительно реального
+    Var $BasePath ; // /ssu/odot/test/ // Реальный путь
+    Var $ReqFile  ; // a.h // Запрашиваемый файл
+    Var $Referer  ; // Откуда пришли собственно
+    Var $RelPath  ; // Путь скрипта, относительно корня '.'
+    Var $RelURL   ; // URL корня '.'
+  
+    Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      $StartDir=$Args['StartDir'] ?? GetCwd(); //RealPath('./') // Global
+      
+      $DefSrv=Array(
+        'REQUEST_METHOD' => 'GET' ,
+        'SERVER_PORT'    => '80'  ,
+        'REQUEST_URI'    => '/'   ,
+        'PHP_SELF'       => ''    ,
+        'HTTP_REFERER'   => ''    ,
+        'HTTPS'          => 'off' ,
+      );
+   
+      ForEach($DefSrv As $k=>$v)
+        If(!IsSet($_SERVER[$k]))
+          $_SERVER[$k]=$v;
+   
+      If(!IsSet($_SERVER['DOCUMENT_ROOT']))
+        $_SERVER['DOCUMENT_ROOT']=StrTr($StartDir,'\\','/').'/';
+      //$_SERVER['DOCUMENT_ROOT']=StrTr(RealPath('.'),'\\','/').'/';
+      If($_SERVER['PHP_SELF']==='')
+        $_SERVER['PHP_SELF']='/'.BaseName($_SERVER['argv'][0]);
+   
+      If(IsSet($_SERVER['HTTP_HOST']))
+        $Host=$_SERVER['HTTP_HOST'];
+      ElseIf(IsSet($_SERVER['SERVER_NAME']))
+        $Host=$_SERVER['SERVER_NAME'];
+      Else
+        $Host=''; //'nohost';
+    //If(!IsSet($_SERVER['HTTP_HOST']))
+    //  $_SERVER['HTTP_HOST']='';
+    //If(!IsSet($_SERVER['SERVER_NAME'])) // Заменить на HTTP_HOST // Неработало у мега-телеком
+    //  $_SERVER['SERVER_NAME']='';
+   
+      $Prot=($_SERVER['HTTPS']=='on')?'https':'http';
+      // Port 443?
+   
+    //$Ls=Explode('/',$_SERVER['REQUEST_URI']); // If used server as proxy
+    //$Ls[0]=Explode(':',$Ls[0]);
+   
+    //If(IsSet($Ls[1]) && IsSet($Ls[0][1]) && !$Ls[1]&&!$Ls[0][1])
+      If($_SERVER['REQUEST_URI']{0}!='/')
+        $CurURL=TUrl::Create($_SERVER['REQUEST_URI']);
+      Else
+        $CurURL=TUrl::Create(
+          $Prot.'://'.$Host.
+          ':'.$_SERVER['SERVER_PORT'].
+          UrlDeCode($_SERVER['REQUEST_URI']));
+    //Debug($_SERVER);
+    //Debug($CurURL->ToString());
+    //$BaseURL=TUrl::Create(
+    //  $Prot.'://'.$Host.
+    //  ':'.$_SERVER['SERVER_PORT'].
+    //  $_SERVER['PHP_SELF']);
+      $BaseURL=$CurURL->_Clone();
+      $BaseURL->Assign_String($_SERVER['PHP_SELF']);
+   
+    //$_SERVER['SCRIPT_NAME']);
+    //If(!$_SERVER['PHP_SELF'])
+    //  $BaseURL->Path->Add('/');
+      $Referer=TUrl::Create($_SERVER['HTTP_REFERER']);
+   
+      $BasePath=TPath::Create($CurURL);
+      $CurPath=TPath::Create($CurURL);
+      $Z=$CurPath->Cmp($BaseURL,False,False);
+    //$Z=$CurPath->Cmp($BasePath);
+    //Debug(Array($CurPath->ToString(),$BaseURL->Path->ToString(),$Z));
+    //$Z=$CurPath->Compare($BaseURL);
+      $Tmp=$BaseURL->Path;
+      If($Tmp->IsFile())
+        $Tmp->Del(-1);
+      $i=$BasePath->Compare($Tmp);
+      $l=$BasePath->Len();
+      If($i<$l)
+      {
+        $BasePath->Del($i-$l,$l);
+        $BasePath->Add('/');
+      }
+      If(Count($BasePath->Path)==1)
+        $BasePath->Path[]='';
+      $BaseURL->Path=$BasePath;
+    //Debug($BaseURL);
+    //Debug($BaseURL->ToString());
+      If($i>0)
+        $CurPath->Del(0,$i);
+    //Debug($i);
+      $ReqFile='';
+      If($CurPath->IsFile())
+      {
+        $ReqFile=$CurPath->FileName();
+        $CurPath->Del(-1);
+        $CurPath->Add('/');
+      }
+   
+      If($Z)
+        $CurPath->Clear();
+   
+    //$RelPath=TPath::Create(RealPath('.'));
+      $RelPath=TPath::Create($StartDir);
+      // Полный путь до выполняемого скрипта
+    //$SFN=$_SERVER['DOCUMENT_ROOT'].$_SERVER['PHP_SELF']
+    //$RelPath->PathFrom($_SERVER('SCRIPT_FILENAME'));
+      $P1=TPath::Create(RealPath($_SERVER['DOCUMENT_ROOT']));
+      $RelPath->PathFrom($P1);
+      If(!$RelPath->IsRoot())
+        Array_UnShift($RelPath->Path,'');
+      $RelURL=$BaseURL->_Clone();
+      $RelURL->Path=$RelPath;
+      $RelURL->Path->Add('/');
+      $RelURL->Path->Norm();
+   
+     /*
+      $P2=TPath::Create($_SERVER['PHP_SELF']);
+      If($P2->IsRoot())
+        Array_Shift($P2->Path);
+      $RelPath->PathFrom($P2);
+      $RelURL=$BaseURL->_Clone();
+      $RelURL->Path->Add($RelPath);
+      $RelURL->Path->Add('/');
+      $RelURL->Path->Norm();
+     */
+      //Debug($RelPath ->ToString());
+      //Debug($BaseURL ->ToString());
+      //Debug($RelURL  ->ToString());
+   
+     /*
+      //Debug($ParseVars['CurPath'  ]);
+      Debug(Array(
+        'CurURL'   => $CurURL   ->ToString(),
+        'BaseURL'  => $BaseURL  ->ToString(),
+        'CurPath'  => $CurPath  ->ToString(),
+        'BasePath' => $BasePath ->ToString(),
+        'ReqFile'  => $ReqFile          ,
+        'RelPath'  => $RelPath  ->ToString(),
+        'RelURL'   => $RelURL   ->ToString(),
+      ));
+     */
+      $this->CurURL   = $CurURL   ;
+      $this->BaseURL  = $BaseURL  ;
+      $this->CurPath  = $CurPath  ;
+      $this->BasePath = $BasePath ;
+      $this->ReqFile  = $ReqFile  ;
+      $this->Referer  = $Referer  ;
+      $this->RelPath  = $RelPath  ;
+      $this->RelURL   = $RelURL   ;
+   
+      $this->Vars=Array(
+        'CurURL'   => $CurURL   ,
+        'BaseURL'  => $BaseURL  ,
+        'CurPath'  => $CurPath  ,
+        'BasePath' => $BasePath ,
+        'ReqFile'  => $ReqFile  ,
+        'RelPath'  => $RelPath  ,
+        'RelURL'   => $RelURL   ,
+      );
+    }
+  
+    Function Relative_Url_Str($Url)
+    {
+      $UR=$this->CurURL;
+      $UT=$UR->_Clone();
+      $UT->Assign($Url);
+      If($UT->PathFrom($UR))
+        $Url=$UT->ToString();
+      Return $Url;
+    }
+  }
+?>

@@ -1,0 +1,35 @@
+<?
+  $Loader->Load_Class('/Inet/HTTP/Poster/Stream' );
+ 
+  Class C_Inet_HTTP_Poster_Input Extends C_Inet_HTTP_Poster_Stream
+  {
+    Var $Stream;
+  
+    Function _Init($Args)
+    {
+      If(!IsSet($Args['Stream']))
+      {
+        Global $HTTP_RAW_POST_DATA;
+        If(StrLen($HTTP_RAW_POST_DATA))
+        {
+          $Stream=&$this->Loader->Create_Object('/Stream/Fifo');
+          $Stream->Write($HTTP_RAW_POST_DATA);
+        }
+        Else
+        {
+          $Stream=&$this->Loader->Create_Object('/Stream/Handle');
+          If(IsSet($_SERVER['CONTENT_LENGTH']))
+            $this->Length_Set($_SERVER['CONTENT_LENGTH']);
+          $Stream->FHandle=FOpen('php://input', 'rb');
+        }
+  
+        $Args['Stream']=&$Stream;
+      }
+      Else
+        $Stream=Null;
+      parent::_Init($Args);
+      If($Stream)
+        $Stream->_UnLock();
+    }
+  }
+?>

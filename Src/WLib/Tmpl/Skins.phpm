@@ -1,0 +1,69 @@
+<?
+  $Loader->Begin_Module('/Tmpl/Skins');
+ 
+  $Loader->Using_Module('/URI/Paths');
+//$Loader->Using_Class('/Tmpl/Skin/Manager');
+  $Loader->Using_Class('/Tmpl/Skin/Node');
+//$Loader->Using_Module('/System/IOFS');
+ 
+//If(!IsSet($GLOBALS['SkinsURL'  ])) $GLOBALS['SkinsURL'  ] ='skins/';
+  If(!IsSet($GLOBALS['SkinsURL'  ])) $GLOBALS['SkinsURL'  ] =False;
+//If(!IsSet($GLOBALS['SkinsPath' ])) $GLOBALS['SkinsPath' ] ='./skins';
+  If(!IsSet($GLOBALS['SkinsPath' ])) $GLOBALS['SkinsPath' ] ='skins/';
+ 
+  $GLOBALS['Skin'] ='';
+ 
+  Function &Tmpl_Skin_Begin(&$AVars, $DefName='_')
+  {
+    Global $SkinsURL, $SkinsPath;
+  
+    $Vars=Vars_With($AVars, []);
+  
+    $Skin=_vars_getf('Skin', $Vars);
+    If($Skin)
+      $Vars['SkinName']=$Skin;
+    $LSkinName=_vars_getf('SkinName', $Vars);
+    If($LSkinName)
+      $SkinName=$LSkinName;
+    Else
+      $SkinName=$DefName;
+    $Vars['SkinName']=$SkinName;
+    $LSkinFName=_vars_getf('SkinFName', $Vars);
+    If(!$LSkinFName)
+      $Vars['SkinFName']='full.html';
+  
+    $Args=[
+      'Path'   => $SkinsPath ,
+      'URL'    => $SkinsURL  ,
+      'Name'   => '',
+      'Parent' => NULL,
+    ];
+  //Debug($Args);
+    $Skins=New T_Tmpl_Skin_Node($Args);
+    $Skin=$Skins->Get_Skin($SkinName);
+    //Debug($SkinName);
+    $Paths=$Skin->Get_Paths();
+    $Router=_vars_getf('TmplRouter', $Vars);
+    $Paths->OldPaths=&$Router->Paths;
+    $Router->Paths=&$Paths;
+    $Vars['Skins']=&$Skins;
+    $Vars['Skin' ]=&$Skin;
+  
+    $Skin->InitVars($Vars);
+  
+    Return $Vars;
+  }
+ 
+  Function Tmpl_Skin_End(&$Vars)
+  {
+    Global $SkinsURL, $SkinsPath, $TypeModeURL;
+  
+    $Vars['IsUseBase']=$TypeModeURL==1;
+    $Skin=_vars_getf('Skin', $Vars);
+    $LSkinFName=_vars_getf('SkinFName', $Vars);
+    $Res=$Skin->Parse($Vars, $LSkinFName);//'full.html');
+    $Router->Paths=&$Router->Paths->OldPaths;
+    Vars_EndWith($Vars);
+    Return $Res;
+  }
+?>

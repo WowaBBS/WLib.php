@@ -1,0 +1,234 @@
+<?
+  class C_Inet_Web_Debug_Html Extends C_Object
+  {
+    Var $Proc;
+  
+    Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      $this->Info=$this->Create_Object('/Inet/Web/Debug/Rules');
+      $this->Proc=$this->Create_Object('/Inet/Web/Debug/Procs');
+    }
+  
+    Function Style()
+    {
+?>
+<style>
+ .odd0 td{ background: #CCeeFF; }
+ .odd1 td{ background: #EEeeFF; }
+ .Empty{ color: red; }
+ .Ok{ color: black; }
+</style>
+<?
+    }
+    
+    Function Request()
+    {
+      $Request =$this->Get_Singleton('/Inet/Web/Request');
+?>
+<table>
+<!--
+<tr class="odd1"><td>REQUEST_URI    :</td><td> <?=$_SERVER['REQUEST_URI'   ]??''; ?></td></tr>
+<tr class="odd0"><td>REDIRECT_URL   :</td><td> <?=$_SERVER['REDIRECT_URL'  ]??'';  ?></td></tr>
+<tr class="odd1"><td>PHP_SELF       :</td><td> <?=$_SERVER['PHP_SELF'      ]??'';  ?></td></tr>
+<tr class="odd0"><td>DOCUMENT_ROOT  :</td><td> <?=$_SERVER['DOCUMENT_ROOT' ]??'';  ?></td></tr>
+-->
+<tr class="odd1"><td>CurURL         :</td><td> <?=$Request->CurURL   ; ?></td></tr>
+<tr class="odd0"><td>BaseURL        :</td><td> <?=$Request->BaseURL  ; ?></td></tr>
+<tr class="odd1"><td>CurPath        :</td><td> <?=$Request->CurPath  ; ?></td></tr>
+<tr class="odd0"><td>BasePath       :</td><td> <?=$Request->BasePath ; ?></td></tr>
+<tr class="odd1"><td>Referer        :</td><td> <?=$Request->Referer  ; ?></td></tr>
+<tr class="odd0"><td>ReqFile        :</td><td> <?=$Request->ReqFile  ; ?></td></tr>
+<tr class="odd1"><td>RelPath        :</td><td> <?=$Request->RelPath  ; ?></td></tr>
+<tr><td colspan=2>
+<a href="..">Up</a> &nbsp;
+<a href="a/">Dir1</a> &nbsp;
+<a href="b/">Dir2</a> &nbsp;
+<a href="c/">Dir3</a> &nbsp;
+<a href="a">File1</a> &nbsp;
+<a href="b">File2</a> &nbsp;
+<a href="c">File3</a>
+</td></tr>
+</table>
+<?
+    }
+    
+    Function Files()
+    {
+      if(true)
+      {
+        $Files   =$this->Get_Singleton('/Inet/Web/Files'   ); //,['Global', false]);
+        if(!$Files->IsEmpty())
+        {
+?>
+<table>
+<tr>
+  <td>Var</td>
+  <td>FileName</td>
+  <td>FileSize</td>
+  <td>MimeType</td>
+  <td>Error   </td>
+  <td>FilePath</td>
+</tr>
+<?
+          $i=0;
+          ForEach($Files->GetList()As $k=>$v)
+          {
+            $i=1-$i;
+            $TrClass='odd'.$i;
+?>
+<tr class="<?=$TrClass;?>">
+ <td><?=$k;?></td>
+ <td><?=$v->GetFileName ();?></td>
+ <td><?=$v->GetFileSize ();?></td>
+ <td><?=$v->GetMimeType ();?></td>
+ <td><?=$v->GetError    ();?></td>
+ <td><?=$v->GetFilePath ();?></td>
+</tr>
+<?
+          }
+?>
+</table>
+<?
+        }
+?>        
+  <form enctype="multipart/form-data" method="post">
+   <p><input type="file" name="f[a][]" multiple>
+   <input type="file" name="a[f]" multiple>
+   <input type="submit" value="Отправить"></p>
+  </form> 
+<?        
+      }
+    
+      if($_FILES)
+      {
+?>
+<pre>
+<?
+  Print_R($_FILES);
+?>
+</pre>
+<?
+      }
+    }
+    
+    Function Server()
+    {
+    }
+    
+    Function Info_Unknown($Info)
+    {
+      $Res=Array();
+      ForEach($_SERVER As $k=>$v)
+        If(!IsSet($Info[$k]))
+          $Res[$k]=$v;
+      If(!$Res)
+        return;
+      $this->Info_Group($Info['>Unknown']);
+      $i=0;
+      ForEach($Res As $Key=>$Value)
+      {
+        $i=1-$i;
+        $this->Tmpl_Hor('odd'.$i, $Key, $Value, '');
+      }
+    }
+    
+    Function Info()
+    {
+      $Info=$this->Info->GetInfo();
+      $Procs=$this->Proc;
+?>
+<table width="100%">
+<?
+      $this->Info_Unknown($Info);
+      UnSet($Info['>Unknown']);
+      $i=0;
+      ForEach($Info As $k=>$v)
+      {
+        If(!Is_Array($v))
+        {
+          $this->Info_Group($v);
+          $i=0;
+        }
+        Else
+        {
+          $i=1-$i;
+          $Str=False;
+          If(IsSet($_SERVER[$k]))
+          {
+            If(IsSet($v['Proc']))
+              If($v['Proc']===True)
+                $Proc=$k;
+              Else
+                $Proc=$v['Proc'];
+            Else
+              $Proc='Default';
+            $Str=[$Procs, $Proc]($_SERVER[$k],$v); // TODO: $Value
+          }
+          $TrClass=($Str!==False? 'Ok':'Empty').' odd'.$i;
+          If(IsSet($v['Templ']))
+            $VarTempl=$v['Templ'];
+          Else
+            $VarTempl='Hor';
+          [$this, 'Tmpl_'.$VarTempl]($TrClass, $k, $Str, $v[0]);
+        }
+       }
+?>
+</table>
+<?
+    }
+    
+    Function Info_Group($Title)
+    {
+?>
+ <tr>
+  <td colspan=3>
+   <h2><?=$Title;?></h2>
+  </td>
+ </tr>
+<?
+    }
+    
+    Function Tmpl_Hor($TrClass, $Key, $Value, $Descr)
+    {
+?>
+ <tr class="<?=$TrClass;?>">
+  <td><?=$Key;?>
+  </td>
+  <td>
+   <?=$Value;?>
+  </td>
+  <td>
+   <?=$Descr;?>
+  </td>
+ </tr>
+<?
+    }
+
+    Function Tmpl_Vert($TrClass, $Key, $Value, $Descr)
+    {
+?>
+ <tr class="<?=$TrClass;?>">
+  <td rowspan=2><?=$Key;?>
+  </td>
+  <td colspan=2>
+   <?=$Descr;?>
+  </td>
+ </tr>
+ <tr class="<?=$TrClass;?>">
+  <td colspan=2>
+   <?=$Value;?>
+  </td>
+ </tr>
+<?
+    }
+    
+    Function Print()
+    {
+      $this->Style();
+      $this->Request();
+      $this->Files();
+      $this->Info();
+    }
+  }
+?>

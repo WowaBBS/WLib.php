@@ -1,0 +1,19 @@
+<?
+  $Loader->Load_Class('/System/Object');
+ 
+  Class C_Inet_HTTP_Poster_Base Extends C_System_Object
+  {
+    Function Method()
+    {
+      Return 'GET';
+    }
+   
+    Function Header_Make(&$AHeader)
+    {
+    }
+  
+    Function Save_To_Stream(&$Sock)
+    {
+    }
+  }
+?>

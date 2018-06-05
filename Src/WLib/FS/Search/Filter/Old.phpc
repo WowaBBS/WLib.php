@@ -1,0 +1,45 @@
+<?
+  $Loader->Parent_Class('/FS/Search/Filter/Base');
+
+  class C_FS_Search_Filter_Old extends C_FS_Search_Filter_Base
+  {
+    Var $Mask      =false;
+    Var $ExclMask  =false;
+    Var $Hidden    =false; //TODO: Duplicate
+    Var $Exclude   =[];
+  
+    Protected Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      
+      if(IsSet($Args['Param'     ])) $Args=$Args['Param'];
+      if(IsSet($Args['Mask'      ])) $this->Mask     =Static::_Mask ($Args['Mask'      ]);
+      if(IsSet($Args['ExclMask'  ])) $this->ExclMask =Static::_Mask ($Args['ExclMask'  ]);
+      if(IsSet($Args['Hidden'    ])) $this->Hidden   =               $Args['Hidden'    ] ;
+      if(IsSet($Args['Exclude'   ])) $this->Exclude  =Array_Flip    ($Args['Exclude'   ]);
+    }
+    
+    Function Check($Item)
+    {
+      if($Item->IsDir())
+      {
+        $Item->SetAddRes(false);
+        if(IsSet($this->Exclude[$Item->LocPath.'/']))
+          $Item->SetSubDir(false);
+      }
+      if($Item->IsFile())
+      {
+        if(IsSet($this->Exclude[$Item->LocPath]) ||
+           !$this->CheckRes($Item))
+          $Item->SetAddRes(false);
+      }
+    }
+
+    Function CheckRes($Item)
+    {
+      if($m=$this->ExclMask ) if( Preg_Match($m, $Item->Name)) return false;
+      if($m=$this->Mask     ) if(!Preg_Match($m, $Item->Name)) return false;
+      return true;
+    }
+  };
+?>

@@ -33,10 +33,11 @@
       $this->RFileName=$Name;
     }
   
-    Function Open($AMode=False)
+    Function Open($AMode=null)
     {
-      If(!$AMode)
-        $AMode=omReadWrite|omMakePath|omBinary;
+      If(Is_Null($AMode)) $AMode=omReadWrite|omMakePath|omBinary; else
+      If($AMode===True  ) $AMode=omWrite|omMakePath|omCreate|omBinary|omClear; else
+      If($AMode===False ) $AMode=omRead|omExist|omBinary;
       If($this->FHandle)
         $this->Close();
       If(Is_String($AMode))

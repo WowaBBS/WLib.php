@@ -1,0 +1,54 @@
+<?
+  $Loader->Parent_Class('/Object');
+  
+  Class C_Tmpl_Skin_Frame Extends C_Object
+  {
+    Var $Content=False;
+    Var $Def='';
+    Var $Type='';
+  
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      If(Is_String($Args['Def']))
+        $this->Def=$Args['Def'];
+    }
+  
+    Function ToString($Vars=False):String
+    {
+    //Debug($Vars);
+    //If($this->Content===False)
+      If($this->Content==False)
+        Return ParseStr($this->Def, $Vars);
+      Else
+        Return $this->Content;
+    }
+  
+    Function AddRight(String $Content)
+    {
+      $this->Content.=$Content;
+    }
+  
+    Function AddLeft(String $Content)
+    {
+      $this->Content=$Content.$this->Content;
+    }
+  
+    Function Override(String $Content)
+    {
+      $this->Content=$Content;
+    }
+  
+    Function &GetVar(&$Path, $Type=tv_Any, Array &$Vars=[])
+    {
+      If(Count($Path)==0)
+      {
+        $Res=$this->ToString($Vars);
+        Return $Res;
+      }
+      $Res=NULL;
+    //Return $this;
+      Return $Res;
+    }
+  }
+?>

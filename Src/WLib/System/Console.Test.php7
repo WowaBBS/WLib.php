@@ -1,0 +1,150 @@
+<?
+  //See: D:\Proj\proj\Proj\Comm\BBS\Terminal\ANSI_DRV.PAS
+  //     D:\Proj\proj\Proj\Comm\BBS\WOWA.BBS
+
+  class console 
+  { 
+    const TARGET_OUTPUT = "php://output" ; 
+    const TARGET_STDOUT = "php://stdout" ; 
+    const TARGET_STDERR = "php://stderr" ; 
+    const TARGET_STDIN  = "php://stdin"  ; 
+    
+    Protected Static $Colors=[
+      'gray'      => 0, 
+      'black'     => 0, 
+      'red'       => 1, 
+      'green'     => 2, 
+      'yellow'    => 3, 
+      'blue'      => 4, 
+      'magenta'   => 5, 
+      'cyan'      => 6, 
+      'white'     => 7, 
+      'default'   => 9,
+    ]; 
+    
+    Protected Static $Styles=[
+      'default'          =>  0, 
+      'bold'             =>  1, 
+      'faint'            =>  2, 
+      'normal'           => 22, 
+      'italic'           =>  3, 
+      'notitalic'        => 23, 
+      'underlined'       =>  4, 
+      'doubleunderlined' => 21, 
+      'notunderlined'    => 24, 
+      'blink'            =>  5, 
+      'blinkfast'        =>  6, 
+      'noblink'          => 25, 
+      'negative'         =>  7, 
+      'positive'         => 27, 
+    ]; 
+    
+    // Input 
+    Function Read_Numeric() 
+    { 
+      $stdin = fopen('php://stdin', 'r'); 
+      $line = trim(fgets($stdin)); 
+      fscanf($stdin, "%d\n", $number); 
+      return $number; 
+    } 
+    
+    Function Read_String() 
+    { 
+      $stdin = fopen('php://stdin', 'r'); 
+      $line = trim(fgets($stdin)); 
+      fscanf($stdin, "%s\n", $string); 
+      return $string; 
+    } 
+    
+    Function WriteList($Args)
+    {
+      ForEach($Args As $Arg) $this->WriteStr($Arg);
+      return $this;
+    }
+    
+    Function WriteStr($Arg)
+    {
+      echo $Arg;
+      return $this;
+    }
+    
+    Function Write(... $Args)
+    {
+      return $this->WriteList($Args);
+    }
+    
+    Function WriteCsi(... $Args)
+    {
+      return $this->WriteStr("\033[")->WriteList($Args);
+    }
+    
+    Function WriteEsc(... $Args)
+    {
+      return $this->WriteStr("\033" )->WriteList($Args);
+    }
+    
+    Function WhereXY() { $this->WriteCsi('6n'); TODO_Read(); }
+    
+    // Sound 
+    function Beep()              { echo "\007"; return $this; } 
+    function SoundHerz($herz=100)      { echo "\033[10;{$herz}]"; return $this; } 
+    function SoundLong($milliseconds=500)  { echo "'033[11;{$milliseconds}]"; return $this; } 
+    // Cursor position 
+    function At($Row=1, $Column=1)  { echo "\033[{$Row};{$Column}H"; return $this; } 
+    function Up    ($Lines   =1) { return $this->WriteCsi("[{$Lines}A"   ); }
+    function Down  ($Lines   =1) { return $this->WriteCsi("[{$Lines}B"   ); }
+    function Right ($Columns =1) { return $this->WriteCsi("[{$Columns}C" ); }
+    function Left  ($Columns =1) { return $this->WriteCsi("[{$Columns}D" ); }
+    // Text colors 
+    function Style   ($Style='default') { return $this->WriteCsi(Static::$Styles   [$Style]   ,'m'); }
+    function Color   ($Color='default') { return $this->WriteCsi(Static::$Colors   [$Color]+30,'m'); }
+    function BgColor ($Color='default') { return $this->WriteCsi(Static::$BgColors [$Color]+40,'m'); }
+    // Application 
+    function AppName ($Name='') { return $this->Write(']0;',$Name,''); }
+    function Title   ($Name='') { return $this->Write(']2;',$Name,''); }
+    function Icon    ($Name='') { return $this->Write(']1;',$Name,''); }
+    // Other 
+    function Clear()               { return $this->WriteEsc("c"); }
+    function Clear2()              { return $this->WriteCsi("2J"); }
+    function Console($Num=1)       { return $this->WriteCsi("12;{$Num}]"); }
+
+    Function _SetAttr($a)
+    {
+      Static $ANS_Colors=['0','4','2','6','1','5','3','7'];
+      
+    //$a=$a And 0x7F;
+      
+      $this->WriteCsi(
+        ($a &0x08?'1':'0'), // bright
+        ($a &0x80?';5':''), // blink
+        ';3'.$ANS_Colors[$a     &7], // foreground
+        ';4'.$ANS_Colors[($a>>4)&7], // background
+        'm' // complete ANSI code
+      );
+    }
+
+    
+    
+    Function FillArea($char, $top, $left, $bottom, $right) {
+       echo '['. $char . ';' . $top . ';' . $left . ';' . $bottom . ';' . $right . '$x';
+    }
+  }
+  
+  //SNormVideo [0m
+  // [1;3Hm
+
+  $c=New Console();
+  $c->Clear2();
+  $c->Title('Hello war');
+ #$c->beep();
+ #$c->SoundLong(500);
+  $c->SoundHerz(100);
+  $c->FillArea('.', 14, 8, 12, 32);
+  $c->At(15, 10);
+ //Echo 'ToPos:';
+  $c->Color('red')->Style('italic');
+  $c->Write('Hello');
+  $c->Color()->Style();
+  Echo ' World';
+  Sleep(5);
+?> 

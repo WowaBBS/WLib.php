@@ -1,0 +1,43 @@
+<?
+  $Loader->Load_Class('/Inet/HTTP/Poster/XForm');
+ 
+  Class C_Inet_HTTP_Poster_MultiPart Extends C_Inet_HTTP_Poster_XForm
+  {
+    Var $Mime  ;
+    Var $Files ; // C_Inet_HTTP_Files
+  
+    Function _Init($Args)
+    {
+      parent::_Init($Args);
+      $this->Mime  =&$this->Loader->Create_Object('/Inet/Mime/Part');
+      If(IsSet($Args['Files']))
+        $this->Files=&$Args['Files']->_Lock();
+      Else
+        $this->Files=&$this->Loader->Create_Object('/Inet/HTTP/Files');
+    }
+  
+    Function _Done()
+    {
+      $this->Mime->Done();
+      $this->Files->_UnLock();
+      parent::_Done();
+    }
+  
+    Function Header_Make(&$AHeader)
+    {
+      $this->Post->Save_To_Mime($this->Mime);
+      $this->Files->Save_To_Mime($this->Mime);
+    //Debug($this->Files);
+   
+      $this->Mime->Header=&$AHeader;
+      $this->Mime->Calc_Content_Length();
+      $AHeader->Put('Content-Type', 'multipart/form-data; boundary='.$this->Mime->Boundary());
+    //$Header->Put('Content-Length', $this->Post->Length()); ???
+    }
+  
+    Function Save_To_Stream(&$Sock)
+    {
+      $this->Mime->Save_To_Stream(&$Sock);
+    }
+  }
+?>

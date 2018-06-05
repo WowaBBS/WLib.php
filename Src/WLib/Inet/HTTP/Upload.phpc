@@ -1,0 +1,278 @@
+<?
+  //*************************************************************************\\
+  // Модуль : HTTP/TUpLoad                                                   \\
+  // Тип    : Unit                                                           \\
+  // Создан : 18.04.2009                                                     \\
+  // Автор  : Савин Владимир Иванович                                        \\
+  // e-mail : wowa_savin@mail.ru                                             \\
+  // fido   : 2:5057/21.69 & 2:5057/21.777                                   \\
+  //*************************************************************************\\
+ 
+ 
+  // Подключение модулей
+  Uses('MSystem'  );
+  Uses('MSysUtil' );
+ 
+  $Loader->Using_Class  ('Object/TRelease');
+  $Loader->Using_Class  ('INet/Mime/Type/MList' );
+  $Loader->Using_Module ('INet/HTTP/Headers' );
+//$Loader->Using_Class  ('INet/HTTP/MAnswers' );
+//$Loader->Using_Class  ('INet/HTTP/Ranges'  );
+//$Loader->Using_Class  ('Stream/Handle'  );
+//$Loader->Using_Class  ('Stream/File'    );
+//$Loader->Using_Class  ('Stream/Proxy/Ranges');
+//$Loader->Using_Class  ('Stream/Proxy/Shaper');
+//$Loader->Load_Class   ('System/Object'  );
+ 
+  // ***************************************************************************************
+//Class T_INet_HTTP_UpLoad Extends T_Object
+  Class C_Inet_HTTP_Upload Extends C_Object //_Release
+  {
+    Var $Status   = False ;
+    Var $AHeaders = [0];
+    Var $QHeaders = False ;
+    Var $Stream   = NULL  ;
+    //Var $OStream  = NULL  ;
+    Var $FileName = False ;
+    Var $MimeType = False ;
+    Var $FileInfo = False ;
+    Var $ETag     = False ;
+    Var $IsRange  = False ;
+    Var $Ranges   = NULL  ;
+    Var $MaxAge   = 1800  ;
+ 
+    //Var $Shaper   = 1638400 ;
+    //Var $Shaper   = 3145728 ;
+    Var $Shaper   = False ;
+ 
+    Function _Done()
+    {
+      If($this->Stream) $this->Stream->_UnLock();
+      If($this->Ranges) $this->Ranges->_UnLock();
+      parent::_Done();
+    }
+ 
+    Function Set_Ranges($ARanges)
+    {
+      If($this->Ranges) $this->Ranges->_UnLock();
+      $this->Ranges=$ARanges->_Lock();
+    }
+ 
+    Function Set_Stream_Object($AObject)
+    {
+      If($this->Stream) $this->Stream->_UnLock();
+      $this->Stream=$AObject->_Lock();
+      Return True;
+    }
+ 
+    Function Set_Stream_Handle($AHandle)
+    {
+    //$this->Stream=New T_Stream_Handle();
+      FAbstract();
+      Return True;
+    }
+ 
+    Function Set_Stream_File($AFileName)
+    {
+      $S=$this->Create_Object('/Stream/File');
+      $S->Assign($AFileName);
+      If(!$S->Open(omReadOnly|omBinary|omExclusive))
+      {
+        $S->Done();
+        Return False;
+      }
+      $this->Set_Stream_Object($S);
+      $S->_UnLock();
+      $this->FileName=ExtractFileName($AFileName);
+      Return True;
+    }
+ 
+    Function Set_Stream_Binary($ABinary)
+    {
+      Return False;
+    }
+ 
+    Function Make_Info()
+    {
+    //If(!$this->FileName)) $this->FileName=ExtractFileName($this->FilePath);
+      If(!$this->MimeType) $this->MimeType=Get_Mime_Type_Of_File($this->FileName, 'application/octet-stream'); // 'application/bin'
+      If(!$this->QHeaders) $this->QHeaders=Http_Headers(); // TODO:
+      If(!$this->FileInfo) $this->FileInfo=$this->Stream->Stat();
+      $Stat=$this->FileInfo;
+    //Debug($this->FileInfo);
+    //Debug($this->QHeaders);
+      If(!$this->ETag && $Stat)
+        $this->ETag=
+          DecHex($Stat['ino'  ]).'-'.
+          DecHex($Stat['size' ]).'-'.
+        //DecHex((($Stat['mtime'].Str_Repeat('0', 6)+0)&(8589934591))), // Modification time in useconds & (2^33-1)
+          DecHex($Stat['mtime']);
+      If(!$this->IsRange) $this->IsRange=$Stat['size'] && $this->Stream->Seek();
+    }
+ 
+    Function Make_Status()
+    {
+    //$FileName, $Data=False, $Type='', $AsFN=False
+  
+      $QH=&$this->QHeaders; // & - For modifications
+      If(!$this->Stream)
+      {
+        $this->Status=404; // Not Found
+      //$this->Status=403; // Forbidden
+        Return False;
+      }
+  
+    //If-Modified-Since: Wed, 03 Oct 2007 10:52:34 GMT
+    //$unix_ims = StrToTime($SH['If-Modified-Since']); // в UNIX формате
+    //If-None-Match: "dec009-91f-77908080"
+  
+      If(IsSet($QH['If-None-Match']))
+      {
+        $ETVal=StripSlashesSpec($QH['If-None-Match']);
+        $ETVal=Array_Flip(Split('[,][ ]?', $ETVal));
+        If(IsSet($ETVal['"'.$this->ETag.'"']))
+        {
+          // Копия файла в кеше клиента не устарела - сообщаем ему об этом...
+          $this->Status=304; // не модифицировано
+          Return True;
+        }
+      }
+  
+      If(IsSet($QH['If-Range']))
+      {
+        Debug($QH);
+        Debug('"'.$this->ETag.'"');
+        If($QH['If-Range']!=('"'.$this->ETag.'"'))
+          UnSet($QH['Range']);
+      }
+  
+      If($this->IsRange && IsSet($QH['Range']))
+      {
+        $Range=$QH['Range'];
+        $Range=Explode('=', $Range);
+        If($Range[0]=='bytes')
+        {
+          $R=$this->Create_Object('/INet/HTTP/Ranges');
+          $R->Set_Size($this->FileInfo['size']);
+          $R->Assign_Str($Range[1]);
+        //Debug($R);
+        //Debug($R);
+        //Debug($R->Length());
+          If($R->Length())
+            $this->Set_Ranges($R);
+          Else
+          {
+            $R->_UnLock();
+            UnSet($R);
+            $this->Status=416; // Requested Range Not Satisfiable
+            Return True;
+          }
+          $R->_UnLock();
+          UnSet($R);
+        }
+      }
+  
+      If(!$this->Status)
+        If($this->Ranges)
+          $this->Status=206; // Partial Content
+        Else
+          $this->Status=200; // OK
+  
+      Return True;
+    }
+ 
+    Function Make_Header()
+    {
+      $AH=&$this->AHeaders;
+      $AH[0]=HTTP_Answer($this->Status);
+      $SLevel=Array(304=>1, 200=>2, 206=>2);
+      $SL=$SLevel[$this->Status] ?? 0;
+      If($SL<1)
+        Return False;
+      $AH[]='Cache-Control: max-age='.$this->MaxAge;
+      If($this->ETag)
+        $AH['ETag'          ]=' "'.$this->ETag.'"';
+      $AH['Last-Modified' ]=GMDate('D, d M Y H:i:s', $this->FileInfo['mtime']).' GMT';
+      $AH['Expires'       ]=GMDate('D, d M Y H:i:s', Time()+$this->MaxAge).' GMT';
+      $AH['Pragma'        ]='public';
+      $AH[]='Cache-Control: must-revalidate, post-check=0, pre-check=0';
+      $AH[]='Cache-Control: public';
+ 
+      If($SL<2)
+        Return False;
+ 
+      If($this->IsRange)
+        $AH['Accept-Ranges']='bytes';
+    //SetHeader('Content-Disposition: attachment; filename='.BaseName($FileName));
+      If($this->Ranges)
+      {
+        $AH['Content-Length' ]= $this->Ranges->Length();
+        $AH['Content-Range'  ]= 'bytes '.($this->Ranges->ToString()).'/'.$this->FileInfo['size'];
+      }
+      Else
+        If($this->FileInfo['size' ])
+          $AH['Content-Length']=$this->FileInfo['size'];
+      $AH['Content-Type']=$this->MimeType;
+    //UnSet($AH['Content-Length' ]);//!!!!
+    }
+ 
+    Function Send_Header()
+    {
+    //Debug($this->QHeaders);
+    //Debug($this->AHeaders);
+    //Debug($this);
+      ForEach($this->AHeaders As $k=>$s)
+        If(Is_Int($k))
+          Header($s);
+        Else
+          Header($k.': '.$s);
+    }
+ 
+    Function Send_Content()
+    {
+      $SLevel=Array(304=>1, 200=>2, 206=>2);
+      $SL=IsSet($SLevel[$this->Status])?$SLevel[$this->Status]:0;
+      If($SL<2)
+        Return;
+    //Debug('Ok');
+      $S=$this->Stream->_Lock();
+      If($this->Ranges)
+      {
+        $S_=$S;
+        $S=$this->Create_Object('/Stream/Proxy/Ranges');
+        $S->Assign($S_);
+        $S_->_UnLock();
+        $S->Ranges_Set_Array($this->Ranges->Ranges);
+      }
+      If($this->Shaper)
+      {
+        $S_=$S;
+        $S=$this->Create_Object('/Stream/Proxy/Shaper');
+        $S->Assign($S_);
+        $S_->_UnLock();
+        $S->Limit_Set($this->Shaper);
+      }
+      Display_Errors(False);
+      Stream_Output_UnLock();
+    //Debug('_');
+    //Debug(Ignore_User_Abort(1).'!');
+    //Debug(Ignore_User_Abort(False).'!');
+      $S->PassThru();
+    //Debug('Ok');
+      Stream_Output_Lock();
+      $S->_UnLock();
+    }
+ 
+    // Отправляет файл на браузер
+    Function Process()
+    {
+      If(Function_Exists('CloseSession'))
+        CloseSession();
+      $this->Make_Info();
+      $this->Make_Status();
+      $this->Make_Header();
+      $this->Send_Header();
+      $this->Send_Content();
+    }
+  }
+?>

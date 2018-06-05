@@ -1,0 +1,59 @@
+<?
+  $Loader->Begin_Class('/Tmpl/Skin/Menu');
+ 
+  $Loader->Parent_Class('/Object');
+ 
+  Class C_Tmpl_Skin_Menu Extends C_Object
+  {
+    Function IsMenuAssigned() { Return False; }
+    Function GetMenuList() { Return []; }
+    Function IsUpMenu() { Return False; }
+    Function UpMenu() { Return False; }
+    Function FirstMenu() { Return False; }
+ 
+    Function &GetVar(Array &$Path, $Type=tv_Any, Array &$Vars=[])
+    {
+      If(Count($Path)==0)
+        Return $this;
+      $Res=Null;
+      $Dir=Array_Shift($Path);
+      Switch($Dir)
+      {
+      Case 'Up':
+        $Res=$this->UpMenu();
+      //If(!$Menu)
+      //{
+      //  $Res=False;
+      //  Return $Res;
+      //}
+      //Return $Menu->GetVar($Path, $Type, $Vars);
+        Break;
+  
+      Case 'First':
+        $Res=$this->FirstMenu();
+      //Return $Menu->GetVar($Path, $Type, $Vars);
+        Break;
+  
+      Case 'Assigned':
+        $Res=$this->IsMenuAssigned();
+        Break;
+  
+      Case 'Current':
+        $Res=$this->Current();
+      //Return $Res->GetVar($Path, $Type, $Vars);
+        Break;
+  
+      Case 'List':
+        $Res=$this->GetMenuList();
+      //$Res=New T_Vars($this->GetMenuList());
+      //Return $Res->GetVar($Path, $Type, $Vars);
+        Break;
+      Default:
+        $Info=$this->GetInfo();
+        If(IsSet($Info[$Dir]))
+          $Res=$Info[$Dir];
+      }
+      Return $Res;
+    }
+  }
+?>

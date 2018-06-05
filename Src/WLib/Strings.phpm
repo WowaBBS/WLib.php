@@ -191,22 +191,6 @@
     Return $Str;
   }
  
-  Function HashStr($Str)
-  {
-    Return DecHex(Crc32(Serialize($Str)));
-  }
- 
-  Function DownString(&$Str)
-  {
-    $Str=StrToLower($Str);
-  }
- 
-  Function DownStr($Str)
-  {
-    DownString($Str);
-    Return $Str;
-  }
- 
   // ***************************************************************************************
  
   Function IsIntStr($Str)

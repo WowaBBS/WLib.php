@@ -1,0 +1,54 @@
+<?
+//$Loader->Load_Class('/System/Object');
+  $Loader->Load_Type('/Type/Map/MultiI');
+  $Loader->Load_Type('/Inet/HTTP/Cookie/Item');
+ 
+  Class C_Inet_HTTP_Cookie_List Extends C_System_Object
+  {
+    Var $Map; // Хеш Имя>индекс в Cookie;
+ 
+    Function _Init($Args)
+    {
+      parent::_Init($Args);
+      $this->Map=New T_Type_Map_MultiI();
+    }
+ 
+    Function Assigned()
+    {
+      Return $this->Map->GetItems() ?True:False;
+    }
+ 
+    Function Clear()               { $this->Map->Clear(); }
+    Function Add($Key, $Value)     { $this->Map->Add($Key, $Value); }
+    Function Count($Key)           { Return $this->Map->CountByKey($AKey); }
+    Function Get($Key, $Idx=False) { Return $this->Map->Get($Key, $Idx); }
+    Function ListKey($Key)         { Return $this->Map->GetValuesByKey($Key); }
+ 
+    Function Parse($Data)
+    {
+      If(!Is_Array($Data))
+        $Data=Explode("\n", $Data);
+      ForEach($Data As $Item)
+      {
+        $Item=Explode(':', $Item, 2);
+        $Item[0]=Trim($Item[0]);
+        $Item[1]=IsSet($Item[1])? Trim($Item[1]):'';
+        $this->Add($Item[0], $Item[1]);
+      }
+    }
+ 
+    Function Get_Req()
+    {
+      $Res=Array();
+      ForEach($this->Map->Values As $l)
+        $Res[]=UrlEnCode($l[0]).'='.UrlEnCode($l[1]->Value);
+      Return Implode('; ', $Res);
+    }
+ 
+    Function ToString()
+    {
+      Return '';
+    }
+  }
+ 
+?>

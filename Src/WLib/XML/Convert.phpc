@@ -3,7 +3,7 @@
   $Loader->Load_Class('/XML/Document');
   $Loader->Load_Class('/XML/CSS/File');
   $Loader->Load_Type('/Inet/Mime/Header');
-  $Loader->Load_Type('/Inet/URL/Link'   );
+  $Loader->Load_Type('/Inet/Url'   );
  
   Class C_XML_Convert Extends C_Object
   {

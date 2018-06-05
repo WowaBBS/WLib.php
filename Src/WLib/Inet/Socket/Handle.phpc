@@ -1,0 +1,51 @@
+<?php
+  $Loader->Load_Class('/Stream/Handle');
+ 
+  Class C_Inet_Socket_Handle Extends C_Stream_Handle
+  {
+    Var $Link;
+ 
+    Function Open($ALink)
+    {
+      $this->Link=$ALink;
+      $this->FHandle=@FSockOpen(
+        $ALink->ProtIP.'://'.
+        $ALink->Domain(),
+        $ALink->Port,
+        $errno, $errstr, 30);
+    //$this->FHandle=@FSockOpen($AHost, $APort, $errno, $errstr);
+      Return $this->FHandle!==False;
+    }
+ 
+    Function Set_Blocking($ZBlocking=False)
+    {
+      Return Stream_Set_Blocking($this->FHandle, $ZBlocking?1:0);
+    }
+ 
+    Function Set_Time_Out($ATimeSec)
+    {
+      Stream_Set_TimeOut($this->FHandle, $ATimeSec);
+    }
+ 
+    Function Recv_Count()
+    { // PHP 4.3.0
+      $Res=Stream_Get_Meta_Data($this->FHandle);
+      Return $Res['unread_bytes'];
+    }
+ 
+    Function ShutDown($typ='w')
+    {
+      If(!Function_Exists('Stream_Socket_ShutDown'))
+        Return False;
+      // PHP 5.x
+      Switch($typ)
+      {
+      Case 'w': Case 'W': $typ=STREAM_SHUT_WR;   Break;
+      Case 'r': Case 'R': $typ=STREAM_SHUT_RD;   Break;
+      Case 'a': Case 'A': $typ=STREAM_SHUT_RDWR; Break;
+      }
+      Return Stream_Socket_ShutDown($this->FHandle, $typ);
+     }
+  }
+
+?>

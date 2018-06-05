@@ -13,7 +13,7 @@
       $this->Manager  =$Args['Manager'  ];
       $this->RelPath  =$Args['RelPath'  ];
       $this->FullPath =$Args['FullPath' ];
-    //$this->Path=New TPath($Args['Path']);
+    //$this->Path=TPath::Create($Args['Path']);
     //$Res=[];
     //ForEach($this->Path->Path As $i=>$v)
     //  If(!$i||($v!=='')&&($v!=='.'))

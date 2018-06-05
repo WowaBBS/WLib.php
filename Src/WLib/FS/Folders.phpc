@@ -1,0 +1,131 @@
+<?
+  $Loader->Parent_Class('/Object');
+  
+  class C_FS_Folders extends C_Object
+  {
+    Var $Folders      =[];
+    Var $IgnoreCase   =true;
+    Var $IgnoreHidden =true;
+    Var $OnFile       =false;
+    
+    // PathType enum
+    const PT_None    = 'None'    ;
+    const PT_NotSet  = 'NotSet'  ;
+    const PT_Unknown = 'Unknown' ;
+    const PT_Mixed   = 'Mixed'   ;
+    const PT_File    = 'File'    ;
+    const PT_Dir     = 'Dir'     ;
+    
+    Protected Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $this->Folders      =$Args[0] ?? $Args['Folders'];
+      $this->IgnoreCase   =$Args['IgnoreCase'   ] ?? $this->IgnoreCase   ;
+      $this->IgnoreHidden =$Args['IgnoreHidden' ] ?? $this->IgnoreHidden ;
+    }
+    
+    Function Process($OnFile=false)
+    {
+      $FoldersStack=[$this->Folders];
+      $this->_ProcessStack($FoldersStack, $OnFile);
+    }
+    
+    Protected Function _ProcessStack($FoldersStack, $OnFile=false)
+    {
+      $PathType   = Self::PT_None; // ['None', 'Unknown', 'Mixed', 'File', 'Dir']
+      $PathTypes  = [];
+      $FullPaths  = $this->Folders;
+      $NameList   = $FullPaths;
+      $RelPath    = '';
+      $HasFolder  = false; //
+      $AllFolders = false; // All are folders
+      $AllFiles   = false; // All are files
+      $FirstFile  ='';
+      
+      ForEach($FullPaths As $Num=>$Tmp)
+        $PathTypes [$Num]=$PathType;
+      
+      $Info=[
+        'PathType'   => &$PathType   ,
+        'PathTypes'  => &$PathTypes  ,
+        'FullPaths'  => &$FullPaths  ,
+        'NameList '  => &$NameList   ,
+        'RelPath'    => &$RelPath    ,
+        'HasFolder'  => &$HasFolder  ,
+        'AllFolders' => &$AllFolders ,
+        'AllFiles'   => &$AllFiles   ,
+        'FileName'   => &$FirstFile  ,
+      ];
+      
+      $PathPos=StrLen(Reset($this->Folders));
+      While($FoldersStack)
+      {
+        $Folders=Array_Pop($FoldersStack);
+        $NameLists=[];
+        
+        $IgnoreCase   =$this->IgnoreCase   ;
+        $IgnoreHidden =$this->IgnoreHidden ;
+        
+        ForEach($Folders As $Num=>$Folder)
+          if(Is_Dir($Folder) && ($Handle=OpenDir($Folder)))
+          {
+            while(($File=ReadDir($Handle))!==false)
+            {
+              if($File==='.'  ) continue;
+              if($File==='..' ) continue;
+              if($IgnoreHidden && $File[0]==='.' ) continue;
+              $Key=$IgnoreCase? StrToLower($File):$File;
+              $NameLists[$Key][$Num]=$File;
+            }
+            CloseDir($Handle);
+          }
+          
+        ForEach($NameLists As $Key=>$NameList)
+        {
+          $FirstFile=Reset($NameList);
+          ForEach($Folders As $Num=>$Folder)
+          {
+            if(IsSet($NameList[$Num]))
+              $Name=$NameList[$Num];
+            else
+              $Name=$NameList[$Num]=$FirstFile;
+            $FullPaths[$Num]=$Folder.'/'.$Name;
+          }
+          
+          $HasFolder  = false ;
+          $AllFolders = true  ;
+          $PathType   = Self::PT_NotSet;
+            
+          ForEach($FullPaths As $Num=>$FullPath)
+          {
+            if(Is_Dir  ($FullPath)) { $_PathType=Self::PT_Dir     ; $HasFolder=true; } else
+            if(Is_File ($FullPath))   $_PathType=Self::PT_File    ; else
+          //if(Exists  ($FullPath))   $_PathType=Self::PT_Unknown ; else
+                                      $_PathType=Self::PT_None    ;
+            $PathTypes[$Num]=$_PathType;
+
+            if($PathType===Self::PT_NotSet) $PathType=$_PathType; else
+            if($PathType!==$_PathType     ) $PathType=Self::PT_Mixed;
+          }
+          $AllFolders =$PathType===Self::PT_Dir  ;
+          $AllFiles   =$PathType===Self::PT_File ;
+          
+          $RelPath=SubStr(Reset($FullPaths), $PathPos);
+          
+          if($OnFile && $OnFile($FullPaths, $Info)===False)
+            continue;
+          
+          if($this->ProcessFile($FullPaths, $Info)===false)
+            continue;
+
+          if($HasFolder)
+            $FoldersStack[]=$FullPaths;
+        }
+      }
+    }
+    
+    Function ProcessFile($FullPaths, $Info)
+    {
+    }    
+  }
+?>

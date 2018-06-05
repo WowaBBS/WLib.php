@@ -1,0 +1,211 @@
+<?
+  $Loader->Parent_Class('/Object');
+  $Loader->Load_Type('/Inet/HTTP/GetReqquest');
+  
+  // Класс, помошник, для вывода списков
+  // Обеспечивает:
+  //    1) + Разбиение на страницы, если такое возможно
+  //    2) - Реализует сортировку по полям
+  //    3) + Поиск
+  //    3) - Фильтры
+ 
+  Class C_Tmpl_Def_List Extends C_Object
+  {
+    // Количество элементов на странице
+    Var $ItemsOnPage   = 50;
+    Var $ItemsShowLeft =  1;
+    // Количество ссылок на страницы в линии
+    Var $PagesOnLine   = 20;
+    Var $PagesShowLeft =  1;
+    // Количество колонок
+    Var $Columns       =  0;
+    // Направление слева направо, или сверху вниз
+    Var $LeftToRight=True;
+    Var $Summary='';
+    Var $Caption='';
+ 
+    Var $State=[
+      'Search'=>[
+        'Str'=>NULL,
+      ],
+      'Pages'=>[
+        'Pos'=>0,
+        'Count'=>NULL,
+      ],
+      'Sort'=>[
+      ],
+    ];
+    Var $StateDef=[
+      'Search'=>[
+        'Str'=>NULL,
+      ],
+      'Pages'=>[
+        'Pos'=>0,
+        'Count'=>NULL,
+      ],
+      'Sort'=>[
+      ],
+    );
+    Var $ByGet=[
+     's'=>['Search' ,'Str'   ],
+     'o'=>['Sort'            ],
+     'p'=>['Pages'  ,'Pos'   ],
+     'c'=>['Pages'  ,'Count' ],
+    ];
+ 
+    Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      If(IsSet($Args['Summary' ])) $this->Summary =$Args['Summary' ];
+      If(IsSet($Args['Caption' ])) $this->Caption =$Args['Caption' ];
+      $this->State_LoadCurrent();
+    }
+ 
+    Function State_LoadCurrent()
+    {
+      $S=&$this->State;
+      ForEach($this->ByGet As $vn=>$p)
+        If(IsSet($_GET[$vn]))
+        {
+          $s=&$S;
+          ForEach($p As $n)
+            $s=&$s[$n];
+          $s=$_GET[$vn];
+        }
+    }
+ 
+    Function GetLink(Array $State=[])
+    {
+      $S=$this->State;
+      $D=$this->StateDef;
+      ForEach($State As $k1=>$v1)
+        ForEach($v1 As $k2=>$v2)
+          $S[$k1][$k2]=$v2;
+      $Get=New TGetReq();
+      ForEach($this->ByGet As $vn=>$p)
+      {
+        $s=$S;
+        $d=$D;
+        ForEach($p As $n)
+        {
+          $s=$s[$n];
+          $d=$d[$n];
+        }
+        If($s===$d)
+          $Get->Del($vn);
+        Else
+          $Get->Put($vn, $s);
+      }
+      $Res=$Get->Make();
+      Return $Res? '?'.$Res:'?';
+    }
+ 
+    Function ItemsOnPage()
+    {
+      $Res=$this->ItemsOnPage;
+      If($this->State['Pages']['Count']>0)
+        $Res=$this->State['Pages']['Count'];
+      Return $Res;
+    }
+ 
+    Function GetPages()
+    {
+      If(IsSet($this->_CachePages))
+        Return $this->_CachePages;
+      $ItemsOnPage=$this->ItemsOnPage();
+      $Pos=$this->State['Pages']['Pos'];
+      $l=$this->GetCount();
+  
+      // Количество слов
+      $CountWords=Max($l, 0);
+      // Количество страниц
+      $CountPages=(Int)($CountWords/($ItemsOnPage))+1;
+      // Текущая страница
+      $PageC=(Int)($Pos/($ItemsOnPage));
+      // Левая граница страниц
+      $PageL=Max($PageC-(($this->PagesOnLine+$this->PagesShowLeft-1)>>1), 0);
+      // Правая граница страниц
+      $PageR=$PageL+($this->PagesOnLine+$this->PagesShowLeft-1);
+      If($PageR>=$CountPages)
+      {
+        $PageR=$CountPages-1;
+        $PageL=Max($PageR-$this->PagesOnLine, 0);
+      }
+    //$this->ItemsOnPage;
+    //$this->PagesOnLine;
+      $l0=$this->GetLink(['Pages'=>['Pos'=>'ppppp']]);
+      $l0=Explode('ppppp', $l0);
+      $l1=$l0[1];
+      $l0=$l0[0];
+  
+      $Pages=[];
+      For($i=$PageL; $i<=$PageR; $i++)
+      {
+        $Page=[];
+        $Page['Page']=[
+          'URL'   =>$l0.($i*$ItemsOnPage).$l1,
+          'IsSet' =>$i!=$PageC
+        ];
+        $Pages[]=$Page;
+      }
+      ReIndexs($Pages, $PageL+1);
+  
+      $R=[];
+      $R[0]=0;
+      $R[1]=$CountPages-1;
+      $R[2]=Max($PageC-1                  ,$R[0]);
+      $R[3]=Min($PageC+1                  ,$R[1]);
+      $R[4]=Max($PageC-$this->PagesOnLine ,$R[0]);
+      $R[5]=Min($PageC+$this->PagesOnLine ,$R[1]);
+      ForEach($R As $k=>$r)
+        $R[$k]=[
+          'URL'=>$l0.($r*$ItemsOnPage).$l1,
+          'IsSet'=>$PageC!=$r
+        ];
+  
+      $Res=[
+        'ZPages'     =>$CountPages>1, // TODO: Rename HasPages
+        'PagesCount' =>$CountPages,
+        'PageNum'    =>$PageC+1,
+        'ItemsCount' =>$CountWords,
+  
+        'FirstPage' =>$R[0],
+        'LastPage'  =>$R[1],
+        'PrevPage'  =>$R[2],
+        'NextPage'  =>$R[3],
+        'PrevPages' =>$R[4],
+        'NextPages' =>$R[5],
+  
+        'Pages'=>$Pages,
+      ];
+      $this->_CachePages=$Res;
+      Return $Res;
+    }
+ 
+    Function GetCounts()
+    {
+    }
+ 
+    Function &GetVar(Array &$Path, $Type=tv_Any, Array &$Vars=[])
+    {
+      $Res=NULL;
+      If(!$Path)
+        Return $this;
+      $Dir=Array_Shift($Path);
+      Switch($Dir)
+      {
+      Case 'List':
+        $Res=$this->GetList();
+        ReIndexs($Res, (Int)$this->State['Pages']['Pos']+1);
+        Break;
+      Case 'Pages'   : $Res=$this->GetPages(); Break;
+      Case 'Counts'  : $Res=$this->GetCounts(); Break;
+      Case 'Count'   : $Res=$this->GetCount(); Break;
+      Case 'Summary' : $Res=$this->Summary; Break;
+      Case 'Caption' : $Res=$this->Caption; Break;
+      Default:
+      }
+      Return $Res;
+    }
+  }
+?>

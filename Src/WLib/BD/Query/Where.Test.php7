@@ -1,16 +1,16 @@
 <?
-  Include('../../Using.php');
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
  
   $W=$Loader->Create_Object('/BD/Query/Where');
-  $W->Eq('DefID',3);
-  $W->Eq('Type',Array(1,3,5,7));
-  $W->Eq('TagName','area');
-  $W->EqField('DefID','a.DefID');
-  //$W->RegExp('a.Name','/.*/i');
-  $W->Like('b.Title','%Test%');
-  $W->Between('b.Type',3,6);
-  $W->FullText('Text','One two');
-  $W->Search(Array('a.Name','b.Title'),'One two');
+  $W->Eq('DefID', 3);
+  $W->Eq('Type', Array(1, 3, 5, 7));
+  $W->Eq('TagName', 'area');
+  $W->EqField('DefID', 'a.DefID');
+  //$W->RegExp('a.Name', '/.*/i');
+  $W->Like('b.Title', '%Test%');
+  $W->Between('b.Type', 3, 6);
+  $W->FullText('Text', 'One two');
+  $W->Search(Array('a.Name', 'b.Title'), 'One two');
  
   Echo $W->GetSql();
  

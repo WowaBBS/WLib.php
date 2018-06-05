@@ -1,0 +1,268 @@
+<?
+//$Loader->Load_Class('/Inet/HTTP/Request');
+  $Loader->Load_Class('/System/Object'     );
+  $Loader->Load_Class('/Stream/File'       );
+  $Loader->Load_Class('/Inet/Sock'         );
+  $Loader->Load_Class('/Inet/Mime/Part'    );
+  $Loader->Load_Class('/Inet/HTTP/Cookie/List' );
+  $Loader->Load_Class('/Inet/HTTP/Files'   );
+  $Loader->Load_Class('/Inet/HTTP/Response');
+  $Loader->Load_Class('/Inet/HTTP/Poster/Base'   );
+  $Loader->Load_Class('/Inet/HTTP/Poster/Input'  );
+  $Loader->Load_Class('/Inet/HTTP/Poster/Stream' );
+  $Loader->Load_Class('/Inet/HTTP/Poster/XForm'  );
+  $Loader->Load_Class('/Inet/HTTP/Poster/MultiPart');
+  $Loader->Load_Type('/Inet/Mime/Header');
+  $Loader->Load_Type('/Inet/Url'   );
+  $Loader->Load_Type('/Inet/HTTP/GetRequest');
+ 
+  Class C_Inet_HTTP_Request Extends C_System_Object
+  {
+    Var $Method  = False;
+    Var $Version = 'HTTP/1.1';
+    Var $URL     = NULL; // T_Inet_Url
+    Var $Get     = NULL; // T_Inet_HTTP_GetRequest
+    Var $Post    = NULL; // T_Inet_HTTP_GetRequest
+    Var $Header  = NULL; // T_Inet_MIME_Header
+    Var $Cookies = NULL; // C_Inet_HTTP_Cookies
+    Var $Files   = NULL; // C_Inet_HTTP_Files
+    Var $Referer = '';
+    Var $Proxy   = False;
+    Var $ReqHash = '';
+  
+    Var $FPoster = Null ; // C_Inet_HTTP_Poster_Base
+  
+    Function _Init($Args)
+    {
+      parent::_Init($Args);
+      $this->URL     =New TUrl();
+      $this->Get     =&$this->URL->Param;
+      $this->Post    =&New T_Inet_HTTP_GetRequest();
+      $this->Header  =&New T_Inet_MIME_Header();
+      $this->Cookies =&$this->Loader->Create_Object('/Inet/HTTP/Cookie/List');
+      $this->Files   =&$this->Loader->Create_Object('/Inet/HTTP/Files');
+    //$this->Method_Set();
+    }
+  
+    Function _Done()
+    {
+      $this->Cookies->Done();
+      $this->Files->_UnLock();
+      If($this->FPoster)
+        $this->FPoster->_UnLock();
+      parent::_Done();
+    }
+  
+    Function &Get_Current()
+    {
+      Static $Res=Array();
+      If(!$Res)
+      {
+        $R=&$this->Loader->Create_Object('/Inet/HTTP/Request');
+        $R->Load_Current();
+        $Res[]=&$R;
+      }
+      Return $Res[0];
+    }
+  
+    Function Load_Current()
+    {
+      $this->Header->Clear();
+    //$Req->URL->Assign($Domain);
+      $this->URL->Param->Clear();
+      $this->URL->Param->Assign($_GET);
+    //If($_SERVER['REQUEST_METHOD']=='POST')
+    //{
+      //$Test=&New C_Stream_File();
+      //$Test->Open('php://input');
+      //Debug($Test->Get_Content());
+      //$Test->Done();
+      //Debug($HTTP_RAW_POST_DATA);
+      //Debug($_SERVER['CONTENT_LENGTH']);
+      //Debug($_POST);
+    //}
+      $this->Post->Assign($_POST);
+      $this->Files->Load_Self();
+      If(IsSet($_SERVER['CONTENT_TYPE']))
+        Switch(True)
+        {
+        Case StrPos(StrToLower($_SERVER['CONTENT_TYPE']), 'multipart')!==False:
+          $LPoster='MultiPart';
+          Break;
+        Case StrPos(StrToLower($_SERVER['CONTENT_TYPE']), 'x-www-form-urlencoded')!==False:
+          $LPoster='XForm';
+          Break;
+        Default:
+          If(IsSet($_SERVER['CONTENT_LENGTH']))
+            $LPoster='Input';
+          Else
+            $LPoster='Stream';
+          $this->Header->Put('Content-Type', $_SERVER['CONTENT_TYPE']);
+          Break;
+        }
+      Else
+       If(IsSet($_SERVER['CONTENT_LENGTH']))
+         $LPoster='Input';
+       Else
+         $LPoster='Base';
+      $this->Method_Set($_SERVER['REQUEST_METHOD'], $LPoster);
+    }
+  
+    Function Use_Proxy($Proxy)
+    {
+      $this->Proxy=$Proxy;
+    }
+  
+    Function _Header_Make()
+    {
+      $Header=New T_Inet_MIME_Header();
+  
+      $Proxy=$this->Proxy;
+      If($Proxy)
+        If(IsSet($Proxy['UserName']))
+          $Header->Put(
+            'Proxy-Authorization',
+            'Basic '.
+              base64_encode(
+                $Proxy['UserName'].
+                ':'.
+                $Proxy['Password']
+              )
+          );
+      $Header->Put('Host', $this->URL->Domain());
+      If($Proxy && !IsSet($Proxy['Local']))
+      {
+        $Header->Put('Progma', 'no-cache');
+        $Header->Put('Proxy-Connection', 'close');
+      }
+      Else
+      {
+        $Header->Put('Connection', 'close');
+      //$Header->Put('Connection', 'Keep-Alive');
+      }
+      $Header->Put('Accept', '*'.'/'.'*');
+    //$Header->Put('User-Agent', 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; Maxthon)');
+      If($this->Referer)
+        $Header->Put('Referer', $this->Referer);
+  
+    //If(!$this->Proxy)
+    //{
+        $Header->Put('Accept-Language' ,'ru-RU,ru;q=0.9,en;q=0.8');
+        $Header->Put('Accept-Charset'  ,'cp1251 ,iso-8859-1, utf-8, utf-16, *;q=0.1');
+    //}
+    //If($this->Cookies->Assigned())
+    //  $Header->Put('Cookie', $this->Cookies.GetStr);
+      Return $Header;
+    }
+  
+    Function _Create_Sock()
+    {
+      $Proxy=&$this->Proxy;
+      $Sock=&$this->Loader->Create_Object('/Inet/Sock');
+      If($Proxy)
+        $Z=$Sock->Open($Proxy['URL']);
+      Else
+        $Z=$Sock->Open($this->URL);
+      If(!$Z)
+      {
+        $Sock->_UnLock();
+        $Res=False;
+        Return $Res;
+      }
+    //If(False)
+     /* */
+    //If($this->Method=='POST')
+      If(IsSet($this->Debug))
+      {
+        $Sock2=$this->Loader->Create_Object('/Stream/Debug');
+        $Sock2->Open($Sock);
+        $Sock->_UnLock();
+        $Sock=$Sock2;
+      }
+     /* */
+      Return $Sock;
+    }
+  
+    Function Poster()
+    {
+      If(!$this->FPoster)
+      {
+        If($this->Files ->Count()) $LPoster='MultiPart' ; Else
+        If($this->Post  ->Count()) $LPoster='XForm'     ; Else
+                                   $LPoster='Base';
+        $this->Method_Set(True, $LPoster);
+      }
+      $Res=$this->FPoster->_Lock();
+      Return $Res;
+    }
+  
+    Function &_Send_Request(&$Sock)
+    {
+      $Poster=&$this->Poster();
+      If(!$this->Method)
+        $this->Method=$Poster->Method();
+      If($this->Proxy && !IsSet($Proxy['Local']))
+        $Sock->Write($this->Method.' '.$this->URL->ToString().' '.$this->Version."\r\n");
+      Else
+        $Sock->Write($this->Method.' '.$this->URL->HttpGet().' '.$this->Version."\r\n");
+      $Header=&$this->_Header_Make();
+      $Poster->Header_Make(&$Header);
+      $Header->Add_Header($this->Header);
+      $Header->Save_To_Stream(&$Sock);
+    //$Header->Done();
+  
+      $Sock->Write("\r\n");
+      $Poster->Save_To_Stream(&$Sock);
+      $Poster->_UnLock();
+      $Sock->Flush();
+    //$Sock->ShutDown('w');
+    //Sleep(1);
+      Return $Sock;
+    }
+  
+    Function _Create_Response($Sock, $A_Z_Result=False)
+    {
+      If($A_Z_Result)
+      {
+        $Res=$this->Loader->Create_Object('/Inet/HTTP/Response');
+        $Res->Open($Sock);
+      }
+      Else
+      {
+        Sleep(1);
+        $Sock->ShutDown('r');
+        $Res=True;
+      }
+      $Sock->_UnLock();
+      Return $Res;
+    }
+  
+    Function Request($A_Z_Result=False)
+    {
+      $Res=False;
+      $Sock=$this->_Create_Sock($A_Z_Result);
+      If(!$Sock)
+        Return $Res;
+      $Sock=$this->_Send_Request($Sock, $A_Z_Result);
+      $Res=$this->_Create_Response($Sock, $A_Z_Result);
+      Return $Res;
+    }
+  
+    Function Method_Set($AMethod=False, $APoster=False)
+    {
+      If($AMethod!==True)
+        $this->Method=$AMethod;
+      If($this->FPoster)
+        $this->FPoster->_UnLock();
+      If($APoster)
+      {
+        $Args=Array(
+          'Files'=>&$this->Files,
+        );
+        $this->FPoster=$this->Loader->Create_Object('/Inet/HTTP/Poster/'.$APoster, $Args);
+      }
+      Else
+        $this->FPoster=null;
+    }
+  }
+?>

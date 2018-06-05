@@ -1,0 +1,191 @@
+<?
+  //*************************************************************************\\
+  // Модуль : MUpLoad                                                        \\
+  // Тип    : Unit                                                           \\
+  // Создан : 09.09.2002                                                     \\
+  // Автор  : Савин Владимир Иванович                                        \\
+  // e-mail : wowa_savin@mail.ru                                             \\
+  // fido   : 2:5057/21.69 & 2:5057/21.777                                   \\
+  //*************************************************************************\\
+
+  $Loader->Parent_Class('/Object');
+  $Loader->Load_Type('/FS/Path');
+  
+  class C_Inet_Web_File extends C_Object
+  {
+    const Src_None =0;
+    const Src_Post =1;
+    const Src_URL  =2;
+    const Src_Temp =3;
+    const Src_File =4;
+    const Src_Data =5;
+  
+    private $Src      =0; //Static::Src_None;
+    private $Var      =[];
+    private $FileName ='NoName';
+    private $FilePath ; 
+    private $MimeType ; 
+    private $FileSize ;
+    private $Error    ;
+    private $Data     =false;
+    
+    Function GetVar      () { return $this->Var      ; }
+    Function GetFilePath () { return $this->FilePath ; }
+    Function GetFileName () { return $this->FileName ; }
+    Function GetFileSize () { return $this->FileSize ; }
+    Function GetError    () { return $this->Error    ; }
+    Function GetMimeType () { return $this->MimeType ; }
+    Function Exists  () { return $this->Src!==Static::Src_None; }
+ 
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $Var=$Args['Var']??[];
+      switch($Args[0] ?? $Args['Type'] ?? 'None')
+      {
+      case 'Post' : $this->AssignPost ($Args[1] ?? $Args['Post' ]); break;
+      case 'URL'  : $this->AssignUrl  ($Args[1] ?? $Args['URL'  ]); break;
+    //case 'Temp' : $this->AssignTemp ($Args[1] ?? $Args['Temp' ]); break;
+      case 'File' : $this->AssignFile ($Args[1] ?? $Args['File' ]); break;
+      case 'Data' : $this->AssignData ($Args[1] ?? $Args['Data' ]); break;
+      }
+    }
+    
+    
+    Function AssignPost($Info)
+    {
+      $this->FileName  = $Info['name'     ];
+      $this->FilePath  = $Info['tmp_name' ];
+      $this->FileSize  = $Info['size'     ];
+      $this->MimeType  = $Info['type'     ];
+      $this->Error = $Info['error'    ];
+      $this->Src=Static::Src_None;
+      if(Is_UpLoaded_File($this->FilePath)) $this->Src=Static::Src_Post; else
+      if(Preg_Match('/^(?:ftp|http|https):/i', $this->FileName)) AssignUrl($this->FileName);
+    }
+    
+    Function AssignUrl($URL, $FileName=false)
+    {
+      $this->Src  =Static::Src_URL;
+      $this->FilePath = $URL;
+      $this->FileName = $FileName ?: ExtractFileName($URL);
+    }
+    
+    Function _AssignFileInfo($FilePath)
+    {
+      $this->FileSize = FileSize        ($FilePath);
+      $this->MimeType = FileType        ($FilePath);
+      $this->FileName = ExtractFileName ($FilePath);
+      return true;
+    }
+    
+    Function _AssignFile($FilePath)
+    {
+      $Exists=File_Exists($FilePath);
+      $this->Src  =$Exists? Static::Src_File:Static::Src_None;
+      $this->FilePath =$FilePath ;
+      return $Exists;
+    }
+    
+    Function AssignFile($FilePath)
+    {
+      return
+        $this->_AssignFile     ($FilePath) &&
+        $this->_AssignFileInfo ($FilePath);
+    }
+    
+    Function _AssignDataInfo($Data)
+    {
+      $this->Data     =       $Data ;
+      $this->FileSize =StrLen($Data);
+      return $Data;
+    }
+    
+    Function AssignData($Data, $FileName=null) // TODO: FileName
+    {
+      $this->Src  =Static::Src_Data;
+      return $this->_AssignData($Data);
+    }
+    
+    Function GetData()
+    {
+      if($this->Data!==false)
+        return $this->Data;
+        
+      switch($this->Src)
+      {
+      case Static::Src_None : return '';
+      case Static::Src_URL  : return $this->Data =File_Get_Contents($this->FilePath);
+      case Static::Src_Post :        $this->MoveToTemp();
+      case Static::Src_Temp :
+      case Static::Src_File : return $this->Data=File_Get_Contents($this->FilePath);
+      case Static::Src_Data : // TODO: Error
+      }
+        
+      return $this->Data='';
+    }
+    
+    Function MoveToTemp()
+    {
+      $this->MoveTo(TempNam(RealPath('.'), 'up'));
+      $this->Src=Static::Src_Temp;
+    }
+    
+    Function MoveToFile($Path, $bAssign=true)
+    {
+      switch($this->Src)
+      {
+      case Static::Src_None : return false;
+      case Static::Src_Post : Move_UpLoaded_File($this->FilePath, $Path); $bAssign=true; break;
+      case Static::Src_URL  :               Copy($this->FilePath, $Path); break;
+      case Static::Src_Temp :             Rename($this->FilePath, $Path); break;
+      case Static::Src_File :               Copy($this->FilePath, $Path); break;
+      case Static::Src_Data :  File_Put_Contents($Path, $this->Data); break;
+      }
+      if($bAssign)
+        return $this->_AssignFile(RealPath($Path));
+      return File_Exists($Path);
+    }
+    
+    Function TODO_MoveToFolder($Path, $bAssign=true) {}
+    Function TODO_MoveTo($Path, $bAssign=true)
+    {
+      $Path=TPath::Create($Path);
+      If($Path->IsDir())
+        $Path->Add($this->FileName);
+      $Path=$Path->ToString();
+    }
+ 
+    Function Deprecated_Pack()
+    {
+      If(!$this->Exists())
+        Return '';
+      Return Serialize([
+        $this->GetFileName(),
+        $this->GetMimeType(),
+        $this->GetFilePath(),
+      ]);
+    }
+ 
+    Function Deprecated_UnPacks($Data)
+    {
+      If(StrLen($Data)>3 && SubStr($Data, 0, 3)==='a:3')
+        $D=@UnSerialize($Data);
+      Else
+        $D='';
+      If(!$D || !Is_Array($D) || Count($D)!=3)
+      {
+        $this->Data=$Data;
+        return;
+      }
+      $this->FileName = $D[0];
+      $this->MimeType = $D[1];
+      $this->Data = $D[2];
+    }
+   
+    Function Deprecated_Remove()
+    {
+      $this->Data='';
+    }
+  }
+?>

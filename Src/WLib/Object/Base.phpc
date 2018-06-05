@@ -25,7 +25,7 @@
     // Debug And Log
     
     Function Debug($Var, $Level=-1) { Return $this->Loader->Debug($Var, $Level); }
-    Function Log() { return $this->Loader->_Log($this, func_get_args()); }
+    Function Log($LogLevel, ...$Args) { return $this->Loader->_Log($this, $LogLevel, $Args); }
 
     Protected Function _Debug_Info(Array &$Res)
     {

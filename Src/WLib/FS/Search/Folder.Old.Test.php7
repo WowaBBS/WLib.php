@@ -1,0 +1,25 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $Args=[
+    'Filter'=>[
+      'Old'=>[
+        'Mask'=>'*.php*',
+        'ExclMask'=>'*.phpc;*.php',
+        'Exclude'=>[
+          '/Tmpl/',
+          '/BD/',
+          '/FS/',
+          '/Strings.phpm',
+        ],
+      ],
+    ],
+  ];
+  $s=$Loader->Create_Object('/FS/Search/Folder', $Args);
+  
+  ForEach($s->GetListArray('../..') As $f)
+  {
+    echo $f->GetLocalPath(), "\n";
+  //echo $f->GetFullPath(), "\n";
+  }
+?>

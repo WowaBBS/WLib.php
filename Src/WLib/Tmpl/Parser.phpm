@@ -1,0 +1,140 @@
+<?
+  //*************************************************************************\\
+  // Unit    : MParser                                                       \\
+  // Date    : 25.07.2002                                                    \\
+  // Creator : Wowa Savin <wowa@activesolutions.info>                        \\
+  // (c) Active solutions                                                    \\
+  //*************************************************************************\\
+ 
+  // Описание глобальных переменных
+  Global $ParseVars;
+ 
+  // Определение модуля
+  $Loader->Begin_Module('/Tmpl/Parser' );
+ 
+  // Подключение модулей
+  $Loader->Using_Module('/System' );
+  $Loader->Using_Module('/SysUtil');
+  $Loader->Using_Module('/Strings');
+  $Loader->Using_Module('/Array'  );
+  $Loader->Using_Module('/Prop'   );
+//$Loader->Using_Module('/Tmpl/Mode');
+ 
+  $Loader->Using_Module('/Tmpl/Vars'    );
+  $Loader->Using_Module('/Tmpl/Utils/DateTime' );
+  $Loader->Using_Module('/Tmpl/Utils/Links'    );
+  $Loader->Using_Module('/Tmpl/Utils/Strings'  );
+  $Loader->Using_Module('/Tmpl/Utils/Macros'   );
+  $Loader->Using_Module('/Strings/Filters');
+ 
+  If(!IsSet($ParseVars))
+    $ParseVars=[];
+ 
+  // ***************************************************************************************
+  If(IsSet($GLOBALS['HTTP_ENV_VARS']['HTTP_REFERER']))
+    $ParseVars['HTTP_REFERER']=$GLOBALS['HTTP_ENV_VARS']['HTTP_REFERER'];
+  $ParseVars['SelfPhp']=PhpSelfName();
+ 
+  Function _ParsePath($Var, &$Vars)
+  {
+   $Var=Explode('|', $Var);
+   $z=True;
+   ForEach($Var As $k=>$v)
+     If($z=!$z)
+      {
+       $Res=_Vars_Get($v, $Vars);
+       If($Res===NULL)
+         Return 'False';
+       Else
+        {
+         If(Is_Array($Res))
+           $Res=Implode('/', $Res);
+         $Var[$k]=$Res;
+        }
+      }
+   $Var=Implode('', $Var);
+   //Debug($Var);
+   Return $Var;
+  }
+ 
+  // ***************************************************************************************
+  Function ParseStr($Str, $Vars=False)
+  {
+   $L=_vars_getf('TmplLoader', $Vars);
+   $T=$L->String_Template($Vars, $Str);
+   $S= $T->Exec_To_Str($Vars);
+   Return $S;
+  }
+ 
+  // Ищет файл шаблона $TmplName
+  Function TmplFile($TmplName, &$Vars)
+  {
+   $L=_vars_getf('TmplLoader', $Vars);
+   Return $L->_Real_Path($Vars, $TmplName);
+  }
+ 
+  Function TmplListFiles($TmplName, &$Vars, $Mask=False, $Attr=1)
+  {
+   $L=_vars_getf('TmplLoader', $Vars);
+   Return $L->_List_Files($Vars, $TmplName, $Mask, $Attr);
+  }
+ 
+  Function Parse($TmplName, $Vars=False)
+  {
+   $L=_vars_getf('TmplLoader', $Vars);
+   $T=$L->Load_Template($Vars, $TmplName);
+   $S=$T->Exec_To_Str($Vars);
+   Return $S;
+  }
+ 
+  Function Tmpl_Request(&$Vars, $Path)
+  {
+   $OMode=_vars_getf('SelfMode', $Vars);
+   $SMode=$OMode->Get($Vars, ExtractFilePath($Path));
+ 
+   $Path='/'.$SMode->Path.'/'.ExtractFileName($Path);
+ 
+   $L=_vars_getf('TmplLoader', $Vars);
+   $T=$L->Load_Template($Vars, $Path);
+   $T->Vars['SelfMode']=&$SMode;
+   $S= $T->Exec_To_Str($Vars);
+   Return $S;
+  }
+ 
+  Function Tmpl_RequestUp(&$Vars, $Path, $Path2=False)
+  {
+   $TmplLoader=_vars_getf('TmplLoader', $Vars);
+ 
+   $OMode=_vars_getf('SelfMode', $Vars);
+   $_CurPath=_vars_getf(' CurPath', $Vars);
+   $OPath=$_CurPath->Make();
+   If($Path2)
+     $TrMode=$OMode->Get($Vars, $Path2);
+   Else
+     $TrMode=&$OMode;
+   $Z=False;
+   While(True)
+   {
+     $SMode=$TrMode->Get($Vars, ExtractFilePath($Path));
+     $Path1='/'.$SMode->Path.'/'.ExtractFileName($Path);
+     $L=StrLen($SMode->Mode);
+     If($Z===False)
+       $Z=$L+1;
+     If($TmplLoader->Templ_Exists($Vars, $Path1)||($Z<=$L))
+     {
+     //$Vars['SelfMode']=&$SMode;
+ 
+       $Tmpl=$TmplLoader->Load_Template($Vars, $TmplName);
+       $Tmpl->Vars['SelfMode']=&$SMode;
+       $Res= $Tmpl->Exec_To_Str($Vars);
+       Break;
+     }
+     $Z=$L;
+     $Path='../'.$Path;
+   }
+   $_CurPath->Assign($OPath);
+ //$Vars['SelfMode']=&$OMode;
+ 
+   Return $Res;
+  }
+?>

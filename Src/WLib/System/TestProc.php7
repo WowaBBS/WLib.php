@@ -1,5 +1,5 @@
 <?
-  Include '../Using.php';
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
   $Exec=$Loader->Create_Object('/System/Exec');
   $Exec->Env=$_SERVER;

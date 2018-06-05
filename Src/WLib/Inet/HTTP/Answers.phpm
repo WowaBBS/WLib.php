@@ -1,0 +1,69 @@
+<?
+  Global $Http_Answers;
+  $Http_Answers=[
+    100 => ['Continue'                        ,1 ],
+    101 => ['Switching Protocols'             ,1 ],
+    102 => ['Switching Protocols'      ,'WebDAV' ],
+
+    200 => ['OK'                              ,0 ],
+    201 => ['Created'                         ,0 ],
+    202 => ['Accepted'                        ,0 ],
+    203 => ['NonAuthoritative Information'    ,1 ],
+    204 => ['No Content'                      ,0 ],
+    205 => ['Reset Content'                   ,1 ],
+    206 => ['Partial Content'                 ,1 ],
+    207 => ['Multi-Status'             ,'WebDAV' ],
+    226 => ['IM Used'                 ,'RFC 3229'],
+
+    300 => ['Multiple Choices'                ,0 ],
+    301 => ['Moved Permanently'               ,0 ],
+    302 => ['Moved Temporarily'               ,0 ],
+    303 => ['See Other'                       ,1 ],
+    304 => ['Not Modified'                    ,0 ],
+    305 => ['Use Proxy'                       ,1 ],
+    306 => [''                        ,'RFC 2616'],
+    307 => ['Temporary Redirect'      ,'RFC 2616'],
+
+    400 => ['Bad Request'                     ,0 ],
+    401 => ['Unauthorized'                    ,0 ],
+    402 => ['Payment Required'                ,1 ],
+    403 => ['Forbidden'                       ,0 ],
+    404 => ['Not Found'                       ,0 ],
+    405 => ['Method Not Allowed'              ,1 ],
+    406 => ['None Acceptable'                 ,1 ],
+    407 => ['Proxy Authentication Required'   ,1 ],
+    408 => ['Request Timeout'                 ,1 ],
+    409 => ['Conflict'                        ,1 ],
+    410 => ['Gone'                            ,1 ],
+    411 => ['Length Required'                 ,1 ],
+    412 => ['Unless True'                     ,1 ],
+    413 => ['Request Entity Too Large'        ,1 ],
+    414 => ['Request-URI Too Long'            ,1 ],
+    415 => ['Unsupported Media Type'          ,1 ],
+    416 => ['Requested Range Not Satisfiable' ,'RFC 2616'],
+    417 => ['Expectation Failed'      ,'RFC 2616'],
+    422 => ['Unprocessable Entity'     ,'WebDAV' ],
+    423 => ['Locked'                   ,'WebDAV' ],
+    424 => ['Failed Dependency'        ,'WebDAV' ],
+    426 => ['Upgrade Required'        ,'RFC 2817'],
+
+    500 => ['Internal Server Error'           ,0 ],
+    501 => ['Not Implemented'                 ,0 ],
+    502 => ['Bad Gateway'                     ,0 ],
+    503 => ['Service Unavailable'             ,0 ],
+    504 => ['Gateway Timeout'                 ,1 ],
+    505 => ['HTTP Version Not Supported'      ,1 ],
+    506 => ['Variant Also Negotiates' ,'RFC 2295'],
+    507 => ['Insufficient Storage'     ,'WebDAV' ],
+    510 => ['Not Extended'            ,'RFC 2774'],
+  ];
+
+  Function HTTP_Answer($Code)
+  {
+    Global $Http_Answers;
+    If(!IsSet($Http_Answers[$Code]))
+      Return 'HTTP/1.0 500 Internal Server Error';
+    $R=$Http_Answers[$Code];
+    Return ($R[1]?'HTTP/1.1 ':'HTTP/1.0 ').$Code.' '.$R[0];
+  }
+?>

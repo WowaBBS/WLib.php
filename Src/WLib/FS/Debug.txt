@@ -1,0 +1,6 @@
+"/reporting/crashsender/CrashInfoReader.cpp (42064, 43581)"
+"/reporting/crashrpt/CrashHandler.cpp (69076, 71311)"
+"/reporting/crashrpt/StdAfx.h (3056, 3089)"
+"/reporting/crashrpt/Utility.cpp (15574, 16224)"
+"/docs/dox/crashfix_server.dox (5561, 5845)"
+"/demos/MFCDemo/MFCDemo.cpp (5569, 5753)"

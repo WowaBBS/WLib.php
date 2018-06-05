@@ -1,5 +1,5 @@
 <?
-  Include '../Using.php';
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
   $CM=$Loader->Create_Object('/Cache/Manager');
   $F=$CM->GetEnumDir('', ['Cfg'=>['T2'=>['Pad'=>2, 'NoZero'=>true, 'Split'=>'_']]]);

@@ -1,0 +1,81 @@
+<?
+  class C_Inet_Web_Debug_Procs Extends C_Object
+  {
+    Var $NewLine="<br>\n";
+  
+    Function _Explode_BR($Data, $Rec, $Char)
+    {
+      $Data=Explode($Char, $Data);
+      $Res=[];
+      ForEach($Data As $k=>$v)
+        If(StrLen($v))
+          $Res[]=$this->Default($v, $Rec);
+      Return Implode($this->NewLine, $Res);
+    }
+   
+    Function Explode_Cookie($Data, $Rec)
+    {
+      Return $this->_Explode_BR($Data, $Rec, ';');
+    }
+   
+    Function Explode_Paths($Data,$Rec)
+    {
+      Return $this->_Explode_BR($Data, $Rec, ';');
+    }
+   
+    Function Explode_DN($Data, $Rec)
+    {
+      Return $this->_Explode_BR($Data, $Rec, '/');
+    }
+   
+    Function Array($Data, $Rec)
+    {
+      ForEach($Data As $k=>$v)
+        $Data[$k]=$this->Default($Data,$Rec);
+      Return 'Array('.Implode(', ',$Data).')';
+    }
+   
+    Function Default($Data, $Rec)
+    {
+      If(Is_String($Data))
+        Return "'".HtmlSpecialChars($Data, ENT_QUOTES)."'";
+      ElseIf(Is_Array($Data))
+        Return $this->Array($Data, $Rec);
+    }
+   
+    Function SERVER_SIGNATURE($Data, $Rec)
+    {
+      Return $Data;
+    }
+   
+    Function Soft($Data, $Rec)
+    {
+      $List=Preg_Split('/(\S+?\\/\S+(?:\s+\\([^\\)]*\\))?)/Ss', $Data, -1, PREG_SPLIT_DELIM_CAPTURE);
+      $Res=Array();
+      ForEach($List As $k=>$v)
+      {
+        $v=Trim($v);
+        If(StrLen($v))
+          If(Preg_Match('/^(\S+)\s+\\(([^\\)]*)\\)$/Ss', $v,$ms))
+          {
+            $Ls=Explode(';',$ms[2]);
+            If(Count($Ls)>1)
+            {
+              $Res[]=$this->Default($ms[1],$Rec);
+              ForEach($Ls As $v2)
+              {
+                $v2=Trim($v2);
+                If(StrLen($v2))
+                  $Res[]=' &nbsp; =&gt; '.$this->Default($v2,$Rec);
+              }
+            }
+            Else
+              $Res[]=$this->Default($v,$Rec);
+          }
+          Else
+            $Res[]=$this->Default($v,$Rec);
+       }
+      Return Implode('<br>',$Res);
+    }
+  }
+?>

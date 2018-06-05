@@ -1,0 +1,44 @@
+<?
+  $Loader->Begin_Class('/Tmpl/Skin/MenuMan');
+ 
+  $Loader->Parent_Class('/Object');
+  $Loader->Using_Class('/Tmpl/Skin/Menu');
+ 
+  Class C_Tmpl_Skin_MenuMan Extends C_Object
+  {
+    Var $List=[];
+  
+  //Function _Init(Array $Args)
+  //{
+  // parent::_Init($Args)
+  // //ForEach($AList As $k=>$v)
+  // //  $this->List[$k]=this->Create_Object('/Tmpl/Skin/Menu', ...$v);
+  //}
+  
+    Function GetMenu($Name)
+    {
+      $Name=StrToLower($Name);
+      If(!IsSet($this->List[$Name]))
+        $this->List[$Name]=$this->Create_Object('/Tmpl/Skin/Menu');
+      Return $this->List[$Name];
+    }
+  
+    Function SetMenu($Name, $Menu)
+    {
+      $Name=StrToLower($Name);
+      $this->List[$Name]=$Menu;
+    }
+  
+    Function &GetVar(Array &$Path, $Type=tv_Any, Array &$Vars=[])
+    {
+      $Res=NULL;
+      If(Count($Path)==0)
+        Return $this;
+      $Dir=StrToLower(Array_Shift($Path));
+      If(!IsSet($this->List[$Dir]))
+        Return $Res;
+      $Res=$this->List[$Dir]->GetVar($Path, $Type, $Vars);
+      Return $Res;
+    }
+  }
+?>

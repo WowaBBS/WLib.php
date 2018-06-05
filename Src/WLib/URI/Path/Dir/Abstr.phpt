@@ -12,7 +12,7 @@
     // »щет текущий файл по пут€м $APaths
     Function SearchFile($AFile, $APaths=[])
     {
-     $AFile=New TPath($AFile);
+     $AFile=TPath::Create($AFile);
      If($AFile->IsFile())
        ForEach($APaths As $k=>$APath)
        {

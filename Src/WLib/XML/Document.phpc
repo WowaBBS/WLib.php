@@ -60,6 +60,11 @@
   
       $this->Parser->LastTag=$Tag1;
     }
+    
+    Function GetFirstTag()
+    {
+      return $this->FirstTag;
+    }
  
     Function Parse($XML)
     {

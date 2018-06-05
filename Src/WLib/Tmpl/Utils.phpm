@@ -1,0 +1,280 @@
+<?
+  // Описание глобальных переменных
+  Global $TmplUse      ;
+  Global $TplModeFile  ;
+ 
+  // Определение модуля
+  $Loader->Begin_Module('/Tmpl/Utils');
+ 
+  // Подключение модулей
+ #$Loader->Using_Module('/System' );
+ #$Loader->Using_Module('/SysUtil');
+  $Loader->Using_Module('/Array'  );
+  $Loader->Using_Module('/Strings');
+ #$Loader->Using_Module('/Session');
+ #$Loader->Using_Module('/Parser' );
+ #$Loader->Using_Module('/DateUtl');
+//$Loader->Using_Module('/Tmpl/Easy/Base');
+  $Loader->Using_Type  ('/Inet/Url');
+  $Loader->Using_Module('/Stream/Output');
+ 
+  $Loader->Using_Class('/Tmpl/Router'   );
+  $Loader->Using_Module('/Tmpl/HtAccess' );
+//$Loader->Using_Module('/Tmpl/Messages' );
+  $Loader->Using_Module('/Tmpl/Skins'    );
+  $Loader->Using_Module('/Tmpl/HtAccess' );
+  $Loader->Using_Module('/Tmpl/Navigator');
+  $Loader->Using_Class ('/Tmpl/Loader'   );
+  $Loader->Using_Type  ('/Security/Access');
+ 
+  // ***************************************************************************************
+ 
+//If(!IsSet($GLOBALS['TmplPath'  ])) $GLOBALS['TmplPath'  ] ='./templates/';
+
+//If(!IsSet($GLOBALS['JS_URL'    ])) $GLOBALS['JS_URL'    ] ='js/';
+//If(!IsSet($GLOBALS['JS_Path'   ])) $GLOBALS['JS_Path'   ] ='./js/';
+
+//If(!IsSet($GLOBALS['FilesURL'  ])) $GLOBALS['FilesURL'  ] ='files/';
+//If(!IsSet($GLOBALS['FilesPath' ])) $GLOBALS['FilesPath' ] ='./files/';
+ 
+  $TmplUse=True;
+ 
+  Function NoUseAutomat()
+  {
+    Global $TmplUse;
+    $TmplUse=False;
+  }
+ 
+  Function IsUseAutomat()
+  {
+    Global $TmplUse;
+    Return $TmplUse;
+  }
+ 
+  $GLOBALS['TplModeFile' ] ='$Mode;';
+  $GLOBALS['JScripts'    ] ='';
+ 
+  Function IsModeTemplate(&$Vars)
+  {
+    Global $TplModeFile;
+    $SelfMode=_vars_getf('SelfMode', $Vars);
+    $Path=$SelfMode->Path;
+    If($Path===False)
+      Return False;
+    $File=$SelfMode->File('main.html');
+  //Debug($File);
+    Return Is_File($File);
+  }
+ 
+  Function BeginAutomat($DefMode='', $Tmp=[], $DefID=[])
+  {
+    Global $Vars    ;
+    Global $TmplUse ;
+    Global $Skin    ;
+    If(!$TmplUse)
+      Return;
+    If(!Is_Array($Tmp))
+      $Tmp=[$Tmp];
+    $ID=$DefID;
+    $DefID=[];
+    ForEach($ID As $k=>$v)
+      If(Is_Integer($k))
+        $DefID[$v]=0;
+      Else
+        $DefID[$k]=$v;
+  
+    If(!$Skin)
+    {
+      $Skin=TSLoadVar('Skin', '');
+      If($Skin=='_')
+        $Skin='';
+    }
+  
+    $Tmp['Data'    ] = ''       ;
+    $Tmp['ns'      ] = 0        ;
+    $Tmp['ID'      ] = $DefID   ;
+    $Tmp['cb'      ] = []       ;
+    $Tmp['Skin'    ] = &$Skin   ;
+    $Tmp['JSID'    ] = 0        ;
+    $Tmp['Access'  ] = New T_Security_Access();
+  
+    LoadVars($Tmp, $Vars);
+  
+    $TLoader=New T_Tmpl_Loader([]);
+    $Vars['TmplLoader']=$TLoader;
+    $Router=$TLoader->Router;
+    $Vars['TmplRouter']=$Router;
+    $LMode=$Router->Cur($Vars, $DefMode);
+    $Vars['SelfMode']=&$LMode;
+  //Debug($LMode->Mode);
+    Global $Web_HtAccess;
+    $Vars['Web']=$Web_HtAccess;
+  
+    $Vars['Mode'] = $LMode->Mode ;
+  
+    $Tmp['Search'] = [];
+    $Vars['Search']=SLoadVar('Search', $Tmp['Search']);
+    If(!$Vars['Search'])
+      $Vars['Search']=[];
+  
+  
+  // Tmpl_Messages_Init_Vars($Vars);
+    $Vars['JScripts'  ]=&$GLOBALS['JScripts'];
+    $Vars[' CurPath'  ]=TPath::Create();
+    $Vars[' RootPath' ]=TPath::Create();
+  //$Vars['FilesURL'  ]=&$GLOBALS['FilesURL'  ];
+  //$Vars['FilesPath' ]=&$GLOBALS['FilesPath' ];
+  
+    $GLOBALS['Mode'    ]=&$Vars['Mode'  ];
+    $GLOBALS['Search'  ]=&$Vars['Search'];
+    $GLOBALS['Data'    ]=&$Vars['Data'  ];
+    $GLOBALS['Cb'      ]=&$Vars['cb'    ];
+    $GLOBALS['ID'      ]=&$Vars['ID'    ];
+    $GLOBALS['ID'      ]=ArrAdd($DefID, $GLOBALS['ID']);
+  //$GLOBALS['PackCb'  ]=PackArray(ExtractArray($GLOBALS['Cb']));
+    $GLOBALS['PackCb'  ]=Array_Values($GLOBALS['Cb']);
+    $GLOBALS['Location']='';
+  }
+ 
+  Function NormMainURL($URL)
+  {
+    $U=TUrl::Create($URL);
+    If($U->Protocol)
+      Return $URL;
+    Global $Vars;
+    If($Vars['JSID'])
+      $U->Param->Put('JSID', $Vars['JSID']);
+    Else
+      $U->Param->Del('JSID');
+    $URL=$U->Make();
+    Return $URL;
+  }
+ 
+  Function RunModeScript($AMode=False)//, $AAdd=False)
+  {
+    Global $Mode, $Data, $ID, $PackCb, $Cb, $Search, $Skin, $Vars;
+  //$PhpCmd=$Vars['SelfMode']->File('main.php');
+  //If($PhpCmd)
+  //  If(Is_File($PhpCmd))
+  //    Include($PhpCmd);
+    $MMode=&$Vars['SelfMode'];
+  //If($AAdd!==False)
+  //{
+  //  $MMode=$MMode->Get($Vars, _ParsePath($AAdd, $Vars));
+  //}
+    If($AMode!==False)
+    {
+    //Debug($AMode);
+      $MMode=$MMode->Get($Vars, _ParsePath($AMode, $Vars));
+    //Debug([
+    //  $AMode,
+    //  $MMode->Path,
+    //  $MMode->Mode,
+    //]);
+    }
+    $PhpCmd=StrToLower($MMode->File('main.php'));
+  //Debug($PhpCmd);
+    If(Is_File($PhpCmd))
+    {
+      Include($PhpCmd);
+      Return True;
+    }
+    Return False;
+  }
+ 
+  Function EndAutomat($Main='index.html', $SMode='login')
+  {
+    Global $Location  ;
+    Global $LocationZ ;
+    Global $Vars      ;
+    Global $Mode      ;
+  //Global $TmplMsgs  ;
+    Global $TmplUse   ;
+    If(!$TmplUse)
+      Return;
+  
+    If(IsSet($GLOBALS['Modes']))
+    {
+      $Modes=$GLOBALS['Modes'];
+      $Res=[];
+      ForEach($Modes As $k=>$v)
+        $Res[]=[
+          'Mode'=>$k,
+          'Title'=>$v,
+          'IsSel'=>StrCaseCmp($k, $Vars['Mode'])==0
+        ];
+      $Modes=$Res;
+      ReIndexs($Modes);
+      $Vars['Modes']=$Modes;
+    }
+  
+  //$TmplErrors   = IsErrors()   ;
+  //$TmplMessages = IsMessages() ;
+  //$TmplWarnings = IsWarnings() ;
+    If($Location)
+    {
+      If($Location===-1)
+        $Location=GetURLNavigation();
+      If(Ord($Location)==Ord('?'))
+        If($Location=='?')
+          $Location=PhpSelfName();
+        Else
+          $Location=PhpSelfName().$Location;
+      If($Vars['JSID']&&$LocationZ)
+      {
+        $Vars['Location']=$Location;
+        Echo Parse('../skins/js/location.html', $Vars);
+      }
+      Else
+      {
+      //Debug(['SetHeader location: ', $Location, NormMainURL($Location)]);
+        SetHeader('location: '.NormMainURL($Location));
+      }
+    }
+    ElseIf($Mode!=$SMode)
+    {
+    //If(IsModeTemplate($Vars))
+      {
+        RegURLNavigation();
+      //ReIndexsTmplMsgs();
+        $Res=Parse($Main, $Vars);
+        Stream_Output_Write($Res);
+      //$TmplMsgs=[];
+      }
+    //Else
+    //{
+    //  $Tmp=GetURLNavigation();
+    ////Debug(['Loc'=>$Tmp]);
+    //  SetHeader('location: '.NormMainURL($Tmp));
+    //}
+    }
+    Else
+    {
+    //ReIndexsTmplMsgs();
+      Echo Parse($Mode, $Vars);
+    //$TmplMsgs=[];
+    }
+  }
+ 
+  Function Location($Str, $z=False)
+  {
+    Global $Location  ;
+    Global $LocationZ ;
+    Global $Mode    ;
+    If($Location)
+      Return;
+    If(!$Str)
+      $Str='?';
+    $Location=$Str;
+    $LocationZ=$z;
+    $Mode='nomode';
+  }
+ 
+  Function IsLocation()
+  {
+    Global $Location;
+    Return $Location;
+  }
+ 
+  // ***************************************************************************************
+?>

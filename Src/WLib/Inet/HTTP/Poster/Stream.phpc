@@ -1,0 +1,89 @@
+<?
+  $Loader->Load_Class('/Inet/HTTP/Poster/Base' );
+ 
+  Class C_Inet_HTTP_Poster_Stream Extends C_Inet_HTTP_Poster_Base
+  {
+    Var $Stream =null;
+    Var $Data   ='';
+    Var $Length =False;
+ 
+    Function _Init($Args)
+    {
+      parent::_Init($Args);
+      If(IsSet($Args['Stream']))
+        $this->Stream_Set(&$Args['Stream']);
+      Else
+        $this->Stream=Null;
+    }
+   
+    Function _Done()
+    {
+      If($this->Stream)
+        $this->Stream->_UnLock();
+      parent::_Done();
+    }
+   
+    Function Length_Set($ALength=0)
+    {
+      $this->Length=$ALength;
+    }
+   
+    Function &Stream_Get()
+    {
+      Return $this->Stream->_Lock();
+    }
+   
+    Function Stream_Set(&$AStream)
+    {
+      If($this->Stream)
+        $this->Stream->_UnLock();
+      $Len=$AStream->Recv_Count();
+      If($Len>0)
+        $this->Length=$Len;
+      $this->Stream=&$AStream->_Lock();
+    }
+   
+    Function Data_Set($Data)
+    {
+      If($this->Stream)
+        $this->Stream->_UnLock();
+      $Null=Null;
+      $this->Stream=&$Null;
+      $this->Data=$Data;
+      $this->Length=StrLen($Data);
+    }
+   
+    Function Method()
+    {
+      Return 'POST';
+    }
+   
+    Function Header_Make(&$Header)
+    {
+      If(!$this->Stream)
+        $Header->Put('Content-Length', StrLen($this->Data));
+      ElseIf($this->Length!=False)
+        $Header->Put('Content-Length', $this->Length);
+      Else
+      {
+        $this->Data=$this->Stream->Read(8*1024);
+        If(!StrLen($this->Data))
+        {
+          $Header->Put('Content-Length', '0');
+          $this->Stream->_UnLock();
+          $Null=Null;
+          $this->Stream=&$Null;
+          UnSet($Null);
+        }
+      }
+    }
+   
+    Function Save_To_Stream(&$Sock)
+    {
+      If(StrLen($this->Data))
+        $Sock->Write($this->Data);
+      If($this->Stream)
+        $this->Stream->Save_To_Stream(&$Sock);
+    }
+  }
+?>

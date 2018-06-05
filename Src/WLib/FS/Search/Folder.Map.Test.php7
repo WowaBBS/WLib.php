@@ -1,0 +1,24 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $Args=[
+    'Filter'=>[
+      'Map'=>[
+        '/Tmpl/' =>0,
+        '/BD/' =>0,
+        '/FS/' =>0,
+        '/Strings.phpm' =>0,
+        '*.phpc'  =>0,
+        '*.php'   =>0,
+        '*.php*'  =>1,
+        '*'       =>0,
+      ],
+    ],
+  ];
+  $s=$Loader->Create_Object('/FS/Search/Folder', $Args);
+  
+  ForEach($s->GetListArray('../..')As $f)
+  {
+    echo $f->GetLocalPath(), "\n";
+  }
+?>

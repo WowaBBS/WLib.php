@@ -1,0 +1,37 @@
+<?
+  $Loader->Parent_Class('/Object');
+  $Loader->Using_Class('/Tmpl/Skin/TFrame');
+ 
+  Class C_Tmpl_Skin_Frames Extends C_Object
+  {
+    Var $List=[];
+  
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      ForEach($Args['List']As $k=>$v)
+        $this->List[$k]=$this->Create_Object('/Tmpl/Skin/Frame', ['Def'=>$v]);
+    }
+  
+    Function GetFrame($Name):C_Tmpl_Skin_Frame
+    {
+      If(!IsSet($this->List[$Name]))
+        $this->List[$Name]=$this->Create_Object('/Tmpl/Skin/Frame', ['Def'=>'']);
+      Return $this->List[$Name];
+    }
+  
+    Function &GetVar(Array &$Path, $Type=tv_Any, Array &$Vars=[])
+    {
+      $Res=NULL;
+      If(Count($Path)==0)
+        Return $this;
+      $Dir=Array_Shift($Path);
+      If(!IsSet($this->List[$Dir]))
+        Return $Res;
+      $Res=$this->List[$Dir]->GetVar($Path, $Type, $Vars);
+    //$this->List[$Dir]=$this->Create_Object('/Tmpl/Skin/Frame', ['Def'=>'']);
+      Return $Res;
+    //Return NULL;
+    }
+  }
+?>

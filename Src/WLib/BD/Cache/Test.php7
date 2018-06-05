@@ -1,5 +1,5 @@
 <?
-  Include './../../../using.php';
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
   Function Row_Pad(Array $Cols, Array $Lens, Array $Row)
   {

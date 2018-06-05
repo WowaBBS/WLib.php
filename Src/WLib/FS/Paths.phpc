@@ -1,9 +1,8 @@
 <?
-  $Loader->Begin_Class('/URI/Paths');
- 
   $Loader->Parent_Class('/Object');
 //$Loader->Using_Module('/System/IOFS');
   $Loader->Using_Module('/FS/IOFS');
+  $Loader->Using_Module('/FS/Path');
   $Loader->Using_Type('/URI/Path/Dir/File');
  
   Class C_URI_Paths extends C_Object
@@ -28,7 +27,7 @@
     Function GetFile($AFilePath)
     {
       If(!Is_Object($AFilePath))
-        $AFilePath=New TPath($AFilePath);
+        $AFilePath=TPath::Create($AFilePath);
       $TmplName1=New TFileDir();
       If($k=$TmplName1->SearchFile($AFilePath, $this->Paths))
       {
@@ -41,11 +40,11 @@
     Function GetFiles($AFilePath)
     {
       If(!Is_Object($AFilePath))
-        $AFilePath=New TPath($AFilePath);
+        $AFilePath=TPath::Create($AFilePath);
       $Res=[];
       ForEach($this->Paths As $Path)
       {
-        $TmplName1=New TPath($Path);
+        $TmplName1=TPath::Create($Path);
         $TmplName1->Add($AFilePath);
         $TmplName1=$TmplName1->Make();
         If(Is_File($TmplName1))
@@ -59,7 +58,7 @@
       $Res=[];
       ForEach($this->Paths As $Path)
       {
-        $TmplName1=New TPath($Path);
+        $TmplName1=TPath::Create($Path);
         $TmplName1->Add($AFilePath);
         $TmplName1->Add('/');
         $TmplName1=$TmplName1->Make();
@@ -82,6 +81,4 @@
       Return $Res[0];
     }
   }
- 
-  $Loader->End_Class();
 ?>

@@ -1,0 +1,92 @@
+<?
+//Uses('Object/TRelease');
+ 
+  Class C_INet_HTTP_Ranges Extends T_Object//_Release
+  {
+    Var $Ranges=Array();
+    Var $Size=0;
+ 
+    Function Set_Size($ASize)
+    {
+      $this->Size=$ASize;
+    }
+ 
+    Function Assign_Str($Str)
+    {
+      $R=&$this->Ranges;
+      $S=$this->Size-1;
+      $R=Array();
+      $Rn=Explode(',', $Str);
+      ForEach($Rn As $r)
+      {
+        $r=Explode('-', $r);
+        If(Count($r)!=2)
+          Continue;
+        If($r[1]==='')
+          $r[1]=$S;
+        Else
+          $r[1]+=0;
+        If($r[0]==='')
+        {
+          $r[0]=$S-$r[1]+1;
+          $r[1]=$S;
+        }
+        Else
+          $r[1]+=0;
+        If($r[0]<0)
+          $r[0]=0;
+        If($r[1]>$S)
+          $r[1]=$S;
+        If($r[0]>$r[1])
+          Continue;
+        $R[]=$r;
+      }
+      $this->Normalize();
+    }
+ 
+    Function __cmpReg($a, $b)
+    {
+      If($a[0]==$b[0])
+        Return 0;
+      Return ($a[0]>$b[0])?+1:-1;
+    }
+ 
+    Function Normalize()
+    {
+      $R=&$this->Ranges;
+      $C=Count($R);
+      If($C<2)
+        Return;
+      USort($R, Array(&$this, '__cmpReg'));
+      $N=Array(&$R[0]);
+      $n=&$N[0][1];
+      For($i=1;$i<$C;$i++)
+      {
+        $r=&$R[$i];
+        If($n+1<$r[0])
+        {
+          $N[]=&$r;
+          $n=&$r[1];
+          Continue;
+        }
+        $n=Max($n, $r[1]);
+      }
+    }
+ 
+    Function Length()
+    {
+      $Res=0;
+      ForEach($this->Ranges As $r)
+        $Res+=$r[1]-$r[0]+1;
+      Return $Res;
+    }
+ 
+    Function ToString()
+    {
+      $Res=Array();
+      ForEach($this->Ranges As $r)
+        $Res[]=$r[0].'-'.$r[1];
+      Return Implode(',', $Res);
+    }
+  }
+?>

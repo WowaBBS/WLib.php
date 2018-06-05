@@ -1,0 +1,96 @@
+<?php
+  $Loader->Load_Class('/Stream/Proxy');
+ 
+  Class C_Inet_HTTP_Coding_Chunked Extends C_Stream_Proxy
+  {
+    Var $FEOF=False;
+    Var $ChunkLen=-1;
+
+    Function Open(&$AStream)
+    {
+      parent::Open($AStream);
+      $this->FEOF=False;
+      $this->ChunkLen=-1;
+    }
+
+    Function Recv_Count()
+    { // PHP 4.3.0
+    //$Res=Stream_Get_Meta_Data($this->FHandle);
+    //Return $Res['unread_bytes'];
+    }
+
+    Function EOF()
+    {
+      Return $this->FEOF;
+    }
+
+    Function Read($Size) TODO: Recv
+    {
+      $ChunkLen=&$this->ChunkLen;
+      $Res=Array('');
+      While($Size)
+      {
+        If($ChunkLen<=0)
+        {
+          If($this->FEOF)
+            Break;
+          If($ChunkLen===0)
+            If($SE=$this->FStream->Get_Line())
+            {
+              Trigger_Error('Chunked error '.$SE, E_USER_WARNING);
+              $this->FEOF=True;
+              Break;
+            }
+          $SE=$this->FStream->Get_Line();
+          $ChunkLen=HexDec($SE);
+          If($SE==='0')
+          {
+            $this->FEOF=True;
+            Break;
+          }
+          If($ChunkLen==0)
+          {
+            Trigger_Error('Chunked error2 '.$SE, E_USER_WARNING);
+            $this->FEOF=True;
+            Break;
+          }
+        }
+        $S=Min($ChunkLen, $Size);
+        $R=$this->FStream->Read($S);
+        $S=StrLen($R);
+        If(!$S)
+        {
+          If($this->FStream->EOF)
+          {
+            $this->FEOF=True;
+            Break;
+          }
+          Continue;
+        }
+        $Size-=$S;
+        $Res[]=$R;
+        $ChunkLen-=$S;
+      }
+      Return Implode('', $Res);
+    }
+
+    Function Write($Data) TODO: Send
+    {
+      $this->FStream->Write(DecHex(StrLen($Data))."\n");
+      $this->FStream->Write($Data);
+      $this->FStream->Write("\n");
+    }
+
+    Function ShutDown($typ='w')
+    {
+      Switch($typ)
+      {
+      Case 'r': Case 'R': $typ=1; Break;
+      Case 'w': Case 'W': $typ=2; Break;
+      Case 'a': Case 'A': $typ=3; Break;
+      }
+      If($typ&2)
+        $this->FStream->Write(DecHex(0)."\n"."\n");
+    }
+  }
+?>

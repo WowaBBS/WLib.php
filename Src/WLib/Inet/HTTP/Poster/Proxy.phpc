@@ -1,0 +1,35 @@
+<?
+  $Loader->Load_Class('/Inet/HTTP/Poster/Base' );
+ 
+  Class C_Inet_HTTP_Poster_Proxy Extends C_Inet_HTTP_Poster_Base
+  {
+    Var $Poster=NULL;
+  
+    Function _Init($Args)
+    {
+      parent::_Init($Args);
+    }
+  
+    Function _Done()
+    {
+      If($this->Poster)
+        $this->Poster->Done();
+      parent::_Done();
+    }
+  
+    Function Method()
+    {
+      Return $this->Poster->Method();
+    }
+  
+    Function Header_Make(&$Header)
+    {
+      Return $this->Poster->Header_Make(&$Header);
+    }
+  
+    Function Save_To_Stream(&$Sock)
+    {
+      Return $this->Poster->Save_To_Stream(&$Sock);
+    }
+  }
+?>

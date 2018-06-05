@@ -9,7 +9,7 @@
     echo GetType($k), '(', $k, ')=', $v, "\n";
   echo AddCSlashes("\0\1\2\3\4", "\0..\37!@\@\177..\377"), "\n";
   
-  Include '../Using.php';
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
  
   $Manager =$Loader->Create_Object('/Debug/Manager'); //System/
   $Manager->Template->ChunkLen=48;

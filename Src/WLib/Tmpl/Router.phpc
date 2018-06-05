@@ -225,7 +225,7 @@
           $DefMode=$Tmp1;
       }
       $DefMode=LoadVar('Mode', $DefMode);
-    //$P=New TPath($DefMode);
+    //$P=TPath::Create($DefMode);
       $Res=$this->Get($Vars, $Prefix.$DefMode);
       Return $Res;
     }

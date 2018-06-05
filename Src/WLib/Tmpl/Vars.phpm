@@ -15,7 +15,7 @@
     Case 'boolean':
       Return $Res;
     Case 'object':
-      Return $Res->AsString();
+      Return $Res->ToString();
     Case 'NULL':
     Default:
       Trigger_Error('Varible no found '.$Name, E_USER_WARNING);
@@ -35,7 +35,7 @@
     Case 'boolean':
       Return $Res;
     Case 'object':
-      Return $Res->AsString();
+      Return $Res->ToString();
     Case 'NULL':
     Default:
       Trigger_Error('Varible no found '.Implode('.', $Path), E_USER_WARNING);

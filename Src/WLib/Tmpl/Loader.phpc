@@ -2,6 +2,7 @@
   $Loader->Parent_Class('/Object');
   $Loader->Using_Class('/Tmpl/Router');
   $Loader->Using_Module('/Tmpl/Vars');
+  $Loader->Load_Type('/FS/Path');
 
   Class C_Tmpl_Loader Extends C_Object
   {
@@ -76,7 +77,7 @@
       }
       Else
         $Res=$this->Types[$this->DefType]->Get_File($FileName);
-      $Res->Vars[' CurPath']=New TPath(DirName($FullName).'/');
+      $Res->Vars[' CurPath']=TPath::Create(DirName($FullName).'/');
       $this->Templates[$FileName]=$Res;
       Return $Res;
     }

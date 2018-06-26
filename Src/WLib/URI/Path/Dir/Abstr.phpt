@@ -1,7 +1,7 @@
 <?
   $Loader->Begin_Type('/URI/Path/Dir/Abstr');
  
-  $Loader->Using_Type('/URI/Path/Base');
+  $Loader->Using_Type('/FS/Path');
  
   Class TAbsDir Extends TPath
   {
@@ -18,7 +18,7 @@
        {
          $this->Assign($APath);
          $this->Add($AFile);
-       //Debug([$this->Make(), $this->IsFile()]);
+       //Debug([$this->ToString(), $this->IsFile()]);
          If($this->IsFile())
            Return [$k];
        }
@@ -27,7 +27,7 @@
        {
          $this->Assign($APath);
          $this->Add($AFile);
-       //Debug([$this->Make(), $this->IsFile()]);
+       //Debug([$this->ToString(), $this->IsFile()]);
          If($this->IsDir())
            Return [$k];
        }

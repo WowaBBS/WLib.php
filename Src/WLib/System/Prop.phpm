@@ -35,7 +35,7 @@
   {
     Var $_Property_ID;
  
-    Function T_Property()
+    Function __construct()
     {
       $this->_Property_ID=++$GLOBALS['_MPropId'];
     }
@@ -87,7 +87,7 @@
     Var $Vars ;
     Var $Path ;
  
-    Function T_Property_Var(&$AVars, $APath)
+    Function __construct(&$AVars, $APath)
     {
       $this->Vars = &$AVars ;
       $this->Path =  $APath ;

@@ -17,12 +17,12 @@
  
     Function IsFile()
     {
-      Return Is_File($this->Make());
+      Return Is_File($this->ToString());
     }
  
     Function IsDir()
     {
-      Return Is_Dir($this->Make());
+      Return Is_Dir($this->ToString());
     }
  
     Function CreatePath($APath=False, $Attr=06775)

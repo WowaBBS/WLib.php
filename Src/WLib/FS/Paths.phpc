@@ -5,7 +5,7 @@
   $Loader->Using_Module('/FS/Path');
   $Loader->Using_Type('/URI/Path/Dir/File');
  
-  Class C_URI_Paths extends C_Object
+  Class C_FS_Paths extends C_Object
   {
     Var $Paths =[];
     Var $URLs  =[];
@@ -32,7 +32,7 @@
       If($k=$TmplName1->SearchFile($AFilePath, $this->Paths))
       {
         $AFilePath->AddLeft($this->URLs[$k[0]]);
-        Return [$TmplName1->Make(), $AFilePath->Make()];
+        Return [$TmplName1->ToString(), $AFilePath->ToString()];
       }
       Return NULL;
     }
@@ -46,7 +46,7 @@
       {
         $TmplName1=TPath::Create($Path);
         $TmplName1->Add($AFilePath);
-        $TmplName1=$TmplName1->Make();
+        $TmplName1=$TmplName1->ToString();
         If(Is_File($TmplName1))
           $Res[]=$TmplName1;
       }
@@ -61,7 +61,7 @@
         $TmplName1=TPath::Create($Path);
         $TmplName1->Add($AFilePath);
         $TmplName1->Add('/');
-        $TmplName1=$TmplName1->Make();
+        $TmplName1=$TmplName1->ToString();
         If(Is_Dir($TmplName1))
         {
           $Ls=ListDir($TmplName1, $Mask, $Attr);

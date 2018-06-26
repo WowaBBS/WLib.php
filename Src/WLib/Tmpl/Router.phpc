@@ -3,7 +3,7 @@
 
   $Loader->Parent_Class('/Object');
   $Loader->Using_Class('/Tmpl/Mode' );
-  $Loader->Using_Class('/URI/Paths' );
+  $Loader->Using_Class('/FS/Paths' );
  
   Class C_Tmpl_Router Extends C_Object
   {
@@ -19,7 +19,7 @@
     {
       parent::_Init($Args);
     //$this->Paths=$GLOBALS['Paths'];
-      $this->Paths=$this->Create_Object('/URI/Paths');
+      $this->Paths=$this->Create_Object('/FS/Paths');
       $this->Paths->AddPath('./', 'Unknown'); // TODO
     }
  
@@ -220,7 +220,7 @@
         $Tmp1=clone $Web_HtAccess->CurPath;
         If($Tmp1->IsDir())
           $Tmp1->Del(-1);
-        $Tmp1=$Tmp1->Make();
+        $Tmp1=$Tmp1->ToString();
         If($Tmp1)
           $DefMode=$Tmp1;
       }

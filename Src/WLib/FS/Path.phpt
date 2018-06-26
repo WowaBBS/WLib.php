@@ -1,6 +1,4 @@
 <?
-  $Loader->Begin_Type('/URI/Path/Base');
- 
   $Loader->Using_Module('/System/Prop');
  
 //Class T_FS_Path
@@ -292,6 +290,4 @@
     //Debug([$this->ToString(), $c, $i]);
     }
   }
- 
-  $Loader->End_Type('/URI/Path/Base');
 ?>

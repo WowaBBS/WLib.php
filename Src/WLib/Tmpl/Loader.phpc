@@ -37,7 +37,7 @@
          Trigger_Error('??? CurPath '. $TmplName);
          return '';
        }
-       Return $_CurPath->Make().$TmplName;
+       Return $_CurPath->ToString().$TmplName;
     }
  
     Protected Function _Real_Path(&$Vars, $TmplName)
@@ -72,7 +72,7 @@
       If(!Is_File($FileName))
       {
         $_CurPath=_vars_getf(' CurPath', $Vars);
-        ErrStr('Template file not founded: "'.$TmplName.'" from "'.($_CurPath? $_CurPath->Make():'').'"');
+        ErrStr('Template file not founded: "'.$TmplName.'" from "'.($_CurPath? $_CurPath->ToString():'').'"');
         $Res=$this->Create_Object('/Tmpl/Base/Template');
       }
       Else

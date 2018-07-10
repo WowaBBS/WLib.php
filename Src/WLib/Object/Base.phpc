@@ -24,13 +24,16 @@
     //****************************************************************
     // Debug And Log
     
+    Function ToDebugInfo() { return Get_Class($this).'('.$this->_ToDebugInfo().')'; }
+    Function _ToDebugInfo() { return $this->Object_Id; }
+    
     Function Debug($Var, $Level=-1) { Return $this->Loader->Debug($Var, $Level); }
     Function Log($LogLevel, ...$Args) { return $this->Loader->_Log($this, $LogLevel, $Args); }
 
     Protected Function _Debug_Info(Array &$Res)
     {
-      if($this->Loader!==null) unset($Res['Loader']);
-      if($this->Object_Inited) unset($Res['Object_Inited']);
+      if($this->Loader!==null) unset($Res['Loader'        ]);
+      if($this->Object_Inited) unset($Res['Object_Inited' ]);
     }
     
     /// Debug manager

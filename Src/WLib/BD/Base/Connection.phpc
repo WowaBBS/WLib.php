@@ -14,10 +14,8 @@
     Protected Function _Debug_Info(Array &$Res)
     {
       Parent::_Debug_Info($Res);
-      if($Res['BaseData']) $Res['BaseData']=$Res['BaseData']->DebugInfo();
+      if($Res['BaseData']) $Res['BaseData']=$Res['BaseData']->ToDebugInfo();
     }
-    
-    Function DebugInfo() { return 'BD/Connection'.$this->Object_Id; }
     
     Protected Function _Done()
     {

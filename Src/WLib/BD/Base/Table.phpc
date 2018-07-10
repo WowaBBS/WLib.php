@@ -18,18 +18,18 @@
     Protected Function _Debug_Info(Array &$Res)
     {
       Parent::_Debug_Info($Res);
-      $Res['Connect']=$Res['Connect']->DebugInfo();
+      $Res['Connect']=$Res['Connect']->ToDebugInfo();
       ForEach($Res['Links']As $k=>&$v)
       {
-        $v[0]['Table']=$v[0]['Table']->DebugInfo();
-        $v[1]['Table']=$v[1]['Table']->DebugInfo();
+        $v[0]['Table']=$v[0]['Table']->ToDebugInfo();
+        $v[1]['Table']=$v[1]['Table']->ToDebugInfo();
       }
       ForEach($Res['DLinks']As $k1=>&$v1)
         ForEach($v1 As $k=>&$v)
-          $v['']=$v['']->DebugInfo();
+          $v['']=$v['']->ToDebugInfo();
     }
     
-    Function DebugInfo() { return $this->Name; }
+    Function _ToDebugInfo() { return $this->Name; }
     
     Protected Function _Init(Array $Args)
     {

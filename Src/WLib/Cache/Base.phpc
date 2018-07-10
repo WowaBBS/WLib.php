@@ -7,6 +7,8 @@
     Var $FullPath ;
     Var $RelPath  ;
     
+    Function _ToDebugInfo() { return $this->RelPath; }
+    
     Protected Function _Init(Array $Args)
     {
       parent::_Init($Args);

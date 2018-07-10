@@ -33,7 +33,7 @@
       $this->_link=False;
     }
  
-    Function DebugInfo() { return 'MySql://'.$this->Host.':'.$this->Port.'/'.$this->DataBase; }
+    Function _ToDebugInfo() { return 'MySql://'.$this->Host.':'.$this->Port.'/'.$this->DataBase; }
     
     Function Close()
     {

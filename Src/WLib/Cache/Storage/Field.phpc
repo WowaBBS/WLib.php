@@ -4,11 +4,12 @@
   // Поддерево кеша переменных
   Class C_Cache_Storage_Field Extends C_Cache_Storage_Base
   {
-    Var $Storage;
-    Var $Field ;
+    Var $Storage ;
+    Var $Field   ;
     Var $IsLoaded=False;
     Var $IsCheck=False;
 
+    Function _ToDebugInfo() { return $this->Storage->ToDebugInfo(); }
     Function MarkChanged() { Parent::MarkChanged(); $this->Storage->MarkChanged(); }
   
     Protected Function _Init(Array $Args)

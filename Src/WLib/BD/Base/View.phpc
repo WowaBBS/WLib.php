@@ -23,10 +23,10 @@
     Protected Function _Debug_Info(Array &$Res)
     {
       Parent::_Debug_Info($Res);
-      $Res['Table']=$Res['Table']->DebugInfo();
+      $Res['Table']=$Res['Table']->ToDebugInfo();
     }
 
-    Function DebugInfo() { return $this->Table->DebugInfo(); }
+    Function _ToDebugInfo() { return $this->Table->ToDebugInfo(); }
     
     // Получение списка полей и их типов
     Function GetFields()

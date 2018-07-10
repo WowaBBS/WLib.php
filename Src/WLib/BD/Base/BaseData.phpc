@@ -16,8 +16,6 @@
       $this->Connect=$this->Manager->Create_Connect($Args);
     }
 
-    Function DebugInfo() { return 'BD/BaseData'.$this->Object_Id; }
-    
     Protected Function _Done()
     {
       parent::_Done();

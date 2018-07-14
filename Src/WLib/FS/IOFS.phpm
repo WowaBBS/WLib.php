@@ -139,7 +139,37 @@
       Return $Matches[1].ExtractFileNick($Path).$Matches[2];
     Return $Mask;
   }
- 
+
+  // Нормализует путь $Path, удаляя ненужное
+  Function NormPath($Path)
+  {
+  //$Path=Str_Replace('\\','/', $Path);
+    $Path=Explode('/', $Path);
+    $Beg=count($Path)-1;
+    $End=count($Path)-1;
+    $Res=[];
+    ForEach($Path As $k=>$v)
+    {
+    //$v=Trim($v);
+      If($v=='')
+      {
+        if($k!==$Beg && $k!==$End)
+          Continue;
+        ++$Beg;
+      }
+      If($v=='.')
+        $Res=['.']; // TODO: Root
+      ElseIf($v=='..')
+      {
+        If(Count($Res)>1)
+          Array_Pop($Res);
+      }
+      Else
+        $Res[]=$v;
+    }
+    Return Implode('/', $Res);
+  }
+  
   // Нормализует путь $Path, удаляя ненужное
   // Если $ZTrim, то проверяет существование пути
   Function Deprecated_NormPath($Path, $Add='', $ZTrim=False)
@@ -148,7 +178,7 @@
     {
       $Res=Array();
       ForEach($Path As $k=>$Item)
-        $Res[$k]=NormPath($Item, $Host);
+        $Res[$k]=Deprecated_NormPath($Item, $Host);
       Return $Res;
     }
     $Path=Str_Replace('\\', '/', $Path);

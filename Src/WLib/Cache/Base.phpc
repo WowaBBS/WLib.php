@@ -48,7 +48,7 @@
         SubStr($Path, 1, 1)==':'   ||
       //SubStr($Path, 1, 1)=='.\\' ||
         SubStr($Path, 0, 2)=='./'
-      );      
+      );
     }
     
     Function _Get(String $Path, String $Type, Array $Args=[])
@@ -96,7 +96,7 @@
         return $this->GetMapDir($Path, $Args);
       else
         return $this->GetMapFile($Path, $Args);
-    }    
+    }
   //****************************************************************
   }
 ?>

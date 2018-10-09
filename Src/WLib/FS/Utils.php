@@ -28,7 +28,7 @@
     $Pos = StrRPos($FileName, '.');
     if($Pos===False)
       return $FileName;
-    return SubStr($FileName, 0, $Pos-1);
+    return SubStr($FileName, 0, $Pos);
   }
   
   // FilePath functions

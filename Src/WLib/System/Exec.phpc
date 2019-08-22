@@ -45,6 +45,17 @@
         $CS='cmd';
       Return $CS.' /C '.$Cmd;
     }
+    
+    Function AddPath($Path)
+    {
+      $Env=&$this->Env;
+      if(!$Env)
+        $Env=[];
+      static $_Path='Path'; //? Case ignore
+      if(!IsSet($Env[$_Path]))
+        $Env[$_Path]='';
+      $Env[$_Path]=$Path.';'.$Env[$_Path];
+    }
   
     Function Open()
     {
@@ -60,6 +71,7 @@
         ]);
       if(Is_Array($this->Env['argv']??false))
         UnSet($this->Env['argv']);
+    //$this->Log('Log', 'Exec_Open ', $this->Command);
       $this->Handle=Proc_Open(
         $this->Command,
         $this->InPipes,
@@ -67,6 +79,8 @@
         $this->WorkDirectory,
         $this->Env
       );
+      if($this->Handle==False)
+        $this->Log('Error', 'Can`t create process: ', $this->Command);
       ForEach($Pipes As $k=>$v)
         $this->OutPipes[$k]=$this->Create_Object('/Stream/Handle', ['Handle'=>$v]);
     }
@@ -83,26 +97,56 @@
       #0 => ['pipe', 'r'], // stdin is a pipe that the child will read from
       #1 => ['pipe'. 'w'], // stdout is a pipe that the child will write to
       #2 => ['pipe', 'w'], // stderr is a file to write to
-      $this->Log('Fatal', 'Unreachable place');
+      $this->Log('Fatal', 'TODO: Implement');
     }
     
     Function SetStream_Input  ($v=true) { return $this->SetStream(0, $v); }
     Function SetStream_Output ($v=true) { return $this->SetStream(1, $v); }
     Function SetStream_Error  ($v=true) { return $this->SetStream(2, $v); }
   
-    Function Is_Alive()
-    {
-      Return $this->GetStatus()['running'];
-    }
+    Function Is_Alive() { Return $this->GetStatus()['running']; }
+    Function GetExitCode() { Return $this->GetStatus()['exitcode']; }
     
-    Function GetStatus() { return Proc_Get_Status($this->Handle); }
+    Function GetStatus()
+    {
+      if($this->Handle)
+        return Proc_Get_Status($this->Handle);
+      $this->Debug($this->Handle);
+      $this->Log('Fatal', 'Called get status not from process');
+      return [
+        'command'  =>  ''  ,
+        'pid'      =>   0  ,
+        'running'  =>False ,
+        'signaled' =>False ,
+        'stopped'  =>True  ,
+        'exitcode' =>   0  ,
+        'termsig'  =>   0  ,
+        'stopsig'  =>   0  ,
+      ];
+    }
   
     Function Execute($Sync=true)
     {
       If(!$this->Handle)
         $this->Open();
-      $this->Wait();
-      $this->Close();
+      ElseIf(!$this->Is_Alive())
+      {
+        $this->Close();
+        $this->Open();
+      }
+      else
+      {
+        $this->Wait();
+        $this->Close();
+        $this->Open();
+      }
+      if($Sync)
+      {
+        $this->Wait();
+        $this->Close();
+        return true;
+      }
+      return $this->Is_Alive(); // TODO:
     }
     
     Function Wait()
@@ -123,6 +167,23 @@
     {
       If(!$this->Handle)
         Return;
+      { // Debug, todo remove
+        $S=$this->GetStatus();
+        UnSet($S['command' ]);
+        UnSet($S['pid'     ]);
+        if($S['running'  ]===false ) UnSet($S['running'  ]);
+        if($S['signaled' ]===false ) UnSet($S['signaled' ]);
+        if($S['stopped'  ]===false ) UnSet($S['stopped'  ]);
+        UnSet($S['exitcode' ]); //if($S['exitcode' ]===0     ) 
+        if($S['termsig'  ]===0     ) UnSet($S['termsig'  ]);
+        if($S['stopsig'  ]===0     ) UnSet($S['stopsig'  ]);
+        if($S)
+        {
+          $Log=$this->Log('Error', 'Exec::Close ', $this->Command);
+          ForEach($S As $k=>$v)
+            $Log('    ', $k, '="', $v, '"');
+        }
+      }
       $Pipes=$this->Pipes;
       $this->Pipes=Array();
       If(IsSet($Pipes[0])) $Pipes[0]->Close();

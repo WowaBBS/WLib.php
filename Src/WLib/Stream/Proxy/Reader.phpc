@@ -46,23 +46,9 @@
       Return $L;
     }
   
-    Function Go_Back_Str($ASize, $AData, $APos=0)
+    Function _Go_Back_Str($ASize, $AData, $APos=0)
     {
     //Return $this->FStream->Go_Back_Str($ASize, $AData, $APos);
-    //#If Debug
-      If($ASize==0)
-      {
-        Trigger_Error('Size=0');
-        Return 0;
-      }
-    //#EndIf
-    //#If Debug
-      If($ASize+$APos!=StrLen($AData))
-      {
-        Trigger_Error('Error Size???');
-        Return 0;
-      }
-    //#EndIf
       $FPos=&$this->FPos;
       If($FPos)
       {

@@ -10,7 +10,7 @@
   Function Stream_Output_Handler($Str)
   {
     If($Str!=='')
-      Trigger_Error('Output "'.$Str.'"', E_USER_WARNING);
+      Trigger_Error('Output "'.$Str.'"', E_USER_WARNING); // TODO: Logger
     Return '';
   //Return $Str;
   }

@@ -10,7 +10,8 @@
   Class C_Stream_Base extends C_Object
   {
     Var $_BS=65536 ;//1024*64;
-    Var $_BT=64    ;//1024*64/1024;
+    Var $_BT=-1    ;//TODO: Restore: Check request
+  //Var $_BT=64    ;//1024*64/1024;
   
     Function Close()
     {
@@ -81,7 +82,8 @@
       $Res=[];
       Do
       {
-        Set_Time_Limit($bt);
+        if($bt>0)
+          Set_Time_Limit($bt);
         $Out=$this->Recv($bs);
         $Res[]=$Out;
       }
@@ -137,7 +139,8 @@
       Do
        {
       //Debug('Set_Time_Limit('.$bt.');');
-        Set_Time_Limit($bt);
+        if($bt>0)
+          Set_Time_Limit($bt);
       //Debug('$r=$this->Recv('.$bs.');');
         $r=$this->Recv($bs);
       //Debug('!');
@@ -160,6 +163,30 @@
       Return $Res;
     }
   
+    Final Function Go_Back_Str($ASize, $AData, $APos=0)
+    {
+    //#If Debug
+      If($ASize==0) // TODO: Remove?
+      {
+        $this->Log('Warning', 'Size=0');
+        Return 0;
+      }
+    //#EndIf
+    /*#If Debug*/
+      If($ASize+$APos!=StrLen($AData))
+      {
+        $this->Log('Error', 'Size???');
+        Return 0;
+      }
+    /*#EndIf*/
+      $this->_Go_Back_Str($ASize, $AData, $APos);
+    }
+    
+    Protected Function _Go_Back_Str($ASize, $AData, $APos)
+    {
+      $this->Log('Fatal', 'Go_Back_Str is not supported');
+    }
+    
     Function Seek($AOffset, $AWhence=0)
     {
       Return False;
@@ -189,7 +216,8 @@
       {
         If($D==='')
         {
-          Set_Time_Limit($bt);
+          if($bt>0)
+            Set_Time_Limit($bt);
           $l=$bs;
           if($Len>=0 && $l>$Len)
             $l=$Len;
@@ -216,7 +244,8 @@
       $this->Seek(0);
       Do
       {
-        Set_Time_Limit($bt);
+        if($bt>0)
+          Set_Time_Limit($bt);
         $D=$this->Recv($bs);
         If($AStream->Write($D)!=StrLen($D))
           Return False;
@@ -271,7 +300,7 @@
   
     Function Read_UInt24b() { $Res=$this->Read0(3); $R=UnPack('n', $Res); Return ($R[1]<<8)|Ord($Res{2}); }
     Function Read_UInt24l() { $Res=$this->Read0(3); $R=UnPack('v', $Res); Return (Ord($Res{2})<<16)|$R[1]; }
-                                                                   
+    
     Function Read_UInt48b()
     {
       $R=$this->Read0(6);

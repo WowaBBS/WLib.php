@@ -88,7 +88,19 @@
         }
       Return $this->FHandle!=False;
     }
-  
+
+    Function Close()
+    {
+      If(Count($this->Locked)!=1)
+        $this->Log('Error', 
+          'File "', $this->RFileName, '" was locked ',
+          '[', Implode(', ', $this->Locked),'] on close'
+        );
+      If($this->FHandle)
+        @FLock($this->FHandle, LOCK_UN);
+      Parent::Close();
+    }
+    
     Function Create($AOpenIsExists=False)
     {
       Return $this->Open(
@@ -99,22 +111,8 @@
         );
     }
   
-    Function Go_Back_Str($ASize, $AData, $APos=0)
+    Function _Go_Back_Str($ASize, $AData, $APos=0)
     {
-    //#If Debug
-      If($ASize==0)
-      {
-        Trigger_Error('Size=0');
-        Return 0;
-      }
-    //#EndIf
-    //#If Debug
-      If($ASize+$APos!=StrLen($AData))
-      {
-        Trigger_Error('Error Size???');
-        Return 0;
-      }
-    //#EndIf
       Return $this->Seek(-$ASize, 1);
     }
   
@@ -194,9 +192,8 @@
     {
       If(Count($this->Locked)<2)
       {
-        Trigger_Error(
-          'Locked Error in "'.$this->RFileName.'"',
-          E_USER_WARNING
+        $this->Log('Error',
+          'File "', $this->RFileName, '" was unlocked more then locked'
         );
         Return @FLock($this->FHandle, LOCK_UN);
       }

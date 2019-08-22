@@ -163,6 +163,8 @@
       {
         If(Count($Res)>1)
           Array_Pop($Res);
+        Else
+          $Res[]=$v;
       }
       Else
         $Res[]=$v;

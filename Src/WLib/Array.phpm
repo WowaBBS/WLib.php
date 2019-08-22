@@ -24,6 +24,12 @@
  
   Function Array_Shift_Checked(&$Arr)
   {
+    if(!Is_Array($Arr))
+    {
+      echo '[Error] Array_Shift_Checked was called for ', GetType($Arr), "\n";
+      echo '   ', $Arr, "\n";
+      UnSupported();
+    }
     if(Count($Arr)==0)
       return null;
     Reset($Arr);

@@ -1,0 +1,89 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+ #Uses('MTSpeed'  );
+ #Uses('XML/MBase'     );
+ #Uses('XML/CSS/MBase' );
+ #Uses('XML/TDocument' );
+ #Uses('MDebug'        );
+ #Uses('Support/PHP5'  );
+ #Uses('Script/PHP/Build/MVars');
+ 
+  Function Word_Style_Convert($Style)
+  {
+    ForEach($Style->Styles As $k1=>$v)
+    {
+      If(
+       (StrIPos($k1,'color')!==False)
+       ||(StrIPos($k1,'background')!==False)
+       ||(StrIPos($k1,'margin')!==False)
+       ||(StrIPos($k1,'padding')!==False)
+       ||($k1==='text-indent' && SubStr($v[0], 0, 1)==='-')
+       )
+      {
+      //Echo $k1,' ';
+        UnSet($Style->Styles[$k1]);
+      }
+    }
+  }
+ 
+  Function Word_CSS_Convert($CSS)
+  {
+   ForEach($CSS->Styles As $k=>$v)
+    {
+     Word_Style_Convert($CSS->Styles[$k]);
+     If(!$CSS->Styles[$k]->Make())
+       UnSet($CSS->Styles[$k]);
+    }
+  }
+ 
+//$Str=LoadFile('entprofile.xml');
+  $XML=$Loader->Create_Object('/XML/Document');
+  $XML->Parser->AddTagCData(Array('Style','Script'));
+  $XML->Parser->AddTagEmpty(Array('br','hr'));
+  $XML->LoadFromFile('01.htm');
+  $Tags=Array_Flip(Array('h1','h2','h3','h4','h5','h6'));
+  $TagsDel1=Array_Flip(Array('img')); //'style',,'head'
+  $TagsDel2=Array_Flip(Array('html','body'));
+  $z=0;
+  $t='';
+  $Tag=$XML->FirstTag;
+  While($Tag)
+  {
+  //Echo $Tag->tagName,' ';
+    If($Tag->tagName==='style' && !$Tag->_f)
+    {
+      $CSS=$Loader->Create_Object('/XML/CSS/File');
+      $CSS->AddStr($Tag->GetCData(True));
+      Word_CSS_Convert($CSS);
+      $Tag->PutCData($CSS->Make(),'');
+      $CSS->Done();
+      $CSS=NULL;
+    }
+    If(IsSet($TagsDel1[$Tag->tagName]))
+    {
+      $Tag=$Tag->Delete(True);
+      Continue;
+    }
+    If(IsSet($TagsDel2[$Tag->tagName]))
+    {
+      $Tag=$Tag->Delete(False);
+      Continue;
+    }
+    If(IsSet($Tag->Attributes) && $Tag->Attributes->IsAttr('style'))
+    {
+      $Style=$Loader->Create_Object('/XML/CSS/Style');
+      $Style->AddStr($Tag->Attributes->GetAttr('style'));
+      ForEach($Style->Styles As $k1=>$v)
+        If(StrIPos($k1,'color')!==False)
+          UnSet($Style->Styles[$k1]);
+      $Tag->Attributes->SetAttr('style',$Style->Make());
+      $Style->Done();
+      $Style=NULL;
+    }
+    $Tag=$Tag->ListNext;
+  }
+  //VarsToPHPFile('Test.htm.php',$XML->BuildHash());
+  $XML->SaveToFile('Test.htm');
+  $XML->Done();
+  $XML=NULL;
+?>

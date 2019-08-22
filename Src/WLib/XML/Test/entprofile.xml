@@ -1,0 +1,596 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<document>
+<br/>
+<g a=''>
+<!--
+ <item edit>
+  <title small="0"><font class="bodytext"><strong>Entrepreneur&nbsp;Information</strong></font></title>
+  <data type="title"><div align="right"><font class="bodytext" color="#FF0000">(R = Required)</font></div></data>
+ </item>
+-->
+ <item edit>
+  <title small="0"><font class="bodytext"><strong>Entrepreneur&nbsp;Information</strong></font></title>
+  <data type="title"><div align="right"><font class="bodytext" color="#FF0000">(R = Required)</font></div></data>
+ </item>
+ <item view>
+  <title small="0"><strong>Entrepreneur Information </strong></title>
+  <data type="title"></data>
+ </item>
+ <item>
+  <title image></title>
+  <data type="title" image></data>
+ </item>
+ <item>
+  <title>First Name:</title>
+  <data type="text" name="FirstName" required></data>
+ </item>
+ <item>
+  <title>Last Name:</title>
+  <data type="text" name="LastName" required></data>
+ </item>
+ <item>
+  <title>Title:</title>
+  <data type="text" name="Title" required>Owner / President / CEO</data>
+ </item>
+ <item>
+  <title>No. of Businesses Started:</title>
+  <data type="select" name="NoofBusinesStarted">
+   <option value="" selected>Please Select One</option>
+   <option value="1">1</option>
+   <option value="2">2</option>
+   <option value="3">3</option>
+   <option value="4">4</option>
+   <option value="5+">5+</option>
+  </data>
+ </item>
+ <item>
+  <title>Current Age:</title>
+  <data type="select" name="CurrentAge" width="256">
+   <option value="" selected>Please Select One</option>
+   <option value="10-19">10-19</option>
+   <option value="20-29">20-29</option>
+   <option value="30-39">30-39</option>
+   <option value="40-49">40-49</option>
+   <option value="50-59">50-59</option>
+   <option value="60+">60+</option>
+   <option value="Would Rather Not Disclose">Would Rather Not Disclose</option>
+  </data>
+ </item>
+ <item>
+  <title>Gender:</title>
+  <data type="select" name="Gender">
+   <option value="Male" selected>Male</option>
+   <option value="Female">Female</option>
+  </data>
+ </item>
+ <item>
+  <title>Ethnicity:</title>
+  <data type="select" name="Ethnicity" width="256">
+   <option value="" selected>Please Select One</option>
+   <option value="African American">African American</option>
+   <option value="American Indian">American Indian</option>
+   <option value="Alaskan Native">Alaskan Native</option>
+   <option value="Asian">Asian</option>
+   <option value="Caucasian/White">Caucasian/White</option>
+   <option value="Filipino">Filipino</option>
+   <option value="Hispanic">Hispanic</option>
+   <option value="Multi-racial">Multi-racial</option>
+   <option value="Pacific Islander">Pacific Islander</option>
+   <option value="Other/Not Listed">Other/Not Listed</option>
+  </data>
+ </item>
+ <item>
+  <title>Education:</title>
+  <data type="select" name="Education" width="256">
+   <option value="" selected>Please Select One</option>
+   <option value="High School">High School</option>
+   <option value="Some College">Some College</option>
+   <option value="AA Degree">AA Degree</option>
+   <option value="BA/BS Degree">BA/BS Degree</option>
+   <option value="Graduate">Graduate</option>
+   <option value="PhD">PhD</option>
+   <option value="Available Upon Request">Available Upon Request</option>
+  </data>
+ </item>
+ <item>
+  <title>Marital Status:</title>
+  <data type="select" name="MaritalStatus" width="256">
+   <option value="" selected>Please Select One</option>
+   <option value="Single">Single</option>
+   <option value="Married">Married</option>
+   <option value="Divorced">Divorced</option>
+   <option value="Widowed">Widowed</option>
+   <option value="Would Rather Not Disclose">Would Rather Not Disclose</option>
+  </data>
+ </item>
+ <item>
+  <title>Children:</title>
+  <data type="select" name="Children">
+   <option value="">Please Select One</option>
+   <option value="0" selected>No</option>
+   <option value="1">Yes</option>
+  </data>
+ </item>
+ <item>
+  <title>&nbsp;</title>
+  <data disabled></data>
+ </item>
+ <item>
+  <title><p><strong>Company Information</strong></p></title>
+  <data disabled></data>
+ </item>
+ <item>
+  <title>Company Name:</title>
+  <data type="text" name="CompanyName" required></data>
+ </item>
+ <item>
+  <title>Address:</title>
+  <data type="text" name="Address"></data>
+ </item>
+ <item>
+  <title>Address:</title>
+  <data type="text" name="Address2"></data>
+ </item>
+ <item>
+  <title>City:</title>
+  <data type="text" name="City" required></data>
+ </item>
+ <item>
+  <title>State:</title>
+  <data type="select" name="State" width="256" required>
+   <option value="" selected>Please Select One</option>
+   <option value="Alabama">Alabama</option>
+   <option value="Alaska">Alaska</option>
+   <option value="Arizona">Arizona</option>
+   <option value="Arkansas">Arkansas</option>
+   <option value="California">California</option>
+   <option value="Colorado">Colorado</option>
+   <option value="Connecticut">Connecticut</option>
+   <option value="Delaware">Delaware</option>
+   <option value="District of Columbia">District of Columbia</option>
+   <option value="Florida">Florida</option>
+   <option value="Georgia">Georgia</option>
+   <option value="Hawaii">Hawaii</option>
+   <option value="Idaho">Idaho</option>
+   <option value="Illinois">Illinois</option>
+   <option value="Indiana">Indiana</option>
+   <option value="Iowa">Iowa</option>
+   <option value="Kansas">Kansas</option>
+   <option value="Kentucky">Kentucky</option>
+   <option value="Louisiana">Louisiana</option>
+   <option value="Maine">Maine</option>
+   <option value="Maryland">Maryland</option>
+   <option value="Massachusetts">Massachusetts</option>
+   <option value="Michigan">Michigan</option>
+   <option value="Minnesota">Minnesota</option>
+   <option value="Mississippi">Mississippi</option>
+   <option value="Missouri">Missouri</option>
+   <option value="Montana">Montana</option>
+   <option value="Nebraska">Nebraska</option>
+   <option value="Nevada">Nevada</option>
+   <option value="New Hampshire">New Hampshire</option>
+   <option value="New Jersey">New Jersey</option>
+   <option value="New Mexico">New Mexico</option>
+   <option value="New York">New York</option>
+   <option value="North Carolina">North Carolina</option>
+   <option value="North Dakota">North Dakota</option>
+   <option value="Ohio">Ohio</option>
+   <option value="Oklahoma">Oklahoma</option>
+   <option value="Oregon">Oregon</option>
+   <option value="Pennsylvania">Pennsylvania</option>
+   <option value="Rhode Island">Rhode Island</option>
+   <option value="South Carolina">South Carolina</option>
+   <option value="South Dakota">South Dakota</option>
+   <option value="Tennessee">Tennessee</option>
+   <option value="Texas">Texas</option>
+   <option value="Utah">Utah</option>
+   <option value="Vermont">Vermont</option>
+   <option value="Virginia">Virginia</option>
+   <option value="Washington">Washington</option>
+   <option value="West Virginia">West Virginia</option>
+   <option value="Wisconsin">Wisconsin</option>
+   <option value="Wyoming">Wyoming</option>
+   <option value="Outside USA and Canada">Outside USA and Canada</option>
+  </data>
+ </item>
+ <item>
+  <title>Zip Code:</title>
+  <data type="text" name="ZipCode"></data>
+ </item>
+ <item>
+  <title>Country:</title>
+  <data type="select" name="Country" required>
+   <option value="USA" selected>USA</option>
+   <option value="Canada">Canada</option>
+   <option value="Unknown Country">Other</option>
+  </data>
+ </item>
+ <item>
+  <title>Telephone:</title>
+  <data type="text" name="Telephone" required>(xxx) xxx-xxxx</data>
+ </item>
+ <item>
+  <title>Fax:</title>
+  <data type="text" name="Fax">(xxx) xxx-xxxx</data>
+ </item>
+ <item>
+  <title>Web Site (URL):</title>
+  <data type="text" name="WebSiteURL">http://www.</data>
+ </item>
+ <item>
+  <title>Industry:</title>
+  <data type="select" name="Industry" width="256">
+   <option value="" selected>Please Select One</option>
+   <option value="Advertising">Advertising</option>
+   <option value="Aerospace  Aviation">Aerospace Aviation</option>
+   <option value="Agriculture &amp; Farming">Agriculture &amp; Farming</option>
+   <option value="Apparel/Clothing">Apparel/Clothing</option>
+   <option value="Architecture">Architecture</option>
+   <option value="Art/Photography">Art/Photography</option>
+   <option value="Associations">Associations</option>
+   <option value="Author/Writer">Author/Writer</option>
+   <option value="Automotive">Automotive</option>
+   <option value="Banking/Mortgage">Banking/Mortgage</option>
+   <option value="Biotechnology">Biotechnology</option>
+   <option value="Childcare/Child Development">Childcare/Child Development</option>
+   <option value="Communications/Broadcasting">Communications/Broadcasting</option>
+   <option value="Computer - Hardware &amp; Software">Computer - Hardware &amp; Software</option>
+   <option value="Construction &amp; Home Services">Construction &amp; Home Services</option>
+   <option value="Consulting &amp; Professional Services">Consulting &amp; Professional Services</option>
+   <option value="Credit/Loan/Collections">Credit/Loan/Collections</option>
+   <option value="Distribution">Distribution</option>
+   <option value="Education &amp; Training">Education &amp; Training</option>
+   <option value="Electronics">Electronics</option>
+   <option value="Employment/Recruiting &amp; Training">Employment/Recruiting &amp; Training</option>
+   <option value="Engineering">Engineering</option>
+   <option value="Entertainment">Entertainment</option>
+   <option value="Environmental &amp; Waste Management">Environmental &amp; Waste Management</option>
+   <option value="Facilities Management &amp; Maintenance">Facilities Management &amp; Maintenance</option>
+   <option value="Financial Services">Financial Services</option>
+   <option value="Food/Products &amp; Services">Food/Products &amp; Services</option>
+   <option value="Furniture/Retail &amp; Wholesale">Furniture/Retail &amp; Wholesale</option>
+   <option value="Graphic Arts/Illustration">Graphic Arts/Illustration</option>
+   <option value="Health &amp; Medical">Health &amp; Medical</option>
+   <option value="Hotel/Restaurant &amp; Hospitality">Hotel/Restaurant &amp; Hospitality</option>
+   <option value="Insurance Services">Insurance Services</option>
+   <option value="Internet/New Media">Internet/New Media</option>
+   <option value="Legal/Law Enforcement">Legal/Law Enforcement</option>
+   <option value="Maintenance/Mechanic">Maintenance/Mechanic</option>
+   <option value="Manufacturing">Manufacturing</option>
+   <option value="Non-Profit/Community Service">Non-Profit/Community Service</option>
+   <option value="Pharmaceutical">Pharmaceutical</option>
+   <option value="Public Relations">Public Relations</option>
+   <option value="Public Speaking">Public Speaking</option>
+   <option value="Publishing, Journalism, Printing">Publishing, Journalism, Printing</option>
+   <option value="Shipping, Mailing, Packaging">Shipping, Mailing, Packaging</option>
+   <option value="Real Estate">Real Estate</option>
+   <option value="Retail/Merchandising &amp; Wholesale">Retail/Merchandising &amp; Wholesale</option>
+   <option value="Sales &amp; Marketing">Sales &amp; Marketing</option>
+   <option value="Security/Loss Prevention">Security/Loss Prevention</option>
+   <option value="Sports, Leisure, Recreation">Sports, Leisure, Recreation</option>
+   <option value="Technology">Technology</option>
+   <option value="Telecommunications">Telecommunications</option>
+   <option value="Telemarketing">Telemarketing</option>
+   <option value="Tourism">Tourism</option>
+   <option value="Transportation">Transportation</option>
+   <option value="Travel">Travel</option>
+   <option value="Other/Not Listed">Other/Not Listed</option>
+  </data>
+ </item>
+ <item>
+  <title>Year Business Started:</title>
+  <data type="text" name="YearBusinessStarted" size="8"></data>
+ </item>
+ <item>
+  <title>Ownership Status:</title>
+  <data type="select" name="OwnershipStatus">
+   <option value="" selected>Please Select One</option>
+   <option value="C-Corporation">C-Corporation</option>
+   <option value="Limited Liability Corporation (LLC)">LLC</option>
+   <option value="Partnership">Partnership</option>
+   <option value="S-Corporation">S-Corporation</option>
+   <option value="Sole Proprietor">Sole Proprietor</option>
+   <option value="Available Upon Request">Available Upon Request</option>
+  </data>
+ </item>
+ <item>
+  <title>Annual Revenues:</title>
+  <data type="select" name="AnnualRevenues" width="256">
+   <option value="" selected>Please Select One</option>
+   <option value="$0 - $100,000">$0 - $100,000</option>
+   <option value="$100,000 - $250,000">$100,000 - $250,000</option>
+   <option value="$250,000 - $500,000">$250,000 - $500,000</option>
+   <option value="$500,000 - $1Million">$500,000 - $1Million</option>
+   <option value="$1 M - $2.5 Million">$1 M - $2.5 Million</option>
+   <option value="$5 M - $10 Million">$5 M - $10 Million</option>
+   <option value="$10 M - $25 Million">$10 M - $25 Million</option>
+   <option value="$25 Million+">$25 Million+</option>
+   <option value="Available Upon Request">Available Upon Request</option>
+  </data>
+ </item>
+ <item>
+  <title>Number of Employees:</title>
+  <data type="select" name="NumberOfEmployees" width="256">
+   <option value="" selected>Please Select One</option>
+   <option value="0-5">0-5</option>
+   <option value="5-10">5-10</option>
+   <option value="10-20">10-20</option>
+   <option value="20-50">20-50</option>
+   <option value="50+">50+</option>
+  </data>
+ </item>
+ <item>
+  <title>Startup Cost:</title>
+  <data type="select" name="StartupCost" width="256">
+   <option value="" selected>Please Select One</option>
+   <option value="$0 - $5,000">$0 - $5,000</option>
+   <option value="$5,000 - $10,000">$5,000 - $10,000</option>
+   <option value="$10,000 - $50,000">$10,000 - $50,000</option>
+   <option value="$50,000 - $100,000">$50,000 - $100,000</option>
+   <option value="$100,000 - $500,000">$100,000 - $500,000</option>
+   <option value="$500,000 - $1Million">$500,000 - $1Million</option>
+   <option value="over $1Million">over $1Million</option>
+   <option value="Available Upon Request">Available Upon Request</option>
+  </data>
+ </item>
+ <item>
+  <title>Primary Funding Source:</title>
+  <data type="select" name="PrimFundSource" width="256">
+   <option value="" selected>Please Select One</option>
+   <option value="Personal Investment">Personal Investment</option>
+   <option value="Venture Capital">Venture Capital</option>
+   <option value="Angel Investor(s)">Angel Investor(s)</option>
+   <option value="Friends &amp; Family">Friends &amp; Family</option>
+   <option value="SBA/Bank Loans">SBA/Bank Loans</option>
+   <option value="Several Sources">Several Sources</option>
+   <option value="Would Rather Not Disclose">Would Rather Not Disclose</option>
+  </data>
+ </item>
+ <item>
+  <title>Geographic Market:</title>
+  <data type="select" name="GeographicMarket" width="256">
+   <option value="" selected>Please Select One</option>
+   <option value="Local">Local</option>
+   <option value="State-wide">State-wide</option>
+   <option value="National">National</option>
+   <option value="International">International</option>
+  </data>
+ </item>
+ <item>
+  <title>&nbsp;</title>
+  <data disabled></data>
+ </item>
+ <item edit>
+  <title small="0"><p><strong>Special Business Category </strong> &nbsp;&nbsp;&nbsp;&nbsp;(Check all that apply)</p></title>
+  <data disabled></data>
+ </item>
+ <item view>
+  <title small="0"><p><strong>Special Business Category </strong></p></title>
+  <data disabled></data>
+ </item>
+ <item>
+  <title>&nbsp;</title>
+  <data disabled></data>
+ </item>
+ <item>
+  <title disabled></title>
+  <data type="checkboxes" name="SpecialBusiness" cols="2" value="Other">
+   <option value="African American Owned">African American Owned</option>
+   <option value="Home Based">Home Based</option>
+   <option value="Asian-Owned">Asian-Owned</option>
+   <option value="Internet Based">Internet Based</option>
+   <option value="Family Owned">Family Owned</option>
+   <option value="Minority Owned">Minority Owned</option>
+   <option value="Husband / Wife Owned">Husband / Wife Owned</option>
+   <option value="Woman Owned">Woman Owned</option>
+   <option value="Hispanic Owned">Hispanic Owned</option>
+   <option value="Other"></option>
+  </data>
+ </item>
+ <item>
+  <title>&nbsp;</title>
+  <data disabled></data>
+ </item>
+ <item edit>
+  <title small="0"><p><strong>Press Kit Information&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</strong>(Check all that apply)</p></title>
+  <data disabled></data>
+ </item>
+ <item view>
+  <title small="0"><p><strong>Press Kit Information</strong></p></title>
+  <data disabled></data>
+ </item>
+ <item>
+  <title>&nbsp;</title>
+  <data disabled></data>
+ </item>
+ <item>
+  <title>Photos Available (if so):</title>
+  <data type="checkboxes" name="PhotosAvailable" cols="2">
+   <option value="Entrepreneur">Entrepreneur</option>
+   <option value="Product">Product</option>
+   <option value="Variety">Variety</option>
+  </data>
+ </item>
+ <item>
+  <title>Video Available (if so):</title>
+  <data type="text" name="VideoFormat">What Format?</data>
+ </item>
+ <item>
+  <title>Press Kit Available?</title>
+  <data type="select" name="PressKitAvailable">
+   <option value="No" selected>No</option>
+   <option value="Yes">Yes</option>
+  </data>
+ </item>
+ <item>
+  <title>Online?</title>
+  <data type="select" name="Online">
+   <option value="No" selected>No</option>
+   <option value="Yes">Yes</option>
+  </data>
+ </item>
+
+ <item>
+  <title>&nbsp;</title>
+  <data disabled></data>
+ </item>
+ <item>
+  <title>&nbsp;</title>
+  <data disabled></data>
+ </item>
+ <item edit>
+  <title><p align='justify'>The questions below are designed to help you tell your company's
+ story to members of the media, who are usually very busy, so please
+ be informative and brief. Feel free to use HTML tags and enjoy this
+ opportunity to tell your story in your own words!</p></title>
+  <data disabled></data>
+ </item>
+ <item>
+  <title><strong>What Does Your Company Do and/or Sell?</strong></title>
+  <data disabled></data>
+ </item>
+ <item>
+  <title disabled></title>
+  <data type="textarea" name="Info1" cols="75" rows="7" align="center"></data>
+ </item>
+
+ <item>
+  <title>&nbsp;</title>
+  <data disabled></data>
+ </item>
+ <item>
+  <title><strong>Where Did You Get the Idea to Start Your Company?</strong></title>
+  <data disabled></data>
+ </item>
+ <item>
+  <title disabled></title>
+  <data type="textarea" name="Info2" cols="75" rows="7" align="center"></data>
+ </item>
+
+ <item>
+  <title>&nbsp;</title>
+  <data disabled></data>
+ </item>
+ <item>
+  <title><strong>What Are/Were Your Major Challenges and/or Accomplishments?</strong></title>
+  <data disabled></data>
+ </item>
+ <item>
+  <title disabled></title>
+  <data type="textarea" name="Info3" cols="75" rows="7" align="center"></data>
+ </item>
+
+ <item>
+  <title>&nbsp;</title>
+  <data disabled></data>
+ </item>
+ <item>
+  <title><strong>What Are the Most Newsworthy Aspects of You and/or Your Company?</strong></title>
+  <data disabled></data>
+ </item>
+ <item>
+  <title disabled></title>
+  <data type="textarea" name="Info4" cols="75" rows="7" align="center"></data>
+ </item>
+
+ <item>
+  <title>&nbsp;</title>
+  <data disabled></data>
+ </item>
+ <item>
+  <title><strong>List Some Possible Interview Topics.</strong></title>
+  <data disabled></data>
+ </item>
+ <item>
+  <title disabled></title>
+  <data type="textarea" name="Info5" cols="75" rows="7" align="center"></data>
+ </item>
+
+ <item>
+  <title>&nbsp;</title>
+  <data disabled></data>
+ </item>
+ <item>
+  <title><p align='justify'>Please use the <em>Browse</em> button to locate a
+ picture on your computer's hard drive that you would like to use for
+ your profile. Your picture must be sized to 150 x 180 pixels and no
+ larger than 20 Kb.</p><br>
+ <p align='center'><#Image#></p>
+  </title>
+  <data disabled></data>
+ </item>
+
+ <item>
+  <title disabled></title>
+  <data type="file" name="File" align="center" blob></data>
+ </item>
+
+ <item nopub>
+  <title>&nbsp;</title>
+  <data disabled></data>
+ </item>
+ <item nopub>
+  <title><p><strong>Payment Options</strong></p></title>
+  <data disabled></data>
+ </item>
+ <item nopub>
+  <title>&nbsp;</title>
+  <data disabled></data>
+ </item>
+ <item nopub>
+  <title>Name:</title>
+  <data type="text" name="CCName">Printed on Credit Card</data>
+ </item>
+ <item nopub>
+  <title>Street Address:</title>
+  <data type="text" name="CCAddress">Where Bill is Sent</data>
+ </item>
+ <item nopub>
+  <title>Zip Code:</title>
+  <data type="text" name="CCZipCode">Where Bill is Sent</data>
+ </item>
+ <item nopub>
+  <title>Credit Card Type:</title>
+  <data type="select" name="CreditCardType">
+   <option value="No" selected>Master card</option>
+   <option value="Yes">Visa</option>
+  </data>
+ </item>
+ <item nopub>
+  <title>Credit Card Number:</title>
+  <data type="text" name="CreditCardNumber" secure></data>
+ </item>
+ <item nopub>
+  <title>Expiration Date:</title>
+  <data type="select" name="CCExpMonth" rh>
+   <option value="" selected>Month</option>
+   <option value="01">01</option>
+   <option value="02">02</option>
+   <option value="03">03</option>
+   <option value="04">04</option>
+   <option value="05">05</option>
+   <option value="06">06</option>
+   <option value="07">07</option>
+   <option value="08">08</option>
+   <option value="09">09</option>
+   <option value="10">10</option>
+   <option value="11">11</option>
+   <option value="12">12</option>
+  </data>
+ </item>
+ <item nopub>
+  <title>&nbsp;</title>
+  <data type="select" name="CCExpYear" lf>
+   <option value="" selected>Year</option>
+   <option value="2002">2002</option>
+   <option value="2003">2003</option>
+   <option value="2004">2004</option>
+   <option value="2005">2005</option>
+   <option value="2006">2006</option>
+   <option value="2007">2007</option>
+   <option value="2008">2008</option>
+   <option value="2009">2009</option>
+   <option value="2010">2010</option>
+  </data>
+ </item>
+</document>

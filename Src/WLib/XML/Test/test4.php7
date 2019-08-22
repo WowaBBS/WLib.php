@@ -1,0 +1,151 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+ #Uses('XML/MBase');
+ #Uses('XML/CSS/MBase');
+ #Uses('XML/TDocument');
+ #Uses('MDebug');
+ #Uses('MCrt');
+ #Uses('Support/PHP5');
+  $Loader->Load_Module('/Strings');
+  
+  Function WriteLn(...$Args)
+  {
+    echo Implode('', $Args), "\n";
+  }
+ 
+  Function TrimAll($S)
+  {
+    Return Trim(MTrim(Str_Replace(Array("\n","\r",'&nbsp;'), ' ', $S)));
+  }
+ 
+//$Str=LoadFile('entprofile.xml');
+  $XML=$Loader->Create_Object('/XML/Document');
+//$XML->LoadFromFile('01.htm');
+  $XML->LoadFromFile('_.html');
+  $Tags=Array_Flip(Array('h1','h2','h3','h4','h5','h6'));
+  $TagsDel1=Array_Flip(Array('img','style','head'));
+  $TagsDel2=Array_Flip(Array('html','body'));
+  $z=0;
+  $t='';
+  $Tag=$XML->FirstTag;
+  $Res=Array();
+  While($Tag)
+  {
+    If($Tag->tagName==='#text' && Preg_Match('/^\\s*((:?\\d+\\.)+)/s',$Tag->value))
+    {
+      $Tag2=$Tag;
+    //While($Tag2->tagName!=='p')
+      While(!($Tag2->tagName==='p' || $Tag2->tagName==='ul'))
+        $Tag2=$Tag2->ListPrev;
+      $Res[]=$Tag2;
+    //WriteLn('! ',$Tag2->innerText());
+    }
+    ElseIf($Tag->tagName[0]==='h' && (int)($Tag->tagName[1])>0)
+    {
+      If(TrimAll($Tag->innerText()))
+        $Res[]=$Tag;
+    //WriteLn('! ',$Tag->innerText());
+    }
+    ElseIf(IsSet($Tag->Attributes) && $Tag->EndTag && StrIPos($Tag->Attributes->GetAttr('class'), 'Heading')!==False)
+    {
+      $Tag2=$Tag;
+      While(!($Tag2->tagName==='p' || $Tag2->tagName==='ul'))
+        $Tag2=$Tag2->ListPrev;
+      If(TrimAll($Tag->innerText()))
+        $Res[]=$Tag2;
+    //WriteLn('! ',$Tag2->innerText());
+      $Tag=$Tag2->EndTag;
+    }
+    If(IsSet($Tag->Attributes) && $Tag->Attributes->IsAttr('style'))
+    {
+      $Style=$Loader->Create_Object('/XML/CSS/Style');
+      $Style->AddStr($Tag->Attributes->GetAttr('style'));
+      ForEach($Style->Styles As $k1=>$v)
+        If(StrIPos($k1,'color')!==False)
+          UnSet($Style->Styles[$k1]);
+      $Tag->Attributes->SetAttr('style',$Style->Make());
+      $Style=NULL;
+    }
+    $Tag=$Tag->ListNext;
+  }
+ 
+  Function Recurse(&$Res, $i=0, $Num=Array(0))
+  {
+    $R1=Array(); // Текущий
+    $R2=Array(); // Лучший
+    $Z1=True;
+    While(IsSet($Res[$i]))
+    {
+      If(Preg_Match('/(:?(\\d+\\.)+)/s',$Res[$i]->innerText(),$M))
+      {
+        If($Num!==False)
+        {
+          $M=Explode('.',$M[1]);
+          If(!$M[Count($M)-1])
+          //UnSet($M[Count($M)-1]);
+            Array_Pop($M);
+        //If(Count($M)>1)
+        //WriteLn($i,' ',Count($M),' ',Implode('.',$M));
+          If(Count($Num)>=Count($M))
+          {
+          //WriteLn($i,' ',Count($M),' ',Implode('.',$Num),' ',Implode('.',$M));
+            If(($Num[Count($M)-1]+1)==($M[Count($M)-1]))
+            {
+              For($j=0;$j<Count($M)-1;$j++)
+                If($Num[$j]!=$M[$j])
+                  Break;
+              If($j==Count($M)-1)
+              {
+                $M[]=0;
+                WriteLn($i,' ',Count($M),' ',Implode('.',$M));
+                $R1=Recurse($Res,$i+1,$M);
+                $R1[]=$i;
+                If(Count($R1)>Count($R2))
+                  $R2=$R1;
+                $Z1=True;
+              }
+            }
+          }
+        }
+      }
+      Else
+      {
+        If($Z1)//&&False)
+        {
+          $Z1=False;
+          $R1=Recurse($Res,$i+1,False);
+          $R1[]=$i;
+          If(Count($R1)>Count($R2))
+            $R2=$R1;
+          //Break;
+        }
+      }
+      $i++;
+     }
+    Return $R2;
+  }
+ 
+  $R=Array_Reverse(Recurse($Res));
+  $RS=Array();
+  For($i=0;$i<Count($Res);$i++)
+  {
+    $S=$Res[$i]->innerText();
+    $ZZ=Preg_Match('/(:?(\\d+\\.)+)/s',$S);
+  //WriteLn(($ZZ?'!':'').'! ',$S);
+    $RS[]=($ZZ?'!':'').'! '.$S;
+  }
+  File_Put_Contents('Abba.txt',Implode("\n",$RS));
+  $RS=Array();
+  For($i=0;$i<Count($R);$i++)
+  {
+    $S=$Res[$R[$i]]->innerText();
+    $S=TrimAll($S);
+    //WriteLn('! ',$S);
+    $RS[]='! '.$S;
+  }
+  File_Put_Contents('Abbb.txt',Implode("\n",$RS));
+  $Res=NULL;
+  $XML->SaveToFile('Test.htm');
+  $XML->Done();
+  $XML=NULL;
+?>

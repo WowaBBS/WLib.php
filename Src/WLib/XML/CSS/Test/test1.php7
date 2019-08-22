@@ -1,0 +1,27 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+//$Loader->Object('Task');
+ #$Loader->Object('Error');
+//$Loader->Object('Output');
+ #$Loader->Object('Debug');
+
+
+  $Str='margin:0cm; margin-bottom:.0001pt; font-size:10.0pt; font-family:"Times New Roman" 1; a:(a:b; a)';
+//Debug(ParseStyle($Str));
+ 
+  $Style=$Loader->Create_Object('/XML/CSS/Style');
+  $Style->AddStr($Str);
+//Echo $Style->Make(), "\n";
+//Debug($Style);
+//Debug($Style->Make());
+  $Loader->Debug($Style->Styles);
+  $Style->Done();
+ 
+  $CSS=$Loader->Create_Object('/XML/CSS/File');
+  $CSS->AddFile('main.css');
+  Echo $CSS->Make(), "\n";
+  $Loader->Debug($CSS->Styles);
+  $CSS->Done();
+ 
+  $Loader->Done();
+?>

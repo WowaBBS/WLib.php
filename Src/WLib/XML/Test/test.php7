@@ -1,0 +1,11 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  Function Null() { return null; }
+
+  $XML=$Loader->Create_Object('/XML/Document');
+  $XML->Clear();
+  $XML->Parser->TagConv='Null';
+  $XML->Parse('<br/>');
+  $XML->_UnLock();
+?>

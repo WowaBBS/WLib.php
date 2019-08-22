@@ -27,8 +27,9 @@
     Function ToDebugInfo() { return Get_Class($this).'('.$this->_ToDebugInfo().')'; }
     Function _ToDebugInfo() { return $this->Object_Id; }
     
+    Function GetLogger() { Return $this->Loader->GetLogger(); }
     Function Debug($Var, $Level=-1) { Return $this->Loader->Debug($Var, $Level); }
-    Function Log($LogLevel, ...$Args) { return $this->Loader->_Log($this, $LogLevel, $Args); }
+    Function Log($LogLevel, ...$Args) { return New T_Log_Item($this, $this->GetLogger(), $LogLevel, $Args); }
 
     Protected Function _Debug_Info(Array &$Res)
     {

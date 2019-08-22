@@ -234,15 +234,23 @@
     //****************************************************************
     // Debug And Log
     
+    Var $Logger=null;
+    
     Function Debug($Var, $Level=-1) // TODO: Return Debug object
     {
       $Deb=$this->Get_Singleton('/Debug/Manager')->Get('Debug.txt');
       return $Deb->Debug($Var, $Level);
     }
     
-    Function Log($LogLevel, ...$Args) { return $Deb=$this->_Log($this, $LogLevel, $Args); }
-    Function _Log($Outer, $LogLevel, Array $List) { return New T_Log_Item($Outer, null, $LogLevel, $List); } // TODO: Logger
-
+    Function _CreateLogger()
+    {
+      $this->Logger=false;
+      return $this->Logger=$this->Get_Singleton('/Log/Manager');
+    }
+    
+    Function GetLogger() { return $this->Logger?? $this->_CreateLogger(); }
+    Function Log($LogLevel, ...$Args) { return New T_Log_Item($this, $this->GetLogger(), $LogLevel, $Args); }
+    
     //****************************************************************
     Function Done() {} // TODO:
   }

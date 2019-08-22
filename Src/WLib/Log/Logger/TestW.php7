@@ -1,0 +1,14 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $l1=$Loader->GetLogger()->Create('Bag.lock');
+  $l2=$Loader->GetLogger()->Create('Bag.lock');
+  $Loader->Log('Log', $l1->TryLock()?'Ok':'Failed');
+  $Loader->Log('Log', $l2->TryLock()?'Ok':'Failed');
+  $l1->UnLock();
+//$l2->UnLock();
+  $l1->Close();
+  $l2->Close();
+
+  UnLink('Bag.lock');
+?>

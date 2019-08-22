@@ -1,0 +1,10 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $l=$Loader->GetLogger()->Create('Test.lock');
+  $l->Log('Log', 'Hello');
+  Echo '!',$l->GetContent().'!';
+  $l->Close();
+
+//  UnLink('Test.lock');
+?>

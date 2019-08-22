@@ -1,0 +1,20 @@
+<?
+  $Loader->Parent_Class('/Log/Logger/Base');
+ 
+  Class C_Log_Logger_Echo extends C_Log_Logger_Base
+  {
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+    }
+    
+    Function Write($Str)
+    {
+      Echo $Str;
+    }
+
+    Function Flush()
+    {
+    }
+  };
+?>

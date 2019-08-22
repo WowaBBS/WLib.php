@@ -1,0 +1,9 @@
+<?
+  trigger_error("1\n2\n3");
+
+  trigger_error('E_USER_NOTICE'  ,E_USER_NOTICE  );
+  trigger_error('E_USER_WARNING' ,E_USER_WARNING );
+  trigger_error('E_USER_ERROR'   ,E_USER_ERROR   );
+  
+  echo 'Bye';
+?>

@@ -1,0 +1,58 @@
+<?
+  $Loader->Parent_Class('/Object');
+  $Loader->Load_Type('/Debug/Timer');
+
+  class C_Debug_Performance extends C_Object
+  {
+    Var $Agregate=[];
+    Var $Total;
+  
+    Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      $this->Total=$this->Start([
+        'Name'   =>'Total',
+        'Logger' =>null,
+      ]);
+      $this->Total->Manager=null;
+    }
+    
+    Function _Done()
+    {
+      $this->Agregate['Total']=0;
+    //$this->Total->Logger  =$this;
+      $this->Total->Manager =$this;
+      $this->Total->Finish();
+      $this->Total=null;
+      $Log=$this->Log('Log', 'It took:');
+      $List=$this->Agregate;
+      $LenKey  =0;
+      $LenTime =0;
+      ForEach($List As $Key=>$Time)
+      {
+        $Time=T_Debug_Timer::TimeToStr($Time);
+        $List[$Key]=$Time;
+        $LenKey  =Max($LenKey  ,StrLen($Key  ));
+        $LenTime =Max($LenTime ,StrLen($Time ));
+      }
+      ForEach($List As $Key=>$Time)
+        $Log('  ', str_pad($Key, $LenKey), ' : ', str_pad($Time, $LenTime, ' ', STR_PAD_LEFT));
+      $Log->Done();
+      Parent::_Done();
+    }
+    
+    Function Start($Args)
+    {
+      $Args['Manager']=$this;
+      $Res=new T_Debug_Timer($Args);
+      $Res->Start();
+      return $Res;
+    }
+    
+    Function Update($Name, $Time)
+    {
+    //$this->Log('Debug', 'UpdateTime(', $Name, ',', $Time, ')');
+      $this->Agregate[$Name]=($this->Agregate[$Name]??0)+$Time;
+    }
+  };
+?>

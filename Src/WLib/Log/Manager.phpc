@@ -1,0 +1,80 @@
+<?
+  $Loader->Parent_Class('/Log/Logger');
+ 
+  Class C_Log_Manager extends C_Log_Logger
+  {
+    Var $ByName=[];
+    Var $Loggers=[];
+    
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $this->Add($this->Create_Object('/Log/Logger/Echo'), ['Name'=>'Console']);
+    }
+    
+    Function _LogItem($LogItem)
+    {
+      ForEach($this->Loggers As $Logger)
+        $Logger->LogItem($LogItem);
+    }
+    
+    Function Add($Logger, $Args=[]) // String $Name, $Logger=false, $bAppend=false)
+    {
+      if(Is_String($Logger))
+      {
+        $Name=$Args['Name']?? $Logger;
+        if(IsSet($this->ByName[$Name]))
+        {
+          $this->GetLoader()->Log('Error', 'Logger ', $Name, ' already exists');
+          return $this->ByName[$Name];
+        }
+        $Logger=$this->Create($Logger, $Args);
+      }
+      else
+        $Name=$Args['Name'];
+      if(IsSet($this->ByName[$Name]))
+        $this->GetLoader()->Log('Warning', 'Logger ', $Name, ' already exists will be overrided');
+      $this->ByName[$Name]=$Logger;
+      if(IsSet($this->Loggers[$Logger->Object_Id]))
+        $this->GetLoader()->Log('Warning', 'Logger ', $Name, ' already was added');
+      else
+        $this->Loggers[$Logger->Object_Id]=$Logger;
+      return $Logger;
+    }
+    
+    Function Get($Name)
+    {
+      return $this->ByName[$Name]??False;
+    }
+    
+    Function Remove($Logger)
+    {
+      if(Is_String($Logger))
+      {
+        $Name=$Logger;
+        $Logger=$this->ByName[$Name]??False;
+        if(!$Logger)
+        {
+          $this->GetLoader()->Log('Error', 'Logger with name ', $Name, ' not found');
+          return false;
+        }
+        UnSet($this->ByName[$Name]);
+      }
+    
+      if(!IsSet($this->Loggers[$Logger->Object_Id]))
+      {
+        $this->GetLoader()->Log('Error', 'Logder ', $Name, ' wasn\'t be added');
+        return false;
+      }
+      UnSet($this->Loggers[$Logger->Object_Id]);
+      return $Logger;
+    }
+    
+    Function Create($Stream=null, $Args=[])
+    {
+    //if(Is_Null   ($Stream)) $Stream=$this->Stream_Default;
+      $Args['Stream']=$Stream;
+      return $this->Create_Object('/Log/Logger/Stream', $Args);
+    }
+  };
+?>

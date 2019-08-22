@@ -1,0 +1,89 @@
+<?
+  $Loader->Parent_Class('/Log/Logger/Base');
+  $Loader->Load_Lib('/Stream/Utils');
+ 
+  Class C_Log_Logger_Stream extends C_Log_Logger_Base
+  {
+    Var $Stream =null;
+    
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $this->SetStream($Args['Stream'], $Args);
+    }
+    
+    Function SetStream($Stream, $Args=[])
+    {
+      if(Is_String($Stream))
+      { // omRead for get content
+        $OpenMode=omRead|omWrite|omMakePath|omCreate|omBinary;//|omShareable; // TODO; Bug TestW.php7
+        $OpenMode|=($Args['Append']??False)? omAppend:omClear;
+        //omExclusive
+        $Stream=$this->Create_Object('/Stream/File',
+          [
+            'FileName'=>$Stream,
+            'OpenMode'=>$OpenMode,
+          ]
+        );
+      }
+      $this->Stream=$Stream;
+    }
+    
+    Function Write($Str)
+    {
+      $this->Stream->Write($Str);
+    }
+
+    Function Flush()
+    {
+      $this->Stream->Flush();
+    }
+    
+    Function TryLock()
+    {
+      return $this->Stream->TryLock();
+    }
+    
+    Function UnLock()
+    {
+      return $this->Stream->UnLock();
+    }
+    
+    Function Close()
+    {
+      return $this->Stream->Close();
+    }
+    
+    Function GetContent()
+    {
+      $Content=$this->Stream->Get_Content();
+      //$this->Stream->Seek(0);
+      //$Content=$this->Stream->Read($this->Stream->Length());
+      return $Content;
+    }
+    
+    //FlushCopyToLoggerUnLockCloseAndRemoveIsEmpty
+    Function Task_Magic($Logger):bool
+    {
+      $Stream=$this->Stream;
+      
+      $Stream->Flush();
+      
+      $IsEmpty=$Stream->Pos()==0;
+      if(!$IsEmpty && $Logger)
+      {
+        $Content=$this->GetContent();
+        $Logger->Log('Log', $Content);
+      }
+      
+      if($Stream->Is_Locked())
+        $Stream->UnLock();
+
+      $Stream->Close();
+      $this->Stream=null;
+      if($IsEmpty)
+        UnLink($Stream->RFileName);
+      return $IsEmpty;
+    }
+  };
+?>

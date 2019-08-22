@@ -1,0 +1,69 @@
+<?
+  $Loader->Parent_Class('/Object');
+  $this->Load_Type('/Log/Item');
+ 
+  Class C_Log_Logger extends C_Object
+  {
+    Var $Disabled=false;
+    Var $ShowLogLevel=[];
+  
+    Function _Init(Array $Args)
+    {
+      $this->SetLogLevel($Args['LogLevel']??'Debug');
+      parent::_Init($Args);
+    }
+    
+    Function SetLogLevel($Level)
+    {
+      $Res=[]; // TODO: Static
+      if(Is_Array($Level))
+      {
+        ForEach(T_Log_Level::GetList() As $Item)
+          $Res[$Item->Name]=false;
+        ForEach($Level As $Item)
+          $Res[$Item]=true;
+      }
+      elseIf(Is_String($Level))
+      {
+        $Index=T_Log_Level::GetByName($Level, 'Debug')->Index;
+        ForEach(T_Log_Level::GetList() As $Item)
+          $Res[$Item->Name]=$Item->Index>=$Index;
+      }
+      else
+        return $this->Loader->Log('Fatal', 'unsuported level type ', GetType($Level));
+      $this->ShowLogLevel=$Res;
+    }
+    
+    Function GetLogger() { return $this; }
+    
+    Final Function LogItem($LogItem)
+    {
+      if($this->Disabled)
+        return;
+      if(!$this->ShowLogLevel[$LogItem->Level->Name])
+        return;
+      $this->_LogItem($LogItem);
+    }
+    
+    Protected Function _LogItem($LogItem)
+    {
+      $this->Write($LogItem->ToString());
+      $this->Flush();
+    }
+    
+    Function Write($Str)
+    {
+      UnUsed();
+    }
+
+    Function Flush()
+    {
+      UnUsed();
+    }
+    
+    Function CloseAndRemoveIsEmpty():bool
+    {
+      return true;
+    }
+  };
+?>

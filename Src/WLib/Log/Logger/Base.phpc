@@ -1,0 +1,27 @@
+<?
+  $Loader->Parent_Class('/Log/Logger');
+ 
+  Class C_Log_Logger_Base extends C_Log_Logger
+  {
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+    }
+    
+    Function _LogItem($LogItem)
+    {
+      $this->Write($LogItem->ToString());
+      $this->Flush();
+    }
+    
+    Function Write($Str)
+    {
+      UnUsed();
+    }
+
+    Function Flush()
+    {
+      UnUsed();
+    }
+  };
+?>

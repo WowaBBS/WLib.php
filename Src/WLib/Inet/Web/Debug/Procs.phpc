@@ -31,7 +31,7 @@
     Function Array($Data, $Rec)
     {
       ForEach($Data As $k=>$v)
-        $Data[$k]=$this->Default($Data,$Rec);
+        $Data[$k]=$this->Default($v, $Rec);
       Return 'Array('.Implode(', ',$Data).')';
     }
    

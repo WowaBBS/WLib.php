@@ -63,6 +63,8 @@
     {
       if(!Is_String($Data) && !Is_Int($Data))
         $this->Log('Fatal', 'Unsupported type ', GetType($Data));
+      if(!$this->FHandle)
+        $this->Log('Fatal', 'No handle');
       Return FWrite($this->FHandle, $Data);
     }
   

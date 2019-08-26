@@ -3,6 +3,8 @@
  
   Class C_Log_Logger_Base extends C_Log_Logger
   {
+    Var $IsWritting=false;
+  
     Function _Init(Array $Args)
     {
       parent::_Init($Args);
@@ -10,8 +12,12 @@
     
     Function _LogItem($LogItem)
     {
+      if($this->IsWritting)
+        return;
+      $this->IsWritting=true;
       $this->Write($LogItem->ToString());
       $this->Flush();
+      $this->IsWritting=false;
     }
     
     Function Write($Str)

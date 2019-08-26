@@ -23,7 +23,7 @@
   $Loader->Log('Log'     ,'It is log'     );
   $Loader->Log('Warning' ,'It is warning' );
   $Loader->Log('Error'   ,'It is error'   );
-  $Loader->Log('Fatal'   ,'It is fatal'   );
+//$Loader->Log('Fatal'   ,'It is fatal'   );
   
   $Loader->Done();
 ?>

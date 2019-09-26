@@ -62,9 +62,15 @@
     Function Write($Data)
     {
       if(!Is_String($Data) && !Is_Int($Data))
-        $this->Log('Fatal', 'Unsupported type ', GetType($Data));
+      {
+        $this->Log('Error', 'Unsupported type ', GetType($Data));
+        return 0;
+      }
       if(!$this->FHandle)
-        $this->Log('Fatal', 'No handle');
+      {
+        $this->Log('Error', 'No handle');
+        return 0;
+      }
       Return FWrite($this->FHandle, $Data);
     }
   
@@ -72,7 +78,8 @@
   
     Function Flush()
     {
-      FFlush($this->FHandle);
+      if($this->FHandle)
+        FFlush($this->FHandle);
     }
   }
 ?>

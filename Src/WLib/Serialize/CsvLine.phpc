@@ -1,0 +1,23 @@
+<?
+  $this->Parent_Class('/Serialize/Base');
+
+  class C_Serialize_CsvLine extends C_Serialize_Base
+  {
+    static $DefaultExt='csv_line';
+    
+    Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+    }
+    
+    Function Serialize($Vars)
+    {
+      TODO: $f=fopen('php://memory', 'r+'); fputcsv($f);
+    }
+
+    Function Deserialize($Data)
+    {
+      TODO: fgetcsv or str_getcsv
+    }
+  }
+?>

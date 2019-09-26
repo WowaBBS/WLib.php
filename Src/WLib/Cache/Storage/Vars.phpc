@@ -7,11 +7,11 @@
   {
     Protected Function _Load()
     {
-      $Name=$this->FullPath.'.vars';
+      $FileName=$this->FullPath.'.vars';
       $this->IsLoaded=True;
-      If(!Is_File($Name))
+      If(!Is_File($FileName))
         Return False;
-      $this->Vars=UnSerialize(LoadFile($Name));
+      $this->Vars=UnSerialize(LoadFile($FileName));
       Return $this->Vars? True:False;
     }
   

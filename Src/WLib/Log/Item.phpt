@@ -1,17 +1,18 @@
 <?
   $this->Load_Type('/Log/Level');
+  ini_set('log_errors_max_len', 1000000);
   
   class T_Log_Item
   {
-    Var $Outer    = null;
-    Var $Logger   = null;
-    Var $Level    = null;
-    Var $Message  = [];
-    Var $Fatal    = false;
-    Var $Finished = false;
-    Var $File     = false;
-    Var $Line     = false;
-    Var $Col      = false;
+    Var $Outer    = null  ;
+    Var $Logger   = null  ;
+    Var $Level    = null  ;
+    Var $Message  = []    ;
+    Var $Fatal    = false ;
+    Var $Finished = false ;
+    Var $File     = false ;
+    Var $Line     = false ;
+    Var $Col      = false ;
     
     Function __Construct($Outer, $Logger, $Level, $List)
     {
@@ -84,6 +85,41 @@
       return $this->AddArr([$Str]);
     }
     
+    //TODO:
+    function GetExceptionTraceAsString($Exception)
+    {
+      $Res= [];
+      $Count = 0;
+      ForEach($Exception->getTrace()As $Frame)
+      {
+        $Args = '';
+        If(IsSet($Frame['args']))
+        {
+          $Args = [];
+          ForEach($Frame['args']As $Arg)
+          {
+            If(Is_String   ($Arg)) { $Args[] = "'".$Arg."'"            ; } Else
+            If(Is_Array    ($Arg)) { $Args[] = 'Array'                 ; } Else
+            If(Is_Null     ($Arg)) { $Args[] = 'null'                  ; } Else
+            If(Is_Bool     ($Arg)) { $Args[] = $Arg? 'true':'false'    ; } Else
+            If(Is_Object   ($Arg)) { $Args[] = Get_Class($Arg)         ; } Else
+            If(Is_Resource ($Arg)) { $Args[] = Get_Resource_Type($Arg) ; } Else
+                                   { $Args[] = $Arg                    ; }
+          }   
+          $Args = Join(', ', $Args);
+        }
+        $Res[]= SPrintF('#%s %s(%s): %s(%s)',
+          $Count,
+          $Frame['file'     ],
+          $Frame['line'     ],
+          $Frame['function' ],
+          $Args
+        );
+        $Count++;
+      }
+      return Implode("\n", $Res);
+    }    
+    
     Function Finish()
     {
       if($this->Finished)
@@ -92,7 +128,11 @@
       if($this->Logger)
         $this->Logger->LogItem($this);
       if($this->Fatal)
+      {
+      //debug_print_backtrace();
+      
         UnSupported();
+      }
     }
     
     Function ToString()

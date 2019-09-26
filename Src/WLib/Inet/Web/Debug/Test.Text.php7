@@ -1,0 +1,13 @@
+<?
+  header('Content-Type: plain/text; charset=windows-1251');
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+
+  $Request =$Loader->Get_Singleton('/Inet/Web/Request' );
+  $Files   =$Loader->Get_Singleton('/Inet/Web/Files'   ); //,['Global', false]);
+//          $Loader->Create_Object('/Inet/Web/File'    );
+  $Loader->Debug($Request);
+  $Loader->Debug($Files);
+
+  $Html=$Loader->Create_Object('/Inet/Web/Debug/Text');
+  $Html->Print();
+?>

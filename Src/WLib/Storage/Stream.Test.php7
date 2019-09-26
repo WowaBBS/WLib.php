@@ -1,0 +1,49 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  
+  stream_set_read_buffer(STDIN, 1);
+  $S1=$Loader->Create_Object('/Storage/Stream', ['./Test.bd']);
+  $S2=$Loader->Create_Object('/Storage/Stream', ['./Test.bd']);
+  
+  Function t1($S, $Str='')
+  {
+    Global $Loader;
+    $Loader->Log('Log', 'Test ', $Str, $Str!==''?' ':'', $S->Get());
+  }
+  
+  Function t2($S, $Str='')
+  {
+    Global $Loader;
+    $Loader->Log('Log', 'Test ', $Str, $Str!==''?' ':'', $S->IsChanged()? ' Changed':' Not changed');
+  }
+  
+  Function t3($S, $S2)
+  {
+    Global $Loader;
+    $Vars=(int)$S->BeginUpdate();
+    t2($S  ,'S  BeginUpdate'); 
+    t2($S2 ,'S2 BeginUpdate');
+    $Vars++;
+    $S->EndUpdate($Vars);
+    t2($S  ,'S  EndUpdate');
+    t2($S2 ,'S2 EndUpdate');
+    $Loader->Log('Log', 'Inc ', $Vars);
+  }
+  
+  t2($S1, 'S1');
+  t2($S2, 'S2');
+  
+  t1($S1, 'S1');
+  t1($S2, 'S2');
+  
+  t2($S1, 'S1');
+  t2($S2, 'S2');
+  
+  t1($S1, 'S1');
+  t3($S1, $S2);
+  t1($S2, 'S2');
+  
+  $S1->Done();
+  $S2->Done();
+?>

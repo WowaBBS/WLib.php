@@ -1,0 +1,27 @@
+<?
+  $this->Parent_Class('/Storage/Base');
+
+  class C_Storage_Serialise extends C_Storage_Base
+  {
+    Var $Serialize=null;
+
+    Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      $S=$Args['Serialize']?? 'Php';
+      if(Is_String ($S)) $S=[$S];
+      if(Is_Array  ($S)) $S=$this->Get_Singleton('/Serialize/'.$S[0], $S[1]??[]);
+      $this->Serialize=$S;
+    }
+    
+    Function _Serialize($Vars)
+    {
+      return $this->Serialize->Serialize($Vars);
+    }
+
+    Function _Deserialize($Data)
+    {
+      return $this->Serialize->Deserialize($Data);
+    }
+  }
+?>

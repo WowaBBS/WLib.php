@@ -1,5 +1,6 @@
 <?
   $Loader->Parent_Class('/Cache/Base');
+
   ///
   Class C_Cache_Sub Extends C_Cache_Base
   {

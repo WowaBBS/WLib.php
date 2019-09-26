@@ -1,0 +1,160 @@
+<?
+  class C_Inet_Web_Debug_Text Extends C_Object
+  {
+    Var $Proc;
+  
+    Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      $this->Info=$this->Create_Object('/Inet/Web/Debug/Rules');
+      $this->Proc=$this->Create_Object('/Inet/Web/Debug/Procs');
+    }
+  
+    Function Request()
+    {
+      $Request =$this->Get_Singleton('/Inet/Web/Request');
+?>
+CurURL         : <?=$Request->CurURL   ; ?>
+
+BaseURL        : <?=$Request->BaseURL  ; ?>
+
+CurPath        : <?=$Request->CurPath  ; ?>
+
+BasePath       : <?=$Request->BasePath ; ?>
+
+Referer        : <?=$Request->Referer  ; ?>
+
+ReqFile        : <?=$Request->ReqFile  ; ?>
+
+RelPath        : <?=$Request->RelPath  ; ?>
+
+<?
+    }
+    
+    Function Files()
+    {
+      if(true)
+      {
+        $Files   =$this->Get_Singleton('/Inet/Web/Files'   ); //,['Global', false]);
+        if(!$Files->IsEmpty())
+        {
+          $i=0;
+          ForEach($Files->GetList()As $k=>$v)
+          {
+            $i=1-$i;
+?>
+Var      : <?=$k;?>
+
+FileName : <?=$v->GetFileName ();?>
+
+FileSize : <?=$v->GetFileSize ();?>
+
+MimeType : <?=$v->GetMimeType ();?>
+
+Error    : <?=$v->GetError    ();?>
+
+FilePath : <?=$v->GetFilePath ();?>
+
+<?
+          }
+        }
+      }
+    
+      if($_FILES)
+      {
+  Print_R($_FILES);
+      }
+    }
+    
+    Function Server()
+    {
+    }
+    
+    Function Info_Unknown($Info)
+    {
+      $Res=Array();
+      ForEach($_SERVER As $k=>$v)
+        If(!IsSet($Info[$k]))
+          $Res[$k]=$v;
+      If(!$Res)
+        return;
+      $this->Info_Group($Info['>Unknown']);
+      $i=0;
+      ForEach($Res As $Key=>$Value)
+      {
+        $i=1-$i;
+        $this->Tmpl_Hor('odd'.$i, $Key, $Value, '');
+      }
+    }
+    
+    Function Info()
+    {
+      $Info=$this->Info->GetInfo();
+      $Procs=$this->Proc;
+      $this->Info_Unknown($Info);
+      UnSet($Info['>Unknown']);
+      $i=0;
+      ForEach($Info As $k=>$v)
+      {
+        If(!Is_Array($v))
+        {
+          $this->Info_Group($v);
+          $i=0;
+        }
+        Else
+        {
+          $i=1-$i;
+          $Str=False;
+          If(IsSet($_SERVER[$k]))
+          {
+            If(IsSet($v['Proc']))
+              If($v['Proc']===True)
+                $Proc=$k;
+              Else
+                $Proc=$v['Proc'];
+            Else
+              $Proc='Default';
+            $Str=[$Procs, $Proc]($_SERVER[$k],$v); // TODO: $Value
+          }
+          $TrClass=($Str!==False? 'Ok':'Empty').' odd'.$i;
+          If(IsSet($v['Templ']))
+            $VarTempl=$v['Templ'];
+          Else
+            $VarTempl='Hor';
+          [$this, 'Tmpl_'.$VarTempl]($TrClass, $k, $Str, $v[0]);
+        }
+       }
+    }
+    
+    Function Info_Group($Title)
+    {
+?>
+----- <?=$Title;?> ----
+
+<?
+    }
+    
+    Function Tmpl_Hor($TrClass, $Key, $Value, $Descr)
+    {
+?>
+<?=$Key;?> = <?=$Value;?> // <?=$Descr;?>
+
+<?
+    }
+
+    Function Tmpl_Vert($TrClass, $Key, $Value, $Descr)
+    {
+?>
+<?=$Key;?> = <?=$Value;?> // <?=$Descr;?>
+
+<?
+    }
+    
+    Function Print()
+    {
+      $this->Request();
+      $this->Files();
+      $this->Info();
+    }
+  }
+?>

@@ -1,0 +1,44 @@
+<?
+  $this->Parent_Class('/Object');
+
+  class C_Serialize_Base extends C_Object
+  {
+    Static $DefaultExt='Serialized';
+    Var $Ext=False;
+    
+    Function _Init(Array $Args)
+    {
+      $this->Ext=$Args['Ext']?? False;
+      Parent::_Init($Args);
+    }
+    
+    Function _Done()
+    {
+      Parent::_Done();
+    }
+    
+    Function GetExt()
+    {
+      if($this->Ext!=False)
+        return $this->Ext;
+      return $this->Ext=$this->GetDefaultExt();
+    }
+    
+    Function GetDefaultExt()
+    {
+      return Static::$DefaultExt;
+    }
+
+    Function Serialize($Vars)
+    {
+      $this->Log('Fatal', 'Usupported');
+      return $Vars;
+    }
+
+    Function Deserialize($Data)
+    {
+      $this->Log('Fatal', 'Usupported');
+      return $Data;
+    }
+  }
+?>

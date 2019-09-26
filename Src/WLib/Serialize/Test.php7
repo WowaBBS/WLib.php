@@ -1,0 +1,31 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $Vars=['a', ['c'=>3]];
+  $List=[
+  # ['AsIs'    ],
+  # ['Csv'     ],
+  # ['CsvLine' ],
+    ['Json'    ],
+    ['Php'     ],
+    ['PhpCode' ],
+  ];
+  
+  ForEach($List As $Item)
+  {
+    $S=$Loader->Get_Singleton('/Serialize/'.$Item[0], $Item[1]??[]);
+    $Str=$S->Serialize($Vars);
+    $Str=StrTr($Str, "\r\n", '  ');
+    $Str=StrTr($Str, ['  '=>' ']);
+    $Str=StrTr($Str, ['  '=>' ']);
+    $Str=StrTr($Str, ['  '=>' ', ' => '=>'=>']);
+    $Str=StrTr($Str, ['[ '=>'[', '{ '=>'{', '( '=>'(']);
+    $Str=StrTr($Str, [' ['=>'[', ' {'=>'{', ' ('=>'(']);
+    $Str=StrTr($Str, ['] '=>']', '} '=>'}', ') '=>')']);
+    $Str=StrTr($Str, [' ]'=>']', ' }'=>'}', ' )'=>')']);
+    $Loader->Log('Log', $S->GetExt(), ': ', $Str);
+    $Vars2=$S->Deserialize($Str);
+    if($Vars!==$Vars2)
+      $Loader->Log('Fatal', 'Deserialize ', $Str, ' wos wrong');
+  }
+?>

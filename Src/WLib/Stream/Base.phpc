@@ -71,7 +71,15 @@
   
     Function Stat()
     {
-      Return [];
+      Return [
+        'mtime' =>  0,
+        'size'  => -1,
+      ];
+    }
+    
+    Function GetMTime()
+    {
+      return $this->Stat()['mtime'];
     }
   
     Function Get_Content($Size=1024)

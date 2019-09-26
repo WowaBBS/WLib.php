@@ -1,0 +1,52 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  
+  stream_set_read_buffer(STDIN, 1);
+  $S=$Loader->Create_Object('/Storage/Stream', ['./Test.bd']);
+  
+  
+  $bHelp=true;
+  while(true)
+  {
+    if($bHelp)
+    {
+      echo ' 1 - get'  ,"\n";
+      echo ' 2 - test' ,"\n";
+      echo ' 3 - inc'  ,"\n";
+      echo ' q - exit' ,"\n";
+      echo 'Input:';
+    }
+    else
+      $bHelp=true;
+  
+  //$c = fgetc(STDIN);
+    $c = fread(STDIN, 1);
+    switch($c)
+    {
+    case "\r":
+    case "\n":
+      $bHelp=false;
+      break;
+    case 'q':
+    case 'Q':
+      break 2;
+    case '1':
+      $Loader->Log('Log', 'Test ', $S->Get());
+      break;
+    case '2':
+      $Loader->Log('Log', 'Test ', $S->IsChanged()? ' Changed':' Not changed');
+      break;
+    case '3':
+      $Vars=(int)$S->BeginUpdate();
+      $Vars++;
+      $S->EndUpdate($Vars);
+      $Loader->Log('Log', 'Inc ', $Vars);
+      break;
+    default:
+      $Loader->Log('Error', 'Unknown key input ', $c);
+    }
+  }
+  
+  $S->Done();
+?>

@@ -1,0 +1,126 @@
+<?
+  $this->Parent_Class('/Storage/Serialise');
+  $this->Load_Lib('/Stream/Utils'); // omRead|omWrite|omMakePath|omCreate|omBinary
+
+  class C_Storage_Stream extends C_Storage_Serialise
+  {
+    Var $Stream      = null;
+    Var $LastModInfo = '';
+    Var $LastVars    = [];
+    Var $State       = 'Closed';
+
+    Function _Init(Array $Args)
+    {
+      $Stream=$Args['Stream']??$Args[0];
+      Parent::_Init($Args);
+      $OpenMode=omRead|omWrite|omMakePath|omCreate|omBinary;//|omShareable; // TODO; Bug TestW.php7
+      if(Is_String($Stream))
+        $Stream=$this->Create_Object('/Stream/File', [
+          'FileName'=>$Stream   ,
+          'OpenMode'=>$OpenMode ,
+        ]);
+      $this->Stream=$Stream;
+      $this->_SetState('Opened');
+    }
+    
+    Function _CheckState($State)
+    {
+      if($this->State!==$State)
+        $this->Log('Error', 'State ', $this->State, ' is wrong, should be state ', $State);
+    }
+    
+    Function _SetState($State)
+    {
+      static $States=[
+         'Closed' =>'Opened',
+         'Read'   =>'Opened',
+         'Write'  =>'Opened',
+         'Opened' =>'',
+      ];
+      $Check=$States[$State]?? False;
+      if($Check===false)
+        return $this->Log('Error', 'State ', $this->State, ' is not allowed');
+      if($Check!=='')
+        $this->_CheckState($Check);
+      $this->State=$State;
+    }
+     
+    Function _Done()
+    {
+      $this->_SetState('Closed');
+      $Stream=$this->Stream;
+      $Stream->Close();
+      $Stream->Done();
+      $this->Stream=null;
+      Parent::_Done();
+    }
+  
+    Protected Function _Get(bool $UnLock)
+    {
+      $Stream=$this->Stream;
+      $this->LastModInfo=$this->GetModInfo();
+      $Res=$Stream->Get_Content();
+      if($UnLock)
+        $Stream->UnLock();
+      $Res=$this->_Deserialize($Res);
+      $this->LastVars=$Res;
+      return $Res;
+    }
+    
+    Function Get()
+    {
+      $this->_CheckState('Opened');
+      if(!$this->IsChanged())
+        return $this->LastVars;
+      $this->Stream->LockRead();
+      $Res=$this->_Get(true);
+      return $Res;
+    }
+    
+    Function GetModInfo()
+    {
+      $Stream=$this->Stream;
+      $Res=$Stream->Stat();
+      $Res=$Res['mtime'].'_'.$Res['size'];
+      return $Res;
+    }
+    
+    Function IsChanged()
+    {
+      return $this->LastModInfo!=$this->GetModInfo();
+    }
+
+    Function BeginUpdate()
+    {
+      $this->_SetState('Write');
+      $this->Stream->LockWrite();
+      if(!$this->IsChanged())
+        $Res=$this->LastVars;
+      else
+        $Res=$this->_Get(false);
+      return $Res;
+    }
+
+    Function EndUpdate($Vars)
+    {
+      $this->_CheckState('Write');
+      $Stream=$this->Stream;
+      $Stream->Put_Content($this->_Serialize($Vars));
+      $this->LastVars    =$Vars;
+      $this->LastModInfo =$this->GetModInfo();
+      $Stream->UnLock();
+      $this->_SetState('Opened');
+    }
+
+    Function CancelUpdate()
+    {
+      $this->_CheckState('Write');
+      $Stream->UnLock();
+      $this->_SetState('Opened');
+    }
+    
+  # Function Remove()
+  # {
+  # }
+  }
+?>

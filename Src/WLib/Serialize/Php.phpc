@@ -1,0 +1,23 @@
+<?
+  $this->Parent_Class('/Serialize/Base');
+
+  class C_Serialize_Php extends C_Serialize_Base
+  {
+    static $DefaultExt='vars';
+    
+    Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+    }
+    
+    Function Serialize($Vars)
+    {
+      return Serialize($Vars);
+    }
+
+    Function Deserialize($Data)
+    {
+      return UnSerialize($Data);
+    }
+  }
+?>

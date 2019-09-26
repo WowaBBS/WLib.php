@@ -16,13 +16,13 @@
    
       $Vars['Procs']=[];
       ForEach($this->Defines As $Name=>$Proc)
-       {
+      {
         $NameID='p'.md5($RndID.$Name);
         $Vars['Procs'][$Name]=$NameID;
         $Res[]='Function '.$NameID.'($Vars){'."\n";
         $Res[]=$Proc;
         $Res[]="\n}\n";
-       }
+      }
     }
   
     Function DefineProc($Proc, $EvalData)

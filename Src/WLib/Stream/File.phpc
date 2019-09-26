@@ -28,6 +28,7 @@
   
     Function Assign($Name)
     {
+      $Name=StrTr($Name, '\\', '/');
       $this->FileName=$Name;
     //$this->RFileName=$this->Loader->Path->Get($Name);
       $this->RFileName=$Name;
@@ -61,12 +62,15 @@
           Break;
         Case 'Open':
           If(!$this->FHandle)
-           {
+          {
             If($Cmd[1]{0}=='r')
               If(!FS_Is_File($this->RFileName))
                 Break;
+          //echo $this->RFileName, "!\n";
             $this->FHandle=@FOpen($this->RFileName, $Cmd[1]);
-           }
+            if(!$this->FHandle)
+              $this->Log('Error', 'Can\'t open file ', $this->RFileName);
+          }
           Break;
         Case 'TestOpen':
           If(!$this->FHandle)
@@ -162,6 +166,12 @@
       FTruncate($this->FHandle, $Size);
     }
   
+    Function TryLockRead  () { return $this->TryLock(LOCK_SH); }
+    Function TryLockWrite () { return $this->TryLock(LOCK_EX); }
+    
+    Function LockRead  () { return $this->Lock(LOCK_SH); }
+    Function LockWrite () { return $this->Lock(LOCK_EX); }
+    
     Function TryLock($Typ=LOCK_EX)
     {
     //Return @FLock($this->FHandle, $Typ|LOCK_NB);

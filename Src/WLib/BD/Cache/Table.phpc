@@ -7,6 +7,17 @@
     Var $Indices   = [];
     Var $IdxByName = [];
     Var $Primary   = null;
+    Var $ExprFactory=null;
+
+    Function _GetExprFactory()
+    {
+      return $this->ExprFactory=$this->Loader->Get_Singleton('/BD/Expression/Factory');
+    }
+    
+    Function GetExprFactory()
+    {
+      return $this->ExprFactory?? $this->_GetExprFactory();
+    }
  
     Function _Init(Array $Args)
     {
@@ -26,7 +37,7 @@
     {
       $this->Data=$Data;
       ForEach($this->Indices As $Index)
-        $Index->Put($Data);
+        $Index->PutList($Data);
     }
     
     Function AddRec($Rec)
@@ -54,39 +65,57 @@
       ForEach($Data As $Item)
         $this->AddRec($Item);
     }
- 
-    Function _GetIndex($Fields, $bCreate=false)
+    
+    Function _GetIndex($Fields, $Name=True, $bCreate=false)
     {
       If(!Is_Array($Fields)) $Fields=[$Fields];
       Sort($Fields);
-      $K=Implode(',', $Fields); // $K=Serialize($Fields);
-      If(!IsSet($this->Indices[$K]))
+      If($Name===True  ) $Name=Is_Array($Fields)? Implode(',', $Fields):$Fields;
+      If(!IsSet($this->Indices[$Name]))
       {
         if(!$bCreate)
         {
-          $this->Log('Log', 'Cache table hasn`t index for columns ', $K);
+          $this->Log('Error', 'Cache table hasn`t index for columns ', $Name);
           return NULL;
         }
-        $Res=$this->Create_Object('/BD/Cache/Index', ['Fields'=>$Fields]);
-        $Res->Put($this->Data);
-        $this->Indices[$K]=$Res;
+        $Res=$this->Create_Object('/BD/Cache/Index', ['Fields'=>$Fields, 'Table'=>$this]);
+        $Res->PutList($this->Data);
+        $this->Indices[$Name]=$Res;
       }
       else
-        $Res=$this->Indices[$K];
+        $Res=$this->Indices[$Name];
       return $Res;
+    }
+    
+    Function _MakeFields($Fields)
+    {
+      $Fields=Is_Array($Fields)? $Fields:[$Fields];
+      
+      $ExprFactory=$this->GetExprFactory();
+      
+      ForEach($Fields As $k=>$Field)
+      {
+        if(Is_String($Field) || Is_Integer($Field))
+          $Field=['Rec', $Field];
+        if(Is_Array($Field))
+          $Fields[$k]=$ExprFactory->Create($Field);
+      }
+      return $Fields;
     }
     
     // Создаёт индекс
     Function Create_Index($Fields, $Name=True)
     {
-      $Res=$this->_GetIndex($Fields, true);
-      If($Name===True  ) $Name=Implode(',', $Res->Fields);
-      If($Name!==False ) $this->IdxByName[$Name]=$Res;
+      $Fields=$this->_MakeFields($Fields);
+      $Res=$this->_GetIndex($Fields, True, true);
+      If($Name===True  ) $Name=Is_Array($Fields)? Implode(',', $Fields):$Fields;
+      If($Name!==True  ) $this->IdxByName[$Name]=$Res;
       return $Res;
     }
  
     Function Create_Primary($Fields, $Name=True)
     {
+      $Fields=$this->_MakeFields($Fields);
       $Res=$this->Create_Index($Fields, $Name);
       $this->Primary=$Res;
       Return $Res;
@@ -108,6 +137,46 @@
     {
       $Index=$this->_GetIndex($Fields);
       Return $Index? $Index->FieldValues():[];
+    }
+
+    Protected Function _Debug_Info(Array &$Res)
+    {
+      Parent::_Debug_Info($Res);
+      unset($Res['ExprFactory' ]);
+    }
+
+    Static Function Serialize_Object_Vars(&$Map)
+    {
+      $Map->RemoveField('Primary'     );
+      $Map->RemoveField('ExprFactory' );
+      $Map->RemoveField('Indices'     );
+      $Map->RemoveField('IdxByName'   );
+    }
+
+    Function Serialize_Object(Array $Arr)
+    {
+      $Indices=[];
+      ForEach($this->Indices As $k=>$v)
+        $Indices[$k]=$v->ToVars();
+      $Arr['Indices']=$Indices;
+      return $Arr;
+    }
+
+    Function Deserialize_Object($Map)
+    {
+      $Indices=$Map->PopVars('Indices');
+      if(!$Indices)
+        $Indices=[];
+      $Undefined=[];
+      ForEach($this->Indices As $k=>$Index)
+      {
+        if(IsSet($Indices[$k]))
+          $Index->Deserialize_Object($Indices[$k]);
+        else
+          $Undefined[]=$Index;
+      }
+      ForEach($Undefined As $Index)
+        $Index->PutList($this->Data);
     }
   }
 ?>

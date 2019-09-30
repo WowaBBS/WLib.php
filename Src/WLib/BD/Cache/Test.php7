@@ -1,5 +1,7 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+
+  $Loader->GetLogger()->Add(dirname(__FILE__).'/Test.log');
   
   Function Row_Pad(Array $Cols, Array $Lens, Array $Row)
   {
@@ -9,7 +11,7 @@
     return $Res;
   }
   
-  Function DebTable($Data)
+  Function LogTable($Logger, $Data)
   {
     if(!$Data)
       return [];
@@ -22,40 +24,69 @@
         $Cols[$i]=true;
       }
     $Cols=Array_Keys($Cols);
-    $Res=[];
   //$Res[]=Implode(' | ', Row_Pad($Cols, $Lens, $Cols));
     ForEach($Data As $Row)
-      $Res[]=Implode(' , ', Row_Pad($Cols, $Lens, $Row));
-    echo Implode("\n", $Res), "\n";
-    Return $Res;
+      $Logger->Log('Log', '  ', Implode(' ,', Row_Pad($Cols, $Lens, $Row)));
   }
   
+  $S1=$Loader->Create_Object('/Storage/Stream', ['./Test.bd', 'Serialize'=>'Json']);
   $W=$Loader->Create_Object('/BD/Cache/Table');
+  $S1->SetObject($W);
+  $S1->BeginUpdate();
+  $Loader->Debug($W);
+  $W->Clear();
   $W->Create_Primary(0);
   $W->Put([
-    [0, 1, 'mftypes.php'     ],
-    [1, 2, 'table.php'       ],
-    [2, 3, 'tdriver.php'     ],
-    [3, 1, 'tindex.php'      ],
-    [4, 2, 'trawrequest.php' ],
-    [5, 3, 'ttable.php'      ],
+    [0, 1, 'MFTypes.php'     ],
+    [1, 2, 'Table.php'       ],
+    [2, 3, 'TDriver.php'     ],
+    [3, 1, 'TIndex.php'      ],
+    [4, 2, 'TRawRequest.php' ],
+    [5, 3, 'TTable.php'      ],
   ]);
   $W->Create_Index(1,'Group');
+  $W->Create_Index([['Lower', ['Rec', 2]]], 'Name');
+  
 //$Loader->Debug($W);
-                 DebTable($W->Query(      )) ; //<Hasn`t index
-  $Loader->Debug(DebTable($W->Query([   3])));
-  echo 'Search: Conumn 2 = 3', "\n";
-  $Loader->Debug(DebTable($W->Query([1=>3])));
-  echo 'Add 2, 2, tdriver.php!', "\n";
+
+  $Loader->Log('Log', 'Query():');
+  LogTable($Loader, $W->Query(      )) ; //<Hasn`t index
+  $Loader->Log('Log', '');
+  
+  $Loader->Log('Log', 'Query(Columt 1 = 3):');
+  LogTable($Loader, $W->Query([   3]));
+  $Loader->Log('Log', '');
+  
+  $Loader->Log('Log', 'Search: Conumn 2 = 3:');
+  LogTable($Loader, $W->Query([1=>3]));
+  $Loader->Log('Log', '');
+  
+  $Loader->Log('Log', 'Add 2, 2, TDriver.php!');
   $W->Add([
-    [2, 2, 'tdriver.php!'    ],
+    [2, 2, 'TDriver.php!'    ],
   ]);
-  Echo "Full:\n";DebTable($W->Query(      )) ;
-  echo 'Search: Conumn 2 = 2', "\n";
-  $Loader->Debug(DebTable($W->Query([1=>2])));
-//$Loader->Debug(DebTable($W->Query([2])));
+  $Loader->Log('Log', '');
+  $Loader->Log('Log', 'Full:');
+  LogTable($Loader, $W->Query(      )) ;
+  $Loader->Log('Log', '');
+  
+  $Loader->Log('Log', 'Search: Conumn 2 = 2');
+  LogTable($Loader, $W->Query([1=>2]));
+  $Loader->Log('Log', '');
+  
+//LogTable($Loader, $W->Query([2]));
+
   $Loader->Debug($W->QueryFields([1]));
-  echo 'Search: Conumn 2 = 3', "\n";
-  $Loader->Debug(DebTable($W->Query([1=>3])));
-//$Loader->Debug($W);
+  $Loader->Log('Log', 'Search: Conumn 2 = 3');
+  LogTable($Loader,  $W->Query([1=>3]));
+  $Loader->Log('Log', '');
+  
+  $Loader->Debug($W);
+  $S1->EndUpdate($W);
+
+  $S2=$Loader->Create_Object('/Storage/Stream', ['./Test.bd', 'Serialize'=>'Json']);
+  $W2=$Loader->Create_Object('/BD/Cache/Table');
+  $S2->SetObject($W2);
+  $S2->Get();
+  $Loader->Debug($W2);
 ?>

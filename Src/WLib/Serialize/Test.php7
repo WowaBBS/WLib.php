@@ -26,6 +26,6 @@
     $Loader->Log('Log', $S->GetExt(), ': ', $Str);
     $Vars2=$S->Deserialize($Str);
     if($Vars!==$Vars2)
-      $Loader->Log('Fatal', 'Deserialize ', $Str, ' wos wrong');
+      $Loader->Log('Fatal', 'Deserialize ', $Str, ' was wrong');
   }
 ?>

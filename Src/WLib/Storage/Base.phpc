@@ -19,10 +19,16 @@
       return false;
     }
 
-    Function BeginUpdate()
+    Function Get($Default=[])
     {
       $this->Log('Fatal', 'Usupported');
-      return [];
+      return $Default;
+    }
+    
+    Function BeginUpdate($Default=[])
+    {
+      $this->Log('Fatal', 'Usupported');
+      return $Default;
     }
 
     Function EndUpdate($Vars)

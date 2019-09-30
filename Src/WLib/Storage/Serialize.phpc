@@ -1,0 +1,59 @@
+<?
+  $this->Parent_Class('/Storage/Base');
+  $this->Load_Type('/Serialize/Object/Map');
+  $this->Load_Type('/Serialize/Object/Vars');
+  $this->Load_Type('/Serialize/Object/VarsCI');
+
+  class C_Storage_Serialize extends C_Storage_Base
+  {
+    Var $Serialize =null;
+    Var $Vars      = [];
+    Var $IsObject  = false;
+
+    Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      $S=$Args['Serialize']?? 'Php';
+      if(Is_String ($S)) $S=[$S];
+      if(Is_Array  ($S)) $S=$this->Get_Singleton('/Serialize/'.$S[0], $S[1]??[]);
+      $this->Serialize=$S;
+    }
+    
+    Function SetObject($Vars)
+    {
+      $this->IsObject=true;
+      $this->Vars=$Vars;
+    }
+    
+    Function _SetDefault($Vars)
+    {
+      if($this->IsObject)
+        return;
+      $this->Vars=$Vars;
+    }
+    
+    Function _Serialize($Vars)
+    {
+      $this->Vars=$Vars;
+      if($this->IsObject)
+        $Vars=T_Serialize_Object_Map::ToVars($Vars);
+      return $this->Serialize->Serialize($Vars);
+    }
+
+    Function _Deserialize($Data)
+    {
+      $Vars=$this->Serialize->Deserialize($Data);
+      if($this->IsObject)
+      {
+        $Map=T_Serialize_Object_Map::Create($this->Vars);
+      //$this->Debug($Vars);
+        $Vars=New T_Serialize_Object_Vars($this, $Vars);
+      //$Vars=New T_Serialize_Object_VarsCI($Vars);
+      //$this->Debug($Vars);
+        $Map->CopyToObj($Vars, $this->Vars);
+      }
+      else
+        $this->Vars=$Vars;
+    }
+  }
+?>

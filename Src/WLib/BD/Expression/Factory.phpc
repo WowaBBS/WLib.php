@@ -1,0 +1,67 @@
+<?
+  $this->Parent_Class('/Object');
+  $this->Load_Type('/BD/Expression/Op');
+  
+  Class C_BD_Expression_Factory extends C_Object
+  {
+    Static $DefaultFuncs=[
+      'Value'   =>['Value' ],
+      'Rec'     =>['Rec'   ],
+      'Arg'     =>['Arg'   ],
+      'Array'   =>['Array' ],
+      '='       =>['Func'  ,['T_BD_Expression_Op', 'Eq'     ]],
+      '<>'      =>['Func'  ,['T_BD_Expression_Op', 'NEq'    ]],
+      '<'       =>['Func'  ,['T_BD_Expression_Op', 'Less'   ]],
+      '<='      =>['Func'  ,['T_BD_Expression_Op', 'LessEq' ]],
+      '>'       =>['Func'  ,['T_BD_Expression_Op', 'More'   ]],
+      '>='      =>['Func'  ,['T_BD_Expression_Op', 'MoreEq' ]],
+      'Lower'   =>['Func'  ,'StrToLower'],
+      'Upper'   =>['Func'  ,'StrToUpper'],
+    ];
+    
+    Var $Funcs=[];
+    Var $Types=[];
+ 
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $this->AddFuncs(Static::$DefaultFuncs);
+    }
+    
+    Function AddFuncs($Funcs)
+    {
+      $Res   =&$this->Funcs;
+      $Types =&$this->Types;
+      ForEach($Funcs As $Name=>$Func)
+      {
+        $Type=Array_Shift($Func);
+        if(!IsSet($Types[$Type]))
+          $Types[$Type]=$this->Loader->Load_Type('/BD/Expression/'.$Type);
+        $Rec=[
+          'Name'=>$Name,
+          'Type'=>$Type,
+          'Args'=>$Func,
+        ];
+        $Res[StrToLower($Name)]=$Rec;
+      }
+    }
+    
+    Function CreateArray($Arr)
+    {
+      $Res=[];
+      ForEach($Arr As $k=>$v)
+        $Res[$k]=$this->Create($v);
+      return $Res;
+    }
+    
+    Function Create($Arr)
+    {
+      $FuncName=StrToLower(Array_Shift($Arr));
+      $FuncRec=$this->Funcs[$FuncName]??False;
+      $Type=$FuncRec['Type'];
+      $Type='T'.$this->Types[$Type];
+      return $Type::Create($this, $FuncRec, $Arr);
+    }
+  }
+
+?>

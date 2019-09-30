@@ -9,7 +9,7 @@
   Function t1($S, $Str='')
   {
     Global $Loader;
-    $Loader->Log('Log', 'Test ', $Str, $Str!==''?' ':'', $S->Get());
+    $Loader->Log('Log', 'Test ', $Str, $Str!==''?' ':'', $S->Get(0));
   }
   
   Function t2($S, $Str='')
@@ -21,7 +21,7 @@
   Function t3($S, $S2)
   {
     Global $Loader;
-    $Vars=(int)$S->BeginUpdate();
+    $Vars=(int)$S->BeginUpdate(0);
     t2($S  ,'S  BeginUpdate'); 
     t2($S2 ,'S2 BeginUpdate');
     $Vars++;

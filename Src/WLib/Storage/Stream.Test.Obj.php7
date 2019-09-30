@@ -1,0 +1,36 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $S1=$Loader->Create_Object('/Storage/Stream', ['./Test.Obj.bd']);
+  $S2=$Loader->Create_Object('/Storage/Stream', ['./Test.Obj.bd']);
+
+  class T_Custom_Object
+  {
+    Var $a='';
+    Var $b=[];
+  }
+  
+  $S1->SetObject(new T_Custom_Object());
+  $S2->SetObject(new T_Custom_Object());
+
+  $Vars=$S1->BeginUpdate(0);
+  $Vars->a='Hello';
+  $Vars->b=['Hello', 'World'];
+  $S1->EndUpdate($Vars);
+  
+  $Loader->Log('Log', 'Test ', $S2->IsChanged()? ' Changed':' Not changed');
+  
+  $Vars=$S2->BeginUpdate(0);
+  $Loader->Debug($Vars);
+  $Vars->a='Bye';
+  $Vars->b=['Bye'=>'World'];
+  $S2->EndUpdate($Vars);
+
+  $Loader->Log('Log', 'Test ', $S1->IsChanged()? ' Changed':' Not changed');
+  
+  $Vars=$S1->Get(0);
+  $Loader->Debug($Vars);
+  
+  $S1->Done();
+  $S2->Done();
+?>

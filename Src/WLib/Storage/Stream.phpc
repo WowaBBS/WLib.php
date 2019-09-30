@@ -1,25 +1,33 @@
 <?
-  $this->Parent_Class('/Storage/Serialise');
+  $this->Parent_Class('/Storage/Serialize');
   $this->Load_Lib('/Stream/Utils'); // omRead|omWrite|omMakePath|omCreate|omBinary
 
-  class C_Storage_Stream extends C_Storage_Serialise
+  class C_Storage_Stream extends C_Storage_Serialize
   {
     Var $Stream      = null;
-    Var $LastModInfo = '';
-    Var $LastVars    = [];
+  # Var $Backup      = null; // TODO:
+    Var $LastModInfo = 'Uninited';
     Var $State       = 'Closed';
 
     Function _Init(Array $Args)
     {
       $Stream=$Args['Stream']??$Args[0];
+    # $Backup=$Args['Backup']??False;
       Parent::_Init($Args);
       $OpenMode=omRead|omWrite|omMakePath|omCreate|omBinary;//|omShareable; // TODO; Bug TestW.php7
       if(Is_String($Stream))
+      {
         $Stream=$this->Create_Object('/Stream/File', [
           'FileName'=>$Stream   ,
           'OpenMode'=>$OpenMode ,
         ]);
+      # $Backup=$this->Create_Object('/Stream/File', [
+      #   'FileName'=>$Stream   .'.backup',
+      #   'OpenMode'=>$OpenMode ,
+      # ]);
+      }
       $this->Stream=$Stream;
+    # $this->Backup=$Backup;
       $this->_SetState('Opened');
     }
     
@@ -55,25 +63,28 @@
       Parent::_Done();
     }
   
-    Protected Function _Get(bool $UnLock)
+    Protected Function _Get(bool $UnLock, $Default=[])
     {
-      $Stream=$this->Stream;
       $this->LastModInfo=$this->GetModInfo();
-      $Res=$Stream->Get_Content();
+    # $Res=$this->Backup->Get_Content();
+    # if(StrLen($Res)>0)
+        $Res=$this->Stream->Get_Content();
       if($UnLock)
-        $Stream->UnLock();
-      $Res=$this->_Deserialize($Res);
-      $this->LastVars=$Res;
-      return $Res;
+        $this->Stream->UnLock();
+      if(!(StrLen($Res)>0))
+        $this->_SetDefault($Default);
+      else
+        $this->_Deserialize($Res);
+      return $this->Vars;
     }
     
-    Function Get()
+    Function Get($Default=[])
     {
       $this->_CheckState('Opened');
       if(!$this->IsChanged())
-        return $this->LastVars;
+        return $this->Vars;
       $this->Stream->LockRead();
-      $Res=$this->_Get(true);
+      $Res=$this->_Get(true, $Default);
       return $Res;
     }
     
@@ -90,14 +101,14 @@
       return $this->LastModInfo!=$this->GetModInfo();
     }
 
-    Function BeginUpdate()
+    Function BeginUpdate($Default=[])
     {
       $this->_SetState('Write');
       $this->Stream->LockWrite();
       if(!$this->IsChanged())
-        $Res=$this->LastVars;
+        $Res=$this->Vars;
       else
-        $Res=$this->_Get(false);
+        $Res=$this->_Get(false, $Default);
       return $Res;
     }
 
@@ -105,9 +116,11 @@
     {
       $this->_CheckState('Write');
       $Stream=$this->Stream;
-      $Stream->Put_Content($this->_Serialize($Vars));
-      $this->LastVars    =$Vars;
+      $Res=$this->_Serialize($Vars);
+    # $Backup->Put_Content($Res);
+      $Stream->Put_Content($Res);
       $this->LastModInfo =$this->GetModInfo();
+      $Stream->Flush();
       $Stream->UnLock();
       $this->_SetState('Opened');
     }

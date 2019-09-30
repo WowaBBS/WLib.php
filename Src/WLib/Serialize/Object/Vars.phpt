@@ -11,39 +11,16 @@
       $this->Logger=$Logger;
       $Var=[];
       ForEach($Vars As $k=>$v)
-        $Var[StrToLower($k)]=$v;
+        $Var[$k]=$v;
       $this->Var=$Var;
-    }
-    
-    Function CopyTo($Obj)
-    {
-      $Map=T_Serialize_Object_Map::Create($Obj);
-      ForEach($Map->Map As $Name=>$Propery)
-      {
-        $v=$Propery->GetValue($Obj);
-        if(Is_Object($v))
-        {
-          $Vars=$this->GetVars($Name);
-          $Vars->CopyTo($v);
-        }
-        else
-        {
-          $v=$this->_Get($Name);
-          if(!Is_Null($v))
-            $Propery->SetValue($Obj, $v);
-        }
-      }
-    //if(Method_Exists($Obj, 'Vars_Loader'))
-      $this->CheckUnused($v);
     }
     
   # Static Function Create($Class, $Vars)
   # {
   # }
     
-    Function _Get($Name)
+    Function _Pop($Name)
     {
-      $Name=StrToLower($Name);
       if(!IsSet($this->Var[$Name]))
         return null;
       $Res=$this->Var[$Name];
@@ -51,17 +28,17 @@
       return $Res;
     }
     
-    Function GetVars($Name)
+    Function PopVars($Name)
     {
-      $R=$this->_Get($Name);
+      $R=$this->_Pop($Name);
       if(!Is_Array($R))
         return null;
       return new Self($this->Logger, $R);
     }
     
-    Function GetArrayVars($Name)
+    Function PopArrayVars($Name)
     {
-      $R=$this->_Get($Name);
+      $R=$this->_Pop($Name);
       if(!Is_Array($R))
         return null;
       $Res=[];

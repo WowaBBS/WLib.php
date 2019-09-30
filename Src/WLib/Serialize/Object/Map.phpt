@@ -2,6 +2,8 @@
   Class T_Serialize_Object_Map
   {
     Var $Map=[];
+    Var $Serialize   =false;
+    Var $Deserialize =false;
     
     Function __Construct($Class)
     {
@@ -26,9 +28,36 @@
     {
       $Map=Static::Create($Obj);
       $Res=[];
-      ForEach($Map->Map As $Property)
+      ForEach($Map->Map As [$Property, $Map2])
         $Res[$Property->getName()]=Static::ToVars($Property->GetValue($Obj));
+      if($F=$Map->Serialize) $Res=$F->Invoke($Obj, $Res);
       return $Res;
+    }
+    
+    Function CopyToObj($Vars, $Obj)
+    {
+      ForEach($this->Map As $Name=>[$Propery, $Map])
+      {
+        $v=$Propery->GetValue($Obj);
+        if(Is_Object($v))
+        {
+          if(!$Map)
+            $Map=Static::Create($v);
+          $Vars=$this->PopVars($Name);
+          $Map->CopyToObj($Vars, $v);
+        }
+        else
+        {
+          if($Map)
+            $this->Logger->Log('Error', 'Field ', $Name, ' has map');
+          $v=$Vars->_Pop($Name);
+          if(!Is_Null($v))
+            $Propery->SetValue($Obj, $v);
+        }
+      }
+      if($F=$this->Deserialize) $F->Invoke($Obj, $Vars);
+    //if(Method_Exists($Obj, 'Vars_Loader'))
+      $Vars->CheckUnused($v);
     }
     
     Static Function Create($Obj)
@@ -74,39 +103,20 @@
           Break;
       //echo $DClass, ':',$Name, "\n";
         $Property->setAccessible(true);
-        $Map[StrToLower($Name)]=$Property;
+        $Map[$Name]=[$Property, False];
       }
       $this->Map=$Map;
+      if(Method_Exists($ClassName, 'Serialize_Object_Vars'))
+        [$ClassName, 'Serialize_Object_Vars']($this);
+      if($Class->HasMethod('Serialize_Object'))
+        $this->Serialize=$Class->GetMethod('Serialize_Object');
+      if($Class->HasMethod('Deserialize_Object'))
+        $this->Deserialize=$Class->GetMethod('Deserialize_Object');
     }
     
-    // Deprecated
-    Function UpdateObj($Obj)
+    Function RemoveField(String $Name)
     {
-      if($this->Map)
-        return;
-      $Map=[];
-    //ForEach(Get_Object_Vars($Obj) As $k=>&$v)
-      ForEach((Array)$Obj As $k=>&$v)
-      {
-        $Field=$k[0]==="\0"? Explode("\0", $k)[2]:$k;
-        $Map[StrToLower[$Field]]=$k;
-      //echo $Field, '->', $k, "\n";
-      }
-      $this->Map=$Map;
-    }
-    
-    Function _Get($Name)
-    {
-      $Name=StrToLower($Name);
-      if(!IsSet($this->Var[$Name]))
-        return null;
-      $Res=$this->Var[$Name];
-      UnSet($this->Var[$Name]);
-      return $Res;
-    }
-    
-    Function GetArray($Name, $Class)
-    {
+      UnSet($this->Map[$Name]);
     }
   };
   

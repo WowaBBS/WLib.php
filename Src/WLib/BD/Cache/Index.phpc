@@ -6,13 +6,23 @@
     Var $ByKey  = []; // По ключу находит индексы
     Var $Index  = []; // По индексу находит ключ
     Var $Fields = [];
+    Var $Table  =null;
+    
+    Function GetExprFactory()
+    {
+      return $this->Table->GetExprFactory();
+    }
  
     Function _Init(Array $Args)
     {
       parent::_Init($Args);
     //$this->Fields=(Array)$Args['Fields'];
+      $this->Table=$Args['Table'];
       $Fields=$Args['Fields'];
-      $this->Fields=Is_Array($Fields)? $Fields:[$Fields];
+    //$this->ExprFactory=$Args['ExprFactory'];
+      $Fields=$this->Table->_MakeFields($Fields);
+          
+      $this->Fields=$Fields;
     }
  
     Function Clear()
@@ -45,7 +55,7 @@
     {
       $Key=[];
       ForEach($this->Fields As $k=>$v)
-        $Key[$k]=$Rec[$v];
+        $Key[$k]=$v->Calc($Rec);
       Return Serialize($Key);
     }
  
@@ -72,7 +82,7 @@
    #    $this->AddRec($Idx++, $Data[$k]);
    #}
  
-    Function Put($Data)
+    Function PutList($Data)
     {
       $this->Clear();
       ForEach($Data As $k=>$v)
@@ -91,6 +101,33 @@
       UnSet(             $this->Index[$Idx]       );
       Return True;
     }
-  }
+
+    Protected Function _Debug_Info(Array &$Res)
+    {
+      Parent::_Debug_Info($Res);
+    //unset($Res['ExprFactory' ]);
+      unset($Res['Table' ]);
+    }
+    
+    Static Function Serialize_Object_Vars(&$Map)
+    {
+      $Map->RemoveField('Fields' );
+      $Map->RemoveField('Table'  );
+    }
+    
+    Function ToVars()
+    {
+      $Res=[];
+      $Res['ByKey']=$this->ByKey;
+      $Res['Index']=$this->Index;
+      return $Res;
+    }
+    
+    Static Function Deserialize_Object($Map)
+    {
+      $this->ByKey=$Map->_Pop('ByKey');
+      $this->Index=$Map->_Pop('Index');
+    }
+  } 
 
 ?>

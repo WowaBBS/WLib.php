@@ -19,6 +19,11 @@
       return $Rec[$this->Name];
     }
 
+    Function Set(Array &$Rec, $Value)
+    {
+      $Rec[$this->Name]=$Value;
+    }
+
     Function __ToString()
     {
       return '`'.$this->Name.'`';

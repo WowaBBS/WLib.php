@@ -1,0 +1,7 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+
+  $Object_Factory=$Factory->Get_Singleton('/Serialize/Object/Factory');
+  //$Object_Factory->
+  TODO: See WLib/Storage/Stream.Test.Obj.php7
+?>

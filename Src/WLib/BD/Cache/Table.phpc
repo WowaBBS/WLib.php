@@ -33,11 +33,17 @@
         $Index->Clear();
     }
  
-    Function Put($Data)
+    Function PutList($Data)
     {
       $this->Data=$Data;
       ForEach($this->Indices As $Index)
         $Index->PutList($Data);
+    }
+    
+    Function AddList($Data)
+    {
+      ForEach($Data As $Rec)
+        $this->AddRec($Rec);
     }
     
     Function AddRec($Rec)
@@ -47,30 +53,25 @@
       {
         $Idx=Array_Keys($Idx)[0];
         ForEach($this->Indices As $Index)
-          $Index->DelRec($Idx);
-        $this->Data[$Idx]=$Rec;
+          $Index->RemoveRecByIdx($Idx);
+        $this->Data[$Idx]=&$Rec;
       }
       Else
       {
-        $this->Data[]=$Rec;
+        $this->Data[]=&$Rec;
         End($this->Data);
         $Idx=Key($this->Data);
       }
       ForEach($this->Indices As $Index)
         $Index->AddRec($Idx, $Rec);
+      return $Rec;
     }
  
-    Function Add($Data)
-    {
-      ForEach($Data As $Item)
-        $this->AddRec($Item);
-    }
-    
     Function _GetIndex($Fields, $Name=True, $bCreate=false)
     {
-      If(!Is_Array($Fields)) $Fields=[$Fields];
-      Sort($Fields);
-      If($Name===True  ) $Name=Is_Array($Fields)? Implode(',', $Fields):$Fields;
+    //$Fields=$this->_MakeFields($Fields);
+    //Sort($Fields);
+      If($Name===True  ) $Name=Implode(',', $Fields);
       If(!IsSet($this->Indices[$Name]))
       {
         if(!$bCreate)
@@ -115,26 +116,84 @@
  
     Function Create_Primary($Fields, $Name=True)
     {
-      $Fields=$this->_MakeFields($Fields);
       $Res=$this->Create_Index($Fields, $Name);
+      $Res->SetUnique();
       $this->Primary=$Res;
       Return $Res;
     }
     
-    Function Query($Where=[])
+    Function _ParseQuery($Where, &$Values, &$Fields)
     {
       If(!$Where)
-        Return $this->Data;
-      $Res=[];
-      KSort($Where);
-      If($Index=$this->_GetIndex(Array_Keys($Where)))
-        ForEach($Index->Search(Array_Values($Where)) As $k=>$v)
-          $Res[]=$this->Data[$k];
+      {
+        if($Values)
+          $this->Log('Error', 'Query has values without fields');
+        Return true;
+      }
+      if($Values)
+        $Fields=$Where;
+      else
+      {
+        $Fields=Array_Keys   ($Where);
+        $Values=Array_Values ($Where);
+      }
+      $Fields=$this->_MakeFields($Fields);
+      
+    //KSort($Where);
+      return false;
+    }
+    
+    Function QueryCount($Where=[], $Values=[])
+    {
+      $Fields=[];
+      If($this->_ParseQuery($Where, $Values, $Fields))
+        return Count($this->Data);
+    
+      If($Index=$this->_GetIndex($Fields))
+      {
+        return Count($Index->SearchByKey($Values));
+      }
+      Else
+      {
+        $this->Log('Error', 'Index for fields [', Implode(',', $Fields), '] not found, TODO: full scan');
+      }
       Return $Res;
+    }
+ 
+    Function Query($Where=[], $Values=[])
+    {
+      $Fields=[];
+      If($this->_ParseQuery($Where, $Values, $Fields))
+        return $this->Data;
+      
+      $Res=[];
+      If($Index=$this->_GetIndex($Fields))
+      {
+        ForEach($Index->SearchByKey($Values)As $k=>$v)
+          $Res[]=$this->Data[$k];
+      }
+      Else
+      {
+        $this->Log('Error', 'Index for fields [', Implode(',', $Fields), '] not found, TODO: full scan');
+      }
+      Return $Res;
+    }
+ 
+    Function QueryRow($Where=[], $Values=[])
+    {
+      $Res=$this->Query($Where, $Values);
+      Switch(Count($Res))
+      {
+      Case 0: return null;
+      Case 1: return $Res[0];
+      }
+      $this->Log('Error', 'Count more than one: ', Count($Res));
+      Return $Res[0];
     }
  
     Function QueryFields($Fields)
     {
+      $Fields=$this->_MakeFields($Fields);
       $Index=$this->_GetIndex($Fields);
       Return $Index? $Index->FieldValues():[];
     }
@@ -170,8 +229,8 @@
       $Undefined=[];
       ForEach($this->Indices As $k=>$Index)
       {
-        if(IsSet($Indices[$k]))
-          $Index->Deserialize_Object($Indices[$k]);
+        if($IndexVars=$Indices->PopVars($k))
+          $Index->Deserialize_Object($IndexVars);
         else
           $Undefined[]=$Index;
       }

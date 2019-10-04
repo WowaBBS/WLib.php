@@ -1,0 +1,67 @@
+<?
+  $this->Parent_Class('/Object');
+  $this->Load_Type('/Serialize/Object/Map');
+  $this->Load_Type('/Serialize/Object/Vars');
+  $this->Load_Type('/Serialize/Object/VarsCI');
+
+  class C_Serialize_Object_Factory extends C_Object
+  {
+    Var $ClassMaps=[];
+    
+    Function _Done()
+    {
+      $this->ClassMaps=[];
+      Parent::_Done();
+    }
+  
+    Function GetClassMap($Obj)
+    {
+      If(Is_Object($Obj))      
+        $Class=Get_Class($Obj);
+      Else
+        $Class=$Obj;
+      if($Res=$this->ClassMaps[$Class]?? False)
+        Return $Res;
+      $Res=new T_Serialize_Object_Map($this, $Class);
+      $this->ClassMaps[$Class]=$Res;
+      $Res->UpdateClass($Class);
+      Return $Res;
+    }
+    
+    Function ToVars($Var)
+    {
+      if(Is_Object ($Var)) return $this->ObjectToVars ($Var);
+      if(Is_Array  ($Var)) return $this->ArrayToVars  ($Var);
+      return $Var;
+    }
+    
+    Function ArrayToVars($Arr)
+    {
+      $Res=[];
+      ForEach($Arr As $k=>$v)
+        $Res[$k]=$this->ToVars($v);
+      return $Res;
+    }
+    
+    Function ObjectToVars($Obj)
+    {
+      $Map=$this->GetClassMap($Obj);
+      $Res=[];
+      ForEach($Map->Map As [$Property, $Map2])
+        $Res[$Property->getName()]=$this->ToVars($Property->GetValue($Obj));
+      if($F=$Map->Serialize) $Res=$F->Invoke($Obj, $Res);
+      return $Res;
+    }
+    
+    Function CreateVars($Vars)
+    {
+      return new T_Serialize_Object_Vars($this, $Vars);
+    }
+
+    Function CreateVarsCI($Vars)
+    {
+      return new T_Serialize_Object_VarsCI($this, $Vars);
+    }
+  };
+
+?>

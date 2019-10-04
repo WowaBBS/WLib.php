@@ -1,0 +1,7 @@
+<?
+  $t=Array();
+  $t[]='a';
+  UnSet($t[0]);
+  $t[]='a';
+  Var_Dump($t);
+?>

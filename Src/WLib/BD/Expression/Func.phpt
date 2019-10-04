@@ -4,12 +4,18 @@
   Class T_BD_Expression_Func extends T_BD_Expression_Array
   {
     Var $Func=''; // Callable
+    Var $ArgsNum=0;
     
     Static Function Create($Factory, $Rec, $Arr)
     {
       $Res=new Self();
-      $Res->Func=$Rec['Args'][0];
-      $Res->List=$Factory->CreateArray($Arr);
+      $Res->ArgsNum =$Rec['Args'][0];
+      $Res->Func    =$Rec['Args'][1];
+      if($Res->ArgsNum===1 && Count($Arr)>1 && Is_String($Arr[0]))
+        $Arr=[$Arr];
+      if($Res->ArgsNum>=0 && Count($Arr)!==$Res->ArgsNum)
+        $Factory->Log('Error', 'Count arguments for ',$this->Func, ' is wrong: ', Json_Encode($Arr, $this->Flags, JSON_UNESCAPED_SLASHES));
+      $Res->List    =$Factory->CreateArray($Arr);
       return $Res;
     }
     

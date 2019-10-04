@@ -6,9 +6,9 @@
   {
     Var $Map=[];
     
-    Function __Construct($Logger, $Vars=[])
+    Function __Construct(C_Serialize_Object_Factory $Factory, $Vars=[])
     {
-      Parent::__Construct($Logger, $Vars);
+      Parent::__Construct($Factory, $Vars);
       $Map=[];
       ForEach($Vars As $k=>$v)
         $Map[StrToLower($k)]=$k;

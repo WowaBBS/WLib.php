@@ -3,28 +3,26 @@
   
   class T_Serialize_Object_Vars
   {
-    Var $Var=[];
-    Var $Logger;
+    Var $Vars=[];
+    Var $Factory=null; // TODO: Weak reference
     
-    Function __Construct($Logger, $Vars=[])
+    Function __Construct(C_Serialize_Object_Factory $Factory, $Vars=[])
     {
-      $this->Logger=$Logger;
-      $Var=[];
-      ForEach($Vars As $k=>$v)
-        $Var[$k]=$v;
-      $this->Var=$Var;
+      $this->Factory =$Factory ;
+      $this->Vars    =$Vars    ;
     }
     
-  # Static Function Create($Class, $Vars)
-  # {
-  # }
-    
+    Function CopyToObj($Obj)
+    {
+      return $this->Factory->GetClassMap($Obj)->CopyToObj($this, $Obj);
+    }
+   
     Function _Pop($Name)
     {
-      if(!IsSet($this->Var[$Name]))
+      if(!IsSet($this->Vars[$Name]))
         return null;
-      $Res=$this->Var[$Name];
-      UnSet($this->Var[$Name]);
+      $Res=$this->Vars[$Name];
+      UnSet($this->Vars[$Name]);
       return $Res;
     }
     
@@ -33,7 +31,8 @@
       $R=$this->_Pop($Name);
       if(!Is_Array($R))
         return null;
-      return new Self($this->Logger, $R);
+      $Class=Get_Class($this);
+      return new $Class($this->Factory, $R);
     }
     
     Function PopArrayVars($Name)
@@ -42,15 +41,22 @@
       if(!Is_Array($R))
         return null;
       $Res=[];
+      $Class=Get_Class($this);
       ForEach($R As $k=>$v)
-        $Res[$k]=new Self($this->Logger, $v);
+        $Res[$k]=new $Class($this->Factory, $v);
       return $Res;
     }
     
     Function CheckUnused($Outer)
     {
-      ForEach($this->Var as $k=>$v)
-        $this->Logger->Log('Error', 'Varible ', $k, ' was unused');
+      ForEach($this->Vars as $k=>$v)
+        $this->Factory->Log('Error', 'Varible ', $k, ' was unused');
+    }
+
+    Function _Debug_Serialize(&$Res)
+    {
+    //Parent::_Debug_Info($Res);
+      unset($Res['Factory' ]);
     }
   };
   

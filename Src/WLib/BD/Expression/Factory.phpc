@@ -9,14 +9,22 @@
       'Rec'     =>['Rec'   ],
       'Arg'     =>['Arg'   ],
       'Array'   =>['Array' ],
-      '='       =>['Func'  ,['T_BD_Expression_Op', 'Eq'     ]],
-      '<>'      =>['Func'  ,['T_BD_Expression_Op', 'NEq'    ]],
-      '<'       =>['Func'  ,['T_BD_Expression_Op', 'Less'   ]],
-      '<='      =>['Func'  ,['T_BD_Expression_Op', 'LessEq' ]],
-      '>'       =>['Func'  ,['T_BD_Expression_Op', 'More'   ]],
-      '>='      =>['Func'  ,['T_BD_Expression_Op', 'MoreEq' ]],
-      'Lower'   =>['Func'  ,'StrToLower'],
-      'Upper'   =>['Func'  ,'StrToUpper'],
+      
+      '='       =>['Op'    , 2 ,['T_BD_Expression_Op', 'Eq'      ]],
+      '<>'      =>['Op'    , 2 ,['T_BD_Expression_Op', 'NEq'     ]],
+      '<'       =>['Op'    , 2 ,['T_BD_Expression_Op', 'Less'    ]],
+      '<='      =>['Op'    , 2 ,['T_BD_Expression_Op', 'LessEq'  ]],
+      '>'       =>['Op'    , 2 ,['T_BD_Expression_Op', 'More'    ]],
+      '>='      =>['Op'    , 2 ,['T_BD_Expression_Op', 'MoreEq'  ]],
+      'In'      =>['Op'    , 2 ,['T_BD_Expression_Op', 'In'      ]],
+      'Like'    =>['Op'    , 2 ,['T_BD_Expression_Op', 'Like'    ]],
+      'Between' =>['Op'    , 3 ,['T_BD_Expression_Op', 'Between' ]],
+      'Not'     =>['Op'    , 1 ,['T_BD_Expression_Op', 'Not'     ]],
+      'And'     =>['Op'    ,-1 ,['T_BD_Expression_Op', 'And'     ]],
+      'Or'      =>['Op'    ,-1 ,['T_BD_Expression_Op', 'Or'      ]],
+      
+      'Lower'   =>['Func'  , 1 ,'StrToLower'],
+      'Upper'   =>['Func'  , 1 ,'StrToUpper'],
     ];
     
     Var $Funcs=[];

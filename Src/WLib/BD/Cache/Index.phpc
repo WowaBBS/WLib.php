@@ -3,10 +3,30 @@
   
   Class C_BD_Cache_Index extends C_Object
   {
-    Var $ByKey  = []; // По ключу находит индексы
-    Var $Index  = []; // По индексу находит ключ
-    Var $Fields = [];
-    Var $Table  =null;
+    Var $ByKey    = []; // По ключу находит индексы
+    Var $Index    = []; // По индексу находит ключ
+    Var $Fields   = [];
+    Var $Table    =null;
+    Var $IsUnique =False;
+    Var $AutoInc  =False;
+    
+    Function IsPrimary()
+    {
+      return $this->Table->Primary->Object_Id===$this->Object_Id;
+    }
+    
+    Function SetAutoIncrement($v=1)
+    {
+      if(!$this->IsPrimary())
+        $this->Log('Error', 'Autoincrement shoul be only on primary index');
+      $this->SetUnique();
+      $this->AutoInc=$v;
+    }
+    
+    Function SetUnique()
+    {
+      $this->IsUnique=true;
+    }
     
     Function GetExprFactory()
     {
@@ -30,24 +50,109 @@
       $this->ByKey=[];
       $this->Index=[];
     }
- 
-    Function Search($Key)
+    
+    //****************************************************************
+    
+    Static Function __Keys_GetFields(Array &$Res, Array $List, Int $c, Array $Fields=[])
     {
-      $Key=Serialize($Key);
-      return $this->ByKey[$Key] ?? [];
+      $c--;
+      if($c>0)
+      {
+        ForEach($List As $k=>$v)
+        {
+          $R=$Fields;
+          $R[]=$k;
+          Static::__Keys_GetFields($Res, $R, $c, $v);
+        }
+      }
+      Else
+      {
+        ForEach($List As $k=>$v)
+        {
+          $R=$Fields;
+          $R[]=$k;
+          $Res[]=$R;
+        }
+      }
     }
  
-    Function SearchRec($Rec)
+    Static Function __Keys_GetIdx(Array &$Res, Array $ByKey)
+    {
+      ForEach($ByKey As $k=>$v)
+        if(Is_Array($v))
+          Static::__Keys_GetIdx($Res, $v);
+        elseif(Is_Integer($k))
+          $Res[$k]=1;
+    }
+ 
+    Static Function _Keys_GetIdx(Array $ByKey)
+    {
+      $Res=[];
+      Static::__Keys_GetIdx($Res, $ByKey);
+      Return $Res;
+    }
+    
+    Function _Keys_Get(Array $Key)
+    {
+      $Res=$this->ByKey;
+      ForEach($Key As $v)
+        $Res=$Res[$v]??[];
+      return $Res;
+    }
+ 
+    Function &_Keys_Create(Array $Key)
+    {
+      $Res=&$this->ByKey;
+      ForEach($Key As $v)
+      {
+        if(!IsSet($Res[$v]))
+          $Res[$v]=[];
+        $Res=&$Res[$v];
+      }
+      return $Res;
+    }
+ 
+    Static Function __Keys_Remove(Array &$ByKey, Array $Key, $i=0)
+    {
+      $K=$Key[$i];
+      $i++;
+      if(IsSet($Key[$i]))
+      {
+        $Res=Static::__Keys_Remove($ByKey[$K], $Key, $i);
+        if(Count($ByKey[$K])===0)
+          UnSet($ByKey[$K]);
+      }
+      else
+      {
+        $Res=$ByKey[$K];
+        UnSet($ByKey[$K]);
+      }
+      return $Res;
+    }
+    
+    Function _Keys_Remove(Array $Key)
+    {
+      return Static::__Keys_Remove($this->ByKey, $Key);
+    }
+ 
+    //****************************************************************
+    Function SearchByKey(Array $Key)
+    {
+      $Res=$this->_Keys_Get($Key);
+      $Res=Static::_Keys_GetIdx($Res);
+      return $Res;
+    }
+ 
+    Function SearchRec(Array $Rec)
     {
       $Key=$this->_KeyByRec($Rec);
-      Return $this->ByKey[$Key] ?? [];
+      Return $this->SearchByKey($Key);
     }
  
     Function FieldValues()
     {
       $Res=[];
-      ForEach($this->ByKey As $k=>$v)
-        $Res[]=UnSerialize($k);
+      Static::__Keys_GetFields($Res, $this->ByKey, Count($this->Fields));
       Return $Res;
     }
  
@@ -56,24 +161,38 @@
       $Key=[];
       ForEach($this->Fields As $k=>$v)
         $Key[$k]=$v->Calc($Rec);
-      Return Serialize($Key);
+      Return $Key;
     }
  
-    Function AddRec($Idx, $Rec)
+    Function AddRec($Idx, &$Rec)
     {
       $Key=$this->_KeyByRec($Rec);
+      if($this->AutoInc!==False && End($Key)===0)
+      {
+        $j=Count($Key)-1;
+        UnSet($Key[$j]);
+        $Res=&$this->_Keys_Create($Key);
+        if(!IsSet($Res['Count']))
+          $Res['Count']=$this->AutoInc;
+        $I=$Res['Count']++;
+        End($this->Fields)->Set($Rec, $I);
+        $Key[$j]=$I;
+      }
+      
       If(IsSet($this->Index[$Idx]))
       {
-        $K=$this->Index[$Idx];
-        If($Key==$K)
+        $OldKey=$this->Index[$Idx];
+        If($Key==$OldKey)
           Return;
-        UnSet($this->ByKey[$this->Index[$Idx]][$Idx]);
+        $this->_Keys_Remove($OldKey);
       }
-      If(!IsSet($this->ByKey[$Key]))
-        $this->ByKey[$Key]=[$Idx=>1];
-      Else
-        $this->ByKey[$Key][$Idx]=1;
+      
       $this->Index[$Idx]=$Key;
+      $Res=&$this->_Keys_Create($Key);
+      $Res[$Idx]=1;
+      
+      if($this->IsUnique && Count($Res)>1)
+        $this->Log('Error', 'Keys [', Implode(', ', $Key), '] is not unique');
     }
  
    #Function Add($Idx, $Data)
@@ -89,16 +208,26 @@
         $this->AddRec($k, $Data[$k]);
     }
  
-    Function DelRec($Idx)
+    Function RemoveRecByKey($Key)
     {
-      If(!IsSet($this->Index[$Idx]))
-      { // TODO: $this->Log('Error', ...);
-        $this->Debug(['Key '.$Idx.' not found'=>$this]);
+      $Res=$this->_Keys_Remove($Key);
+      $Res=Static::_Keys_GetIdx($Res);
+      ForEach($Res As $k=>$v)
+        UnSet($this->Index[$k]);
+    }
+    
+    Function RemoveRecByIdx($Idx)
+    {
+      $Key=$this->Index[$Idx]?? [];
+      If(!$Key)
+      {
+        $this->Log('Error', 'Key for idx=', $Idx, ' not found');
         Return False;
       }
-    //Echo 'DelRec ', $Idx, ' By Key ',$this->Index[$Idx], "\n";
-      UnSet($this->ByKey[$this->Index[$Idx]][$Idx]);
-      UnSet(             $this->Index[$Idx]       );
+      $Key[]=$Idx;
+      $this->_Keys_Remove($Key);
+
+      UnSet($this->Index[$Idx]);
       Return True;
     }
 
@@ -111,8 +240,10 @@
     
     Static Function Serialize_Object_Vars(&$Map)
     {
-      $Map->RemoveField('Fields' );
-      $Map->RemoveField('Table'  );
+      $Map->RemoveField('Fields'   );
+      $Map->RemoveField('Table'    );
+      $Map->RemoveField('IsUnique' );
+      $Map->RemoveField('AutoInc'  );
     }
     
     Function ToVars()
@@ -123,7 +254,7 @@
       return $Res;
     }
     
-    Static Function Deserialize_Object($Map)
+    Function Deserialize_Object($Map)
     {
       $this->ByKey=$Map->_Pop('ByKey');
       $this->Index=$Map->_Pop('Index');

@@ -29,22 +29,24 @@
       $Logger->Log('Log', '  ', Implode(' ,', Row_Pad($Cols, $Lens, $Row)));
   }
   
-  $S1=$Loader->Create_Object('/Storage/Stream', ['./Test.bd', 'Serialize'=>'Json']);
   $W=$Loader->Create_Object('/BD/Cache/Table');
+  $W->Create_Primary(0)->SetAutoIncrement();
+  $W->Create_Index(1,'Group');
+
+  $S1=$Loader->Create_Object('/Storage/Stream', ['./Test.bd', 'Serialize'=>'Json']);
   $S1->SetObject($W);
+  
   $S1->BeginUpdate();
   $Loader->Debug($W);
   $W->Clear();
-  $W->Create_Primary(0);
-  $W->Put([
-    [0, 1, 'MFTypes.php'     ],
-    [1, 2, 'Table.php'       ],
-    [2, 3, 'TDriver.php'     ],
-    [3, 1, 'TIndex.php'      ],
-    [4, 2, 'TRawRequest.php' ],
-    [5, 3, 'TTable.php'      ],
+  $W->AddList([
+    [0, 1, 'MFTypes.php'     ], // 1,
+    [0, 2, 'Table.php'       ], // 2,
+    [0, 3, 'TDriver.php'     ], // 3,
+    [0, 1, 'TIndex.php'      ], // 4,
+    [0, 2, 'TRawRequest.php' ], // 5,
+    [0, 3, 'TTable.php'      ], // 6,
   ]);
-  $W->Create_Index(1,'Group');
   $W->Create_Index([['Lower', ['Rec', 2]]], 'Name');
   
 //$Loader->Debug($W);
@@ -62,10 +64,9 @@
   $Loader->Log('Log', '');
   
   $Loader->Log('Log', 'Add 2, 2, TDriver.php!');
-  $W->Add([
-    [2, 2, 'TDriver.php!'    ],
-  ]);
+  $W->AddList([[3, 2, 'TDriver.php!'    ],]);
   $Loader->Log('Log', '');
+  
   $Loader->Log('Log', 'Full:');
   LogTable($Loader, $W->Query(      )) ;
   $Loader->Log('Log', '');
@@ -79,6 +80,16 @@
   $Loader->Debug($W->QueryFields([1]));
   $Loader->Log('Log', 'Search: Conumn 2 = 3');
   LogTable($Loader,  $W->Query([1=>3]));
+  $Loader->Log('Log', '');
+  
+  $Loader->Log('Log', 'Add 2, 2, tdRiver.php!');
+  $W->AddList([[2, 2, 'tdRiver.php!'    ],]);
+  $Loader->Log('Log', '');
+  
+  $Loader->Debug($W->QueryFields([1]));
+  $Loader->Log('Log', 'Search: Conumn 3 = tdriver.php!');
+//LogTable($Loader,  $W->Query([['Lower', ['Rec', 2]]], ['tdriver.php!']));
+  LogTable($Loader,  $W->Query([['Lower', 'Rec', 2]], ['tdriver.php!'])); // Short format
   $Loader->Log('Log', '');
   
   $Loader->Debug($W);

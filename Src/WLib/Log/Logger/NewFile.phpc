@@ -1,0 +1,36 @@
+<?
+  $Loader->Parent_Class('/Log/Logger/Stream');
+ 
+  Class C_Log_Logger_NewFile extends C_Log_Logger_Stream
+  {
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+
+      $Path  = $Args['Path' ]?? './log/';
+      $Ext   = $Args['Ext'  ]?? '.log';
+      
+      [$MTime, $Time]= Explode(' ',MicroTime());
+      $MTime = (Int)((Float)$MTime*1000000);
+      
+      $Path .=@Date('Ymd_his_', $Time);
+      $i=16;
+      Do
+      {
+        $Add=Str_Pad($MTime, 6, '0', STR_PAD_LEFT);
+        $FilePath =$Path.$Add.$Ext;
+        Echo $FilePath, "\n";
+        $this->Stream->Assign($FilePath);
+        If($this->Stream->Open(omReadWrite|omCreate|omMakePath|omBinary))
+          Break;
+        $MTime++;
+      }
+      While(--$i);
+
+      $this->Write(Serialize($_SERVER));
+      $this->Write("\n");
+      $this->Write(Serialize($_POST));
+      $this->Write("\n");
+    }
+  };
+?>

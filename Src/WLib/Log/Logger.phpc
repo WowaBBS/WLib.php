@@ -65,5 +65,47 @@
     {
       return true;
     }
+ 
+    Function Error_Handler($ErrNo, $ErrStr, $ErrFile, $ErrLine, $Vars)
+    {
+      If($ErrNo==2048)
+        Return;
+      static $ErrorTypes=[
+        1    => ['Error'   ,'Error'           ],
+        2    => ['Warning' ,'Warning'         ],
+        4    => ['Error'   ,'Parsing Error'   ],
+        8    => ['Error'   ,'Notice'          ],
+        16   => ['Error'   ,'Core Error'      ],
+        32   => ['Warning' ,'Core Warning'    ],
+        64   => ['Error'   ,'Compile Error'   ],
+        128  => ['Warning' ,'Compile Warning' ],
+        256  => ['Error'   ,'User Error'      ],
+        512  => ['Warning' ,'User Warning'    ],
+        1024 => ['Note'    ,'User Notice'     ],
+        2048 => ['Note'    ,'Runtime Notice'  ],
+        4096 => ['Error'   ,'Fatal error'     ],
+      ];
+  
+      $ErrorType=$ErrorTypes[$ErrNo]?? ['Error',''];
+      $Res=$ErrStr;
+    //$Res=' ['.$ErrNo.'] '.$ErrStr;
+      $this->Log($ErrorType[0], $Res)->File($ErrFile, $ErrLine)->BackTrace(2);
+    }
+    
+    Function Set_Error_Handler()
+    {
+      if(($this->Error_Handler_Setted?? false))
+        return;
+      Set_Error_Handler([$this, 'Error_Handler']);
+      $this->Error_Handler_Setted=true;
+    }
+    
+    Function Restore_Error_Handler()
+    {
+      if(!($this->Error_Handler_Setted?? false))
+        return;
+      Restore_Error_Handler();
+      UnSet($this->Error_Handler_Setted);
+    }
   };
 ?>

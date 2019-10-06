@@ -10,6 +10,14 @@
     {
       parent::_Init($Args);
       $this->Add($this->Create_Object('/Log/Logger/Echo'), ['Name'=>'Console']);
+      if($Args['Set_Error_Handler']?? True)
+        $this->Set_Error_Handler();
+    }
+    
+    Function _Done()
+    {
+      $this->Restore_Error_Handler();
+      Parent::_Done();
     }
     
     Function _LogItem($LogItem)
@@ -75,6 +83,13 @@
     //if(Is_Null   ($Stream)) $Stream=$this->Stream_Default;
       $Args['Stream']=$Stream;
       return $this->Create_Object('/Log/Logger/Stream', $Args);
+    }
+    
+    Function CreateNewFile($Path=null, $Args=[])
+    {
+    //if(Is_Null   ($Stream)) $Stream=$this->Stream_Default;
+      $Args['Path']=$Path;
+      return $this->Create_Object('/Log/Logger/NewFile', $Args);
     }
   };
 ?>

@@ -67,6 +67,7 @@
         $this->Line = $Line ;
         $this->Col  = $Col  ;
       }
+      return $this;
     }
     
     Function __invoke(... $Args)
@@ -84,13 +85,36 @@
     {
       return $this->AddArr([$Str]);
     }
+
+    //****************************************************************
+    // Stack
+    Var $Stack=[];
+
+    Function SetStack(Array $List, Int $Skip=0, Int $Count=1000)
+    {
+      if($Skip>0)
+        Array_Splice($List, 0, $Skip);
+      if(Count($List)>$Count)
+        Array_Splice($List, $Count);
+      $this->Stack=$List;
+    }
+
+    Function BackTrace($Skip=0)
+    {
+      $this->SetStack(Debug_BackTrace(), $Skip);
+    }
+
+    Function SetStackFromException($Exception)
+    {
+      $this->SetStack($Exception->getTrace());
+    }
     
     //TODO:
-    function GetExceptionTraceAsString($Exception)
+    function GetStackAsString()
     {
       $Res= [];
       $Count = 0;
-      ForEach($Exception->getTrace()As $Frame)
+      ForEach($this->Stack As $Frame)
       {
         $Args = '';
         If(IsSet($Frame['args']))
@@ -98,13 +122,22 @@
           $Args = [];
           ForEach($Frame['args']As $Arg)
           {
-            If(Is_String   ($Arg)) { $Args[] = "'".$Arg."'"            ; } Else
-            If(Is_Array    ($Arg)) { $Args[] = 'Array'                 ; } Else
-            If(Is_Null     ($Arg)) { $Args[] = 'null'                  ; } Else
-            If(Is_Bool     ($Arg)) { $Args[] = $Arg? 'true':'false'    ; } Else
-            If(Is_Object   ($Arg)) { $Args[] = Get_Class($Arg)         ; } Else
-            If(Is_Resource ($Arg)) { $Args[] = Get_Resource_Type($Arg) ; } Else
-                                   { $Args[] = $Arg                    ; }
+            // TODO: $this->DebugL($Arg,3);
+            Switch(GetType($Arg))
+            {
+            Case 'boolean'       : $Args[] = $Arg? 'true':'false'    ; break;
+            Case 'integer'       : $Args[] = $Arg                    ; break;
+            Case 'double'        : $Args[] = $Arg                    ; break;
+            Case 'string'        : $Args[] = "'".$Arg."'"            ; break;
+            Case 'object'        : $Args[] = Get_Class($Arg)         ; break;
+            Case 'array'         : $Args[] = 'Array'                 ; break;
+            Case 'NULL'          : $Args[] = 'null'                  ; break;
+            Case 'resource'      : $Args[] = Get_Resource_Type($Arg) ; break;
+            Case 'float'         : $Args[] = $Arg                    ; break;
+            Case 'unknown type'  : $Args[] = $Arg                    ; break;
+            Case 'user function' : $Args[] = $Arg                    ; break;
+            Default              : $Args[] = $Arg                    ; break;
+            }
           }   
           $Args = Join(', ', $Args);
         }
@@ -119,7 +152,8 @@
       }
       return Implode("\n", $Res);
     }    
-    
+
+    //****************************************************************
     Function Finish()
     {
       if($this->Finished)
@@ -158,6 +192,11 @@
         ForEach($Line As $Str)
           $Message[]=$Str; // TODO: Check Is_String and debug
         $Message[]="\n";
+      }
+      if($this->Stack)
+      {
+        $Message[]="\n";
+        $Message[]=$this->GetStackAsString();
       }
       return Implode('', $Message);
     }

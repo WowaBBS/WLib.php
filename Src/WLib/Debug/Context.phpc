@@ -1,88 +1,22 @@
-<?
+<? // TODO: Remove
   $Loader->Parent_Class('/Object');
   // Taken from builder of UE, directory Builder/Lib/Debug
   
   Class C_Debug_Context extends C_Object
   {
-    Var $Stream;
-    Var $Level=-1; 
-    Var $Tab="\n";
-    Var $Template;
-    Var $Manager;
-    Var $IsInline=0;
-    Var $WriteLn=false;
+    Var $Stream   ;
     
-    Function _Init(Array $Args)
-    {
-      parent::_Init($Args);
-      
-      $Manager =$Args['Manager' ];
-      $Stream  =$Args['Stream'  ];
-    
-      $this->Manager  =$Manager  ;
-      $this->Stream   =$Stream   ;
-      $this->Template =$Manager->Template ;
-      $this->Level    =$Manager->Level    ;
-    }
-    
-    Function IsInline() { return $this->IsInline>0; }
-    Function Inline_Begin() { $this->IsInline++; }
-    Function Inline_End() { $this->IsInline--; }
-    Function NoInline() { $Res=$this->IsInline; $this->IsInline=0; return $Res; }
-    Function EndNoInline($SaveInline) { $this->IsInline=$SaveInline; }
+    //****************************************************************
+    // Level
+    Var $Level    =-1;
     
     Function Level_End() { return $this->Level=0; }
     Function Level_Inc() { $this->Level--; }
     Function Level_Dec() { $this->Level++; }
     
-    Function Tab_Push($AddTab)
-    {
-      if($this->IsInline>0) return false;
-      if(StrLen($AddTab)==0) return false;
-      $Tab=&$this->Tab;
-      $OldTab=$Tab; $Tab.=$AddTab;
-      return $OldTab;
-    }
-    
-    Function Tab_Pop($OldTab) { if($OldTab!==false) $this->Tab=$OldTab; }
-    
-    Function Write($s)
-    {
-      if($s==='') return;
-      $Stream=$this->Stream;
-      $WriteLn=&$this->WriteLn;
-      if($WriteLn)
-      {
-        $WriteLn=false;
-        $Stream->Write($this->Tab);
-      }
-      $Lines=Explode("\n", $s);
-      if(Count($Lines)==1)
-        return $Stream->Write($s);
-      $Last=Array_Pop($Lines);
-      if(StrLen($Last)==0)
-      {
-        $Last=Array_Pop($Lines);
-        $WriteLn=true;
-      }
-      $Tab=$this->Tab;
-      ForEach($Lines As $Line)
-      {
-        $Stream->Write($Line);
-        $Stream->Write($Tab);
-      }
-      $Stream->Write($Last);
-    }
-    
-    Function WriteLn($s='')
-    {
-      $this->Write($s);
-      if($this->IsInline<=0)
-        $this->WriteLn=true;
-    }
-    
-    Function Flush() {}
-    
+    //****************************************************************
+    // Debug
+
     Function Debug($v, $Level=false)
     {
       $SaveLevel=$this->Level;
@@ -94,6 +28,20 @@
       $this->Level=$SaveLevel;
     }
  
+    //****************************************************************
+    // Inline
+    
+    Var $IsInline =0;
+    
+    Function IsInline() { return $this->IsInline>0; }
+    Function Inline_Begin() { $this->IsInline++; }
+    Function Inline_End() { $this->IsInline--; }
+    Function NoInline() { $Res=$this->IsInline; $this->IsInline=0; return $Res; }
+    Function EndNoInline($SaveInline) { $this->IsInline=$SaveInline; }
+    
+    //****************************************************************
+    Var $Template =null;
+    
     Function Value($v)
     {
       $this->Template->Value($this, $v);
@@ -136,5 +84,91 @@
       $this->NewClass($Class, $Args);
       $this->EndNoInline($Save);
     }
+    
+    //****************************************************************
+    // Tab
+    
+    Var $Tab      ="\n";
+
+    Function Tab_Push($AddTab)
+    {
+      if($this->IsInline>0) return false;
+      if(StrLen($AddTab)==0) return false;
+      $Tab=&$this->Tab;
+      $OldTab=$Tab; $Tab.=$AddTab;
+      return $OldTab;
+    }
+    
+    Function Tab_Pop($OldTab) { if($OldTab!==false) $this->Tab=$OldTab; }
+    
+    //****************************************************************
+  //Var $Manager  ;
+    Var $WriteLn  =false;
+    
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      
+      $Manager =$Args['Manager' ];
+      $Stream  =$Args['Stream'  ];
+    
+    //$this->Manager  =$Manager  ;
+      $this->Stream   =$Stream   ;
+      $this->Template =$Manager->Template ;
+      $this->Level    =$Manager->Level    ;
+    }
+    
+    Function _Write($v)
+    {
+      if($v==='') return;
+      
+      if($this->WriteLn)
+      {
+        $this->WriteLn=false;
+        $this->Stream->Write($this->Tab);
+      }
+      if(($p=StrPos($v, "\n"))!==False)
+      {
+        $Lines=Explode("\n", $v);
+        $v=Array_Pop($Lines);
+        if(StrLen($v)===0)
+        {
+          $v=Array_Pop($Lines);
+          $this->WriteLn=true;
+        }
+        $Tab=$this->Tab;
+        ForEach($Lines As $Line)
+        {
+          $Stream->Write($Line);
+          $Stream->Write($Tab);
+        }
+      }
+      
+      $this->Stream->Write($v);
+    }
+    
+    Function Write($s)
+    {
+      $this->_Write($Last);
+    }
+    
+    Function WriteLn($s='')
+    {
+      $this->Write($s);
+      if($this->IsInline<=0)
+        $this->WriteLn=true;
+    }
+    
+    Function WriteOp    ($v) { return $this->Write($v); } // Operator
+    Function WriteStr   ($v) { return $this->Write($v); } // String
+    Function WriteResvd ($v) { return $this->Write($v); } // Reserved word
+    Function WriteFunc  ($v) { return $this->Write($v); } // 
+    Function WriteBool  ($v) { return $this->Write($v); } // 
+    Function WriteNum   ($v) { return $this->Write($v); } // 
+    Function WriteFloat ($v) { return $this->Write($v); } // 
+    Function WriteType  ($v) { return $this->Write($v); } // 
+    Function WriteNull  ($v=null) { return $this->Write($v?? 'Null'); } // 
+    
+    Function Flush() {}
   }
 ?>

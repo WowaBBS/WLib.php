@@ -11,7 +11,7 @@
   
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
  
-  $Manager =$Loader->Create_Object('/Debug/Manager'); //System/
+  $Manager =$Loader->Get_Singleton('/Debug/Manager'); //System/
   $Manager->Template->ChunkLen=48;
   $Manager->Template->StrMaxLen=56;
   $Deb     =$Manager->Create();

@@ -1,0 +1,358 @@
+<?
+  $this->Parent_Class('/Object');
+  
+  class C_Log_Format extends C_Object
+  {
+    Var $Stream;
+    Var $WriteLn  =false;
+    Var $Manager;
+    
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      
+      $Manager =$Args['Manager' ]?? $this->Get_Singleton('/Debug/Manager');
+      $Stream  =$Args['Stream'  ]?? null;
+    
+      $this->Manager  =$Manager  ;
+      $this->Stream   =$Stream   ;
+      $this->Template =$Args['Template' ]?? $this->Get_Singleton('/Debug/Template');
+      $this->Level    =$Args['Level'    ]?? -1;
+    }
+    
+    Function SetStream($Stream)
+    {
+      $Res=$this->Stream;
+      $this->Stream=$Stream;
+      return $Res;
+    }
+  
+    Function _Write($v)
+    {
+      if($v==='') return;
+      
+      $Stream=$this->Stream;
+      if($this->WriteLn)
+      {
+        $this->WriteLn=false;
+        $Stream->Write($this->Tab);
+      }
+      if(($p=StrPos($v, "\n"))!==False)
+      {
+        $Lines=Explode("\n", $v);
+        $v=Array_Pop($Lines);
+        if(StrLen($v)===0)
+        {
+          $v=Array_Pop($Lines);
+          $this->WriteLn=true;
+        }
+        $Tab=$this->Tab;
+        ForEach($Lines As $Line)
+        {
+          $Stream->Write($Line);
+          $Stream->Write($Tab);
+        }
+      }
+      
+      $Stream->Write($v);
+    }
+
+    Function WriteLn($s='')
+    {
+      $this->_Write($s);
+      if($this->IsInline<=0)
+      {
+        if($this->WriteLn)
+          $this->Stream->Write($this->Tab);
+        else
+          $this->WriteLn=true;
+      }
+    }
+    
+    Function Flush()
+    {
+      $this->Stream->Flush();
+    }
+    
+    //****************************************************************
+
+  //Var $Manager  ;
+    
+    //****************************************************************
+    // Tab
+    Var $Tab      ="\n";
+
+    Function Tab_Push($AddTab)
+    {
+      if($this->IsInline>0) return false;
+      if(StrLen($AddTab)==0) return false;
+      $Tab=&$this->Tab;
+      $OldTab=$Tab; $Tab.=$AddTab;
+      return $OldTab;
+    }
+    
+    Function Tab_Pop($OldTab) { if($OldTab!==false) $this->Tab=$OldTab; }
+    
+
+    //****************************************************************
+    // Level
+    
+    Var $Level    =-1;
+    
+    Function Level_End() { return $this->Level=0; }
+    Function Level_Inc() { $this->Level--; }
+    Function Level_Dec() { $this->Level++; }
+    
+    //****************************************************************
+    // Inline
+
+    Var $IsInline =0;
+    
+    Function IsInline() { return $this->IsInline>0; }
+    Function Inline_Begin() { $this->IsInline++; }
+    Function Inline_End() { $this->IsInline--; }
+    Function NoInline() { $Res=$this->IsInline; $this->IsInline=0; return $Res; }
+    Function EndNoInline($SaveInline) { $this->IsInline=$SaveInline; }
+    
+    //****************************************************************
+    // Debug
+    
+    Function Debug($v, $Level=false)
+    {
+      $SaveLevel=$this->Level;
+      if($Level!==false)
+        $this->Level=$Level;
+      $this->Value($v);
+      $this->Stream->Write("\n");
+      $this->Flush();
+      $this->Level=$SaveLevel;
+    }
+ 
+    //****************************************************************
+    Var $Template =null;
+    
+    Function Value($v)
+    {
+      $this->Template->Value($this, $v);
+    }
+ 
+    Function CallFunc($Func, $Args)
+    {
+      $this->Template->CallFunc($this, $Func, $Args);
+    }
+   
+    Function NewClass($Class, $Args)
+    {
+      $this->CallFunc('new '.$Class, $Args);
+    }
+ 
+    Function Inline_CallFunc($Func, $Args)
+    {
+      $this->Inline_Begin();
+      $this->CallFunc($Func, $Args);
+      $this->Inline_End();
+    }
+   
+    Function Inline_NewClass($Class, $Args)
+    {
+      $this->Inline_Begin();
+      $this->NewClass($Class, $Args);
+      $this->Inline_End();
+    }
+
+    Function NoInline_CallFunc($Func, $Args)
+    {
+      $Save=$this->NoInline();
+      $this->CallFunc($Func, $Args);
+      $this->EndNoInline($Save);
+    }
+   
+    Function NoInline_NewClass($Class, $Args)
+    {
+      $Save=$this->NoInline();
+      $this->NewClass($Class, $Args);
+      $this->EndNoInline($Save);
+    }
+    
+    //****************************************************************
+    
+    Function _WriteL(...$l)
+    {
+      ForEach($l As $v)
+        $this->_Write($v);
+    }
+    
+    Static Function _GetTokens()
+    {
+      Static $Res=[
+        'Def'     =>''        ,
+
+        'Resrvd'  =>'Def'     ,
+        'Num'     =>'Def'     ,
+        'Str'     =>'Def'     ,
+
+        'Op'      =>'Resrvd'  ,
+        'Type'    =>'Resrvd'  ,
+        'Null'    =>'Resrvd'  ,
+        'Bool'    =>'Resrvd'  ,
+
+        'Float'   =>'Num'     ,
+        'Name'    =>'Str'     ,
+
+        'File'    =>'Name'    ,
+        'Func'    =>'Name'    ,
+        'Class'   =>'Name'    ,
+
+        'Debug'   =>'Def'     ,
+        'Log'     =>'Def'     ,
+        'Note'    =>'Log'     ,
+        'Warning' =>'Note'    ,
+        'Error'   =>'Warning' ,
+        'Fatal'   =>'Error'   ,
+      ];
+      Return $Res;
+    }   
+    
+    Function _WriteToken($Type, $v)
+    {
+      $this->_Write($v);
+    } 
+      
+    Function Write(...$l)
+    { 
+      ForEach($l As $v)
+        $this->WriteItem($v);
+    } 
+      
+    Function WriteItem($v)
+    {
+    //echo '[',GetType($v),']';
+
+      Switch(GetType($v))
+      {
+      Case 'boolean'       : $this->WriteBool  ($v                    ); break;
+      Case 'integer'       : $this->WriteNum   ($v                    ); break;
+      Case 'double'        : $this->WriteFloat ($v                    ); break;
+      Case 'string'        : $this->_Write     ($v                    ); break;
+      Case 'NULL'          : $this->WriteNull  (                      ); break;
+      Case 'float'         : $this->WriteFloat ($v                    ); break;
+      Default              :
+        $this->Inline_Begin();
+        $this->Debug($v, 3);
+        $this->Inline_End();
+      }
+    /*
+      Switch(GetType($v))
+      {
+      Case 'boolean'       : $this->WriteBool  ($v                    ); break;
+      Case 'integer'       : $this->WriteNum   ($v                    ); break;
+      Case 'double'        : $this->WriteFloat ($v                    ); break;
+      Case 'string'        : $this->_Write     ($v                    ); break;
+      Case 'object'        : $this->WriteClass (Get_Class($v)         ); break;
+      Case 'array'         : $this->WriteType  ('Array'               ); break;
+      Case 'NULL'          : $this->WriteNull  (                      ); break;
+      Case 'resource'      : $this->WriteType  (Get_Resource_Type($v) ); break;
+      Case 'float'         : $this->WriteFloat ($v                    ); break;
+      Case 'unknown type'  : $this->_Write     ($v                    ); break;
+      Case 'user function' : $this->_Write     ($v                    ); break;
+      Default              : $this->_Write     ($v                    ); break;
+      }
+    */
+    }
+    
+    Function Begin($v) {}
+    Function End($v) {}
+  
+    // Simple types
+    Function WriteDef    ($v     ) { $this->_WriteToken('Def'    ,$v); }
+    Function WriteOp     ($v     ) { $this->_WriteToken('Op'     ,$v); }
+    Function WriteResrvd ($v     ) { $this->_WriteToken('Resrvd' ,$v); }
+    Function WriteNum    ($v     ) { $this->_WriteToken('Num'    ,$v); }
+    Function WriteStr    ($v     ) { $this->_WriteToken('Str'    ,$v); }
+    Function WriteName   ($v     ) { $this->_WriteToken('Name'   ,$v); }
+    Function WriteFile   ($v     ) { $this->_WriteToken('File'   ,$v); }
+    Function WriteFunc   ($v     ) { $this->_WriteToken('Func'   ,$v); }
+    Function WriteType   ($v     ) { $this->_WriteToken('Type'   ,$v); }
+    Function WriteClass  ($v     ) { $this->_WriteToken('Class'  ,$v); }
+    Function WriteFloat  ($v     ) { $this->_WriteToken('Float'  ,$v); }
+    Function WriteNull   ($v=null) { $this->_WriteToken('Null'   ,Is_Null($v)? 'null':$v); }
+    Function WriteBool   ($v     ) { $this->_WriteToken('Bool'   ,Is_Bool($v)? ($v? 'True':'False'):$v); }
+    Function NewLine() { $this->_Write("\n"); }
+  
+    Function WriteLogLevel($View, $Level) { $this->_WriteToken($Level->Name, $View); }
+    
+    // Structs
+    Function File($File, $Line=False, $Col=False)
+    {
+      $this->Begin('File');
+      $z1=$File !==false;
+      $z2=$Line !==false && $Line>0;
+      $z3=$Col  !==false;
+
+      if($z1)
+        $this->WriteFile($File);
+      if($z2 || $z3)
+      {
+                        $this->WriteOp  ('('   );
+         if($z2       ) $this->WriteNum ($Line );
+         if($z1 && $z3) $this->WriteOp  (','   );
+         if($z3       ) $this->WriteNum ($Col  );
+                        $this->WriteOp  (')'   );
+      }
+      if($z1) $this->WriteDef(' ');
+      $this->End('File');
+    }
+    
+    Function StackFrame(Array $Frame, Int $Idx=0)
+    {
+      $this->WriteNum('#'.$Idx.' ');
+      if(IsSet($Frame['file']) || IsSet($Frame['line']))
+        $this->File(
+          $Frame['file']?? '',
+          $Frame['line']?? ''
+        );
+      $this->WriteDef(': ');
+      $this->WriteFunc($Frame['function' ]);
+      $Args = '';
+      If(IsSet($Frame['args']))
+      {
+        $this->WriteOp('(');
+        ForEach($Frame['args']As $i=>$Arg)
+        {
+          if($i)
+            $this->WriteOp(', ');
+          // TODO: $this->DebugL($Arg,3);
+          Switch(GetType($Arg))
+          {
+          Case 'boolean'       : $this->WriteBool  ($Arg                    ); break;
+          Case 'integer'       : $this->WriteNum   ($Arg                    ); break;
+          Case 'double'        : $this->WriteFloat ($Arg                    ); break;
+          Case 'string'        : $this->WriteStr   ("'".$Arg."'"            ); break;
+          Case 'object'        : $this->WriteClass (Get_Class($Arg)         ); break;
+          Case 'array'         : $this->WriteType  ('Array'                 ); break;
+          Case 'NULL'          : $this->WriteNull  (                        ); break;
+          Case 'resource'      : $this->WriteType  (Get_Resource_Type($Arg) ); break;
+          Case 'float'         : $this->WriteFloat ($Arg                    ); break;
+          Case 'unknown type'  : $this->WriteDef   ($Arg                    ); break;
+          Case 'user function' : $this->WriteDef   ($Arg                    ); break;
+          Default              : $this->WriteDef   ($Arg                    ); break;
+          }
+        }   
+        $this->WriteOp(')');
+      }
+      $this->NewLine();
+    }
+    
+    Function Stack(Array $List)
+    {
+      $Idx=0;
+      ForEach($List As $Frame)
+        $this->StackFrame($Frame, ++$Idx);
+    }
+    
+    Function LogItem(T_Log_Item $Item)
+    {
+      $Item->ToFormat($this);
+    }
+  }
+?>

@@ -1,0 +1,10 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $Loader->GetLogger()->Add('OutOfMemory.log');
+
+  while(1)
+    $tmp[] = str_repeat('a', 10000);
+  
+  $Loader->Done();
+?>

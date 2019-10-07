@@ -3,21 +3,39 @@
  
   Class C_Log_Logger_Base extends C_Log_Logger
   {
-    Var $IsWritting=false;
+    Var $IsWritting=0;
+    Var $Format=null;
   
     Function _Init(Array $Args)
     {
+      $Format=$Args['Format']?? '/Log/Format';
+      if(!Is_Object($Format))
+      {
+        if(Is_Array($Format))
+          $Format=$this->Get_Singleton($Format['Class']?? $Format[0], $Format);
+        Else
+          $Format=$this->Get_Singleton($Format);
+      }
+      $this->Format=$Format;
       parent::_Init($Args);
     }
     
     Function _LogItem($LogItem)
     {
-      if($this->IsWritting)
+      if($this->IsWritting>1)
         return;
-      $this->IsWritting=true;
-      $this->Write($LogItem->ToString());
+      $this->IsWritting++;
+      
+      $Format=$this->Format;
+      $Old=$Format->SetStream($this);
+      $Format->LogItem($LogItem);
+    //$this->Write($LogItem->ToString());
+      $Old=$Format->SetStream($Old);
+      If($Old!=$this)
+        $this->Log('Error', 'Stream can\'t be restoed');
+      
       $this->Flush();
-      $this->IsWritting=false;
+      $this->IsWritting--;
     }
     
     Function Write($Str)

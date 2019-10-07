@@ -2,10 +2,11 @@
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
   $MainLogger=$Loader->GetLogger();
-  
 //$MainLogger->Set_Error_Handler();
   
   $b=$a['a'];
+  $b=[]['a'];
+  $b=$b[a];
   
 //$MainLogger->Restore_Error_Handler();
   

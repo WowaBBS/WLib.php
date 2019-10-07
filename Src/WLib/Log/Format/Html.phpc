@@ -1,0 +1,8 @@
+<?
+  $this->Parent_Class('/Log/Format/Base');
+  
+  class C_Log_Format_Html extends C_Log_Format_Base
+  {
+    // TODO:
+  }
+?>

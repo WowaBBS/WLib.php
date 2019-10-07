@@ -1,0 +1,119 @@
+<?
+  $this->Parent_Class('/Log/Format/Base');
+  
+  class C_Log_Format_v100 extends C_Log_Format_Base
+  {
+    const Esc="\033";
+    const Csi="\033[";
+    
+  //const fgGray      ="\033[0;30m";
+    const fgBlack     ="\033[0;30m";
+    const fgRed       ="\033[0;31m";
+    const fgGreen     ="\033[0;32m";
+    const fgYellow    ="\033[0;33m";
+    const fgBlue      ="\033[0;34m";
+    const fgMagenta   ="\033[0;35m";
+    const fgCyan      ="\033[0;36m";
+  //const fgWhite     ="\033[0;37m";
+    const fgWhite     ="\033[0;37m";
+    const fgDefault   ="\033[0;39m";
+
+    const fgBrGray    ="\033[1;30m";
+  //const fgBrBlack   ="\033[1;30m";
+    const fgBrRed     ="\033[1;31m";
+    const fgBrGreen   ="\033[1;32m";
+    const fgBrYellow  ="\033[1;33m";
+    const fgBrBlue    ="\033[1;34m";
+    const fgBrMagenta ="\033[1;35m";
+    const fgBrCyan    ="\033[1;36m";
+  //const fgBrWhite   ="\033[1;37m";
+    const fgBrWhite   ="\033[1;37m";
+    const fgBrDefault ="\033[1;39m";
+    
+  /*  
+    const bgGray      ="\033[40m";
+    const bgBlack     ="\033[40m";
+    const bgRed       ="\033[41m";
+    const bgGreen     ="\033[42m";
+    const bgYellow    ="\033[43m";
+    const bgBlue      ="\033[44m";
+    const bgMagenta   ="\033[45m";
+    const bgCyan      ="\033[46m";
+    const bgWhite     ="\033[47m";
+    const bgDefault   ="\033[49m";
+  */  
+    Var $ColorRules=[
+      'Def'    =>False    ,
+    # 'Def'    =>''       ,
+      
+    //'Resrvd' =>self::fgCyan    ,
+      'Resrvd' =>self::fgBrWhite ,
+      'Num'    =>self::fgBrGreen ,
+    //'Str'    =>self::fgRed     ,
+      'Str'    =>self::fgBrMagenta,
+      
+    # 'Op'     =>'Resrvd' ,
+    # 'Type'   =>'Resrvd' ,
+    # 'Null'   =>'Resrvd' ,
+    # 'Bool'   =>'Resrvd' ,
+      
+    # 'Float'  =>'Num'    ,
+      'Name'   =>self::fgCyan     ,// 'Str'
+      
+    # 'File'   =>'Name'   ,
+    # 'Func'   =>'Name'   ,
+    # 'Class'  =>'Name'   ,
+
+      'Debug'   =>self::fgCyan    ,
+    # 'Log'     =>
+      'Note'    =>self::fgGreen   ,
+      'Warning' =>self::fgMagenta ,
+      'Error'   =>self::fgBrRed   ,
+      'Fatal'   =>self::fgBrRed   ,
+    ];
+    
+    Function _Init(Array $Args)
+    {
+      $Rules=&$this->ColorRules;
+      ForEach(Self::_GetTokens()As $From=>$To)
+        If(!IsSet($Rules[$From]))
+          $Rules[$From]=$Rules[$To]??'[Error23478:'.$To.']';
+      Parent::_Init($Args);
+    }
+    
+  //Function 
+  
+    Function _WriteToken($Type, $v)
+    {
+      if($Col=$this->ColorRules[$Type]?? '[Error72873:'.$Type.']')
+        $this->_WriteL($Col, $v, self::fgDefault);
+      else
+        $this->_Write($v);
+    } 
+      
+  
+  /*
+    Function WriteNum($v)  { $this->_WriteL(self::fgGreen   ,$v ,self::fgDefault); }
+  # Function WriteStr($v)  { $this->_WriteL(self::fgMagenta ,$v ,self::fgDefault); }
+    Function WriteStr($v)  { $this->_WriteL(self::fgCyan    ,$v ,self::fgDefault); }
+  # Function WriteStr($v)  { $this->_WriteL(self::fgYellow  ,$v ,self::fgDefault); }
+  # Function WriteStr($v)  { $this->_WriteL(self::fgRed     ,$v ,self::fgDefault); }
+    Function WriteNull($V=null)   { $this->WriteNum('null'); }
+    Function WriteBool($v) { $this->WriteNum(Is_Bool($v)? ($v? 'True':'False'):$v); }
+    Function WriteLogLevel($View, $Level)
+    {
+      Switch($Level->Name)
+      {
+      Case 'Debug'   : $f=self::fgCyan    ; break;
+      Case 'Note'    : $f=self::fgGreen   ; break;
+      Case 'Warning' : $f=self::fgMagenta ; break;
+      Case 'Error'   : $f=self::fgRed     ; break;
+      Case 'Fatal'   : $f=self::fgRed     ; break;
+      Default        : $f='';
+      }
+      
+      $this->_WriteL($f, $View ,self::fgDefault); 
+    }
+  */
+  }
+?>

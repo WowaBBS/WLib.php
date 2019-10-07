@@ -3,8 +3,17 @@
  
   Class C_Log_Logger_Echo extends C_Log_Logger_Base
   {
+    Static Function _DetectFormat()
+    {
+      if(Function_Exists('sapi_windows_vt100_support'))
+        if(sapi_windows_vt100_support(STDOUT))
+          return '/Log/Format/v100';
+      return '/Log/Format';
+    }
+  
     Function _Init(Array $Args)
     {
+      if(!IsSet($Args['Format'])) $Args['Format']=self::_DetectFormat(); // TODO: ??=
       parent::_Init($Args);
     }
     

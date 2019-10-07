@@ -6,10 +6,10 @@
   {
     Var $Disabled=false;
     Var $ShowLogLevel=[];
-  
+    
     Function _Init(Array $Args)
     {
-      $this->SetLogLevel($Args['LogLevel']??'Debug');
+      $this->SetLogLevel($Args['LogLevel']?? 'Debug');
       parent::_Init($Args);
     }
     
@@ -65,47 +65,112 @@
     {
       return true;
     }
+    
+    Function Error_Type($Code)
+    {
+      static $ErrorTypes=[
+        0    => ['Error'   ,'[Zero Error'      .'] '],
+        1    => ['Error'   ,'[Error'           .'] '],
+        2    => ['Error'   ,'[Warning'         .'] '],
+        4    => ['Error'   ,'[Parsing Error'   .'] '],
+        8    => ['Error'   ,'[Notice'          .'] '],
+        16   => ['Error'   ,'[Core Error'      .'] '],
+        32   => ['Warning' ,'[Core Warning'    .'] '],
+        64   => ['Error'   ,'[Compile Error'   .'] '],
+        128  => ['Warning' ,'[Compile Warning' .'] '],
+        256  => ['Error'   ,'[User Error'      .'] '],
+        512  => ['Warning' ,'[User Warning'    .'] '],
+        1024 => ['Note'    ,'[User Notice'     .'] '],
+        2048 => ['Note'    ,'[Runtime Notice'  .'] '],
+        4096 => ['Error'   ,'[Fatal Error'     .'] '],
+      ];
+  
+      return $ErrorTypes[$Code]?? ['Error','[Unknown Error '.$Code.'] '];
+    }
+    
+    Function Exception_Handler(Throwable $E)
+    {
+      $this->Back_Memory=True;
+
+      $ErrorType=$this->Error_Type($E->GetCode());
+      $this->Log($ErrorType[0], $E->GetMessage())
+        ->File($E->GetFile(), $E->GetLine())
+        ->SetStack($E->GetTrace())
+        ->ShowLevel($ErrorType[1]=='[Zero Error] '? '['.Get_Class($E).'] ':$ErrorType[1]);
+        
+      if($this->Exception_Handler_Old)
+        $this->Exception_Handler_Old($E);
+      
+      Error_Clear_Last();
+    }
  
     Function Error_Handler($ErrNo, $ErrStr, $ErrFile, $ErrLine, $Vars)
     {
-      If($ErrNo==2048)
-        Return;
-      static $ErrorTypes=[
-        1    => ['Error'   ,'Error'           ],
-        2    => ['Warning' ,'Warning'         ],
-        4    => ['Error'   ,'Parsing Error'   ],
-        8    => ['Error'   ,'Notice'          ],
-        16   => ['Error'   ,'Core Error'      ],
-        32   => ['Warning' ,'Core Warning'    ],
-        64   => ['Error'   ,'Compile Error'   ],
-        128  => ['Warning' ,'Compile Warning' ],
-        256  => ['Error'   ,'User Error'      ],
-        512  => ['Warning' ,'User Warning'    ],
-        1024 => ['Note'    ,'User Notice'     ],
-        2048 => ['Note'    ,'Runtime Notice'  ],
-        4096 => ['Error'   ,'Fatal error'     ],
-      ];
-  
-      $ErrorType=$ErrorTypes[$ErrNo]?? ['Error',''];
+    //If($ErrNo==2048)
+    //  Return;
       $Res=$ErrStr;
-    //$Res=' ['.$ErrNo.'] '.$ErrStr;
-      $this->Log($ErrorType[0], $Res)->File($ErrFile, $ErrLine)->BackTrace(2);
+      $ErrorType=$this->Error_Type($ErrNo);
+      $this->Log($ErrorType[0], $Res)
+        ->File($ErrFile, $ErrLine)
+        ->BackTrace(2)
+        ->ShowLevel($ErrorType[1]);
+    //Error_Clear_Last();
+    }
+    
+    Function Shutdown_Function()
+    {
+      if(!$this->Shutdown_Function_Setted)
+        return;
+      $this->Back_Memory=True;
+      if($error=Error_Get_Last())
+        if($error['type']===E_ERROR)
+        {
+          $this->Log('Error', $error['message'])
+            ->File($error['file'], $error['line'])
+            ->ShowLevel('[Fatal Error] ')
+          //->BackTrace(2)
+            ->NoBackTrace()
+          ;
+        # $this->Error_Handler(
+        #   $error['type'], $error['message'],
+        #   $error['file'], $error['line'],
+        #   []
+        # );
+        }
     }
     
     Function Set_Error_Handler()
     {
-      if(($this->Error_Handler_Setted?? false))
+      if($this->Error_Handler_Setted?? false)
         return;
       Set_Error_Handler([$this, 'Error_Handler']);
       $this->Error_Handler_Setted=true;
+      
+      if(!($this->Shutdown_Function_Setted?? False))
+        Register_Shutdown_Function([$this, 'Shutdown_Function']);
+      $this->Shutdown_Function_Setted=true;
+      
+      if($this->Exception_Handler_Setted?? false)
+        return;
+      $this->Exception_Handler_Old=Set_Exception_Handler([$this, 'Exception_Handler']);
+      $this->Exception_Handler_Setted=true;
+      
+      $this->Back_Memory=Str_Repeat("\0", 1024*128);
+    //ini_set("display_errors", "off");
+    //error_reporting(E_ALL);
+    //ini_set('html_errors', 'on');
     }
-    
+
     Function Restore_Error_Handler()
     {
       if(!($this->Error_Handler_Setted?? false))
         return;
       Restore_Error_Handler();
       UnSet($this->Error_Handler_Setted);
+      
+      $this->Shutdown_Function_Setted=false;
+      
+      Restore_Exception_Handler();
     }
   };
 ?>

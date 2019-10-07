@@ -48,7 +48,8 @@
           ]
         );
       }
-      return $this->Create_Object('/Debug/Context',
+    //return $this->Create_Object('/Debug/Context',
+      return $this->Create_Object('/Log/Format',
         [
           'Manager' =>$this,
           'Stream'  =>$Stream

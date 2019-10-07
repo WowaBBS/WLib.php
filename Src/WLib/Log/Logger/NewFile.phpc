@@ -13,13 +13,13 @@
       [$MTime, $Time]= Explode(' ',MicroTime());
       $MTime = (Int)((Float)$MTime*1000000);
       
-      $Path .=@Date('Ymd_his_', $Time);
+      $Path .=@Date('Ymd_his_', $Time); //<TODO: Depricated
       $i=16;
       Do
       {
         $Add=Str_Pad($MTime, 6, '0', STR_PAD_LEFT);
         $FilePath =$Path.$Add.$Ext;
-        Echo $FilePath, "\n";
+      //Echo $FilePath, "\n";
         $this->Stream->Assign($FilePath);
         If($this->Stream->Open(omReadWrite|omCreate|omMakePath|omBinary))
           Break;

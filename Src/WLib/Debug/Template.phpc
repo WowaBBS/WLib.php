@@ -25,7 +25,7 @@
     //$Ctx->Write('<'.$Ctx->Level.'>');
       If($Ctx->Level_End())
       {
-        $Ctx->Write($this->Skip);
+        $Ctx->WriteOp($this->Skip);
         Return;
       }
       $_TOV=GetType($Value);
@@ -48,14 +48,14 @@
       }
     }
  
-    Function Boolean  ($Ctx, $v) { $Ctx->Write($v? 'True':'False'); }
-    Function Integer  ($Ctx, $v) { $Ctx->Write((String)$v); }
-    Function Double   ($Ctx, $v) { $Ctx->Write((String)$v); }
-    Function Float    ($Ctx, $v) { $Ctx->Write((String)$v); }
-    Function Resource ($Ctx, $v) { $Ctx->Write('Resource '.get_resource_type($v).'('.$v.')'); }
-    Function Null     ($Ctx, $v) { $Ctx->Write('Null'); }
-    Function Function ($Ctx, $v) { $Ctx->Write('Function '.$v); }
-    Function UnKnown  ($Ctx, $v) { $Ctx->Write('UnKnown '.$v);  }
+    Function Boolean  ($Ctx, $v) { $Ctx->WriteBool  ($v? 'True':'False'); }
+    Function Integer  ($Ctx, $v) { $Ctx->WriteNum   ((String)$v); }
+    Function Double   ($Ctx, $v) { $Ctx->WriteFloat ((String)$v); }
+    Function Float    ($Ctx, $v) { $Ctx->WriteFloat ((String)$v); }
+    Function Resource ($Ctx, $v) { $Ctx->WriteType  ('Resource '); $Ctx->WriteName(Get_Resource_Type($v)); $Ctx->WriteOp('('); $Ctx->Write((String)$v); $Ctx->WriteOp(')'); }
+    Function Null     ($Ctx, $v) { $Ctx->WriteNull  ('Null'); }
+    Function Function ($Ctx, $v) { $Ctx->WriteResvd ('Function '); $Ctx->Write($v); }
+    Function UnKnown  ($Ctx, $v) { $Ctx->WriteResvd ('UnKnown '); $Ctx->Write($v);  }
     
     Function AddSlashes($v) { return StrTr($v, $this->Slashes); }
   //Function IsBinary($v) { return StrLen(StrPBRK($v, $this->BinarySign))!==false; }
@@ -64,29 +64,31 @@
     
     Function String_Chunk($Ctx, $v, $Len)
     {
-      $Ctx->Write("''.\n");
+      $Ctx->WriteStr("''.\n");
       $SaveInline=$Ctx->NoInline();
       $OldTab=$Ctx->Tab_Push($this->AddTab);
       $List=str_split($v, $Len);
       $Last=Array_Pop($List);
       ForEach($List As $Chunk)
-        $Ctx->Write('"'.$this->AddSlashes($Chunk).'".'."\n");
-      $Ctx->Write('"'.$this->AddSlashes($Last).'"');
+      {
+        $Ctx->WriteStr('"'.$this->AddSlashes($Chunk).'".'."\n");
+      }
+      $Ctx->WriteStr('"'.$this->AddSlashes($Last).'"');
       $Ctx->Tab_Pop($OldTab);
       $Ctx->EndNoInline($SaveInline);
     }
     
     Function MultiString($Ctx, $v)
     {
-      $Ctx->Write("''.\n");
+      $Ctx->WriteStr("''.\n");
       $SaveInline=$Ctx->NoInline();
       $OldTab=$Ctx->Tab_Push($this->AddTab);
       $List=explode("\n", $v);
       $Last=Array_Pop($List);
       ForEach($List As $Chunk)
-        $Ctx->Write('"'.$this->AddSlashes($Chunk).'\\n".'."\n");
-      $Ctx->Write('"'.$this->AddSlashes($Last).'"');
-    //$Ctx->Write("''");
+        $Ctx->WriteStr('"'.$this->AddSlashes($Chunk).'\\n".'."\n");
+      $Ctx->WriteStr('"'.$this->AddSlashes($Last).'"');
+    //$Ctx->WriteStr("''");
       $Ctx->Tab_Pop($OldTab);
       $Ctx->EndNoInline($SaveInline);
     }
@@ -94,12 +96,12 @@
     Function String($Ctx, $v)
     {
     //if($Ctx->IsInline())
-    //  $Ctx->Write('"'.$this->AddSlashes($v).'"');
+    //  $Ctx->WriteStr('"'.$this->AddSlashes($v).'"');
       $IsBinary =$this->IsBinary($v);
       $IsMulti  =!$IsBinary && $this->IsMultiString($v);
       $l=StrLen($v);
       if($l<$this->StrMaxLen && !$IsMulti)
-        $Ctx->Write('"'.$this->AddSlashes($v).'"');
+        $Ctx->WriteStr('"'.$this->AddSlashes($v).'"');
       elseif($IsBinary)
         $this->String_Chunk($Ctx, $v, $this->ChunkLen);
       else
@@ -110,17 +112,18 @@
     {
       if(!Count($Value))
       {
-        $Ctx->Write('[]');
+        $Ctx->WriteOp('[]');
         return;
       }
-      $Ctx->WriteLn('[');
+      $Ctx->WriteOp('[');
+      $Ctx->WriteLn();
       $OldTab=$Ctx->Tab_Push($this->AddTab);
       $this->ArrayBody($Ctx, $Value);
       if(!$Ctx->IsInline())
-        $Ctx->Write(',');
+        $Ctx->WriteOp(',');
       $Ctx->Tab_Pop($OldTab);
       $Ctx->WriteLn();
-      $Ctx->Write(']');
+      $Ctx->WriteOp(']');
     }
     
     Function Object($Ctx, $Value)
@@ -145,7 +148,7 @@
         {
           $Idx=null;
           $this->Value($Ctx, $k);
-          $Ctx->Write('=>');
+          $Ctx->WriteOp('=>');
         }
         $Ctx->Level_Inc();
         $this->Value($Ctx, $V);
@@ -169,10 +172,12 @@
     
     Function ObjectDefault($Ctx, $Class, $Value)
     {
-      $Ctx->Write('new '.$Class.'(');
+      $Ctx->WriteResvd('new ');
+      $Ctx->WriteClass($Class);
+      $Ctx->WriteOp('(');
       $v=$this->GetObjectVars($Value);
       $this->Value($Ctx, $v);
-      $Ctx->Write(')');
+      $Ctx->WriteOp(')');
     }
  
     Function CallFunc($Ctx, $Func, $Args)
@@ -180,17 +185,24 @@
       if(Is_Object($Args)) $Args=$this->GetObjectVars($Args);
       if(Is_Array($Args))
       {
-        $Ctx->Write($Func.'(');
+        $Ctx->WriteFunc($Func);
+        $Ctx->WriteOp('(');
         $this->ArrayBody($Ctx, $Args);
-        $Ctx->Write(')');
+        $Ctx->WriteOp(')');
       }
       else
-        $Ctx->Write($Func.'('.$Args.')');
+      {
+        $Ctx->WriteFunc($Func);
+        $Ctx->WriteOp('(');
+        $Ctx->Write($Args);
+        $Ctx->WriteOp(')');
+      }
     }
    
     Function NewClass($Ctx, $Class, $Args)
     {
-      $this->CallFunc($Ctx, 'new '.$Class, $Args);
+      $Ctx->WriteResvd('new ');
+      $this->CallFunc($Ctx, $Class, $Args);
     }
   }
 ?>

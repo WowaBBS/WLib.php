@@ -4,15 +4,16 @@
   
   class T_Log_Item
   {
-    Var $Outer    = null  ;
-    Var $Logger   = null  ;
-    Var $Level    = null  ;
-    Var $Message  = []    ;
-    Var $Fatal    = false ;
-    Var $Finished = false ;
-    Var $File     = false ;
-    Var $Line     = false ;
-    Var $Col      = false ;
+    Var $Outer     = null  ;
+    Var $Logger    = null  ;
+    Var $Level     = null  ;
+    Var $ShowLevel = False ;
+    Var $Message   = []    ;
+    Var $Fatal     = false ;
+    Var $Finished  = false ;
+    Var $File      = false ;
+    Var $Line      = false ;
+    Var $Col       = false ;
     
     Function __Construct($Outer, $Logger, $Level, $List)
     {
@@ -27,8 +28,7 @@
         $Level=$Levels['Fatal'];
       }
       $this->Level=$Level;
-      if($Level->Show!==false)
-        Array_Unshift($List, $Level->Show);
+      $this->ShowLevel=$Level->Show;
       $this->AddArr($List);
       $this->Fatal  =$Level->Fatal;
       //Example: $this->Log('Fatal', 'Unreachable place');
@@ -37,9 +37,12 @@
     Function Done() { $this->Finish(); $this->Message=[]; $this->Outer=null; $this->Logger=null; }
     Function __Destruct() { $this->Finish(); }
     
+    Var $Debug=[];
+    
     Function Debug($Vars, $Limit=-1) // TODO: To Log
     {
-      $this->Outer->Debug($Vars, $Limit);
+      $this->Debug[]=[$Vars, $Limit];
+    //$this->Outer->Debug($Vars, $Limit);
     }
     
     Function Call($CallBack)
@@ -52,6 +55,8 @@
     {
       return $this->AddArr($Args);
     }
+    
+    Function ShowLevel($v) { $this->ShowLevel=$v; return $this; }
     
     Function File($File, $Line=false, $Col=false)
     {
@@ -97,62 +102,25 @@
       if(Count($List)>$Count)
         Array_Splice($List, $Count);
       $this->Stack=$List;
+      return $this;
     }
 
     Function BackTrace($Skip=0)
     {
-      $this->SetStack(Debug_BackTrace(), $Skip);
+      return $this->SetStack(Debug_BackTrace(), $Skip);
     }
 
     Function SetStackFromException($Exception)
     {
-      $this->SetStack($Exception->getTrace());
+      return $this->SetStack($Exception->getTrace());
     }
     
-    //TODO:
-    function GetStackAsString()
+    Function NoBackTrace()
     {
-      $Res= [];
-      $Count = 0;
-      ForEach($this->Stack As $Frame)
-      {
-        $Args = '';
-        If(IsSet($Frame['args']))
-        {
-          $Args = [];
-          ForEach($Frame['args']As $Arg)
-          {
-            // TODO: $this->DebugL($Arg,3);
-            Switch(GetType($Arg))
-            {
-            Case 'boolean'       : $Args[] = $Arg? 'true':'false'    ; break;
-            Case 'integer'       : $Args[] = $Arg                    ; break;
-            Case 'double'        : $Args[] = $Arg                    ; break;
-            Case 'string'        : $Args[] = "'".$Arg."'"            ; break;
-            Case 'object'        : $Args[] = Get_Class($Arg)         ; break;
-            Case 'array'         : $Args[] = 'Array'                 ; break;
-            Case 'NULL'          : $Args[] = 'null'                  ; break;
-            Case 'resource'      : $Args[] = Get_Resource_Type($Arg) ; break;
-            Case 'float'         : $Args[] = $Arg                    ; break;
-            Case 'unknown type'  : $Args[] = $Arg                    ; break;
-            Case 'user function' : $Args[] = $Arg                    ; break;
-            Default              : $Args[] = $Arg                    ; break;
-            }
-          }   
-          $Args = Join(', ', $Args);
-        }
-        $Res[]= SPrintF('#%s %s(%s): %s(%s)',
-          $Count,
-          $Frame['file'     ],
-          $Frame['line'     ],
-          $Frame['function' ],
-          $Args
-        );
-        $Count++;
-      }
-      return Implode("\n", $Res);
-    }    
-
+      $this->Stack=[];
+      return $this;
+    }
+    
     //****************************************************************
     Function Finish()
     {
@@ -169,36 +137,26 @@
       }
     }
     
-    Function ToString()
+    Function ToFormat($Res)
     {
-      $Message=[];
-      $z1=$this->File !==false;
-      $z2=$this->Line !==false && $this->Line>0;
-      $z3=$this->Col  !==false;
-      
-      if($z1) $Message[]=$this->File;
-      if($z2 || $z3)
-      {
-         $Message[]='(';
-         if($z2) $Message[]=$this->Line ;
-         if($z1 && $z3) $Message[]=',';
-         if($z3) $Message[]=$this->Col  ;
-         $Message[]=')';
-      }
-      if($z1) $Message[]=' ';
+      if($this->File!==False)
+        $Res->File($this->File, $this->Line, $this->Col);
+        
+      if($this->ShowLevel!==False)
+        $Res->WriteLogLevel($this->ShowLevel, $this->Level);
 
       ForEach($this->Message As $Line)
       {
-        ForEach($Line As $Str)
-          $Message[]=$Str; // TODO: Check Is_String and debug
-        $Message[]="\n";
+        $Res->Write(... $Line);
+        $Res->NewLine();
       }
       if($this->Stack)
       {
-        $Message[]="\n";
-        $Message[]=$this->GetStackAsString();
+        $Res->Stack($this->Stack);
+        $Res->NewLine();
       }
-      return Implode('', $Message);
+      ForEach($this->Debug As $Debug)
+        $Res->Debug($Debug[0], $Debug[1]);
     }
   }
 ?>

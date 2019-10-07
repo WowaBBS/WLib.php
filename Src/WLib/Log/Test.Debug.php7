@@ -1,0 +1,8 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $Loader->Log('Debug', 'Hello ', True, ' ', null, ' Bue ', 0.5);
+  $Loader->Log('Log', 'Hello ', ['a', 'b', 'c'])->Debug($argv);
+  
+  $Loader->Done();
+?>

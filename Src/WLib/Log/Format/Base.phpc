@@ -1,0 +1,8 @@
+<?
+//$this->Parent_Class('/Object');
+  $this->Parent_Class('/Log/Format');
+  
+  class C_Log_Format_Base extends C_Log_Format // C_Object
+  {
+  }
+?>

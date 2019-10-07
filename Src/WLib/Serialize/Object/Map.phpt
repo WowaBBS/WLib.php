@@ -14,7 +14,9 @@
     Function CopyToObj($Vars, $Obj)
     {
       $Factory=$this->Factory;
-      if($F=$this->Deserialize) $F->Invoke($Obj, $Vars);
+      if($F=$this->Deserialize)
+        if($F->Invoke($Obj, $Vars)===False)
+          return false;
       ForEach($this->Map As $Name=>[$Propery, $Map])
       {
         $v=$Propery->GetValue($Obj);
@@ -35,6 +37,7 @@
         }
       }
       $Vars->CheckUnused($v);
+      return true;
     }
     
     Function UpdateClass($Class)

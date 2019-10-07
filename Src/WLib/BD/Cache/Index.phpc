@@ -17,8 +17,8 @@
     
     Function SetAutoIncrement($v=1)
     {
-      if(!$this->IsPrimary())
-        $this->Log('Error', 'Autoincrement shoul be only on primary index');
+    //if(!$this->IsPrimary()) // It's ok
+    //  $this->Log('Error', 'Autoincrement shoul be only on primary index');
       $this->SetUnique();
       $this->AutoInc=$v;
     }
@@ -116,23 +116,42 @@
     {
       $K=$Key[$i];
       $i++;
+      $ByKey2=&$ByKey[$K];
       if(IsSet($Key[$i]))
       {
-        $Res=Static::__Keys_Remove($ByKey[$K], $Key, $i);
-        if(Count($ByKey[$K])===0)
-          UnSet($ByKey[$K]);
+        $Res=Static::__Keys_Remove($ByKey2, $Key, $i);
+        $c=Count($ByKey2);
+        if($c<=2)
+        {
+          if(IsSet($ByKey2['Free'  ])) $c--;
+          if(IsSet($ByKey2['Count' ])) $c--;
+          if($c===0)
+            UnSet($ByKey[$K]);
+        }
       }
       else
       {
-        $Res=$ByKey[$K];
+        $Res=$ByKey2;
         UnSet($ByKey[$K]);
       }
       return $Res;
     }
     
-    Function _Keys_Remove(Array $Key)
+    Function _Keys_Remove(Array $Key, bool $Full=false)
     {
-      return Static::__Keys_Remove($this->ByKey, $Key);
+      $Res=Static::__Keys_Remove($this->ByKey, $Key);
+      if($Full)
+      {
+        $c=Count($this->ByKey);
+        if($c<=2)
+        {
+          if(IsSet($this->ByKey['Free'  ])) $c--;
+          if(IsSet($this->ByKey['Count' ])) $c--;
+          if($c===0) // TODO: &ReuseIds
+            $this->ByKey=[];
+        }
+      }
+      return $Res;
     }
  
     //****************************************************************
@@ -208,15 +227,17 @@
         $this->AddRec($k, $Data[$k]);
     }
  
-    Function RemoveRecByKey($Key)
-    {
-      $Res=$this->_Keys_Remove($Key);
-      $Res=Static::_Keys_GetIdx($Res);
-      ForEach($Res As $k=>$v)
-        UnSet($this->Index[$k]);
-    }
+  # // TODO: Deprecated
+  # Function RemoveRecByKey($Key)
+  # {
+  #   $Res=$this->_Keys_Remove($Key, true);
+  #   $Res=Static::_Keys_GetIdx($Res);
+  #   ForEach($Res As $k=>$v)
+  #     UnSet($this->Index[$k]);
+  # }
     
-    Function RemoveRecByIdx($Idx)
+    // TODO: Deprecated?
+    Function RemoveRecByIdx($Idx, bool $Full=true)
     {
       $Key=$this->Index[$Idx]?? [];
       If(!$Key)
@@ -225,7 +246,7 @@
         Return False;
       }
       $Key[]=$Idx;
-      $this->_Keys_Remove($Key);
+      $this->_Keys_Remove($Key, $Full);
 
       UnSet($this->Index[$Idx]);
       Return True;

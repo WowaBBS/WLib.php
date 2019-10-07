@@ -112,7 +112,7 @@
       $ErrorType=$this->Error_Type($ErrNo);
       $this->Log($ErrorType[0], $Res)
         ->File($ErrFile, $ErrLine)
-        ->BackTrace(2)
+        ->BackTrace(1)
         ->ShowLevel($ErrorType[1]);
     //Error_Clear_Last();
     }
@@ -128,7 +128,7 @@
           $this->Log('Error', $error['message'])
             ->File($error['file'], $error['line'])
             ->ShowLevel('[Fatal Error] ')
-          //->BackTrace(2)
+          //->BackTrace(1)
             ->NoBackTrace()
           ;
         # $this->Error_Handler(

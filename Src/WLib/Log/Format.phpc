@@ -311,7 +311,19 @@
           $Frame['file']?? '',
           $Frame['line']?? ''
         );
-      $this->WriteDef(': ');
+      $this->WriteDef(' ');
+      if(IsSet($Frame['class']))
+      {
+        $this->WriteClass($Frame['class']);
+        if(IsSet($Frame['object']))
+          if($Frame['class']!==Get_Class($Frame['object']))
+          {
+            $this->WriteOp('(');
+            $this->WriteClass(Get_Class($Frame['object']));
+            $this->WriteOp(')');
+          }
+        $this->WriteOp('::');
+      }
       $this->WriteFunc($Frame['function' ]);
       $Args = '';
       If(IsSet($Frame['args']))

@@ -46,16 +46,16 @@
       'Def'    =>False    ,
     # 'Def'    =>''       ,
       
-    //'Resrvd' =>self::fgCyan    ,
-      'Resrvd' =>self::fgBrWhite ,
+    //'Resvd'  =>self::fgCyan    ,
+      'Resvd'  =>self::fgBrWhite ,
       'Num'    =>self::fgBrGreen ,
     //'Str'    =>self::fgRed     ,
       'Str'    =>self::fgBrMagenta,
       
-    # 'Op'     =>'Resrvd' ,
-    # 'Type'   =>'Resrvd' ,
-    # 'Null'   =>'Resrvd' ,
-    # 'Bool'   =>'Resrvd' ,
+    # 'Op'     =>'Resvd' ,
+    # 'Type'   =>'Resvd' ,
+    # 'Null'   =>'Resvd' ,
+    # 'Bool'   =>'Resvd' ,
       
     # 'Float'  =>'Num'    ,
       'Name'   =>self::fgCyan     ,// 'Str'

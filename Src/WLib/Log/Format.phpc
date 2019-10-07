@@ -328,14 +328,15 @@
           Case 'integer'       : $this->WriteNum   ($Arg                    ); break;
           Case 'double'        : $this->WriteFloat ($Arg                    ); break;
           Case 'string'        : $this->WriteStr   ("'".$Arg."'"            ); break;
-          Case 'object'        : $this->WriteClass (Get_Class($Arg)         ); break;
-          Case 'array'         : $this->WriteType  ('Array'                 ); break;
           Case 'NULL'          : $this->WriteNull  (                        ); break;
-          Case 'resource'      : $this->WriteType  (Get_Resource_Type($Arg) ); break;
           Case 'float'         : $this->WriteFloat ($Arg                    ); break;
           Case 'unknown type'  : $this->WriteDef   ($Arg                    ); break;
           Case 'user function' : $this->WriteDef   ($Arg                    ); break;
-          Default              : $this->WriteDef   ($Arg                    ); break;
+          Case 'object'        :
+          Case 'array'         :
+          Case 'resource'      :
+          Default              :
+            $this->Debug($Arg, 3);
           }
         }   
         $this->WriteOp(')');

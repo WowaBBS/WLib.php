@@ -4,5 +4,12 @@
   $Loader->Log('Debug', 'Hello ', True, ' ', null, ' Bue ', 0.5);
   $Loader->Log('Log', 'Hello ', ['a', 'b', 'c'])->Debug($argv);
   
+  Function Test(...$Vars)
+  {
+    Global $Loader;
+    $Loader->Log('Log')->BackTracke();
+  }
+  Test('a', null, 1.5, ['a'=>'b', False=>'d']);
+  
   $Loader->Done();
 ?>

@@ -9,16 +9,37 @@
     Var $Classes =[];
     Var $Level=-1; 
     
-    Static $Stream_Echo_Default;
+  //Static $Stream_Echo_Default;
     Var $Stream_Echo    ;
     Var $Stream_Default ;
     
     Function _Init(Array $Args)
     {
       parent::_Init($Args);
-      $this->Stream_Default =Self::$Stream_Echo_Default;
-      $this->Stream_Echo    =Self::$Stream_Echo_Default;
+    //$this->Stream_Default =Self::$Stream_Echo_Default;
+    //$this->Stream_Echo    =Self::$Stream_Echo_Default;
       $this->Template = $this->Create_Object('/Debug/Template');
+    }
+    
+    Function _GetStreamEcho()
+    {
+      return $this->Get_Singleton('/Log/Manager')->Get('Console');
+    }
+    
+    Function _GetStreamDefault()
+    {
+      $Log=$this->Get_Singleton('/Log/Manager');
+      return $Log->Get('Console')?: $this->_GetStreamEcho();
+    }
+    
+    Function GetStreamEcho()
+    {
+      return $this->Stream_Echo?? $this->_GetStreamEcho();
+    }
+    
+    Function GetStreamDefault()
+    {
+      return $this->Stream_Default?? $this->_GetStreamDefault();
     }
     
     Var $Files=[];
@@ -35,7 +56,7 @@
     
     Function Create($Stream=null, $bAppend=false)
     {
-      if(Is_Null   ($Stream)) $Stream=$this->Stream_Default;
+      if(Is_Null   ($Stream)) $Stream=$this->GetStreamDefault();
       if(Is_String ($Stream))
       {
         $this->Loader->Load_Lib('/Stream/Utils');
@@ -100,5 +121,5 @@
     }
   };
   
-  C_Debug_Manager::$Stream_Echo_Default=new T_Debug_Stream_Echo_Default();
+//C_Debug_Manager::$Stream_Echo_Default=new T_Debug_Stream_Echo_Default();
 ?>

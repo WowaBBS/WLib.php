@@ -52,15 +52,15 @@
 //$Loader->Debug($W);
 
   $Loader->Log('Log', 'Query():');
-  LogTable($Loader, $W->Query(      )) ; //<Hasn`t index
+  LogTable($Loader, $W->QueryList(      )) ; //<Hasn`t index
   $Loader->Log('Log', '');
   
   $Loader->Log('Log', 'Query(Columt 1 = 3):');
-  LogTable($Loader, $W->Query([   3]));
+  LogTable($Loader, $W->QueryList([   3]));
   $Loader->Log('Log', '');
   
   $Loader->Log('Log', 'Search: Conumn 2 = 3:');
-  LogTable($Loader, $W->Query([1=>3]));
+  LogTable($Loader, $W->QueryList([1=>3]));
   $Loader->Log('Log', '');
   
   $Loader->Log('Log', 'Add 2, 2, TDriver.php!');
@@ -68,18 +68,18 @@
   $Loader->Log('Log', '');
   
   $Loader->Log('Log', 'Full:');
-  LogTable($Loader, $W->Query(      )) ;
+  LogTable($Loader, $W->QueryList(      )) ;
   $Loader->Log('Log', '');
   
   $Loader->Log('Log', 'Search: Conumn 2 = 2');
-  LogTable($Loader, $W->Query([1=>2]));
+  LogTable($Loader, $W->QueryList([1=>2]));
   $Loader->Log('Log', '');
   
-//LogTable($Loader, $W->Query([2]));
+//LogTable($Loader, $W->QueryList([2]));
 
   $Loader->Debug($W->QueryFields([1]));
   $Loader->Log('Log', 'Search: Conumn 2 = 3');
-  LogTable($Loader,  $W->Query([1=>3]));
+  LogTable($Loader,  $W->QueryList([1=>3]));
   $Loader->Log('Log', '');
   
   $Loader->Log('Log', 'Add 2, 2, tdRiver.php!');
@@ -88,8 +88,8 @@
   
   $Loader->Debug($W->QueryFields([1]));
   $Loader->Log('Log', 'Search: Conumn 3 = tdriver.php!');
-//LogTable($Loader,  $W->Query([['Lower', ['Rec', 2]]], ['tdriver.php!']));
-  LogTable($Loader,  $W->Query([['Lower', 'Rec', 2]], ['tdriver.php!'])); // Short format
+//LogTable($Loader,  $W->QueryList([['Lower', ['Rec', 2]]], ['tdriver.php!']));
+  LogTable($Loader,  $W->QueryList([['Lower', 'Rec', 2]], ['tdriver.php!'])); // Short format
   $Loader->Log('Log', '');
   
   $Loader->Debug($W);

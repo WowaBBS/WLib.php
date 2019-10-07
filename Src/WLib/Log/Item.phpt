@@ -31,6 +31,8 @@
       $this->ShowLevel=$Level->Show;
       $this->AddArr($List);
       $this->Fatal  =$Level->Fatal;
+      if($Level->Stack)
+        $this->BackTrace(2);
       //Example: $this->Log('Fatal', 'Unreachable place');
     }
     
@@ -107,6 +109,7 @@
 
     Function BackTrace($Skip=0)
     {
+      $Skip++;
       return $this->SetStack(Debug_BackTrace(), $Skip);
     }
 

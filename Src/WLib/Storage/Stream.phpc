@@ -80,6 +80,8 @@
     
     Function Get($Default=[])
     {
+      if($this->State==='Write')
+        return $this->Vars;
       $this->_CheckState('Opened');
       if(!$this->IsChanged())
         return $this->Vars;

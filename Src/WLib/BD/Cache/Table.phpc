@@ -46,6 +46,24 @@
         $this->AddRec($Rec);
     }
     
+    Function RemoveRec($Rec)
+    {
+      $Primary=$this->Primary;
+      if(!$Primary)
+        return $this->Log('Error', 'No primary index found');
+
+      If($Idx=$Primary->SearchRec($Rec))
+      {
+        $Idx=Array_Keys($Idx)[0];
+        ForEach($this->Indices As $Index)
+          $Index->RemoveRecByIdx($Idx);
+        UnSet($this->Data[$Idx]);
+        $this->Data['Free'][]=$Idx;
+      }
+      Else
+        $this->Log('Error', 'No primary index found');
+    }
+    
     Function AddRec($Rec)
     {
       $Primary=$this->Primary;
@@ -53,14 +71,22 @@
       {
         $Idx=Array_Keys($Idx)[0];
         ForEach($this->Indices As $Index)
-          $Index->RemoveRecByIdx($Idx);
+          $Index->RemoveRecByIdx($Idx, false);
         $this->Data[$Idx]=&$Rec;
       }
       Else
       {
-        $this->Data[]=&$Rec;
-        End($this->Data);
-        $Idx=Key($this->Data);
+        if($this->Data['Free']??[])
+        {
+          $Idx=Array_Pop($this->Data['Free']);
+          $this->Data[$Idx]=&$Rec;
+        }
+        Else
+        {
+          $this->Data[]=&$Rec;
+          End($this->Data);
+          $Idx=Key($this->Data);
+        }
       }
       ForEach($this->Indices As $Index)
         $Index->AddRec($Idx, $Rec);
@@ -162,6 +188,12 @@
  
     Function Query($Where=[], $Values=[])
     {
+      $this->Log('Error', 'C_BD_Cache_Table::Query is deprecated, please use QueryList');
+      return $this->QueryList($Where, $Values);
+    }
+    
+    Function QueryList($Where=[], $Values=[])
+    {
       $Fields=[];
       If($this->_ParseQuery($Where, $Values, $Fields))
         return $this->Data;
@@ -181,7 +213,7 @@
  
     Function QueryRow($Where=[], $Values=[])
     {
-      $Res=$this->Query($Where, $Values);
+      $Res=$this->QueryList($Where, $Values);
       Switch(Count($Res))
       {
       Case 0: return null;

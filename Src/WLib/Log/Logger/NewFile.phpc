@@ -27,10 +27,10 @@
       }
       While(--$i);
 
-      $this->Write(Serialize($_SERVER));
-      $this->Write("\n");
-      $this->Write(Serialize($_POST));
-      $this->Write("\n");
+    //$this->Write(Serialize($_SERVER));
+    //$this->Write("\n");
+    //$this->Write(Serialize($_POST));
+    //$this->Write("\n");
     }
   };
 ?>

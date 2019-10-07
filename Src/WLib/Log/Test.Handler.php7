@@ -3,6 +3,10 @@
   
   $MainLogger=$Loader->GetLogger();
 //$MainLogger->Set_Error_Handler();
+
+  $Loader->GetLogger()->AddNewFile('./');
+  $Request =$Loader->Get_Singleton('/Inet/Web/Request' );
+  $Loader->Log('Debug', 'Request:')->Debug($Request);
   
   $b=$a['a'];
   $b=[]['a'];

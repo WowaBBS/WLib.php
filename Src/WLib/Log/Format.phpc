@@ -266,7 +266,7 @@
     // Simple types
     Function WriteDef   ($v     ) { $this->_WriteToken('Def'   ,$v); }
     Function WriteOp    ($v     ) { $this->_WriteToken('Op'    ,$v); }
-    Function WriteRervd ($v     ) { $this->_WriteToken('Rervd' ,$v); }
+    Function WriteResvd ($v     ) { $this->_WriteToken('Resvd' ,$v); }
     Function WriteNum   ($v     ) { $this->_WriteToken('Num'   ,$v); }
     Function WriteStr   ($v     ) { $this->_WriteToken('Str'   ,$v); }
     Function WriteName  ($v     ) { $this->_WriteToken('Name'  ,$v); }

@@ -50,6 +50,11 @@
       return $Logger;
     }
     
+    Function AddNewFile($Path=null, $Args=[])
+    {
+      $this->Add($this->CreateNewFile($Path, $Args));
+    }
+    
     Function Get($Name)
     {
       return $this->ByName[$Name]??False;

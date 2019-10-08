@@ -46,10 +46,10 @@
       {
         $SOFactory=$this->SOFactory;
         $Map=$SOFactory->GetClassMap($this->Vars);
-      //$this->Debug($Vars);
+      //$this->Log('Debug', '2e354u')->Debug($Vars);
         $Vars=$SOFactory->CreateVars($Vars);
       //$Vars=$SOFactory->CreateVarsCI($Vars);
-      //$this->Debug($Vars);
+      //$this->Log('Debug', 'w9-u8r54')->Debug($Vars);
         $Map->CopyToObj($Vars, $this->Vars);
       }
       else

@@ -11,7 +11,7 @@
       $this->Factory=$Factory;
     }
     
-    Function CopyToObj($Vars, $Obj)
+    Function CopyToObj(T_Serialize_Object_Vars $Vars, $Obj)
     {
       $Factory=$this->Factory;
       if($F=$this->Deserialize)
@@ -25,7 +25,10 @@
           if(!$Map)
             $Map=$Factory->GetClassMap($v);
           $ObjectVars=$Vars->PopVars($Name);
-          $Map->CopyToObj($ObjectVars, $v);
+          if($ObjectVars)
+            $Map->CopyToObj($ObjectVars, $v);
+        # else
+        #   $this->Factory->Log('Error', 'Serialize/Object/Map::CopyToObj property ', $Name, ' not found')->Debug($Vars);
         }
         else
         {

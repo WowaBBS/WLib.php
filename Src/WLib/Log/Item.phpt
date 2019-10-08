@@ -32,7 +32,7 @@
       $this->AddArr($List);
       $this->Fatal  =$Level->Fatal;
       if($Level->Stack)
-        $this->BackTrace(2);
+        $this->BackTrace(1);
       //Example: $this->Log('Fatal', 'Unreachable place');
     }
     
@@ -153,13 +153,13 @@
         $Res->Write(... $Line);
         $Res->NewLine();
       }
+      ForEach($this->Debug As $Debug)
+        $Res->Debug($Debug[0], $Debug[1]);
       if($this->Stack)
       {
         $Res->Stack($this->Stack);
         $Res->NewLine();
       }
-      ForEach($this->Debug As $Debug)
-        $Res->Debug($Debug[0], $Debug[1]);
     }
   }
 ?>

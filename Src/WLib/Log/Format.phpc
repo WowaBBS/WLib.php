@@ -99,7 +99,7 @@
     
     Var $Level    =-1;
     
-    Function Level_End() { return $this->Level=0; }
+    Function Level_End() { return $this->Level===0; }
     Function Level_Inc() { $this->Level--; }
     Function Level_Dec() { $this->Level++; }
     

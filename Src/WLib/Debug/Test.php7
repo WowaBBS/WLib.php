@@ -28,6 +28,16 @@
     }
   };
   
+  Class TestRecursive
+  {
+    Var $Me;
+    
+    Function __Construct()
+    {
+      $this->Me=$this;
+    }
+  };
+  
   $Deb    ->Classes=&$Classes;
   $Inline ->Classes=&$Classes;
   $Manager->Classes['TestClass']=
@@ -36,6 +46,7 @@
       $Ctx->Inline_NewClass($Class, [$v->a, $v->b]);
     };
   $a[]=new TestClass('Hello'."\0\t\r\n\"\\\\000", 777);
+  $a[]=new TestRecursive();
   $a[]=[];
   $a[]="Hello\nWorld";
   $b="\0Hello\nWorld\n";
@@ -44,5 +55,5 @@
   $a[]=$b;
   $a[]=new TestClass("Hello\nWorld\$", null);
   echo '$a=';
-  $Deb->Debug($a);
+  $Deb->Debug($a,5);
 ?>

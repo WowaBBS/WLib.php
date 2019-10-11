@@ -18,7 +18,7 @@
     {
     //$this->Stream->Close();
       parent::_Done();
-      if($this->RemoveIfUnimportant && $this->Importance<=0)
+      if($this->RemoveUnimportant && $this->Importance<=0)
         UnLink($this->FilePath);
     }
     

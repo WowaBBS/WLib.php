@@ -14,6 +14,7 @@
   //Var $Path  = './templates/' ;
   //Var $URL   = 'templates/' ;
     Var $LHash = [] ;
+    Var $RouteFile = '.route.php'; //'location.php';
  
     Function _Init(Array $Args)
     {
@@ -64,10 +65,9 @@
         $Location=$this->LHash[$Mode];
       Else
       {
+        $PMF=$this->RouteFile;
         If($Mode!=='')
-          $PMF=$Mode.'/location.php';
-        Else
-          $PMF='location.php';
+          $PMF=$Mode.'/'.$PMF;
         $PMFL=$this->GetFiles($PMF);
         $LocationRes=[];
         ForEach($PMFL As $PMFF)

@@ -36,13 +36,16 @@
           $this->GetLoader()->Log('Error', 'Logger ', $Name, ' already exists');
           return $this->ByName[$Name];
         }
-        $Logger=$this->Create($Logger, $Args);
+        $Logger=$this->CreateFile($Logger, $Args);
       }
       else
-        $Name=$Args['Name'];
-      if(IsSet($this->ByName[$Name]))
-        $this->GetLoader()->Log('Warning', 'Logger ', $Name, ' already exists will be overrided');
-      $this->ByName[$Name]=$Logger;
+        $Name=$Args['Name']?? '';
+      if(StrLen($Name))
+      {
+        if(IsSet($this->ByName[$Name]))
+          $this->GetLoader()->Log('Warning', 'Logger ', $Name, ' already exists will be overrided');
+        $this->ByName[$Name]=$Logger;
+      }
       if(IsSet($this->Loggers[$Logger->Object_Id]))
         $this->GetLoader()->Log('Warning', 'Logger ', $Name, ' already was added');
       else
@@ -52,7 +55,7 @@
     
     Function AddNewFile($Path=null, $Args=[])
     {
-      $this->Add($this->CreateNewFile($Path, $Args));
+      return $this->Add($this->CreateNewFile($Path, $Args));
     }
     
     Function Get($Name)
@@ -79,20 +82,24 @@
         $this->GetLoader()->Log('Error', 'Logder ', $Name, ' wasn\'t be added');
         return false;
       }
+      
       UnSet($this->Loggers[$Logger->Object_Id]);
       return $Logger;
     }
     
-    Function Create($Stream=null, $Args=[])
+    Function CreateCustom($Name, $Args=[])
     {
-    //if(Is_Null   ($Stream)) $Stream=$this->Stream_Default;
-      $Args['Stream']=$Stream;
-      return $this->Create_Object('/Log/Logger/Stream', $Args);
+      return $this->Create_Object('/Log/Logger/'.$Name, $Args);
+    }
+    
+    Function CreateFile($FilePath=null, $Args=[])
+    {
+      $Args['FilePath']=$FilePath;
+      return $this->Create_Object('/Log/Logger/File', $Args);
     }
     
     Function CreateNewFile($Path=null, $Args=[])
     {
-    //if(Is_Null   ($Stream)) $Stream=$this->Stream_Default;
       $Args['Path']=$Path;
       return $this->Create_Object('/Log/Logger/NewFile', $Args);
     }

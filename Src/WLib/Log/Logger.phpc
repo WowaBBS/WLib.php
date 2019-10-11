@@ -61,11 +61,12 @@
       UnUsed();
     }
     
-    Function CloseAndRemoveIsEmpty():bool
-    {
-      return true;
-    }
+  //Function CloseAndRemoveIsEmpty():bool { return true; }
+  
+    Function Enable($v=true) { $this->Disabled=!$v; }
+    Function Disable($v=true) { $this->Disabled=$v; }
     
+  //****************************************************************
     Function Error_Type($Code)
     {
       static $ErrorTypes=[
@@ -172,5 +173,6 @@
       
       Restore_Exception_Handler();
     }
+  //****************************************************************
   };
 ?>

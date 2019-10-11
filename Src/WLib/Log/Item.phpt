@@ -125,6 +125,13 @@
     }
     
     //****************************************************************
+    
+    Var $Importance=1;
+    
+    Function Unimportant() { $this->Importance=0; return $this; }
+    Function SetImportance($v) { $this->Importance=$v; return $this; }
+    
+    //****************************************************************
     Function Finish()
     {
       if($this->Finished)

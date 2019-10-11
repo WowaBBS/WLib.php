@@ -12,6 +12,13 @@
       $this->SetStream($Args['Stream']?? False, $Args);
     }
     
+    Function _Done()
+    {
+      $this->Stream->Done();
+      $this->Stream=null;
+      parent::_Done();
+    }
+    
     Function SetStream($Stream, $Args=[])
     {
       if($Stream===False)
@@ -21,12 +28,10 @@
         $OpenMode=omRead|omWrite|omMakePath|omCreate|omBinary;//|omShareable; // TODO; Bug TestW.php7
         $OpenMode|=($Args['Append']??False)? omAppend:omClear;
         //omExclusive
-        $Stream=$this->Create_Object('/Stream/File',
-          [
-            'FileName'=>$Stream,
-            'OpenMode'=>$OpenMode,
-          ]
-        );
+        $Stream=$this->Create_Object('/Stream/File', [
+          'FileName'=>$Stream,
+          'OpenMode'=>$OpenMode,
+        ]);
       }
       $this->Stream=$Stream;
     }
@@ -62,30 +67,6 @@
       //$this->Stream->Seek(0);
       //$Content=$this->Stream->Read($this->Stream->Length());
       return $Content;
-    }
-    
-    //FlushCopyToLoggerUnLockCloseAndRemoveIsEmpty
-    Function Task_Magic($Logger):bool
-    {
-      $Stream=$this->Stream;
-      
-      $Stream->Flush();
-      
-      $IsEmpty=$Stream->Pos()==0;
-      if(!$IsEmpty && $Logger)
-      {
-        $Content=$this->GetContent();
-        $Logger->Log('Log', $Content);
-      }
-      
-      if($Stream->Is_Locked())
-        $Stream->UnLock();
-
-      $Stream->Close();
-      $this->Stream=null;
-      if($IsEmpty)
-        UnLink($Stream->RFileName);
-      return $IsEmpty;
     }
   };
 ?>

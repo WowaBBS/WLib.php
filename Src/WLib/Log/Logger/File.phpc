@@ -1,0 +1,55 @@
+<?
+  $Loader->Parent_Class('/Log/Logger/Stream');
+ 
+  Class C_Log_Logger_File extends C_Log_Logger_Stream
+  {
+    Var $FilePath      ='';
+    Var $RemoveUnimportant =false;
+    
+    Function _Init(Array $Args)
+    {
+      $this->FilePath          =$Args['FilePath'          ]?? '';
+      $this->RemoveUnimportant =$Args['RemoveUnimportant' ]?? true;
+      $Args['Stream' ]=False;
+      parent::_Init($Args);
+    }
+
+    Function _Done()
+    {
+    //$this->Stream->Close();
+      parent::_Done();
+      if($this->RemoveIfUnimportant && $this->Importance<=0)
+        UnLink($this->FilePath);
+    }
+    
+    Function Open($FilePath)
+    {
+      $this->FilePath=$FilePath;
+      $this->Stream->Assign($FilePath);
+      return $this->Stream->Open(omReadWrite|omCreate|omMakePath|omBinary);
+    }
+    
+    Function Task_Magic($Logger):bool
+    {
+      $Stream=$this->Stream;
+      
+      $Stream->Flush();
+      
+      $IsEmpty=$Stream->Pos()==0;
+      if(!$IsEmpty && $Logger)
+      {
+        $Content=$this->GetContent();
+        $Logger->Log('Log', $Content);
+      }
+      
+      if($Stream->Is_Locked())
+        $Stream->UnLock();
+
+      $Stream->Close();
+      $this->Stream=null;
+      if($IsEmpty)
+        UnLink($Stream->RFileName);
+      return $IsEmpty;
+    }
+  };
+?>

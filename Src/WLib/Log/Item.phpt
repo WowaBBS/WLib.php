@@ -2,6 +2,10 @@
   $this->Load_Type('/Log/Level');
   ini_set('log_errors_max_len', 1000000);
   
+  class TLoggerUnsupportedException extends Exception
+  {
+  }
+  
   class T_Log_Item
   {
     Var $Outer     = null  ;
@@ -32,7 +36,7 @@
       $this->AddArr($List);
       $this->Fatal  =$Level->Fatal;
       if($Level->Stack)
-        $this->BackTrace(1);
+        $this->Stack=1;
       //Example: $this->Log('Fatal', 'Unreachable place');
     }
     
@@ -95,7 +99,7 @@
 
     //****************************************************************
     // Stack
-    Var $Stack=[];
+    Var $Stack=0;
 
     Function SetStack(Array $List, Int $Skip=0, Int $Count=1000)
     {
@@ -120,7 +124,7 @@
     
     Function NoBackTrace()
     {
-      $this->Stack=[];
+      $this->Stack=0;
       return $this;
     }
     
@@ -137,13 +141,15 @@
       if($this->Finished)
         return;
       $this->Finished=true;
+      if($this->Stack && !Is_Array($this->Stack))
+        $this->BackTrace($this->Stack);
       if($this->Logger)
         $this->Logger->LogItem($this);
       if($this->Fatal)
       {
       //debug_print_backtrace();
-      
-        UnSupported();
+        throw new TLoggerUnsupportedException('Unsupported');
+        //UnSupported();
       }
     }
     
@@ -164,6 +170,8 @@
         $Res->Debug($Debug[0], $Debug[1]);
       if($this->Stack)
       {
+        if(!Is_Array($this->Stack))
+          $this->BackTrace($this->Stack);
         $Res->Stack($this->Stack);
         $Res->NewLine();
       }

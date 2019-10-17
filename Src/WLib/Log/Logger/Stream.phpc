@@ -4,17 +4,26 @@
  
   Class C_Log_Logger_Stream extends C_Log_Logger_Base
   {
-    Var $Stream =null;
+    Protected $Stream =null;
     
     Function _Init(Array $Args)
     {
       parent::_Init($Args);
       $this->SetStream($Args['Stream']?? False, $Args);
+      $this->CheckStream();
+    }
+    
+    Function CheckStream()
+    {
+      if($this->Stream) return true;
+      $this->Loader->Log('Error', 'Logger hasn\'t stream');
+      return false;
     }
     
     Function _Done()
     {
-      $this->Stream->Done();
+      if($this->CheckStream())
+        $this->Stream->Done();
       $this->Stream=null;
       parent::_Done();
     }

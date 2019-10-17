@@ -27,8 +27,8 @@
         [ 0  ,'Debug'   ,'[Debug] '   ,false ,E_USER_NOTICE  ,False ],
         [ 1  ,'Log'     , False       ,false ,E_USER_NOTICE  ,False ],
         [ 2  ,'Note'    ,'[Note] '    ,false ,E_USER_NOTICE  ,False ],
-        [ 3  ,'Warning' ,'[Warning] ' ,false ,E_USER_WARNING ,True  ],
-        [ 4  ,'Error'   ,'[Error] '   ,false ,E_USER_WARNING ,True  ],
+        [ 3  ,'Warning' ,'[Warning] ' ,false ,E_USER_WARNING ,False ], // TODO True for some
+        [ 4  ,'Error'   ,'[Error] '   ,false ,E_USER_WARNING ,False ], // TODO True for some
         [ 5  ,'Fatal'   ,'[Fatal] '   ,true  ,E_USER_ERROR   ,True  ],
       ];
       ForEach($Levels As $Level)

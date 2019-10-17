@@ -1,7 +1,7 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
-  $Loader->GetLogger()->Add('Fatal.log');
+  $Loader->GetLogger()->Add('Test.Fatal.log');
   
   asdadas();
   

@@ -106,13 +106,14 @@
   //Echo 'CP ', $Path, "\n";
     If($Path==='' || $Path==='/')
       Return True;
-    If(FS_Is_Dir($Path))
+    If(Is_Dir($Path))
       Return True;
-    If(FS_File_Exists($Path))
+    If(File_Exists($Path))
       Return False;
     If(!CreatePath(GetDirPath($Path), $Attr))
       Return False;
-    @FS_MkDir($Path, $Attr);
-    Return FS_Is_Dir($Path);
+    if(!Is_Dir($Path))
+      MkDir($Path, $Attr);
+    Return Is_Dir($Path);
   }
 ?>

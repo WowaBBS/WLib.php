@@ -12,6 +12,8 @@
       $this->RemoveUnimportant =$Args['RemoveUnimportant' ]?? true;
       $Args['Stream' ]=False;
       parent::_Init($Args);
+      if($this->FilePath)
+        $this->Open($this->FilePath);
     }
 
     Function _Done()
@@ -26,7 +28,7 @@
     {
       $this->FilePath=$FilePath;
       $this->Stream->Assign($FilePath);
-      return $this->Stream->Open(omReadWrite|omCreate|omMakePath|omBinary);
+      return $this->Stream->Open(omReadWrite|omCreate|omMakePath|omBinary|omClear);
     }
     
     Function Task_Magic($Logger):bool
@@ -46,7 +48,8 @@
         $Stream->UnLock();
 
       $Stream->Close();
-      $this->Stream=null;
+    //$this->Stream=null;
+      $this->RemoveUnimportant=False;
       if($IsEmpty)
         UnLink($Stream->RFileName);
       return $IsEmpty;

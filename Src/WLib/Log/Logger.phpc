@@ -93,11 +93,14 @@
     {
       $this->Back_Memory=True;
 
-      $ErrorType=$this->Error_Type($E->GetCode());
-      $this->Log($ErrorType[0], $E->GetMessage())
-        ->File($E->GetFile(), $E->GetLine())
-        ->SetStack($E->GetTrace())
-        ->ShowLevel($ErrorType[1]=='[Zero Error] '? '['.Get_Class($E).'] ':$ErrorType[1]);
+      if(Get_Class($E)!=='TLoggerUnsupportedException')
+      {
+        $ErrorType=$this->Error_Type($E->GetCode());
+        $this->Log($ErrorType[0], 'Exception_Handler: ', $E->GetMessage())
+          ->File($E->GetFile(), $E->GetLine())
+          ->SetStack($E->GetTrace())
+          ->ShowLevel($ErrorType[1]=='[Zero Error] '? '['.Get_Class($E).'] ':$ErrorType[1]);
+      }
         
       if($this->Exception_Handler_Old)
         $this->Exception_Handler_Old($E);
@@ -111,7 +114,7 @@
     //  Return;
       $Res=$ErrStr;
       $ErrorType=$this->Error_Type($ErrNo);
-      $this->Log($ErrorType[0], $Res)
+      $this->Log($ErrorType[0], 'Error_Handler: ', $Res)
         ->File($ErrFile, $ErrLine)
         ->BackTrace(1)
         ->ShowLevel($ErrorType[1]);
@@ -126,7 +129,8 @@
       if($error=Error_Get_Last())
         if($error['type']===E_ERROR)
         {
-          $this->Log('Error', $error['message'])
+          Set_Time_Limit(10);
+          $this->Log('Error', 'Shutdown_Function: ', $error['message'])
             ->File($error['file'], $error['line'])
             ->ShowLevel('[Fatal Error] ')
           //->BackTrace(1)
@@ -173,6 +177,12 @@
       
       Restore_Exception_Handler();
     }
+  //****************************************************************
+    Protected Function _Debug_Info(Array &$Res)
+    {
+      if(IsSet($Res['Back_Memory' ])) unset($Res['Back_Memory' ]);
+    }
+    
   //****************************************************************
   };
 ?>

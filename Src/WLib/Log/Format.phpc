@@ -44,12 +44,14 @@
         if(StrLen($v)===0)
         {
           $v=Array_Pop($Lines);
+          $Stream->Write("\n");
           $this->WriteLn=true;
         }
         $Tab=$this->Tab;
         ForEach($Lines As $Line)
         {
           $Stream->Write($Line);
+          $Stream->Write("\n");
           $Stream->Write($Tab);
         }
       }
@@ -64,8 +66,8 @@
       {
         if($this->WriteLn)
           $this->Stream->Write($this->Tab);
-        else
-          $this->WriteLn=true;
+        $this->Stream->Write("\n");
+        $this->WriteLn=true;
       }
     }
     
@@ -80,7 +82,7 @@
     
     //****************************************************************
     // Tab
-    Var $Tab      ="\n";
+    Var $Tab      ="";
 
     Function Tab_Push($AddTab)
     {
@@ -348,7 +350,7 @@
           Case 'array'         :
           Case 'resource'      :
           Default              :
-            $this->Debug($Arg, 3);
+            $this->Debug($Arg, 1);
           }
         }   
         $this->WriteOp(')');

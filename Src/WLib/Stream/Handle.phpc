@@ -11,6 +11,18 @@
       $this->FHandle=$Args['Handle']??false;
     }
     
+    Function CheckHandle()
+    {
+      if($this->FHandle)
+        return true;
+      if(!($this->HasNoHandleError?? False))
+      {
+        $this->HasNoHandleError=true;
+        $this->Log('Error', 'No handle');
+      }
+      return False;
+    }
+    
     Function Close()
     {
       If($this->FHandle)
@@ -66,11 +78,8 @@
         $this->Log('Error', 'Unsupported type ', GetType($Data));
         return 0;
       }
-      if(!$this->FHandle)
-      {
-        $this->Log('Error', 'No handle');
+      if(!$this->CheckHandle())
         return 0;
-      }
       Return FWrite($this->FHandle, $Data);
     }
   

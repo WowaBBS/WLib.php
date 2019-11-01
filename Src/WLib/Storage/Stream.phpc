@@ -34,7 +34,7 @@
     Function _CheckState($State)
     {
       if($this->State!==$State)
-        $this->Log('Error', 'State ', $this->State, ' is wrong, should be state ', $State);
+        $this->Log('Error', 'State ', $this->State, ' is wrong, should be state ', $State)->BackTrace();
     }
     
     Function _SetState($State)

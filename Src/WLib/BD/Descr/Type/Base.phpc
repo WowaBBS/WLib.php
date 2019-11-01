@@ -1,0 +1,66 @@
+<?
+  $Loader->Load_Class('/Object');
+ 
+  Class C_BD_Descr_Type_Base Extends C_Object
+  {
+  //Var $TypeName='';
+  
+    Protected Function _Init($Args)
+    {
+    //$this->TypeName=$Args['TypeName'];
+      parent::_Init($Args);
+    }
+
+    Protected Function _Done()
+    {
+      parent::_Done();
+    }
+    
+    Function Create_Type($Descr)
+    {
+      if(Is_String($Descr))
+        $Descr=[$Descr];
+      $TypeName=$Descr['Type']?? Array_Shift($Descr);
+    # if($Type=$this->Types[$TypeName]?? False)
+    #   return $Type->Create($Descr);
+      if($Type=$this->Get_Singleton('/BD/Descr/Type/'.$TypeName, [], ['Safe'=>True]))
+        return $Type->Create($Descr);
+        
+      $this->Log('Error', 'TypeName ', $TypeName, ' not found');
+      return null;
+    }
+    
+    Function _Create_Type($TypeName, $Args)
+    {
+      if($Type=$this->Get_Singleton('/BD/Descr/Type/'.$TypeName, $Args))
+        return $Type;
+        
+      $this->Log('Error', 'TypeName ', $TypeName, ' not found')->Debug($Args);
+      return null;
+    }
+    
+    Function IsEnum() { return False; }
+    
+    Function GetTypeName() { return Get_Class($this); }
+    
+    Static Function Descr_Pop(Array &$Descr, String $Name, $Def='String')
+    {
+      if(IsSet($Descr['Type']))
+      {
+        $Res=$Descr['Type'];
+        UnSet($Descr['Type']);
+        return $Res;
+      }
+      elseif(IsSet($Descr[0]))
+        return Array_Shift($Descr);
+      return $Def;
+    }
+    
+    Function Create($Descr)
+    {
+      if($Descr)
+        $this->Log('Error', 'Descr is not supported for ', $this->GetTypeName())->Debug($Descr);
+      return $this;
+    }
+  }
+?>

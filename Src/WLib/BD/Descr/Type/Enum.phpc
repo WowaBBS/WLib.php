@@ -1,0 +1,22 @@
+<?
+  $Loader->Load_Class('/BD/Descr/Type/Base');
+ 
+  Class C_BD_Descr_Type_Enum Extends C_BD_Descr_Type_Base
+  {
+    Var $Values=[];
+  
+    Protected Function _Init($Args)
+    {
+      $this->Values=$Args['Values'];
+    //ForEach($Args['Descr'] As $k=>$v)
+      parent::_Init($Args);
+    }
+
+    Protected Function _Done()
+    {
+      parent::_Done();
+    }
+
+    Function IsEnum() { return True; }
+  }
+?>

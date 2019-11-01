@@ -139,6 +139,7 @@
     
     Function _Keys_Remove(Array $Key, bool $Full=false)
     {
+    //$this->Log('Debug')->Debug([$this->ByKey, $Key]);
       $Res=Static::__Keys_Remove($this->ByKey, $Key);
       if($Full)
       {
@@ -179,7 +180,12 @@
     {
       $Key=[];
       ForEach($this->Fields As $k=>$v)
-        $Key[$k]=$v->Calc($Rec);
+      {
+        $V=$v->Calc($Rec);
+        if(Is_Null($V))
+          $V='';
+        $Key[$k]=$V;
+      }
       Return $Key;
     }
  
@@ -242,7 +248,7 @@
       $Key=$this->Index[$Idx]?? [];
       If(!$Key)
       {
-        $this->Log('Error', 'Key for idx=', $Idx, ' not found');
+        $this->Log('Error', 'Key for idx=', $Idx, ' not found')->BackTrace();
         Return False;
       }
       $Key[]=$Idx;

@@ -1,0 +1,60 @@
+<?
+  $Loader->Load_Class('/Object');
+ 
+  Class C_BD_Descr_Index Extends C_Object
+  {
+    Var $Table   =null;
+    Var $Fields  =[];
+    Var $Unique  =false;
+    Var $AutoInc =false;
+    Var $Primary =false;
+  
+    Protected Function _Init($Args)
+    {
+      $this->Table=$Args['Table'];
+      $Descr=$Args['Descr'];
+      if($Fields=$Descr['Fields']?? False)
+        UnSet($Descr['Fields']);
+      else
+        $Fields=Array_Shift($Descr);
+      $this->Fields=$this->Table->_MakeFields($Fields);
+      ForEach($Descr As $k=>$v)
+        if(Is_Integer($k) && Is_String($v))
+          Switch($v)
+          {
+          Case 'Primary':
+            if($this->Primary)
+              $this->Log('Error', 'Index already primary');
+            else
+              $this->Primary=true;
+            break;
+          Case 'Unique':
+            if($this->Unique)
+              $this->Log('Error', 'Index already unique');
+            else
+              $this->Unique=true;
+            break;
+          Case 'AutoIncrement':
+            if($this->AutoInc)
+              $this->Log('Error', 'Index already auto increment');
+            else
+              $this->AutoInc=true;
+            break;
+          Default:
+            $this->Log('Error', 'Unknown tag ', $v);
+          }
+      parent::_Init($Args);
+    }
+
+    Protected Function _Done()
+    {
+      parent::_Done();
+    }
+
+    Protected Function _Debug_Info(Array &$Res)
+    {
+      Parent::_Debug_Info($Res);
+      unset($Res['Table']);
+    }
+  }
+?>

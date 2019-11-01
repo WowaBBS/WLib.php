@@ -1,5 +1,5 @@
 <?
-  Class T_BD_Expression_Base
+  Class T_BD_Expr_Base
   {
     Function Calc(Array $Rec=[], Array $Args=[])
     {

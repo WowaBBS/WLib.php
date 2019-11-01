@@ -1,9 +1,9 @@
 <?
-  $this->Load_Type('/BD/Expression/Base');
+  $this->Load_Type('/BD/Expr/Base');
   
-  Class T_BD_Expression_Array extends T_BD_Expression_Base
+  Class T_BD_Expr_Array extends T_BD_Expr_Base
   {
-    Var $List=[]; // Array of T_BD_Expression_Base
+    Var $List=[]; // Array of T_BD_Expr_Base
     
     Static Function Create($Factory, $Rec, $Arr)
     {

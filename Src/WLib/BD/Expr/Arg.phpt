@@ -1,7 +1,7 @@
 <?
-  $this->Load_Type('/BD/Expression/Base');
-  
-  Class T_BD_Expression_Rec extends T_BD_Expression_Base
+  $this->Load_Type('/BD/Expr/Base');
+
+  Class T_BD_Expr_Arg extends T_BD_Expr_Base
   {
     Var $Name=''; // String|Int
     
@@ -16,17 +16,12 @@
     
     Function Calc(Array $Rec=[], Array $Args=[])
     {
-      return $Rec[$this->Name];
+      return $Args[$this->Name];
     }
-
-    Function Set(Array &$Rec, $Value)
-    {
-      $Rec[$this->Name]=$Value;
-    }
-
+    
     Function __ToString()
     {
-      return '`'.$this->Name.'`';
+      return '@'.$this->Name;
     }
   }
 ?>

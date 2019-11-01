@@ -53,12 +53,12 @@
       return $Res;
     }
     
-    Function CreateVars($Vars)
+    Function CreateVars($Vars=[])
     {
       return new T_Serialize_Object_Vars($this, $Vars);
     }
 
-    Function CreateVarsCI($Vars)
+    Function CreateVarsCI($Vars=[])
     {
       return new T_Serialize_Object_VarsCI($this, $Vars);
     }

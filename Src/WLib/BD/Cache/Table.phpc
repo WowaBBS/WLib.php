@@ -4,6 +4,7 @@
   Class C_BD_Cache_Table extends C_Object
   {
     Var $Data      = [];
+    Var $Free      = [];
     Var $Indices   = [];
     Var $IdxByName = [];
     Var $Primary   = null;
@@ -11,7 +12,7 @@
 
     Function _GetExprFactory()
     {
-      return $this->ExprFactory=$this->Loader->Get_Singleton('/BD/Expression/Factory');
+      return $this->ExprFactory=$this->Loader->Get_Singleton('/BD/Expr/Factory');
     }
     
     Function GetExprFactory()
@@ -58,7 +59,7 @@
         ForEach($this->Indices As $Index)
           $Index->RemoveRecByIdx($Idx);
         UnSet($this->Data[$Idx]);
-        $this->Data['Free'][]=$Idx;
+        $this->Free[]=$Idx;
       }
       Else
         $this->Log('Error', 'No primary index found');
@@ -76,9 +77,9 @@
       }
       Else
       {
-        if($this->Data['Free']??[])
+        if($this->Free)
         {
-          $Idx=Array_Pop($this->Data['Free']);
+          $Idx=Array_Pop($this->Free);
           $this->Data[$Idx]=&$Rec;
         }
         Else
@@ -206,7 +207,24 @@
       }
       Else
       {
-        $this->Log('Error', 'Index for fields [', Implode(',', $Fields), '] not found, TODO: full scan');
+        $this->Log('Error', 'Index for fields [', Implode(',', $Fields), '] not found, full scan');
+        $List=$this->Data;
+        $A=[];
+        ForEach($List As $id=>$Rec)
+        {
+          $Key=[];
+          ForEach($Fields As $k=>$v)
+            $Key[$k]=$v->Calc($Rec);
+          $A=$Key;
+          if($Key===$Values)
+            $Res[]=$Rec;
+        }
+        $this->Debug(['FullScan',
+          'Fields'=>$Fields,
+          'Values'=>$Values,
+          'Result'=>$Res,
+          'A'=>$A,
+        ]);
       }
       Return $Res;
     }

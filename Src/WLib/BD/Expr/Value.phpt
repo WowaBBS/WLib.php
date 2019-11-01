@@ -1,14 +1,14 @@
 <?
-  $this->Load_Type('/BD/Expression/Base');
-
-  Class T_BD_Expression_Arg extends T_BD_Expression_Base
+  $this->Load_Type('/BD/Expr/Base');
+  
+  Class T_BD_Expr_Value extends T_BD_Expr_Base
   {
-    Var $Name=''; // String|Int
+    Var $Value='';
     
     Static Function Create($Factory, $Rec, $Arr)
     {
       $Res=new Self();
-      $Res->Name=Array_Shift($Arr);
+      $Res->Value=Array_Shift($Arr);
       if($Arr)
         $Factory->Log('Fatal', '');
       return $Res;
@@ -16,12 +16,12 @@
     
     Function Calc(Array $Rec=[], Array $Args=[])
     {
-      return $Args[$this->Name];
+      return $this->Value;
     }
-    
+
     Function __ToString()
     {
-      return '@'.$this->Name;
+      return IsString($this->Value)? '"'.$this->Value.'"':$this->Value;
     }
   }
 ?>

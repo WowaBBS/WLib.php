@@ -1,0 +1,30 @@
+<?
+  $Loader->Load_Class('/BD/Descr/Type/Base');
+ 
+  Class C_BD_Descr_Type_Map Extends C_BD_Descr_Type_Base
+  {
+    Var $KeyType   =null;
+    Var $ValueType =null;
+    
+    Protected Function _Init($Args)
+    {
+      $this->KeyType   =$this->Create_Type($Args['KeyType'   ]?? 'String');
+      $this->ValueType =$this->Create_Type($Args['ValueType' ]?? 'String');
+      parent::_Init($Args);
+    }
+
+    Protected Function _Done()
+    {
+      parent::_Done();
+    }
+
+    Function Create($Descr)
+    {
+      $KeyType   =Static::Descr_Pop($Descr, 'KeyType'   );
+      $ValueType =Static::Descr_Pop($Descr, 'ValueType' );
+      if($Descr)
+        $this->Log('Error', 'Descr is not supported for ', $this->GetTypeName())->Debug($Descr);
+      return $this->_Create_Type('Set', ['KeyType'=>$KeyType, 'ValueType'=>$ValueType]);
+    }
+  }
+?>

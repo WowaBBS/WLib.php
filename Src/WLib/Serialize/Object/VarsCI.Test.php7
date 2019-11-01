@@ -1,0 +1,39 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  Function MyAssert($v, ...$Title)
+  {
+    Global $Loader;
+    if($v)
+    //$Loader->Log('Log', ...$Title, 'Ok');
+      $Loader->Log('Log', 'Ok');
+    Else
+      $Loader->Log('Error', ...$Title);
+  }
+
+  $Object_Factory=$Loader->Get_Singleton('/Serialize/Object/Factory');
+  $Vars=$Object_Factory->CreateVarsCI();
+  $Vars['aaa']='bbb';
+  $Vars['bbb']=['cCc'=>'ddd'];
+  $Vars[1]=2;
+  $Vars[]=3;
+  UnSet($Vars[1]);
+  
+  MyAssert( IsSet($Vars['AaA']));
+  MyAssert(!IsSet($Vars['CcC']));
+  $Vars['cCc']=['cAc'=>'dAd'];
+  MyAssert( IsSet($Vars['CcC']));
+  MyAssert($Vars['AAA']==='bbb');
+  MyAssert($Vars['BBB']['CCC']==='ddd');
+  
+  $Loader->Log('Log', 'Count=', Count($Vars));
+  ForEach($Vars As $k=>$v)
+    if(Is_Scalar($v))
+      $Loader->Log('Log', $k, '=>', $v);
+    elseif(Is_Iterable($v))
+      $Loader->Log('Log', $k, '=>', 'Iterable');
+    else
+      $Loader->Log('Log', $k, '=>', 'Other');
+  //$Object_Factory->
+//TODO: See WLib/Storage/Stream.Test.Obj.php7
+?>

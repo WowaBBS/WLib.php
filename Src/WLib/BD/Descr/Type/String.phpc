@@ -1,0 +1,18 @@
+<?
+  $Loader->Load_Class('/BD/Descr/Type/Base');
+ 
+  Class C_BD_Descr_Type_String Extends C_BD_Descr_Type_Base
+  {
+    Var $MaxLen=255;
+  
+    Protected Function _Init($Args)
+    {
+      parent::_Init($Args);
+    }
+
+    Protected Function _Done()
+    {
+      parent::_Done();
+    }
+  }
+?>

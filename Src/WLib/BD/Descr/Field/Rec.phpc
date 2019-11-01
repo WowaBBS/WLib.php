@@ -1,0 +1,24 @@
+<?
+  $Loader->Load_Class('/BD/Descr/Field/Base');
+ 
+  Class C_BD_Descr_Field_Rec Extends C_BD_Descr_Field_Base
+  {
+    Var $Type ;
+    Var $Def  ;
+    
+    Protected Function _Init($Args)
+    {
+      $Descr =$Args['Descr'];
+      $Type  =$Descr['Type' ]?? Array_Shift($Descr);
+      $Def   =$Descr['Def'  ]?? Array_Shift($Descr);
+      parent::_Init($Args);
+      $this->Type =$this->Create_Type  ($Type );
+      $this->Def  =$this->Create_Value ($Def  );
+    }
+    
+    Protected Function _Done()
+    {
+      parent::_Done();
+    }
+  }
+?>

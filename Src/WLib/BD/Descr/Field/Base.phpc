@@ -1,0 +1,62 @@
+<?
+  $Loader->Load_Class('/Object');
+ 
+  Class C_BD_Descr_Field_Base Extends C_Object
+  {
+    Var $FieldName ='';
+    Var $Table     =null;
+  
+    Protected Function _Init($Args)
+    {
+      $this->FieldName =$Args['FieldName' ];
+      $this->Table     =$Args['Table'     ];
+      
+      parent::_Init($Args);
+    }
+
+    Function GetExprFactory()
+    {
+      return $this->Table->GetExprFactory();
+    }
+ 
+    Function Create_Expr($Field)
+    {
+      $ExprFactory=$this->GetExprFactory();
+      
+      if(Is_String($Field) || Is_Integer($Field) || Is_Null($Field))
+        $Field=['Rec', $Field];
+      if(Is_Array($Field))
+        $Field=$ExprFactory->Create($Field);
+      
+      return $Field;
+    }
+    
+    Function Create_Value($Field)
+    {
+      $ExprFactory=$this->GetExprFactory();
+      
+      if(Is_String($Field) || Is_Integer($Field) || Is_Null($Field))
+        $Field=['Value', $Field];
+      if(Is_Array($Field))
+        $Field=$ExprFactory->Create($Field);
+      
+      return $Field;
+    }
+    
+    Protected Function _Done()
+    {
+      parent::_Done();
+    }
+
+    Function Create_Type($Descr)
+    {
+      return $this->Table->Create_Type($Descr);
+    }
+
+    Protected Function _Debug_Info(Array &$Res)
+    {
+      Parent::_Debug_Info($Res);
+      unset($Res['Table' ]);
+    }
+  }
+?>

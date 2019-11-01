@@ -1,0 +1,103 @@
+<?
+  $Loader->Load_Class('/Object');
+ 
+  Class C_BD_Descr_BaseData Extends C_Object
+  {
+    Var $Types  =[];
+    Var $Tables =[];
+    Var $ExprFactory=null;
+  
+    Protected Function _Init($Args)
+    {
+      ForEach($Args['Descr']As $Item)
+      {
+        $Type=Array_Shift($Item);
+        Switch($Type)
+        {
+        Case 'Table':
+          $Name=Array_Shift($Item);
+          $Table=$this->Create_Object('/BD/Descr/Table', ['BaseData'=>$this, 'Descr'=>$Item, 'TableName'=>$Name]);
+          if(IsSet($this->Tables[$Name]))
+            $this->Log('Error', 'Table ', $Name, ' already exists');
+          $this->Tables[$Name]=$Table;
+          Break;
+        Case 'Enum':
+          $Name=Array_Shift($Item);
+        //$Type=$this->Create_Object('/BD/Descr/Type/Enum', ['Descr'=>$Item, 'TypeName'=>$Name]);
+          $Type=$this->Create_Object('/BD/Descr/Type/Enum', ['Values'=>$Item, 'TypeName'=>$Name]);
+          if(IsSet($this->Types[$Name]))
+            $this->Log('Error', 'Table ', $Name, ' already exists');
+          $this->Types[$Name]=$Type;
+          Break;
+        Case 'Update':
+          $Type=Array_Shift($Item);
+          Switch($Type)
+          {
+          Case 'Table':
+            $Name=Array_Shift($Item);
+            if($Table=$this->Tables[$Name]?? null)
+              $Table->Update_Descr($Item);
+            else
+              $this->Log('Fatal', 'Table ', $Name, ' not found');
+            Break;
+          Case 'Enum':
+            $Name=Array_Shift($Item);
+            if(($Type=$this->Tables[$Name]?? null)&& $Type->IsEnum())
+              $Type->Update_Descr($Item);
+            else
+              $this->Log('Fatal', 'Type ', $Name, ' not found');
+            Break;
+          Default:
+            $this->Log('Fatal', 'Descr type ', $Type, ' not found');
+          }
+          break;
+        Default:
+          $this->Log('Fatal', 'Descr type ', $Type, ' not found');
+        }
+      } 
+      parent::_Init($Args);
+    }
+
+    Protected Function _Done()
+    {
+      parent::_Done();
+    }
+    
+    Function _GetExprFactory()
+    {
+      return $this->ExprFactory=$this->Loader->Get_Singleton('/BD/Expr/Factory');
+    }
+    
+    Function GetExprFactory()
+    {
+      return $this->ExprFactory?? $this->_GetExprFactory();
+    }
+ 
+    Function Create_Type($Descr)
+    {
+      if(Is_String($Descr))
+        $Descr=[$Descr];
+      $TypeName=$Descr['Type']?? Array_Shift($Descr);
+      if($Type=$this->Types[$TypeName]?? False)
+        return $Type->Create($Descr);
+      if($Type=$this->Get_Singleton('/BD/Descr/Type/'.$TypeName, [], ['Safe'=>True]))
+        return $Type->Create($Descr);
+        
+      $this->Log('Error', 'TypeName ', $TypeName, ' not found');
+      return null;
+    }
+    
+    Protected Function _Debug_Info(Array &$Res)
+    {
+      Parent::_Debug_Info($Res);
+      unset($Res['ExprFactory']);
+    }
+    
+  # Function GetTable($Name): C_BD_Descr_Table
+  # {
+  #   If(!IsSet($this->Tables[$Name]))
+  #     $this->Tables[$Name]=$this->Manager->Create_Table($this, $Name);
+  #   Return $this->Tables[$Name];
+  # }
+  }
+?>

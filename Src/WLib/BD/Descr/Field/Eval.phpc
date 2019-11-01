@@ -1,0 +1,21 @@
+<?
+   $Loader->Load_Class('/BD/Descr/Field/Base');
+ 
+  Class C_BD_Descr_Field_Eval Extends C_BD_Descr_Field_Base
+  {
+    Var $Eval=null;
+    
+    Protected Function _Init($Args)
+    {
+      $Descr =$Args['Descr'];
+      $Eval  =$Descr['Eval' ]?? Array_Shift($Descr);
+      parent::_Init($Args);
+      $this->Eval  =$this->Create_Expr ($Eval  );
+    }
+
+    Protected Function _Done()
+    {
+      parent::_Done();
+    }
+  }
+?>

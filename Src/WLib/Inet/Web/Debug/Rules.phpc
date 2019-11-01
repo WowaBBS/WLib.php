@@ -1,4 +1,6 @@
 <?
+//declare(encoding='utf-8');
+  
   class C_Inet_Web_Debug_Rules Extends C_Object
   {
     Var $Info=[

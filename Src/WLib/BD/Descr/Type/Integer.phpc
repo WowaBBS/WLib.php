@@ -1,0 +1,20 @@
+<?
+  $Loader->Load_Class('/BD/Descr/Type/Base');
+ 
+  Class C_BD_Descr_Type_Integer Extends C_BD_Descr_Type_Base
+  {
+    Var $Bits   =32   ;
+    Var $Len    =9    ;
+    Var $Signed =true ;
+  
+    Protected Function _Init($Args)
+    {
+      parent::_Init($Args);
+    }
+
+    Protected Function _Done()
+    {
+      parent::_Done();
+    }
+  }
+?>

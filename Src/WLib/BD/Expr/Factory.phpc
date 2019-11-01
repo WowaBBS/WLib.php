@@ -1,0 +1,83 @@
+<?
+  $this->Parent_Class('/Object');
+  $this->Load_Type('/BD/Expr/Op');
+  
+  Class C_BD_Expr_Factory extends C_Object
+  {
+    Static $DefaultFuncs=[
+      'Value'   =>['Value' ],
+      'Rec'     =>['Rec'   ],
+      'Arg'     =>['Arg'   ],
+      'Array'   =>['Array' ],
+      
+      '='       =>['Op'    , 2 ,['T_BD_Expr_Op', 'Eq'      ]],
+      '<>'      =>['Op'    , 2 ,['T_BD_Expr_Op', 'NEq'     ]],
+      '<'       =>['Op'    , 2 ,['T_BD_Expr_Op', 'Less'    ]],
+      '<='      =>['Op'    , 2 ,['T_BD_Expr_Op', 'LessEq'  ]],
+      '>'       =>['Op'    , 2 ,['T_BD_Expr_Op', 'More'    ]],
+      '>='      =>['Op'    , 2 ,['T_BD_Expr_Op', 'MoreEq'  ]],
+      'In'      =>['Op'    , 2 ,['T_BD_Expr_Op', 'In'      ]],
+      'Like'    =>['Op'    , 2 ,['T_BD_Expr_Op', 'Like'    ]],
+      'Between' =>['Op'    , 3 ,['T_BD_Expr_Op', 'Between' ]],
+      'Not'     =>['Op'    , 1 ,['T_BD_Expr_Op', 'Not'     ]],
+      'And'     =>['Op'    ,-1 ,['T_BD_Expr_Op', 'And'     ]],
+      'Or'      =>['Op'    ,-1 ,['T_BD_Expr_Op', 'Or'      ]],
+      
+      'Lower'   =>['Func'  , 1 ,'StrToLower' ],
+      'Upper'   =>['Func'  , 1 ,'StrToUpper' ],
+      'Concat'  =>['Func'  ,-1 ,'Implode'    ],
+      'md5'     =>['Func'  , 1 ,'md5'        ],
+      'Now'     =>['Func'  , 0 ,['T_BD_Expr_Op', 'Now']],
+    ];
+    
+    Var $Funcs=[];
+    Var $Types=[];
+ 
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      $this->AddFuncs(Static::$DefaultFuncs);
+    }
+    
+    Function AddFuncs($Funcs)
+    {
+      $Res   =&$this->Funcs;
+      $Types =&$this->Types;
+      ForEach($Funcs As $Name=>$Func)
+      {
+        $Type=Array_Shift($Func);
+        if(!IsSet($Types[$Type]))
+          $Types[$Type]=$this->Loader->Load_Type('/BD/Expr/'.$Type);
+        $Rec=[
+          'Name'=>$Name,
+          'Type'=>$Type,
+          'Args'=>$Func,
+        ];
+        $Res[StrToLower($Name)]=$Rec;
+      }
+    }
+    
+    Function CreateArray($Arr)
+    {
+      $Res=[];
+      ForEach($Arr As $k=>$v)
+        $Res[$k]=$this->Create($v);
+      return $Res;
+    }
+    
+    Function Create($Arr)
+    {
+      $FuncName=Array_Shift($Arr);
+      if(!Is_String($FuncName))
+        $this->Log('Fatal', 'FuncName should be string')->Debug($FuncName);
+      $FuncName=StrToLower($FuncName);
+      $FuncRec=$this->Funcs[$FuncName]??False;
+      if(!$FuncRec)
+        $this->Log('Fatal', 'FuncName ', $FuncName, ' not found');
+      $Type=$FuncRec['Type'];
+      $Type='T'.$this->Types[$Type];
+      return $Type::Create($this, $FuncRec, $Arr);
+    }
+  }
+
+?>

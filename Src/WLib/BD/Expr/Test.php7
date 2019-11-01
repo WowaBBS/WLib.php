@@ -1,7 +1,7 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
 
-  $F=$Loader->Create_Object('/BD/Expression/Factory');
+  $F=$Loader->Create_Object('/BD/Expr/Factory');
   $C=$F->Create(['Lower', ['Arg', 0]]);
   $Loader->log('Log', $C->Calc([], ['Test']));
   $C=$F->Create(

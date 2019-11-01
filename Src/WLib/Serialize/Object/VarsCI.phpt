@@ -15,12 +15,16 @@
       $this->Map=$Map;
     }
     
-    Function _Pop($Name)
+    Function _GetName($Name)
     {
-      $Name=StrToLower($Name);
-      $Name=$this->Map[$Name];
-      $Res=Parent::_Pop($Name);
-      return $Res;
+      $N=StrToLower($Name);
+      return $this->Map[$N]?? $Name;
+    }
+
+    Function _SetName($Name)
+    {
+      $N=StrToLower($Name);
+      return $this->Map[$N]?? ($this->Map[$N]=$Name);
     }
   };
   

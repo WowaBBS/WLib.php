@@ -23,7 +23,8 @@
     Function _LogItem($LogItem)
     {
       ForEach($this->Loggers As $Logger)
-        $Logger->LogItem($LogItem);
+        if($Logger->IsValid())
+          $Logger->LogItem($LogItem);
     }
     
     Function Add($Logger, $Args=[]) // String $Name, $Logger=false, $bAppend=false)

@@ -13,6 +13,11 @@
       $this->CheckStream();
     }
     
+    Function IsValid()
+    {
+      return !Is_Null($this->Stream);
+    }
+    
     Function CheckStream()
     {
       if($this->Stream) return true;

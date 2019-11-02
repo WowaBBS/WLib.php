@@ -13,6 +13,11 @@
       parent::_Init($Args);
     }
     
+    Function IsValid()
+    {
+      return true;
+    }
+    
     Function SetLogLevel($Level)
     {
       $Res=[]; // TODO: Static

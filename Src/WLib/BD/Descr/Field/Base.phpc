@@ -48,9 +48,9 @@
       parent::_Done();
     }
 
-    Function Create_Type($Descr)
+    Function Get_Type($Descr)
     {
-      return $this->Table->Create_Type($Descr);
+      return $this->Table->Get_Type($Descr);
     }
 
     Protected Function _Debug_Info(Array &$Res)

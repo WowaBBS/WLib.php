@@ -1,8 +1,11 @@
 <?
   $Loader->Load_Class('/Object');
+  $Loader->Load_Type('/BD/Descr/Trait/Types'); // TODO: Load_Trait
  
   Class C_BD_Descr_Table Extends C_Object
   {
+    Use T_BD_Descr_Trait_Types;
+    
     Var $TableName  =''   ;
     Var $Fields     =[]   ;
     Var $BaseData   =null ;
@@ -10,6 +13,7 @@
     Var $Indices    =[]   ;
     Var $TableClass =null ;
     Var $RowClass   =null ;
+    Var $Rows       =[];
   
     Protected Function _Init($Args)
     {
@@ -40,42 +44,78 @@
       return $Fields;
     }
     
+    Function Create_Field($Name, $Descr)
+    {
+      $Field=$this->Create_Object('/BD/Descr/Field/Rec', ['Table'=>$this, 'Descr'=>$Descr, 'FieldName'=>$Name]);
+      if(IsSet($this->Fields[$Name]))
+        $this->Log('Error', 'Field ', $Name, ' already exists');
+      return $this->Fields[$Name]=$Field;
+    }
+    
+    Function Create_Eval($Name, $Descr)
+    {
+      $Field=$this->Create_Object('/BD/Descr/Field/Eval', ['Table'=>$this, 'Descr'=>$Descr, 'FieldName'=>$Name]);
+      if(IsSet($this->Fields[$Name]))
+        $this->Log('Error', 'Field ', $Name, ' already exists');
+      return $this->Fields[$Name]=$Field;
+    }
+    
+    Function Create_Fields($List)
+    {
+      $Res=[];
+      ForEach($List As $Key=>$Descr)
+      {
+        if(Is_String($Key))
+          $Name=$Key;
+        ElseIf($Name=$Descr['Name']?? False)
+          UnSet($Descr['Name']);
+        Else
+          $Name=Array_Shift($Descr);
+        $Res[$Key]=$this->Create_Field($Name, $Descr);
+      }
+      return $Res;
+    }
+    
+    Function Create_Index($Descr)
+    {
+      $Index=$this->Create_Object('/BD/Descr/Index', ['Table'=>$this, 'Descr'=>$Descr]);
+      $this->Indices[]=$Index;
+      if($Index->Primary)
+      {
+        if($this->Primary)
+          $this->Log('Error', 'Primary index already exists on table ', $this->TableName);
+        $this->Primary=$Index;
+      }
+    }
+    
+    Function Add_Row($Row)
+    {
+      $this->Rows[]=$Row;
+    }
+    
+    Function Add_Rows($Rows)
+    {
+      ForEach($Rows As $Row)
+        $this->Add_Row($Row);
+    }
+    
     Function Update_Descr($Descr)
     {
       ForEach($Descr As $Item)
         Switch($Type=Array_Shift($Item))
         {
-        Case 'Field'   :
-          $Name=Array_Shift($Item);
-          $Field=$this->Create_Object('/BD/Descr/Field/Rec', ['Table'=>$this, 'Descr'=>$Item, 'FieldName'=>$Name]);
-          if(IsSet($this->Fields[$Name]))
-            $this->Log('Error', 'Field ', $Name, ' already exists');
-          $this->Fields[$Name]=$Field;
-          Break;
-        Case 'Eval'    :
-          $Name=Array_Shift($Item);
-          $Field=$this->Create_Object('/BD/Descr/Field/Eval', ['Table'=>$this, 'Descr'=>$Item, 'FieldName'=>$Name]);
-          if(IsSet($this->Fields[$Name]))
-            $this->Log('Error', 'Field ', $Name, ' already exists');
-          $this->Fields[$Name]=$Field;
-          Break;
+        Case 'Field'   : $Name=Array_Shift($Item); $this->Create_Field ($Name, $Item); Break;
+        Case 'Eval'    : $Name=Array_Shift($Item); $this->Create_Eval  ($Name, $Item); Break;
+        Case 'Fields'  : $this->Create_Fields($Item); Break;
         Case 'Primary' : $Item[]='Primary' ;
         Case 'Unique'  : $Item[]='Unique'  ;
-        Case 'Index'   :
-        //$Name=Array_Shift($Item);
-          $Index=$this->Create_Object('/BD/Descr/Index', ['Table'=>$this, 'Descr'=>$Item]);
-          $this->Indices[]=$Index;
-          if($Index->Primary)
-          {
-            if($this->Primary)
-              $this->Log('Error', 'Primary index already exists on table ', $this->TableName);
-            $this->Primary=$Index;
-          }
-          Break;
+        Case 'Index'   : $this->Create_Index($Item); Break;
+        Case 'Row'     : $this->Add_Row($Item); Break;
+        Case 'Rows'    : $this->Add_Rows($Item); Break;
         Case 'TableClass' : $this->TableClass = Array_Shift($Item); break;
         Case 'RowClass'   : $this->RowClass   = Array_Shift($Item); break;
         Default:
-          $this->Log('Fatal', 'Descr type ', $Type, ' not found');
+          $this->Log('Error', 'Descr type "', $Type, '" not found');
         }
     }
 
@@ -84,11 +124,11 @@
       parent::_Done();
     }
     
-    Function Create_Type($Descr)
+    Function Types_GetParent()
     {
-      return $this->BaseData->Create_Type($Descr);
+      return $this->BaseData;
     }
-
+    
     Protected Function _Debug_Info(Array &$Res)
     {
       Parent::_Debug_Info($Res);

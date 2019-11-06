@@ -1,8 +1,10 @@
 <?
   $Loader->Load_Class('/Object');
+  $Loader->Load_Type('/BD/Descr/Trait/Args'); // TODO: Load_Trait
  
   Class C_BD_Descr_Type_Base Extends C_Object
   {
+    Use T_BD_Descr_Trait_Args;
   //Var $TypeName='';
   
     Protected Function _Init($Args)
@@ -16,21 +18,19 @@
       parent::_Done();
     }
     
-    Function Create_Type($Descr)
+    Function Get_Type($Descr)
     {
       if(Is_String($Descr))
         $Descr=[$Descr];
-      $TypeName=$Descr['Type']?? Array_Shift($Descr);
-    # if($Type=$this->Types[$TypeName]?? False)
-    #   return $Type->Create($Descr);
+      $TypeName=Static::Args_PopOrGet($Descr, 'Type');
       if($Type=$this->Get_Singleton('/BD/Descr/Type/'.$TypeName, [], ['Safe'=>True]))
         return $Type->Create($Descr);
         
-      $this->Log('Error', 'TypeName ', $TypeName, ' not found');
+      $this->Log('Error', 'TypeName ', $TypeName, ' not found')->Debug($Descr);
       return null;
     }
     
-    Function _Create_Type($TypeName, $Args)
+    Function _Get_Type($TypeName, $Args)
     {
       if($Type=$this->Get_Singleton('/BD/Descr/Type/'.$TypeName, $Args))
         return $Type;
@@ -42,19 +42,6 @@
     Function IsEnum() { return False; }
     
     Function GetTypeName() { return Get_Class($this); }
-    
-    Static Function Descr_Pop(Array &$Descr, String $Name, $Def='String')
-    {
-      if(IsSet($Descr['Type']))
-      {
-        $Res=$Descr['Type'];
-        UnSet($Descr['Type']);
-        return $Res;
-      }
-      elseif(IsSet($Descr[0]))
-        return Array_Shift($Descr);
-      return $Def;
-    }
     
     Function Create($Descr)
     {

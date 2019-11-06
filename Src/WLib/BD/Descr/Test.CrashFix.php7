@@ -1,0 +1,16 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $LogFile=$HTTP_SERVER_VARS['PHP_SELF']?? $argv[0];
+//$LogFile=__FILE__;
+  $LogFile=PathInfo($LogFile);
+//$Loader->Log('Debug')->Debug($LogFile);
+  $LogFile=$LogFile['dirname'].'/'.$LogFile['filename'].'.log';
+//$Loader->Log('Debug')->Debug($LogFile);
+  $Loader->GetLogger()->Add($LogFile);
+  
+  $BD_Descr=include '.Descr.CrashFix.1.php';
+
+  $BDD=$Loader->Create_Object('/BD/Descr/BaseData', ['Descr'=>$BD_Descr]);
+  $BDD->Log('Debug')->Debug($BDD);
+?>

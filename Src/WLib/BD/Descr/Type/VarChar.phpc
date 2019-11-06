@@ -1,7 +1,7 @@
 <?
   $Loader->Load_Class('/BD/Descr/Type/Base');
  
-  Class C_BD_Descr_Type_String Extends C_BD_Descr_Type_Base
+  Class C_BD_Descr_Type_VarChar Extends C_BD_Descr_Type_Base
   {
     Var $MaxLen=255;
   
@@ -13,6 +13,12 @@
     Protected Function _Done()
     {
       parent::_Done();
+    }
+
+    Function Create($Descr)
+    {
+      $MaxLen=Static::Args_PopOrGet($Descr, 'MaxLen', $this->MaxLen);
+      return $this;
     }
   }
 ?>

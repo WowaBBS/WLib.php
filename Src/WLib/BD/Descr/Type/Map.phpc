@@ -8,8 +8,8 @@
     
     Protected Function _Init($Args)
     {
-      $this->KeyType   =$this->Create_Type($Args['KeyType'   ]?? 'String');
-      $this->ValueType =$this->Create_Type($Args['ValueType' ]?? 'String');
+      $this->KeyType   =$this->Get_Type($Args['KeyType'   ]?? 'String');
+      $this->ValueType =$this->Get_Type($Args['ValueType' ]?? 'String');
       parent::_Init($Args);
     }
 
@@ -20,11 +20,11 @@
 
     Function Create($Descr)
     {
-      $KeyType   =Static::Descr_Pop($Descr, 'KeyType'   );
-      $ValueType =Static::Descr_Pop($Descr, 'ValueType' );
+      $KeyType   =Static::Args_PopOrGet($Descr, 'KeyType'   ,'String');
+      $ValueType =Static::Args_PopOrGet($Descr, 'ValueType' ,'String');
       if($Descr)
         $this->Log('Error', 'Descr is not supported for ', $this->GetTypeName())->Debug($Descr);
-      return $this->_Create_Type('Set', ['KeyType'=>$KeyType, 'ValueType'=>$ValueType]);
+      return $this->_Get_Type('Set', ['KeyType'=>$KeyType, 'ValueType'=>$ValueType]);
     }
   }
 ?>

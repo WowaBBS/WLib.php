@@ -129,8 +129,8 @@
         'Signature'                    => 0x06054b50, 
         'DiskNumber'                   => 0,          
         'StartDiskNumber'              => 0,          
-        'NumberCentralDirectoryRecord' => $records = count($Dictionary), 
-        'TotalCentralDirectoryRecord'  => $records, 
+        'NumberCentralDirectoryRecord' => $Records = count($Dictionary), 
+        'TotalCentralDirectoryRecord'  => $Records, 
         'SizeOfCentralDirectory'       => 0, 
         'CentralDirectoryOffset'       => $this->Written,
         'CommentLength'                => 0

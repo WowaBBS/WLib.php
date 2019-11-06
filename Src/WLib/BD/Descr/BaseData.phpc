@@ -1,58 +1,44 @@
 <?
   $Loader->Load_Class('/Object');
+  $Loader->Load_Type('/BD/Descr/Trait/Types'); // TODO: Load_Trait
  
   Class C_BD_Descr_BaseData Extends C_Object
   {
-    Var $Types  =[];
+    Use T_BD_Descr_Trait_Types;
     Var $Tables =[];
     Var $ExprFactory=null;
-  
+    
+    Function Create_Table($Name, $Descr=[])
+    {
+      $Table=$this->Create_Object('/BD/Descr/Table', ['BaseData'=>$this, 'Descr'=>$Descr, 'TableName'=>$Name]);
+      if(IsSet($this->Tables[$Name]))
+        $this->Log('Error', 'Table ', $Name, ' already exists');
+      return $this->Tables[$Name]=$Table;
+    }
+    
+    Function Update_Table($Name, $Descr)
+    {
+      if($Table=$this->Tables[$Name]?? null)
+        $Table->Update_Descr($Descr);
+      else
+        $this->Log('Fatal', 'Table ', $Name, ' not found');
+    }
+    
     Protected Function _Init($Args)
     {
       ForEach($Args['Descr']As $Item)
       {
         $Type=Array_Shift($Item);
+        if($Type==='Update')
+          $Type.='/'.Array_Shift($Item);
         Switch($Type)
         {
-        Case 'Table':
-          $Name=Array_Shift($Item);
-          $Table=$this->Create_Object('/BD/Descr/Table', ['BaseData'=>$this, 'Descr'=>$Item, 'TableName'=>$Name]);
-          if(IsSet($this->Tables[$Name]))
-            $this->Log('Error', 'Table ', $Name, ' already exists');
-          $this->Tables[$Name]=$Table;
-          Break;
-        Case 'Enum':
-          $Name=Array_Shift($Item);
-        //$Type=$this->Create_Object('/BD/Descr/Type/Enum', ['Descr'=>$Item, 'TypeName'=>$Name]);
-          $Type=$this->Create_Object('/BD/Descr/Type/Enum', ['Values'=>$Item, 'TypeName'=>$Name]);
-          if(IsSet($this->Types[$Name]))
-            $this->Log('Error', 'Table ', $Name, ' already exists');
-          $this->Types[$Name]=$Type;
-          Break;
-        Case 'Update':
-          $Type=Array_Shift($Item);
-          Switch($Type)
-          {
-          Case 'Table':
-            $Name=Array_Shift($Item);
-            if($Table=$this->Tables[$Name]?? null)
-              $Table->Update_Descr($Item);
-            else
-              $this->Log('Fatal', 'Table ', $Name, ' not found');
-            Break;
-          Case 'Enum':
-            $Name=Array_Shift($Item);
-            if(($Type=$this->Tables[$Name]?? null)&& $Type->IsEnum())
-              $Type->Update_Descr($Item);
-            else
-              $this->Log('Fatal', 'Type ', $Name, ' not found');
-            Break;
-          Default:
-            $this->Log('Fatal', 'Descr type ', $Type, ' not found');
-          }
-          break;
-        Default:
-          $this->Log('Fatal', 'Descr type ', $Type, ' not found');
+        Case 'Table'        : $Name=Array_Shift($Item); $this->Create_Table ($Name, $Item); Break;
+        Case 'Update/Table' : $Name=Array_Shift($Item); $this->Update_Table ($Name, $Item); Break;
+        Case 'Enum'         : $Name=Array_Shift($Item); $this->Create_Enum  ($Name, $Item); Break;
+        Case 'Update/Enum'  : $Name=Array_Shift($Item); $this->Update_Enum  ($Name, $Item); Break;
+        Case 'Type'         : $Name=Array_Shift($Item); $this->Create_Type  ($Name, $Item); Break;
+        Default: $this->Log('Error', 'Descr type "', $Type, '" not found');
         }
       } 
       parent::_Init($Args);
@@ -73,17 +59,8 @@
       return $this->ExprFactory?? $this->_GetExprFactory();
     }
  
-    Function Create_Type($Descr)
+    Function Types_GetParent()
     {
-      if(Is_String($Descr))
-        $Descr=[$Descr];
-      $TypeName=$Descr['Type']?? Array_Shift($Descr);
-      if($Type=$this->Types[$TypeName]?? False)
-        return $Type->Create($Descr);
-      if($Type=$this->Get_Singleton('/BD/Descr/Type/'.$TypeName, [], ['Safe'=>True]))
-        return $Type->Create($Descr);
-        
-      $this->Log('Error', 'TypeName ', $TypeName, ' not found');
       return null;
     }
     

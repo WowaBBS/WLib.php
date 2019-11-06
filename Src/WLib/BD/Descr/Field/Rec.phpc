@@ -12,7 +12,7 @@
       $Type  =$Descr['Type' ]?? Array_Shift($Descr);
       $Def   =$Descr['Def'  ]?? Array_Shift($Descr);
       parent::_Init($Args);
-      $this->Type =$this->Create_Type  ($Type );
+      $this->Type =$this->Get_Type     ($Type );
       $this->Def  =$this->Create_Value ($Def  );
     }
     

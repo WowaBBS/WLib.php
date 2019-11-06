@@ -7,7 +7,6 @@
   
     Protected Function _Init($Args)
     {
-      $this->KeyType=$this->Create_Type($Descr['Type']?? 'String');
       parent::_Init($Args);
     }
 
@@ -18,10 +17,10 @@
 
     Function Create($Descr)
     {
-      $KeyType=$this->Create_Type(Static::Descr_Pop($Descr, 'Type'));
+      $KeyType=$this->Get_Type(Static::Args_PopOrGet($Descr, 'Type', 'String'));
       if($Descr)
         $this->Log('Error', 'Descr is not supported for ', $this->GetTypeName())->Debug($Descr);
-      return $this->_Create_Type('Set', ['Type'=>$KeyType]);
+      return $this->_Get_Type('Set', ['Type'=>$KeyType]);
     }
   }
 ?>

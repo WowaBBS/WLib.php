@@ -1,0 +1,17 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $LogFile=$HTTP_SERVER_VARS['PHP_SELF']?? $argv[0];
+  $LogFile=PathInfo($LogFile);
+  $LogFile=$LogFile['dirname'].'/'.$LogFile['filename'].'.log';
+  $Loader->GetLogger()->Add($LogFile);
+  
+  $ZipBuilder=$Loader->Create_Object('/Archive/Zip/Builder');
+//$ZipBuilder->AddFile('https://speed.hetzner.de/100MB.bin');
+  $ZipBuilder->AddFile('Builder.phpc');
+  $ZipBuilder->AddFile('Builder.Test.php7');
+  $ZipBuilder->Write('test.zip');
+  
+  $Loader->Log('Log', 'Peak memory usage: ', Memory_Get_Peak_Usage(true), ' bytes')
+    ('Size of archive: ', $ZipBuilder->Written, ' bytes');
+?>

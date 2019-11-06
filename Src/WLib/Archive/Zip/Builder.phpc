@@ -1,0 +1,151 @@
+<?php
+  $Loader->Load_Class('/Object/Base');
+  // See https://habr.com/ru/post/472966/
+  // https://github.com/maennchen/ZipStream-PHP
+
+  Class C_Archive_Zip_Builder extends C_Object_Base
+  {
+    Var $Files   =[];
+    Var $Written =0;
+    Var $Level   =6;
+  
+    Function _WriteFile($To, String $FilePath)
+    {
+      // TODO: Add cacheing
+      $UncompressedSize = 0;
+      $CompressedSize = 0;
+      
+      $HashCtx = Hash_Init('crc32b');
+      $DeflateCtx = Deflate_Init(ZLIB_ENCODING_RAW, ['level'=>$this->Level]);
+  
+      $Stream = $this->Create_Object('/Stream/File', [
+        'FileName'=>$FilePath,
+        'OpenMode'=>omReadOnly|omExist|omBinary|omShareable,
+      ]);
+      while(!$Stream->Eof())
+      {
+        $Chunk = $Stream->Recv(64*1024);
+        
+        Hash_Update($HashCtx, $Chunk);
+        $CompressedChunk = Deflate_Add($DeflateCtx, $Chunk, $Stream->Eof()? ZLIB_FINISH:ZLIB_SYNC_FLUSH);
+        
+        $UncompressedSize += StrLen($Chunk);
+        $CompressedSize   += StrLen($CompressedChunk);
+        
+        $this->AddWritten($To->Write($CompressedChunk)); //, $CompressedChunk);
+        
+        $Chunk = null;
+        $CompressedChunk = null;
+      }
+      $Stream->Close();
+      
+      return [
+        'UncompressedSize' => $UncompressedSize,
+        'CompressedSize'   => $CompressedSize,
+        'Crc32'            => HexDec(Hash_Final($HashCtx)),
+      ];
+    }
+    
+    Function AddFile($Path)
+    {
+      $this->Files[]=$Path;
+    }
+    
+    Function AddWritten($Size) //, $Data)
+    {
+    //$this->Log('Debug', $Size, ' ', StrLen($Data));
+      $this->Written+=$Size;
+    }
+    
+    Function Write($FilePath='php://output')
+    {
+      $this->Loader->Load_Lib('/Stream/Utils');
+      $Stream = $this->Create_Object('/Stream/File', [
+        'FileName'=>$FilePath,
+        'OpenMode'=>omWrite|omCreate|omMakePath|omBinary|omExclusive,
+      ]);
+      
+      $this->Written = 0;
+      $Dictionary = [];
+      ForEach($this->Files as $Entry)
+      {
+        $FileName = BaseName($Entry);
+        
+        $FileInfo = [
+          'VersionToExtract'      => 10,      
+          // Мы добавили сжатие, поэтому теперь наш флаг будет иметь значение 0x0018 вместо 0x0008
+          'GeneralPurposeBitFlag' => 0x0018,           
+          'CompressionMethod'     => 8,     
+          // Ну и надо указать метод сжатия: 8 - Deflate
+          'ModificationTime'      => 28021,                                   
+          'ModificationDate'      => 20072,
+          'Crc32'                 => 0,
+          'CompressedSize'        => 0,
+          'UncompressedSize'      => 0,
+          'FileNameLength'        => StrLen($FileName),
+          'ExtraFieldLength'      => 0,
+        ];
+        
+        $LFH = Pack('LSSSSSLLLSSa*', ...Array_Values([
+          'Signature' => 0x04034b50, 
+        ] + $FileInfo + ['FileName' => $FileName]));
+        
+        $FileOffset = $this->Written;
+        $this->AddWritten($Stream->Write($LFH)); //, $LFH);
+        
+        [
+          'UncompressedSize' => $UncompressedSize , 
+          'CompressedSize'   => $CompressedSize   ,
+          'Crc32'            => $Crc32            ,
+        ] = $this->_WriteFile($Stream, $Entry);
+        
+        $FileInfo['Crc32'            ] = $Crc32            ;
+        $FileInfo['CompressedSize'   ] = $CompressedSize   ;
+        $FileInfo['UncompressedSize' ] = $UncompressedSize ;
+        
+        $DD = Pack('LLLL', ...Array_Values([
+          'Signature'        => 0x08074b50,
+          'Crc32'            => $FileInfo['Crc32'],
+          'CompressedSize'   => $FileInfo['CompressedSize'],
+          'UncompressedSize' => $FileInfo['UncompressedSize'],
+        ]));
+        
+        $this->AddWritten($Stream->Write($DD));//, $DD);
+        
+        $Dictionary[$FileName] = [
+          'Signature'     => 0x02014b50,
+          'VersionMadeBy' => 798,
+        ] + $FileInfo + [
+          'FileCommentLength'      => 0,
+          'DiskNumber'             => 0,
+          'InternalFileAttributes' => 0,
+          'ExternalFileAttributes' => 2176057344,
+          'LocalFileHeaderOffset'  => $FileOffset,
+          'FileName'               => $FileName,
+        ];
+      }
+      
+      $EOCD = [
+        'Signature'                    => 0x06054b50, 
+        'DiskNumber'                   => 0,          
+        'StartDiskNumber'              => 0,          
+        'NumberCentralDirectoryRecord' => $records = count($Dictionary), 
+        'TotalCentralDirectoryRecord'  => $records, 
+        'SizeOfCentralDirectory'       => 0, 
+        'CentralDirectoryOffset'       => $this->Written,
+        'CommentLength'                => 0
+      ];
+      
+      ForEach($Dictionary as $EntryInfo)
+      {
+        $CDFH = Pack('LSSSSSSLLLSSSSSLLa*', ...Array_Values($EntryInfo));
+        $this->AddWritten($Stream->Write($CDFH));//, $CDFH);
+      }
+      
+      $EOCD['SizeOfCentralDirectory'] = $this->Written - $EOCD['CentralDirectoryOffset'];
+      $EOCD = Pack('LSSSSLLS', ...Array_Values($EOCD));
+      $this->AddWritten($Stream->Write($EOCD));//, $EOCD);
+      
+      $Stream->Close();
+    }
+  }

@@ -72,12 +72,12 @@
         $FileName = BaseName($Entry);
         
         $FileInfo = [
-          'VersionToExtract'      => 10,      
+          'VersionToExtract'      => 10,
           // Мы добавили сжатие, поэтому теперь наш флаг будет иметь значение 0x0018 вместо 0x0008
-          'GeneralPurposeBitFlag' => 0x0018,           
-          'CompressionMethod'     => 8,     
+          'GeneralPurposeBitFlag' => 0x0018,
+          'CompressionMethod'     => 8,
           // Ну и надо указать метод сжатия: 8 - Deflate
-          'ModificationTime'      => 28021,                                   
+          'ModificationTime'      => 28021,
           'ModificationDate'      => 20072,
           'Crc32'                 => 0,
           'CompressedSize'        => 0,
@@ -127,13 +127,13 @@
       
       $EOCD = [
         'Signature'                    => 0x06054b50, 
-        'DiskNumber'                   => 0,          
-        'StartDiskNumber'              => 0,          
-        'NumberCentralDirectoryRecord' => $Records = count($Dictionary), 
-        'TotalCentralDirectoryRecord'  => $Records, 
-        'SizeOfCentralDirectory'       => 0, 
+        'DiskNumber'                   => 0,
+        'StartDiskNumber'              => 0,
+        'NumberCentralDirectoryRecord' => $Records = count($Dictionary),
+        'TotalCentralDirectoryRecord'  => $Records,
+        'SizeOfCentralDirectory'       => 0,
         'CentralDirectoryOffset'       => $this->Written,
-        'CommentLength'                => 0
+        'CommentLength'                => 0,
       ];
       
       ForEach($Dictionary as $EntryInfo)
@@ -149,3 +149,4 @@
       $Stream->Close();
     }
   }
+?>

@@ -9,8 +9,8 @@
     Protected Function _Init($Args)
     {
       $Descr =$Args['Descr'];
-      $Type  =$Descr['Type' ]?? Array_Shift($Descr);
-      $Def   =$Descr['Def'  ]?? Array_Shift($Descr);
+      $Type  =Static::Args_PopOrGet($Descr, 'Type' );
+      $Def   =Static::Args_PopOrGet($Descr, 'Def'  );
       parent::_Init($Args);
       $this->Type =$this->Get_Type     ($Type );
       $this->Def  =$this->Create_Value ($Def  );

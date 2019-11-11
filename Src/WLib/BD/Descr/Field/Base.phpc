@@ -1,8 +1,11 @@
 <?
   $Loader->Load_Class('/Object');
+  $Loader->Load_Type('/BD/Descr/Trait/Args'); // TODO: Load_Trait
  
   Class C_BD_Descr_Field_Base Extends C_Object
   {
+    Use T_BD_Descr_Trait_Args;
+    
     Var $FieldName ='';
     Var $Table     =null;
   

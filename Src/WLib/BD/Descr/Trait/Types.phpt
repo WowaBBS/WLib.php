@@ -35,14 +35,23 @@
     {
       if(Is_String($Descr))
         $Descr=[$Descr];
-      $TypeName=$Descr['Type']?? Array_Shift($Descr);
+      $TypeName=Static::Args_PopOrGet($Descr, 'Type');
+      if(!$TypeName)
+      {
+        $this->Log('Fatal', 'TypeName is null')->Debug($Descr);
+        return null;
+      }
+      
       if($Type=$this->Types[$TypeName]?? False)
         return $Type->Create($Descr);
       if($Type=$this->Get_Singleton('/BD/Descr/Type/'.$TypeName, [], ['Safe'=>True]))
         return $Type->Create($Descr);
         
       if($Parent=$this->Types_GetParent())
+      {
+        $Descr['Type']=$TypeName; // TODO???
         return $Parent->Get_Type($Descr);
+      }
         
       $this->Log('Error', 'TypeName ', $TypeName, ' not found')->Debug($Descr);
       return null;

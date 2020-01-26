@@ -318,9 +318,9 @@
       $ZQw=False;
       $l=StrLen($Link)-1;
       If($l>0)
-        If($Link{0}==='"' && $Link{$l}==='"')
+        If($Link[0]==='"' && $Link[$l]==='"')
           $ZQw='"';
-        ElseIf($Link{0}==="'" && $Link{$l}==="'")
+        ElseIf($Link[0]==="'" && $Link[$l]==="'")
           $ZQw="'";
       If($ZQw)
         $Link=SubStr($Link, 1, $l-1);

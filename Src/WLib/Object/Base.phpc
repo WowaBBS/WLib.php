@@ -34,7 +34,7 @@
     Protected Function _Debug_Info(Array &$Res)
     {
       if($this->Loader!==null) unset($Res['Loader'        ]);
-      if($this->Object_Inited) unset($Res['Object_Inited' ]);
+      if($this->Object_Inited===1) unset($Res['Object_Inited' ]);
     }
     
     /// Debug manager
@@ -57,7 +57,7 @@
     //****************************************************************
     // Time life
 
-    Private $Object_Inited =false;
+    Private $Object_Inited =0;
     
     Final Function __Construct(Array $Args)
     {
@@ -90,7 +90,7 @@
     Final Function Done()
     {
       if(!$this->Object_Inited)
-        throw new Exception('Object hasn`t initialized');
+        throw new Exception('Object '.Get_Class($this).' hasn`t initialized');
       $this->_Done();
       if($this->Object_Inited)
         throw new Exception('Destroing is not fully');

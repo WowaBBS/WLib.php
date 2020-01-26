@@ -1,4 +1,4 @@
-<?
+|<?
   $Loader->Parent_Class('/Object');
   $Loader->Using_Class('/Tmpl/Router');
   $Loader->Using_Module('/Tmpl/Vars');
@@ -29,7 +29,7 @@
        If(!StrLen($TmplName))
          Return '';
        $TmplName=StrToLower(StrTr($TmplName, '\\', '/'));
-       If($TmplName{0}=='/')
+       If($TmplName[0]=='/')
          Return $TmplName;
        $_CurPath=_vars_getf(' CurPath', $Vars);
        If(!$_CurPath)

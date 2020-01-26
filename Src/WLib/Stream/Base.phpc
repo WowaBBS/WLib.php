@@ -306,8 +306,8 @@
   //Function Read_UInt64b() { $Res=$this->Read0(8); $Res=UnPack('J', $Res); Return $Res[1]; } // TODO: Only 64 bit version
   //Function Read_UInt64l() { $Res=$this->Read0(8); $Res=UnPack('P', $Res); Return $Res[1]; } // TODO: Only 64 bit version
   
-    Function Read_UInt24b() { $Res=$this->Read0(3); $R=UnPack('n', $Res); Return ($R[1]<<8)|Ord($Res{2}); }
-    Function Read_UInt24l() { $Res=$this->Read0(3); $R=UnPack('v', $Res); Return (Ord($Res{2})<<16)|$R[1]; }
+    Function Read_UInt24b() { $Res=$this->Read0(3); $R=UnPack('n', $Res); Return ($R[1]<<8)|Ord($Res[2]); }
+    Function Read_UInt24l() { $Res=$this->Read0(3); $R=UnPack('v', $Res); Return (Ord($Res[2])<<16)|$R[1]; }
     
     Function Read_UInt48b()
     {

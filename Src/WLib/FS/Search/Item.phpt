@@ -1,6 +1,5 @@
 <?
   $Loader->Parent_Class('/Object');
-  $Loader->Load_Lib('/FS/My');
   $Loader->Load_Lib('/FS/Utils');
 
   class T_FS_Search_Item

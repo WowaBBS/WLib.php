@@ -51,7 +51,7 @@
   
     //Debug($Mode);
       $Mode=$this->Mode($Mode);
-    //If($Mode!=='' && $Mode{0}!='/')
+    //If($Mode!=='' && $Mode[0]!='/')
     //  $Mode='/'.$Mode;
   
     //Debug($Mode);

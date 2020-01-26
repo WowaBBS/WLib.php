@@ -59,7 +59,7 @@
     //$Ls[0]=Explode(':',$Ls[0]);
    
     //If(IsSet($Ls[1]) && IsSet($Ls[0][1]) && !$Ls[1]&&!$Ls[0][1])
-      If($_SERVER['REQUEST_URI']{0}!='/')
+      If($_SERVER['REQUEST_URI'][0]!='/')
         $CurURL=TUrl::Create($_SERVER['REQUEST_URI']);
       Else
         $CurURL=TUrl::Create(

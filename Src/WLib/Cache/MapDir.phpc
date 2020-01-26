@@ -3,7 +3,6 @@
  
   $Loader->Parent_Class('/Object');
   $Loader->Load_Lib('/FS/Utils');
-  $Loader->Load_Lib('/FS/My');
   
   /// Для каждого $Key создаёт файл с переменными
   /// Проверяет $Hash, если файла нет или хеш не совпадает
@@ -45,9 +44,9 @@
     
     Static Function Cache_FileLoad($CacheFile, $Hash, $Getter, $Args=null)
     {
-      if(FS_Is_File($CacheFile))
+      if(Is_File($CacheFile))
       {
-        $Res=Include(FS_EnCode($CacheFile));
+        $Res=Include($CacheFile);
         if($Res['Hash']===$Hash)
           return $Res['Data'];
       }
@@ -69,7 +68,7 @@
         .'?>'
       ;
       CreatePath(GetDirPath($CacheFile));
-      FS_File_Put_Contents($CacheFile, $Res);
+      File_Put_Contents($CacheFile, $Res);
     }
     
     Function Get($Key, $Hash, $Getter, $Vars=[])
@@ -100,23 +99,25 @@
       While(IsSet($Stack[0]))
       {
         $Dir=Array_Pop($Stack);
-        If(!($Handle=FS_OpenDir($Dir)))
+        If(!Is_Dir($Dir))
+          Continue;
+        If(!($Handle=OpenDir($Dir)))
           Continue;
       
         $Empty=true;
-        while(False !== ($Name=FS_ReadDir($Handle)))
+        while(False !== ($Name=ReadDir($Handle)))
         {
           if($Name==='.'  ) continue;
           if($Name==='..' ) continue;
           
           $DirName=$Dir.'/'.$Name;
           
-          if(FS_Is_Dir($DirName))
+          if(Is_Dir($DirName))
           {
             Array_Push($Stack, $DirName);
             $Empty=false;
           }
-          if(FS_Is_File($DirName))
+          if(Is_File($DirName))
           {
             $Key=SubStr($DirName, $PathLen+1);
             if(IsSet($Checked[$Key]))
@@ -124,13 +125,13 @@
             else
             {
               $this->Log('Log', 'RemoveCache ', $Key);
-              FS_UnLink($DirName);
+              UnLink($DirName);
             }
           }
         }
-        FS_CloseDir($Handle);
+        CloseDir($Handle);
         if($Empty)
-          FS_RmDir($Dir);
+          RmDir($Dir);
       }
     }
   }

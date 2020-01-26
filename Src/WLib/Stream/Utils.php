@@ -47,7 +47,7 @@
    {
      $Res=0;
      For($i=0; $i<StrLen($AMode); $i++)
-       Switch($AMode{$i})
+       Switch($AMode[$i])
        {
        Case 'r':
          $Res|=omRead     ;

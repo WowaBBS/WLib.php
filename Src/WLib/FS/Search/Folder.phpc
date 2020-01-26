@@ -1,6 +1,5 @@
 <?
   $Loader->Parent_Class('/Object');
-  $Loader->Load_Lib('/FS/My');
   $Loader->Load_Lib('/FS/Utils');
   $Loader->Load_Type('/FS/Search/Item');
 
@@ -53,10 +52,10 @@
       While(IsSet($Stack[0]))
       {
         $Dir=Array_Pop($Stack);
-        If(!($Handle=FS_OpenDir($Dir->FullPath)))
+        If(!($Handle=OpenDir($Dir->FullPath)))
           Continue;
       
-        while(False !== ($Name=FS_ReadDir($Handle)))
+        while(False !== ($Name=ReadDir($Handle)))
         {
           if($Name[0]=='.')
           {
@@ -73,7 +72,7 @@
           if($Child->IsAddRes ()) $Res   []=$Child;
           if($Child->IsAbort  ()) Break 2;
         }
-        FS_CloseDir($Handle);
+        CloseDir($Handle);
       }
       Return $Res;
     }

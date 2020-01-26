@@ -22,14 +22,14 @@
     {
       $Res=Str_Repeat(' ', $ASize);
       For($i=$ASize; $i;)
-        $Res{--$i}=Chr(Rand(0, 255));
+        $Res[--$i]=Chr(Rand(0, 255));
       Return $Res;
     }
   
     Function Write($Data)
     {
       For($i=StrLen($Data); $i;)
-        SRand(Rand()^Ord($Data{--$i}));
+        SRand(Rand()^Ord($Data[--$i]));
       Return StrLen($Data);
     }
   

@@ -17,7 +17,7 @@
   
     Function _CalcMD5($FullPath)
     {
-      return FS_md5_file($FullPath);
+      return md5_file($FullPath);
     }
     
     Function CalcMD5($FullPath, $RootPath='')
@@ -26,10 +26,10 @@
     //$md5=&$this->md5;
     //if($md5!=='')
     //  return $md5;
-      if(!FS_Is_File($FullPath))
+      if(!Is_File($FullPath))
         return '';
-      $Size    =FS_FileSize  ($FullPath);
-      $Changed =FS_FileMTime ($FullPath);
+      $Size    =FileSize  ($FullPath);
+      $Changed =FileMTime ($FullPath);
       $md5=$this->Get(
         $FullPath,
         $Size.','.$Changed,

@@ -1,6 +1,4 @@
 <?
-  Require_Once "My.php";
-
   Function Path_Simplify($v)
   {
     $v=StrTr($v, '\\', '/');

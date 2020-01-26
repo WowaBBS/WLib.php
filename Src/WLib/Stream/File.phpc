@@ -1,6 +1,5 @@
 <?
   $Loader->Parent_Class('/Stream/Handle');
-  $Loader->Load_Lib('/FS/My');
   $Loader->Load_Lib('/FS/Utils');
  
   Class C_Stream_File Extends C_Stream_Handle
@@ -50,7 +49,7 @@
         Switch($Cmd[0])
         {
         Case 'Exists':
-          If(FS_Is_File($this->FileName)!=$Cmd[1])
+          If(Is_File($this->FileName)!=$Cmd[1])
             Break 2;
           Break;
         Case 'CreatePath':
@@ -63,8 +62,8 @@
         Case 'Open':
           If(!$this->FHandle)
           {
-            If($Cmd[1]{0}=='r')
-              If(!FS_Is_File($this->RFileName))
+            If($Cmd[1][0]=='r')
+              If(!Is_File($this->RFileName))
                 Break;
           //echo $this->RFileName, "!\n";
             $this->FHandle=@FOpen($this->RFileName, $Cmd[1]);

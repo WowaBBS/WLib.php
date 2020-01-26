@@ -2,7 +2,6 @@
   $Loader->Parent_Class('/Cache/Storage/File');
   $Loader->Load_Lib('/FS/Utils');
   $Loader->Load_Module('/FS/IOFS');
-  $Loader->Load_Lib('/FS/My');
  
   Class C_Cache_Storage_PHP Extends C_Cache_Storage_File
   {
@@ -14,7 +13,7 @@
       $this->IsLoaded=True;
       If(!Is_File($Name))
         Return False;
-      $this->Vars=Include FS_EnCode($Name);
+      $this->Vars=Include $Name;
       Return $this->Vars? True:False;
     }
   

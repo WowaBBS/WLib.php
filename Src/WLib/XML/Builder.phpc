@@ -9,6 +9,8 @@
     Protected $Text            =false ;
     Protected $AttrAlwaysQuote =true  ;
     Protected $AttrType        =ENT_COMPAT;
+    
+    Var $SelfCloseTag='/>';
   
     Function _Init(Array $Args)
     {
@@ -56,6 +58,11 @@
         $this->_Write('>');
     }
     
+    Function FullTag($Name)
+    {
+      return $this->Tag($Name, $Attr)->End();
+    }
+    
     Function Tag($Name)
     {
       $this->_OutOfTag();
@@ -65,11 +72,26 @@
       return $this;
     }
  
-    Function End()
+    Function FullTagAttr($Name, $Attr=[])
+    {
+      return $this->TagAttr($Name, $Attr)->End();
+    }
+    
+    Function TagAttr($Name, $Attr=[])
+    {
+      $this->Tag($Name);
+      ForEach($Attr As $k=>$v)
+        $this->Attr($k, $v);
+      return $this;
+    }
+ 
+    Function End($CheckName=null)
     {
       $Name=Array_Pop($this->Tags);
+      if(!Is_Null($CheckName) && $Name!=$CheckName)
+        $this->Log('Error', 'Excepted tag ', $CheckName, ' but ', $Name);
       if($this->Fresh)
-        $this->_Write('/>', $this->EndLine);
+        $this->_Write($this->SelfCloseTag, $this->EndLine);
       else
       {
         if($this->Text)
@@ -86,6 +108,7 @@
     {
       if(!$this->Fresh)
         $this->Log('Fatal', 'Attr not for tag -- logical error');
+      if(Is_Null($Value)) return $this;
       $this->_Write(' ', $Name);
       if($Value!==false)
       {
@@ -102,6 +125,16 @@
       $this->Text=true;
       $this->Fresh=false;
       $this->_Write(HtmlEntities($Value)); // TODO
+    //ENT_NOQUOTES
+      return $this;
+    }
+
+    Function Raw($Value)
+    {
+      $this->_OutOfTag2();
+      $this->Text=true;
+      $this->Fresh=false;
+      $this->_Write($Value); // TODO
     //ENT_NOQUOTES
       return $this;
     }

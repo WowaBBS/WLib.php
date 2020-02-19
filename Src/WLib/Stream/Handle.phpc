@@ -75,7 +75,7 @@
     {
       if(!Is_String($Data) && !Is_Int($Data))
       {
-        $this->Log('Error', 'Unsupported type ', GetType($Data));
+        $this->Log('Error', 'Unsupported type ', GetType($Data))->BackTrace();
         return 0;
       }
       if(!$this->CheckHandle())

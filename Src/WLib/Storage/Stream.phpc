@@ -120,7 +120,10 @@
       $Stream=$this->Stream;
       $Res=$this->_Serialize($Vars);
     # $Backup->Put_Content($Res);
-      $Stream->Put_Content($Res);
+      if($Res!==False)
+        $Stream->Put_Content($Res);
+      else
+        $this->Log('Error', 'Can\'t serialize')->Debug($Vas);
       $this->LastModInfo =$this->GetModInfo();
       $Stream->Flush();
       $Stream->UnLock();

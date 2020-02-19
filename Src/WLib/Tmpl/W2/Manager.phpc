@@ -32,7 +32,8 @@
  
     Function LoadPhp($Id)
     {
-      Include($this->FilePhp($Id));
+      if($this->Cache)
+        Include($this->FilePhp($Id));
     }
  
     Function FuncName($Id)
@@ -64,13 +65,18 @@
       $Builder->Tab='';
       $Builder->Foot[]=' }'."\n";
       $Builder->Foot[]='?>';
-      if(!Is_Dir($this->Cache))
-        CreatePath($this->Cache);
-      if(!SaveText($this->FilePhp($Id), $Builder->GetPHP()))
+      if($this->Cache)
       {
-        CreatePath($this->Cache);
-        SaveText($this->FilePhp($Id), $Builder->GetPHP());
+        if(!Is_Dir($this->Cache))
+          CreatePath($this->Cache);
+        if(!SaveText($this->FilePhp($Id), $Builder->GetPHP()))
+        {
+          CreatePath($this->Cache);
+          SaveText($this->FilePhp($Id), $Builder->GetPHP());
+        }
       }
+      else
+        Eval(SubStr($Builder->GetPHP(), 2, -2));
       $Builder->Done();
       $Tmpl->Done();
       $Tmpl=NULL;

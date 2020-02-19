@@ -1,4 +1,4 @@
-|<?
+<?
   $Loader->Parent_Class('/Object');
   $Loader->Using_Class('/Tmpl/Router');
   $Loader->Using_Module('/Tmpl/Vars');

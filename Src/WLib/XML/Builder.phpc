@@ -58,9 +58,30 @@
         $this->_Write('>');
     }
     
-    Function FullTag($Name)
+    Function TagTree($Tag)
     {
-      return $this->Tag($Name, $Attr)->End();
+      $HasTag=false;
+      ForEach($Tag As $k=>$v)
+        If(Is_Integer($k))
+        {
+          If(Is_Array($v))
+            $this->TagTree($v);
+          Else If($k===0)
+          {
+            if(StrLen($v))
+            {
+              $this->Tag($v);
+              $HasTag=true;
+            }
+          }
+          Else
+            $this->Text($v);
+        }
+        Else
+          $this->Attr($k, $v);
+      if($HasTag)
+        $this->End();
+      return $this;
     }
     
     Function Tag($Name)
@@ -69,19 +90,6 @@
       $this->_Write(Str_Repeat($this->Tab, count($this->Tags)), '<', $Name);
       $this->Tags[]=$Name;
       $this->Fresh=true;
-      return $this;
-    }
- 
-    Function FullTagAttr($Name, $Attr=[])
-    {
-      return $this->TagAttr($Name, $Attr)->End();
-    }
-    
-    Function TagAttr($Name, $Attr=[])
-    {
-      $this->Tag($Name);
-      ForEach($Attr As $k=>$v)
-        $this->Attr($k, $v);
       return $this;
     }
  
@@ -104,6 +112,13 @@
       return $this;
     }
     
+    Function AttrMap($Attr=[])
+    {
+      ForEach($Attr As $k=>$v)
+        $this->Attr($k, $v);
+      return $this;
+    }
+ 
     Function Attr($Name, $Value=false)
     {
       if(!$this->Fresh)

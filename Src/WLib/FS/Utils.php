@@ -15,6 +15,14 @@
     return $v;
   };
   
+  Function NodePath_GetPath($Path)
+  {
+    $Pos = StrRPos($FileName, '/');
+    if($Pos===False)
+      return '';
+    return SubStr($FileName, 0, $Pos+1);
+  }
+ 
   // FileName functions
   function FileName_Normalize($Res)
   {

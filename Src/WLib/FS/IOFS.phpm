@@ -6,7 +6,7 @@
   // (c) Active solutions                                                    \\
   //*************************************************************************\\
  
-  $Loader->Begin_Module('FS/IOFS');
+  $Loader->Begin_Module('FS/IOFS'); // TODO: Move into Utils.php
  
   // ***************************************************************************************
  
@@ -15,7 +15,7 @@
   // Выдирает путь к файлу
   Function ExtractFilePath($Path)
   {
-    If(Is_Array($Path))
+    If(Is_Array($Path)) // TODO: Create another function
     {
       $Res=Array();
       ForEach($Path As $k=>$Item)
@@ -36,7 +36,7 @@
   // Выдирает имя файла
   Function ExtractFileName($Path)
   {
-    If(Is_Array($Path))
+    If(Is_Array($Path)) // TODO: Create another function
     {
       $Res=Array();
       ForEach($Path As $k=>$Item)
@@ -51,7 +51,7 @@
   // Выдирает расширение файла
   Function ExtractFileExt($Path)
   {
-    If(Is_Array($Path))
+    If(Is_Array($Path)) // TODO: Create another function
     {
       $Res=Array();
       ForEach($Path As $k=>$Item)
@@ -70,7 +70,7 @@
   // Выдирает ник файла
   Function ExtractFileNick($Path)
   {
-    If(Is_Array($Path))
+    If(Is_Array($Path)) // TODO: Create another function
     {
       $Res=Array();
       ForEach($Path As $k=>$Item)
@@ -86,7 +86,7 @@
   // Удаляет в конце слеш
   Function PathToDir($Path)
   {
-    If(Is_Array($Path))
+    If(Is_Array($Path)) // TODO: Create another function
     {
       $Res=Array();
       ForEach($Path As $k=>$Item)
@@ -99,7 +99,7 @@
   // Добавляет в конец слеш
   Function DirToPath($Path)
   {
-    If(Is_Array($Path))
+    If(Is_Array($Path)) // TODO: Create another function
     {
       $Res=Array();
       ForEach($Path As $k=>$Item)
@@ -139,13 +139,13 @@
       Return $Matches[1].ExtractFileNick($Path).$Matches[2];
     Return $Mask;
   }
-
+  
   // Нормализует путь $Path, удаляя ненужное
-  Function NormPath($Path)
+  Function NormPath($Path, $UseCwd=false)
   {
   //$Path=Str_Replace('\\','/', $Path);
     $Path=Explode('/', $Path);
-    $Beg=count($Path)-1;
+    $Beg=0;
     $End=count($Path)-1;
     $Res=[];
     ForEach($Path As $k=>$v)
@@ -158,7 +158,12 @@
         ++$Beg;
       }
       If($v=='.')
-        $Res=['.']; // TODO: Root
+      {
+        If($UseCwd)
+          $Res=Explode('/', Str_Replace('\\','/', getcwd()));
+        Else
+          $Res=['.'];
+      }
       ElseIf($v=='..')
       {
         If(Count($Res)>1)

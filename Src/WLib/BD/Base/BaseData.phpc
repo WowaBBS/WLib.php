@@ -4,7 +4,7 @@
   Class C_BD_Base_BaseData Extends C_Object
   {
     Var $Tables=[]; // Определённые объекты
-    Var $CodePage='cp1251'; // TODO: UTF8
+    Var $CodePage='utf8mb4'; //'cp1251'; // TODO: UTF8, utf8mb4 only for MySql
     Var $Connect;
     Var $Manager;
  

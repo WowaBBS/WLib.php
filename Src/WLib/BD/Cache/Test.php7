@@ -1,7 +1,7 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
 
-  $Loader->GetLogger()->Add(dirname(__FILE__).'/Test.log');
+  $Loader->GetLogger()->Add(__DIR__.'/Test.log');
   
   Function Row_Pad(Array $Cols, Array $Lens, Array $Row)
   {

@@ -47,7 +47,7 @@
     Function Connect()
     {
       $this->_link=MySqlI_Connect($this->Host, $this->Login, $this->Password, $this->DataBase, $this->Port);
-      If($this->BaseData->CodePage)
+      If($this->_link && $this->BaseData->CodePage)
         $this->_link->Set_CharSet($this->BaseData->CodePage);
     }
  

@@ -215,7 +215,7 @@
       Return $Res;
     }   
     
-    Function _WriteToken($Type, $v)
+    Function _WriteToken($Type, String $v)
     {
       $this->_Write($v);
     } 

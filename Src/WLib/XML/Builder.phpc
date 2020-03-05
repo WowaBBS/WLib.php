@@ -27,6 +27,10 @@
       $this->Stream->_UnLock();
     }
     
+    Function GetStream      () { return     $this->Stream  ; }
+    Function GetLastTagName () { return End($this->Tags   ); }
+  //Function GetEndLine     () { return     $this->EndLine ; }
+    
     Function _Write(... $Args)
     {
       ForEach($Args As $Arg)

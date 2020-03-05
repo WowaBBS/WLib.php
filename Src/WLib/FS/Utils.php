@@ -17,10 +17,10 @@
   
   Function NodePath_GetPath($Path)
   {
-    $Pos = StrRPos($FileName, '/');
+    $Pos = StrRPos($Path, '/');
     if($Pos===False)
       return '';
-    return SubStr($FileName, 0, $Pos+1);
+    return SubStr($Path, 0, $Pos+1);
   }
  
   // FileName functions

@@ -49,6 +49,7 @@
     {
       $this->Debug[]=[$Vars, $Limit];
     //$this->Outer->Debug($Vars, $Limit);
+      return $this;
     }
     
     Function Call($CallBack)

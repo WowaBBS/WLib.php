@@ -59,6 +59,8 @@
 
     Private $Object_Inited =0;
     
+    Function IsObjectInited() { return $this->Object_Inited; }
+    
     Final Function __Construct(Array $Args)
     {
       $this->Object_Id=Self::$Object_Counter++;

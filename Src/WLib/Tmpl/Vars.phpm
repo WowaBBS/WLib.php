@@ -38,7 +38,8 @@
       Return $Res->ToString();
     Case 'NULL':
     Default:
-      Trigger_Error('Varible no found '.Implode('.', $Path), E_USER_WARNING);
+      Global $Loader;
+      $Loader->Log('Error', 'Varible no found ', Implode('.', $Path))->BackTrace()->Debug($Vars);
       Return 'Error';
     }
   }

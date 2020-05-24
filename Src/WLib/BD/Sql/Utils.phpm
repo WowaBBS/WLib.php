@@ -64,7 +64,7 @@
     $Res=[];
     ForEach($Arr As $k=>$v)
       $Res[]=Is_Integer($k)? $v:$k.' '.($v? 'Desc':'Asc');
-    Return Implode(', ', $Arr);
+    Return Implode(', ', $Res);
   }
  
   // Готовит поле для проверки в While/Having/On

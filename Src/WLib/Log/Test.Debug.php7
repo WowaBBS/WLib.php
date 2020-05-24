@@ -1,13 +1,14 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
-  $Loader->Log('Debug', 'Hello ', True, ' ', null, ' Bue ', 0.5);
+  $Loader->GetLogger()->Add('Test.Debug.log');
+  $Loader->Log('Debug', 'Hello ', True, ' ', null, ' Bye ', 0.5);
   $Loader->Log('Log', 'Hello ', ['a', 'b', 'c'])->Debug($argv);
   
   Function Test(...$Vars)
   {
     Global $Loader;
-    $Loader->Log('Log')->BackTracke();
+    $Loader->Log('Log')->BackTrace();
   }
   Test('a', null, 1.5, ['a'=>'b', False=>'d']);
   

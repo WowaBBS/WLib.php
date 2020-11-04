@@ -92,9 +92,9 @@
       return $Prefix.$this->AllocNum($Key, $Prefix, $Cfg);
     }
  
-    Function AllocRel(String $Key, String $Prefix='', $Cfg)
+    Function AllocRel(String $Key, String $Prefix='', $Cfg=[])
     {
-      $Res=$this->_Alloc($Key, $Prefix);
+      $Res=$this->_Alloc($Key, $Prefix, $Cfg);
       return $this->RelPath.$Res;
     }
  

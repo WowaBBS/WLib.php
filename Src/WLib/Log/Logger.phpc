@@ -113,7 +113,7 @@
       Error_Clear_Last();
     }
  
-    Function Error_Handler($ErrNo, $ErrStr, $ErrFile, $ErrLine, $Vars)
+    Function Error_Handler($ErrNo, $ErrStr, $ErrFile, $ErrLine) // , $Vars) Removed in PHP8
     {
     //If($ErrNo==2048)
     //  Return;

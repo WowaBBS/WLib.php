@@ -96,7 +96,7 @@
     return SubStr($FileName, 0, $Pos);
   }
  
-  function GetDir($FileName)
+  function GetParentDir($FileName) // OldName: GetDir, conflict with GetDir in php 8
   {
   //$Pos = StrRPos($FileName, '/', StrLen($FileName)-2);
     if(StrLen($FileName)<2)

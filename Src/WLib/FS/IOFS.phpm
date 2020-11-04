@@ -146,7 +146,7 @@
   //$Path=Str_Replace('\\','/', $Path);
     $Path=Explode('/', $Path);
     $Beg=0;
-    $End=count($Path)-1;
+    $End=Count($Path)-1;
     $Res=[];
     ForEach($Path As $k=>$v)
     {
@@ -160,7 +160,7 @@
       If($v=='.')
       {
         If($UseCwd)
-          $Res=Explode('/', Str_Replace('\\','/', getcwd()));
+          $Res=Explode('/', Str_Replace('\\','/', GetCwd()));
         Else
           $Res=['.'];
       }

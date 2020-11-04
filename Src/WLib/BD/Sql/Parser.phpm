@@ -24,6 +24,35 @@
     Return $Res;
   }
  
+  Function RegSqlTokenizer()
+  {
+    $Space ='\s+';
+    $Word  ='\w[\d\w]+';
+    $Num   ='\d+(?:\\.\d*)?(?:[Ee][+-]?\d+)?';
+    $Qw    ="'(?:\\\\.|[^'\\\\]*)*'";
+    $DQw   ='"(?:\\\\.|[^"\\\\]*)*"';
+    $BQw   ='`(?:\\\\.|[^`\\\\]*)*`';
+    $Rem   ='#[^\n]*\n';
+    $MChOp =Implode('|', Array_Map('Preg_Quote', ['<=>','<>','!=','<=','>=','||','&&','<<','>>',':=']));
+    $ChOp  ='['.Preg_Quote('()=<>!+-*/|&~%^;,.', '/').']';
+    $Other ='([^\s\w]+)';
+  
+    $Reg=[
+      $Space ,
+      $Word  ,
+      $Num   ,
+      $Qw    ,
+      $DQw   ,
+      $BQw   ,
+      $Rem   ,
+      $MChOp ,
+      $ChOp  ,
+      $Other ,
+    ];
+    $Reg='/(?:'.Implode('|', $Reg).')/sS';
+    return $Reg;
+  }
+
   Function SplitSQL($Text)
   {
     $Res=[];

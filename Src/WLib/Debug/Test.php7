@@ -1,13 +1,15 @@
 <?
-  // Taken from builder of UE, directory Builder/Lib/Debug
-  $a=[''=>1, null=>2, '1'=>3, 2=>4, 3.14=>5, 4=>6, '4'=>7, '2.1'=>8, 9];
-  $b=5;
-  echo '\\a', "{$b}\n";
-
-  Var_Dump($a);
-  foreach($a as $k=>$v)
-    echo GetType($k), '(', $k, ')=', $v, "\n";
-  echo AddCSlashes("\0\1\2\3\4", "\0..\37!@\@\177..\377"), "\n";
+  if(False)
+  {
+    $a=[''=>1, null=>2, '1'=>3, 2=>4, 3.14=>5, 4=>6, '4'=>7, '2.1'=>8, 9];
+    $b=5;
+    echo '\\a', "{$b}\n";
+  
+    Var_Dump($a);
+    foreach($a as $k=>$v)
+      echo GetType($k), '(', $k, ')=', $v, "\n";
+    echo AddCSlashes("\0\1\2\3\4", "\0..\37!@\@\177..\377"), "\n";
+  }
   
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
  
@@ -38,8 +40,9 @@
     }
   };
   
-  $Deb    ->Classes=&$Classes;
-  $Inline ->Classes=&$Classes;
+# $Classes=[];
+# $Deb    ->Classes=&$Classes;
+# $Inline ->Classes=&$Classes;
   $Manager->Classes['TestClass']=
     Function($Ctx, $Class, $v)
     {

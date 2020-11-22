@@ -1,4 +1,6 @@
 <?
+  Define('FS_Dev_Null' ,PHP_OS_FAMILY==='Windows'? 'nul':'/dev/null');
+
   Function Path_Simplify($v)
   {
     $v=StrTr($v, '\\', '/');

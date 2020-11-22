@@ -1,6 +1,8 @@
 <?
   $Loader->Parent_Class('/Object');
 
+  $Loader->Load_Lib('/FS/Utils');
+
   Class C_System_Exec extends C_Object
   {
     Var $Env           =Null;
@@ -72,8 +74,11 @@
       if(Is_Array($this->Env['argv']??false))
         UnSet($this->Env['argv']);
     //$this->Log('Log', 'Exec_Open ', $this->Command);
+      $Command=$this->Command;
+      if(PHP_OS_FAMILY==='Windows' && Is_String($Command))
+        $Command='"'.$Command.'"';
       $this->Handle=Proc_Open(
-        $this->Command,
+        $Command,
         $this->InPipes,
         $Pipes,
         $this->WorkDirectory,
@@ -90,10 +95,13 @@
     Function Stream_Output () { return $this->GetStream(1); }
     Function Stream_Error  () { return $this->GetStream(2); }
 
-    Function SetStream($i, $v)
+    Function SetStream($i, $v, $Op=null)
     {
-      if($v===true) // Default
-        return $this->InPipes[$i]=['pipe', $i? 'w':'r'];
+      $Op??=$i>0;
+      if(Is_Bool  ($Op)) $Op=$Op? 'w':'r';
+      if($v===true     ) return $this->InPipes[$i]=['pipe',              $Op]; // Default
+      if(Is_Null   ($v)) return $this->InPipes[$i]=['file', FS_Dev_Null, $Op];
+      if(Is_String ($v)) return $this->InPipes[$i]=['file', $v         , $Op];
       #0 => ['pipe', 'r'], // stdin is a pipe that the child will read from
       #1 => ['pipe'. 'w'], // stdout is a pipe that the child will write to
       #2 => ['pipe', 'w'], // stderr is a file to write to

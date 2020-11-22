@@ -1,0 +1,180 @@
+<?
+  $this->Parent_Class('/Object/Base');
+  $this->Load_Lib('/FS/Utils');
+  $this->Using_Module('/FS/IOFS');
+
+  class C_Archive_7Zip_App extends C_Object_Base
+  {
+    Var $Path='';
+    Var $Cache='./.Cache/7zip.path';
+  
+    Function _Init(Array $Args)
+    {
+      $this->Cache=$Args['CacheFile']?? $this->Cache;
+      $this->Find();
+      Parent::_Init($Args);
+    }
+    
+    Function IsFound() { return $this->Path!==''; }
+    
+    Function Pack($InputPath, $OutputFile, $Args=[])
+    {
+      $Cmd=['a', '-w"'.$InputPath.'"', '"'.$OutputFile.'"',];
+      return $this->Exec($Cmd, $Args);
+    }
+    
+    Function UnPack($PathOfFile, $OutputDir, $Args=[])
+    {
+      If(!$PathOfFile ) { $this->Log('Error', 'Archive is not defined' ); return null; }
+      if(!$OutputDir  ) { $this->Log('Error', 'No output directory'    ); return null; }
+
+      $FilePath=RealPath($PathOfFile);
+      If(!Is_Readable($FilePath  )) { $this->Log('Error', 'Archive ',$PathOfFile,' is not found'); return null; }
+
+      if($Args['RemoveOutput' ]?? true) DeleteFile($OutputDir);
+      if($Args['CreatePath'   ]?? true) CreatePath($OutputDir);
+      
+      $OutDir=RealPath($OutputDir);
+      if(!Is_Dir($OutDir)) { $this->Log('Error', 'Directory ',$OutputDir,' is not created'); return null; }
+
+      $Cmd=['x', '"'.$FilePath.'"', '-o"'.$OutDir.'"',];
+      return $this->Exec($Cmd, $Args);
+    }
+    
+    Function Exec($Cmd, $Args)
+    {
+      $Cmd=['"'.$this->Path.'"', ...$Cmd];
+      if($Password=$Args['Password']?? False) $Cmd[]='-p'.$Password;
+      // -t7z
+      $Exec=$this->Create_Object('/System/Exec');
+    //$Exec->Command=$Cmd; //<TODO:
+      $Exec->Command=Implode(' ', $Cmd);
+    //$this->Log('Debug', 'Exec: ', $Exec->Command);
+      $Exec->Open();
+      if($Args['Async']?? False)
+        return $Exec;
+      $Exec->Wait();
+      $Res=$Exec->GetExitCode();
+      $Exec->Done();
+      return $Res;
+    }
+  
+    Function Find()
+    {
+      $this->Log('Log', 'Finding 7z...');
+      $this->Path=$this->_Find();
+      $this->Log('Log', '7z=', $this->Path);
+    }
+  
+    Function _Find()
+    {
+      if($this->Test($Path=$this->Find_Cache   ()))                             return $Path;
+      if($this->Test($Path=$this->Find_Windows ())) { $this->Save_Cache($Path); return $Path; }
+      if($this->Test($Path=$this->Find_Paths   ()))                             return $Path;
+      $this->Log('Error', '7z is not found');
+      return '7z';
+    }
+  
+    Function Test($Path)
+    {
+      if(!$Path)
+        return false;
+      $Exec=$this->Create_Object('/System/Exec');
+    //$Env=$_SERVER;
+      $Cmd=[
+        '"'.$Path.'"',
+        '-h',
+      ];
+      $Exec->Command=Implode(' ', $Cmd);
+      $Exec->SetStream_Output (null);
+      $Exec->SetStream_Error  (null);
+      $Exec->Open();
+      $Exec->Wait();
+      $Exit=$Exec->GetExitCode();
+      $Exec->Done();
+      $Exec=null;
+      return $Exit===0;
+    }
+    
+    Function Find_Cache()
+    {
+      if(!Is_File($this->Cache))
+        return null;
+      return File_Get_Contents($this->Cache);
+    }
+    
+    Function Save_Cache($Path)
+    {
+      if(!CreatePath(GetDirPath($this->Cache)))
+        return false;
+      File_Put_Contents($this->Cache, $Path);
+    }
+    
+    Function Find_Windows()
+    {
+      if(PHP_OS_FAMILY!=='Windows')
+        return null;
+      return
+        $this->Find_Registry()??
+        $this->Find_ProgramFiles();
+    }
+    
+    Function Find_Registry()
+    {
+      $Reg=$this->Create_Object('/System/Reg');
+      $List=$Reg->SearchParam(
+        [
+          'HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall',
+          'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall',
+          'HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall',
+          'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall',
+        ],
+        ['InstallLocation', 'DisplayName'], // 'InstallSource'
+        ['Recursive'=>true]
+      );
+      $Reg->Done();
+    //$Reg->Debug($List);
+      $Res=[];
+      ForEach($List As $Item)
+      {
+        $InstallLocation =$Item['InstallLocation' ]??false;
+        $DisplayName     =$Item['DisplayName'     ]??false;
+        if(!$InstallLocation)
+          continue;
+        if($DisplayName!==false || !IsSet($Res[$InstallLocation]))
+          $Res[$InstallLocation]=$DisplayName;
+      }
+      ForEach($Res As $Path=>$Name)
+      //if(SubStr($Name, 0, 5)==='7-Zip')
+        if(Is_File($Path=$Path.'7z.exe'))
+          return $Path;
+    }
+    
+    Function Find_ProgramFiles()
+    {
+      $Envs=[
+        'PROGRAMFILES'      ,
+        'PROGRAMFILES(X86)' ,
+        'PROGRAMW6432'      ,
+      ];
+      ForEach($Envs As $EnvName)
+      {
+        $Path=GetEnv($EnvName);
+        if(Is_File($Path=$Path.'/7-Zip/7z.exe'))
+          return $Path;
+      }
+    }
+    
+    Function Find_Paths()
+    {
+      $IsWin=PHP_OS_FAMILY==='Windows';
+      $Paths=Explode($IsWin? ';':':', GetEnv('PATH'));
+      $Exec=$IsWin? '/7z.exe':'/7z';
+      ForEach($Paths As $Path)
+        if(Is_File($File=$Path.$Exec) && Is_Executable($File))
+          return $File;
+    }
+  //****************************************************************
+  
+  }
+?>

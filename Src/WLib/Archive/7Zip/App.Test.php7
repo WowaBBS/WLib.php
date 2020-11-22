@@ -1,0 +1,13 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $Loader->GetLogger()->Add(__FILE__.'.log');
+  
+  $App=$Loader->Create_Object('/Archive/7Zip/App');
+  $Args=['Password'=>'Test'];
+  $ToPack   = __DIR__;
+  $ArchFile = __DIR__.'.file';
+  $ToUnPack = __DIR__.'.res';
+  $App->Pack($ToPack  ,$ArchFile ,$Args);
+  $App->UnPack($ArchFile, $ToUnPack,$Args);
+?>

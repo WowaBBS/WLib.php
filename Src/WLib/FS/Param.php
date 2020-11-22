@@ -26,14 +26,14 @@
      $List=&$this->List;
      if(IsSet($List[$Path])) return $List[$Path];
        
-     $Dir=GetDir($Path);
+     $Dir=GetParentDir($Path);
    //echo '!!!', $Dir, '-', $Path, "\n";
      if(IsSet($List[$Dir.'*'])) return $List[$Dir.'*'];
      if(IsSet($List[$Dir    ])) return $List[$Dir    ];
      $Paths[]=$Dir;
      while(true)
      {
-       $Dir=GetDir($Dir);
+       $Dir=GetParentDir($Dir);
        if($Dir==='')
          break;
        if(IsSet($List[$Dir.'*/'])) return $List[$Dir.'*/'];

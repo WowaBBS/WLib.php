@@ -6,7 +6,6 @@
   {
     Var $Storage ;
     Var $Field   ;
-    Var $IsLoaded=False;
     Var $IsCheck=False;
 
     Function _ToDebugInfo() { return $this->Storage->ToDebugInfo(); }

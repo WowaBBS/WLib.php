@@ -1,10 +1,11 @@
 <?
   $Loader->Parent_Class('/Object');
-  $Loader->Load_Type('/Debug/Timer');
+  $Loader->Load_Type('/Debug/Timer' );
+  $Loader->Load_Type('/Debug/TimerItem'   );
 
   class C_Debug_Performance extends C_Object
   {
-    Var $Agregate=[];
+    Var $Agregate =[];
     Var $Total;
   
     Function _Init(Array $Args)
@@ -19,24 +20,29 @@
     
     Function _Done()
     {
-      $this->Agregate['Total']=0;
+      $this->GetItem('Total')->Time=0;
     //$this->Total->Logger  =$this;
       $this->Total->Manager =$this;
       $this->Total->Finish();
       $this->Total=null;
       $Log=$this->Log('Log', 'It took:');
       $List=$this->Agregate;
-      $LenKey  =0;
-      $LenTime =0;
-      ForEach($List As $Key=>$Time)
+      $LenKey   =0;
+      $LenTime  =0;
+      $LenCount =0;
+      ForEach($List As $Key=>$Item)
       {
-        $Time=T_Debug_Timer::TimeToStr($Time);
-        $List[$Key]=$Time;
-        $LenKey  =Max($LenKey  ,StrLen($Key  ));
-        $LenTime =Max($LenTime ,StrLen($Time ));
+        $Item->MakeStr();
+        $LenKey   =Max($LenKey   ,StrLen($Key            ));
+        $LenTime  =Max($LenTime  ,StrLen($Item->TimeStr  ));
+        $LenCount =Max($LenCount ,StrLen($Item->CountStr ));
       }
-      ForEach($List As $Key=>$Time)
-        $Log('  ', str_pad($Key, $LenKey), ' : ', str_pad($Time, $LenTime, ' ', STR_PAD_LEFT));
+      ForEach($List As $Key=>$Item)
+        $Log('  ', 
+          Str_Pad($Key, $LenKey), ' : ', 
+          Str_Pad($Item->TimeStr, $LenTime, ' ', STR_PAD_LEFT),
+          $Item->Count>1? Str_Pad($Item->CountStr, $LenCount+1, ' ', STR_PAD_LEFT):''
+        );
       $Log->Done();
       Parent::_Done();
     }
@@ -49,10 +55,11 @@
       return $Res;
     }
     
-    Function Update($Name, $Time)
+    Function GetItem($Name) { return $this->Agregate[$Name]??=new T_Debug_TimerItem(); }
+    
+    Function Update($Name, $Time, $Count=1)
     {
-    //$this->Log('Debug', 'UpdateTime(', $Name, ',', $Time, ')');
-      $this->Agregate[$Name]=($this->Agregate[$Name]??0)+$Time;
+      $this->GetItem($Name)->Update($Time, $Count);
     }
   };
 ?>

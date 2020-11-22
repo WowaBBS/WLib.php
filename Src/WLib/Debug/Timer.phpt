@@ -7,6 +7,15 @@
     Var $Title     =''       ;
     Var $Logger    =null     ;
     
+    Const Timer_Coef=1e-9;
+  //Const Timer_Coef=1.0;
+    
+    Static Function GetTime()
+    {
+    //return MicroTime(true);
+      return HrTime(true);
+    }
+    
     Final Function __Construct(Array $Args)
     {
     //$this->StartTime =$Args['StartTime' ]??$this->StartTime ;
@@ -26,7 +35,7 @@
     {
       if($this->StartTime!==0)
         $this->Manager->Log('Error', $this->Name, ' timer already started');
-      $this->StartTime = MicroTime(true);
+      $this->StartTime = Static::GetTime();
       if($this->Logger)
         $this->Logger->Log('Log', $this->Name, ': Begin ', $this->Title);
     }
@@ -45,7 +54,7 @@
     {
       if($this->StartTime===0)
         $this->Manager->Log('Error', $this->Name, ' timer is not started');
-      $DeltaTime=(MicroTime(true)-$this->StartTime)*$Coef;
+      $DeltaTime=(Static::GetTime()-$this->StartTime)*$Coef*Static::Timer_Coef;
       if($this->Logger)
         $this->Logger->Log('Log', $this->Name, ': Finish ', 
           Number_Format($DeltaTime, 3, '.', ''),

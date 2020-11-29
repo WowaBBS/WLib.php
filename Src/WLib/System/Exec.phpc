@@ -115,7 +115,19 @@
     Function Is_Alive() { Return $this->GetStatus()['running']; }
     Function GetExitCode() { Return $this->GetStatus()['exitcode']; }
     
+    Protected $ExitCode=-1;
+    
     Function GetStatus()
+    {
+      $Res=$this->_GetStatus();
+      if($Res['exitcode']===-1)
+        $Res['exitcode']=$this->ExitCode;
+      else
+        $this->ExitCode=$Res['exitcode'];
+      return $Res;
+    }
+    
+    Protected Function _GetStatus()
     {
       if($this->Handle)
         return Proc_Get_Status($this->Handle);
@@ -127,7 +139,7 @@
         'running'  =>False ,
         'signaled' =>False ,
         'stopped'  =>True  ,
-        'exitcode' =>   0  ,
+        'exitcode' =>  -1  ,
         'termsig'  =>   0  ,
         'stopsig'  =>   0  ,
       ];
@@ -190,6 +202,7 @@
           $Log=$this->Log('Error', 'Exec::Close ', $this->Command);
           ForEach($S As $k=>$v)
             $Log('    ', $k, '="', $v, '"');
+          $Log->Done();
         }
       }
       $Pipes=$this->Pipes;

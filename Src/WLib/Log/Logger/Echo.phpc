@@ -6,9 +6,14 @@
     Static Function _DetectFormat()
     {
       if(PHP_SAPI==='cli')
+      {
         if(Function_Exists('sapi_windows_vt100_support'))
           if(sapi_windows_vt100_support(STDOUT))
             return '/Log/Format/v100';
+        if(Function_Exists('posix_ttyname'))
+          if(Posix_TtyName(STDOUT)!==false)
+            return '/Log/Format/v100';
+      }
       return '/Log/Format';
     }
   

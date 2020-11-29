@@ -32,5 +32,23 @@
   trigger_error('Is\'s user warning' ,E_USER_WARNING );
   trigger_error('Is\'s user error'   ,E_USER_ERROR   );
   
+  $Loader->Log('Log' ,'Begin progress');
+  Sleep(1);
+  $Loader->Log('Progress' ,'It is a progress...');
+  Sleep(1);
+  $Loader->Log('Progress' ,1   );
+  Sleep(1);
+  $Loader->Log('Progress' ,2   );
+  Sleep(1);
+  $Loader->Log('Progress' ,3   );
+  Sleep(1);
+  $Loader->Log('Progress' ,4   )("Load ", 0, "%");
+  Sleep(1);
+  $Loader->Log('Progress' ,5   )("Load ", 50, "%");
+  Sleep(1);
+  $Loader->Log('Progress' ,6   )("Load ", 100, "%");
+  Sleep(1);
+  $Loader->Log('Progress' ,'End of progress');
+  $Loader->Log('Log' ,'End progress');
   $Loader->Done();
 ?>

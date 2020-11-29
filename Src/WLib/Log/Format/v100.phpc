@@ -30,6 +30,8 @@
     const fgBrWhite   ="\033[1;37m";
     const fgBrDefault ="\033[1;39m";
     
+    const clearLine   ="\033[K";
+    const lf          ="\033[K\n";
   /*  
     const bgGray      ="\033[40m";
     const bgBlack     ="\033[40m";
@@ -43,28 +45,32 @@
     const bgDefault   ="\033[49m";
   */  
     Var $ColorRules=[
-      'Def'    =>False    ,
-    # 'Def'    =>''       ,
+      'Def'     =>False    ,
+    # 'Def'     =>''       ,
       
-    //'Resvd'  =>self::fgCyan    ,
-      'Resvd'  =>self::fgBrWhite ,
-      'Num'    =>self::fgBrGreen ,
-    //'Str'    =>self::fgRed     ,
-      'Str'    =>self::fgBrMagenta,
+    //'Resvd'   =>self::fgCyan    ,
+      'Resvd'   =>self::fgBrWhite ,
+      'Num'     =>self::fgBrGreen ,
+    //'Str'     =>self::fgRed     ,
+      'Str'     =>self::fgBrMagenta,
+      'Text'    =>false,
       
-    # 'Op'     =>'Resvd' ,
-    # 'Type'   =>'Resvd' ,
-    # 'Null'   =>'Resvd' ,
-    # 'Bool'   =>'Resvd' ,
+      'NewLine' =>False,
       
-    # 'Float'  =>'Num'    ,
-      'Name'   =>self::fgCyan     ,// 'Str'
+    # 'Op'      =>'Resvd' ,
+    # 'Type'    =>'Resvd' ,
+    # 'Null'    =>'Resvd' ,
+    # 'Bool'    =>'Resvd' ,
       
-    # 'File'   =>'Name'   ,
-    # 'Func'   =>'Name'   ,
-    # 'Class'  =>'Name'   ,
+    # 'Float'   =>'Num'    ,
+      'Name'    =>self::fgCyan     ,// 'Str'
+      
+    # 'File'    =>'Name'   ,
+    # 'Func'    =>'Name'   ,
+    # 'Class'   =>'Name'   ,
 
       'Debug'   =>self::fgCyan    ,
+    # 'Progress'=>
     # 'Log'     =>
       'Note'    =>self::fgGreen   ,
       'Warning' =>self::fgMagenta ,
@@ -81,39 +87,33 @@
       Parent::_Init($Args);
     }
     
-  //Function 
-  
     Function _WriteToken($Type, $v)
     {
+      $Cr=self::lf;
       if($Col=$this->ColorRules[$Type]?? '[Error72873:'.$Type.']')
-        $this->_WriteL($Col, $v, self::fgDefault);
+        $CountLf=$this->_WriteL([$Col, $v, self::fgDefault], $Cr);
       else
-        $this->_Write($v);
-    } 
-      
-  
-  /*
-    Function WriteNum($v)  { $this->_WriteL(self::fgGreen   ,$v ,self::fgDefault); }
-  # Function WriteStr($v)  { $this->_WriteL(self::fgMagenta ,$v ,self::fgDefault); }
-    Function WriteStr($v)  { $this->_WriteL(self::fgCyan    ,$v ,self::fgDefault); }
-  # Function WriteStr($v)  { $this->_WriteL(self::fgYellow  ,$v ,self::fgDefault); }
-  # Function WriteStr($v)  { $this->_WriteL(self::fgRed     ,$v ,self::fgDefault); }
-    Function WriteNull($V=null)   { $this->WriteNum('null'); }
-    Function WriteBool($v) { $this->WriteNum(Is_Bool($v)? ($v? 'True':'False'):$v); }
-    Function WriteLogLevel($View, $Level)
-    {
-      Switch($Level->Name)
-      {
-      Case 'Debug'   : $f=self::fgCyan    ; break;
-      Case 'Note'    : $f=self::fgGreen   ; break;
-      Case 'Warning' : $f=self::fgMagenta ; break;
-      Case 'Error'   : $f=self::fgRed     ; break;
-      Case 'Fatal'   : $f=self::fgRed     ; break;
-      Default        : $f='';
-      }
-      
-      $this->_WriteL($f, $View ,self::fgDefault); 
+        $CountLf=$this->_Write($v, $Cr);
+      if($this->Progress)
+        $this->Progress+=$CountLf;
     }
-  */
+    
+    Var $Progress=0;
+      
+    Function BeginProgress()
+    {
+      $this->Progress=1;
+    } 
+    
+    Function EndProgress()
+    {
+      $this->_Write("\033[".($this->Progress-1).'A' );
+      $this->Progress=0;
+    }
+    
+    Function NewLine()
+    {
+      Parent::NewLine();
+    }
   }
 ?>

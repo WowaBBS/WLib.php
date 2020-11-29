@@ -12,7 +12,7 @@
     Var $Logger    = null  ;
     Var $Level     = null  ;
     Var $ShowLevel = False ;
-    Var $Message   = []    ;
+    Var $Data      = []    ;
     Var $Fatal     = false ;
     Var $Finished  = false ;
     Var $File      = false ;
@@ -35,33 +35,17 @@
       $this->ShowLevel=$Level->Show;
       $this->AddArr($List);
       $this->Fatal  =$Level->Fatal;
-      if($Level->Stack)
-        $this->Stack=1;
       //Example: $this->Log('Fatal', 'Unreachable place');
     }
     
-    Function Done() { $this->Finish(); $this->Message=[]; $this->Outer=null; $this->Logger=null; }
+    Function Done() { $this->Finish(); $this->Data=[]; $this->Outer=null; $this->Logger=null; }
     Function __Destruct() { $this->Finish(); }
     
-    Var $Debug=[];
+    Function Debug($Vars, $Limit=-1) { $this->Data[]=['Debug', $Vars, $Limit]; return $this; } 
     
-    Function Debug($Vars, $Limit=-1) // TODO: To Log
-    {
-      $this->Debug[]=[$Vars, $Limit];
-    //$this->Outer->Debug($Vars, $Limit);
-      return $this;
-    }
+    Function Call($CallBack) { $CallBack($this); return $this; } // TODO: Remove?
     
-    Function Call($CallBack)
-    {
-      $CallBack($this);
-      return $this;
-    }
-    
-    Function Add(... $Args)
-    {
-      return $this->AddArr($Args);
-    }
+    Function Add(... $Args) { return $this->AddArr($Args); }
     
     Function ShowLevel($v) { $this->ShowLevel=$v; return $this; }
     
@@ -87,35 +71,26 @@
       return $this->AddArr($Args);
     }
     
-    Function AddArr(Array $v)
-    {
-      $this->Message[]=$v;
-      return $this;
-    }
+    Function AddArr(Array $v) { $this->Data[]=['Message', $v]; return $this; }
     
-    Function AddStr()
-    {
-      return $this->AddArr([$Str]);
-    }
+    Function AddStr(String $Str) { return $this->AddArr([$Str]); } //<TODO: Remove?
 
     //****************************************************************
     // Stack
-    Var $Stack=0;
-
+    
     Function SetStack(Array $List, Int $Skip=0, Int $Count=1000)
     {
       if($Skip>0)
         Array_Splice($List, 0, $Skip);
       if(Count($List)>$Count)
         Array_Splice($List, $Count);
-      $this->Stack=$List;
+      $this->Data[]=['Stack', $List];
       return $this;
     }
 
     Function BackTrace($Skip=0)
     {
-      $Skip++;
-      return $this->SetStack(Debug_BackTrace(), $Skip);
+      return $this->SetStack(Debug_BackTrace(), $Skip+1);
     }
 
     Function SetStackFromException($Exception)
@@ -123,11 +98,8 @@
       return $this->SetStack($Exception->getTrace());
     }
     
-    Function NoBackTrace()
-    {
-      $this->Stack=0;
-      return $this;
-    }
+    Function NoBackTrace ($v=true) { $this->Data['Stack'    ]=['Flag', !$v]; return $this; }
+    Function Progress    ($v=true) { $this->Data['Progress' ]=['Flag',  $v]; return $this; }
     
     //****************************************************************
     
@@ -142,8 +114,8 @@
       if($this->Finished)
         return;
       $this->Finished=true;
-      if($this->Stack && !Is_Array($this->Stack))
-        $this->BackTrace($this->Stack);
+      if($this->Data['Stack'][1]?? $this->Level->Stack)
+        $this->BackTrace(1);
       if($this->Logger)
         $this->Logger->LogItem($this);
       if($this->Fatal)
@@ -159,23 +131,37 @@
       if($this->File!==False)
         $Res->File($this->File, $this->Line, $this->Col);
         
+      $Progress=$this->Data['Progress'][1]?? $this->Level->Progress;
+      if($Progress)
+        $Res->BeginProgress();
+
       if($this->ShowLevel!==False)
         $Res->WriteLogLevel($this->ShowLevel, $this->Level);
-
-      ForEach($this->Message As $Line)
-      {
-        $Res->Write(... $Line);
-        $Res->NewLine();
-      }
-      ForEach($this->Debug As $Debug)
-        $Res->Debug($Debug[0], $Debug[1]);
-      if($this->Stack)
-      {
-        if(!Is_Array($this->Stack))
-          $this->BackTrace($this->Stack);
-        $Res->Stack($this->Stack);
-        $Res->NewLine();
-      }
+        
+      ForEach($this->Data As $Data)
+        Switch($Data[0])
+        {
+        Case 'Message':
+          $Res->Write(... $Data[1]);
+          $Res->NewLine();
+          break;
+        Case 'Debug':
+          $Res->Debug($Data[1], $Data[2]);
+          break;
+        Case 'Stack':
+          $Res->Stack($Data[1]);
+          $Res->NewLine();
+          break;
+        Case 'Flag':
+          break;
+        Default:
+          $Res->Write('[LogError] not ype of data', $Data[0]);
+          $Res->NewLine();
+          $Res->Debug($Data, 4);
+          break;
+        }
+      if($Progress)
+        $Res->EndProgress();
     }
   }
 ?>

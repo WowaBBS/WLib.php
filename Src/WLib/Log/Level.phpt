@@ -25,14 +25,14 @@
       Static $Res=[];
       if($Res) return $Res;
       $Levels=[
-        #Idx ,Name       ,Show         ,Fatal ,Php            ,Stack ,Progress
-        [ 0  ,'Debug'    ,'[Debug] '   ,false ,E_USER_NOTICE  ,False ,False   ],
-        [ 1  ,'Progress' , False       ,false ,E_USER_NOTICE  ,False ,True    ],
-        [ 2  ,'Log'      , False       ,false ,E_USER_NOTICE  ,False ,False   ],
-        [ 3  ,'Note'     ,'[Note] '    ,false ,E_USER_NOTICE  ,False ,False   ],
-        [ 4  ,'Warning'  ,'[Warning] ' ,false ,E_USER_WARNING ,False ,False   ], // TODO True for some
-        [ 5  ,'Error'    ,'[Error] '   ,false ,E_USER_WARNING ,False ,False   ], // TODO True for some
-        [ 6  ,'Fatal'    ,'[Fatal] '   ,true  ,E_USER_ERROR   ,True  ,False   ],
+        #Idx ,Name       ,Show          ,Fatal ,Php            ,Stack ,Progress
+        [ 0  ,'Debug'    ,'[Debug] '    ,false ,E_USER_NOTICE  ,False ,False   ],
+        [ 1  ,'Progress' ,'[Progress] ' ,false ,E_USER_NOTICE  ,False ,True    ],
+        [ 2  ,'Log'      , False        ,false ,E_USER_NOTICE  ,False ,False   ],
+        [ 3  ,'Note'     ,'[Note] '     ,false ,E_USER_NOTICE  ,False ,False   ],
+        [ 4  ,'Warning'  ,'[Warning] '  ,false ,E_USER_WARNING ,False ,False   ], // TODO True for some
+        [ 5  ,'Error'    ,'[Error] '    ,false ,E_USER_WARNING ,False ,False   ], // TODO True for some
+        [ 6  ,'Fatal'    ,'[Fatal] '    ,true  ,E_USER_ERROR   ,True  ,False   ],
       ];
       ForEach($Levels As $Level)
         $Res[]=New T_Log_Level($Level);

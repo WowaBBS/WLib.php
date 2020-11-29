@@ -80,6 +80,7 @@
     
     Function SetStack(Array $List, Int $Skip=0, Int $Count=1000)
     {
+      $this->NoBackTrace();
       if($Skip>0)
         Array_Splice($List, 0, $Skip);
       if(Count($List)>$Count)

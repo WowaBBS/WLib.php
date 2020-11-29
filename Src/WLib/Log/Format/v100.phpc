@@ -70,7 +70,7 @@
     # 'Class'   =>'Name'   ,
 
       'Debug'   =>self::fgCyan    ,
-    # 'Progress'=>
+      'Progress'=>False,
     # 'Log'     =>
       'Note'    =>self::fgGreen   ,
       'Warning' =>self::fgMagenta ,
@@ -89,6 +89,8 @@
     
     Function _WriteToken($Type, $v)
     {
+      if($Type==='Progress')
+        return;
       $Cr=self::lf;
       if($Col=$this->ColorRules[$Type]?? '[Error72873:'.$Type.']')
         $CountLf=$this->_WriteL([$Col, $v, self::fgDefault], $Cr);

@@ -74,6 +74,8 @@
     Function AddArr(Array $v) { $this->Data[]=['Message', $v]; return $this; }
     
     Function AddStr(String $Str) { return $this->AddArr([$Str]); } //<TODO: Remove?
+    
+    Function Ret($Res=Null) { Return $Res; }
 
     //****************************************************************
     // Stack

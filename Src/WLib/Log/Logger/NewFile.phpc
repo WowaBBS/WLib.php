@@ -13,7 +13,7 @@
       [$MTime, $Time]= Explode(' ',MicroTime());
       $MTime = (Int)((Float)$MTime*1000000);
       
-      $Path .=@Date('Ymd_his_', $Time); //<TODO: Depricated
+      $Path .=@Date('Ymd_His_', $Time); //<TODO: Depricated
       $i=16;
       Do
       {

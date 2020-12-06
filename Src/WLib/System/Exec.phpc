@@ -9,11 +9,23 @@
     Var $Command       ='';
     Var $WorkDirectory =Null;
     Var $Handle        ;
-    Var $InPipes       =Array();
-    Var $OutPipes      =Array();
-    Var $Pipes         =Array();
+    Var $InPipes       =[];
+    Var $OutPipes      =[];
   
     Var $_TempFile=False;
+
+    Protected Function _Init(Array $Args)
+    {
+      $this->Env           =$Args['Env'           ]?? $this->Env           ;
+      $this->Command       =$Args['Command'       ]?? $this->Command       ;
+      $this->WorkDirectory =$Args['WorkDirectory' ]?? $this->WorkDirectory ;
+      if(Array_Key_Exists('Input'  ,$Args)) $this->SetStream_Input  ($Args['Input'  ]);
+      if(Array_Key_Exists('Output' ,$Args)) $this->SetStream_Output ($Args['Output' ]);
+      if(Array_Key_Exists('Error'  ,$Args)) $this->SetStream_Error  ($Args['Error'  ]);
+      ForEach($Args['Pipes' ]?? [] As $k=>$v)
+        $this->SetStream($k, $v);
+      Parent::_Init($Args);
+    }
   
     Function Enveroments_Default_Get()
     {
@@ -27,7 +39,7 @@
       $p->Close();
       $p->Done();
       $res=Explode("\r\n", $res);
-      $Res=Array();
+      $Res=[];
       ForEach($res As $v)
         If(StrLen($v))
         {
@@ -95,13 +107,31 @@
     Function Stream_Output () { return $this->GetStream(1); }
     Function Stream_Error  () { return $this->GetStream(2); }
 
+    Function _SetStream($i, $v)
+    {
+      $this->InPipes[$i]=$v;
+    }
+
     Function SetStream($i, $v, $Op=null)
     {
+      if(Is_String($i))
+      {
+        static $Types=[
+          'Input'  =>0, 'input'  =>0, 'StdIn'  =>0, 'stdin'  =>0,
+          'Output' =>1, 'output' =>1, 'StdOut' =>1, 'stdout' =>1,
+          'Error'  =>2, 'error'  =>2, 'StdErr' =>2, 'stderr' =>2,
+        ];
+        $i=$Types[$i]?? $Types[StrToLower($i)]?? null;
+      }
+      if(!Is_Integer($i))
+        return $this->Log('Error', 'Invalid stream index')->Ret();
       $Op??=$i>0;
-      if(Is_Bool  ($Op)) $Op=$Op? 'w':'r';
-      if($v===true     ) return $this->InPipes[$i]=['pipe',              $Op]; // Default
-      if(Is_Null   ($v)) return $this->InPipes[$i]=['file', FS_Dev_Null, $Op];
-      if(Is_String ($v)) return $this->InPipes[$i]=['file', $v         , $Op];
+      if(Is_Bool    ($Op)) $Op=$Op? 'w':'r';
+      if($v===true       ) return $this->_SetStream($i, ['pipe',              $Op]); // Default
+      if(Is_Null     ($v)) return $this->_SetStream($i, ['file', FS_Dev_Null, $Op]);
+      if(Is_String   ($v)) return $this->_SetStream($i, ['file', $v         , $Op]);
+      if(Is_Array    ($v)) return $this->_SetStream($i,          $v               );
+      if(Is_Resource ($v)) return $this->_SetStream($i,          $v               );
       #0 => ['pipe', 'r'], // stdin is a pipe that the child will read from
       #1 => ['pipe'. 'w'], // stdout is a pipe that the child will write to
       #2 => ['pipe', 'w'], // stderr is a file to write to
@@ -132,7 +162,7 @@
       if($this->Handle)
         return Proc_Get_Status($this->Handle);
       $this->Debug($this->Handle);
-      $this->Log('Fatal', 'Called get status not from process');
+      $this->Log('Fatal', 'There is no handle for getting status');
       return [
         'command'  =>  ''  ,
         'pid'      =>   0  ,
@@ -169,12 +199,18 @@
       return $this->Is_Alive(); // TODO:
     }
     
-    Function Wait()
+    Function WaitIdle()
+    {
+      USleep(100000);
+    }
+    
+    Function Wait($CallBack=null)
     {
       while($this->Is_Alive())
       {
-        usleep(100000);
-      //echo '.';
+        if($CallBack && $CallBack()===True)
+          Continue;
+        $this->WaitIdle();
       }
     }
     
@@ -205,8 +241,8 @@
           $Log->Done();
         }
       }
-      $Pipes=$this->Pipes;
-      $this->Pipes=Array();
+      $Pipes=$this->OutPipes;
+      $this->OutPipes=Array();
       If(IsSet($Pipes[0])) $Pipes[0]->Close();
       If(IsSet($Pipes[1])) $Pipes[1]->Close();
       If(IsSet($Pipes[2])) $Pipes[2]->Close();

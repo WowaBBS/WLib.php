@@ -41,15 +41,30 @@
       return $this->Exec($Cmd, $Args);
     }
     
+    Function CreateExec($Cmd, $Args)
+    {
+      $Cmd=['"'.$this->Path.'"', ...$Cmd, ...($Args['Args']??[])];
+    //$Reg->Debug($List);
+      if($Password=$Args['Password']?? False) $Cmd[]='-p'.$Password;
+      if(($Progress=$Args['Progress']?? False)!==False) $Cmd[]='-bsp'.$Progress;
+      // -t7z
+      $ExecArgs=($Args['ExecArgs']??[])+[
+      //'Command'      =>$Cmd, //<TODO:
+        'Command'      =>Implode(' ', $Cmd),
+        'ShowProgress' =>$Args['ShowProgress' ]?? False ,
+        'Output'       =>$Args['Output'       ]?? True  ,
+        'Error'        =>$Args['Error'        ]?? True  ,
+      ];
+      $Exec=$this->Create_Object('/Archive/7Zip/Exec', $ExecArgs);
+    //$this->Log('Debug', 'Exec: ', $Exec->Command);
+      return $Exec;
+    }
+    
     Function Exec($Cmd, $Args)
     {
-      $Cmd=['"'.$this->Path.'"', ...$Cmd];
-      if($Password=$Args['Password']?? False) $Cmd[]='-p'.$Password;
-      // -t7z
-      $Exec=$this->Create_Object('/System/Exec');
-    //$Exec->Command=$Cmd; //<TODO:
-      $Exec->Command=Implode(' ', $Cmd);
-    //$this->Log('Debug', 'Exec: ', $Exec->Command);
+      $Exec=$this->CreateExec($Cmd, $Args);
+      if($Args['NoExec']?? False)
+        return $Exec;
       $Exec->Open();
       if($Args['Async']?? False)
         return $Exec;

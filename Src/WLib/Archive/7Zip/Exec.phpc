@@ -1,0 +1,76 @@
+<?
+  $this->Parent_Class('/System/Exec');
+
+  class C_Archive_7Zip_Exec extends C_System_Exec
+  {
+    Var $OutPutFile   =Null  ;
+    Var $OutPutStream =Null  ;
+    
+    Protected Function _Init(Array $Args)
+    {
+      $this->ShowProgress=$Args['ShowProgress']?? False;
+      Parent::_Init($Args);
+    }
+  
+    Function SetStream($i, $v, $Op=null)
+    {
+      if($i===1 || $i==='Output')
+      $this->OutPutFile=$v;
+      return Parent::SetStream($i, $v, $Op);
+    }
+
+    Function Open()
+    {
+      $Res=Parent::Open();
+      if(Is_String($this->OutPutFile))
+        $this->OutPutStream=$this->Create_Object('/Stream/File', [$this->OutPutFile, False]);
+    //$this->Debug($this->OutPutStream);
+      return $Res;
+    }
+    
+    Var $ShowProgress =False ;
+    
+    Function WaitIdle()
+    {
+      Parent::WaitIdle();
+      if(!$this->ShowProgress)
+        return;
+      $Last=$this->LastProgress;
+      $Curr=$this->GetProgressStr();
+      If($Last===$Curr)
+        Return;
+      $this->Log('Progress', $Curr);
+    }
+    
+    Var $LastProgress='';
+    
+    Function GetProgressStr()
+    {
+      if(!$this->OutPutStream)
+        Return;
+      $Res=$this->LastProgress;
+      $S=$this->OutPutStream;
+    # while(!$S->Eof())
+      while($S->Recv_Count()>0)
+      {
+        $R=Trim($S->Get_Line());
+        if(StrPos($R, '%')!==False)
+          $Res=$R;
+      }
+    # ClearStatCache();
+      $this->LastProgress=$Res;
+      return $Res;
+    }
+
+    Function Close()
+    {
+      if($this->OutPutStream)
+      {
+        $this->OutPutStream->Close();
+        $this->OutPutStream->Done();
+        $this->OutPutStream=null;
+      }
+      $Res=Parent::Close();
+      return $Res;
+    }
+  }

@@ -3,11 +3,52 @@
   
   $Loader->GetLogger()->Add(__FILE__.'.log');
   
+  $BigFileName='BigFile.dat';
+  if(!Is_File($BigFileName))
+  {
+    $BigFileStream=$Loader->Create_Object('/Stream/File', [$BigFileName, true]);
+    $Md5='';
+    $IsBin=!true;
+    $FileSize   =1024*1024*32; //*128;
+    $Md5Count   =256;
+    $SizeBlock  =$Md5Count*($IsBin? 16:32);
+    $BlockCount =$FileSize/$SizeBlock;
+    For($i=0; $i<$BlockCount; $i++)
+    {
+      $Lines=[];
+      For($j=0; $j<$Md5Count; $j++)
+        $Lines[]=$Md5=Md5($Md5, $IsBin);
+      $BigFileStream->Write(Implode($Lines));
+    }
+    $BigFileStream->Close();
+  }
   $App=$Loader->Create_Object('/Archive/7Zip/App');
-  $Args=['Password'=>'Test'];
+  
   $ToPack   = __DIR__;
-  $ArchFile = __DIR__.'.file';
+  $ArchFile = __DIR__.'.7z';
   $ToUnPack = __DIR__.'.res';
-  $App->Pack($ToPack  ,$ArchFile ,$Args);
-  $App->UnPack($ArchFile, $ToUnPack,$Args);
+  $Args=[
+    'Password'     =>'Test'           ,
+    'Output'       =>'PackOutput.txt' ,
+    'Error'        =>'PackError.txt'  ,
+    'Async'        =>True ,
+    'ShowProgress' =>True ,
+    'Progress'     =>1    ,
+    'Args'         =>['-mx9'],
+  ];
+  $Exec=$App->Pack($ToPack  ,$ArchFile ,$Args);
+  $Loader->Log('Debug', $Exec->Command);
+  $Exec->Wait();
+  $Args=[
+    'Output'   =>'UnPackOutput.txt' ,
+    'Error'    =>'UnPackError.txt'  ,
+  ]+$Args;
+  $Exec=$App->UnPack($ArchFile, $ToUnPack,$Args);
+  $Loader->Log('Debug', $Exec->Command);
+  $Exec->Wait();
+  UnLink('PackOutput.txt'   );
+  UnLink('PackError.txt'    );
+  UnLink('UnPackOutput.txt' );
+  UnLink('UnPackError.txt'  );
+//UnLink($BigFileName);
 ?>

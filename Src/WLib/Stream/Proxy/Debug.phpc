@@ -3,10 +3,10 @@
  
   Class C_Stream_Proxy_Debug Extends C_Stream_Proxy_Base
   {
-    Var $Mode='';
-    Var $Debug=NULL;
-    Var $IsEOF=False;
-    Var $Idx=0;
+    Var $Mode  =''    ;
+    Var $Debug =Null  ;
+    Var $IsEof =False ;
+    Var $Idx   =0     ;
 
     Function _Init(Array $Args)
     {
@@ -38,12 +38,12 @@
       $this->Debug_Write("\n>>> ".$AMode.($Info? ' '.$Info:" >>>\n"));
     }
 
-    Function EOF()
+    Function Eof()
     {
-      $Res=parent::EOF();
-      If($Res!=$this->IsEOF)
-        $this->Set_Mode('EOF', $Res? 'True':'False');
-      $this->IsEOF=$Res;
+      $Res=parent::Eof();
+      If($Res!=$this->IsEof)
+        $this->Set_Mode('Eof', $Res? 'True':'False');
+      $this->IsEof=$Res;
       Return $Res;
     }
 

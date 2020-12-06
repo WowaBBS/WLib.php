@@ -30,7 +30,7 @@
     }
 
     Function Read ($Size) { Return $this->FStream->Read($Size);  }
-    Function EOF()        { Return $this->FStream->EOF();        }
+    Function Eof()        { Return $this->FStream->Eof();        }
     Function Flush()
     {
       If($this->Output_Buffer)

@@ -29,7 +29,7 @@
       $B=$Res;
     }
   
-    Function EOF()
+    Function Eof()
     {
     //Return $this->FLength==0;
       Return Count($this->FBuffer)==0;

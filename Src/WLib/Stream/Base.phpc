@@ -17,10 +17,7 @@
     {
     }
   
-    Function EOF()
-    {
-      Return True;
-    }
+    Function Eof() { Return True; }
   
     Function Read_Max($ASize_Min=1, $ASize_Max=65536)
     {

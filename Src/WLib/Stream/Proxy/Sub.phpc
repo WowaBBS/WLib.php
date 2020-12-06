@@ -32,7 +32,7 @@
       Return $Res;
     }
   
-    Function EOF() { Return $this->Length<=$this->Pos; }
+    Function Eof() { Return $this->Length<=$this->Pos; }
   
     Function Seek($AOffset=0, $AWhence=0)
     {

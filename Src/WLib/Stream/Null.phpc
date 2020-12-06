@@ -55,7 +55,7 @@
     {
     }
  
-    Function EOF()
+    Function Eof()
     {
       Return True;
     }

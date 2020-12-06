@@ -15,7 +15,7 @@
     Function Recv_Count() { Return $this->FStream->Recv_Count(); }
     Function Write($Data) { Return $this->FStream->Write($Data); }
     Function Read ($Size) { Return $this->FStream->Read($Size);  }
-    Function EOF()        { Return $this->FStream->EOF();        }
+    Function Eof()        { Return $this->FStream->Eof();        }
     Function Flush()      { Return $this->FStream->Flush();      }
   //Function Get_Line($Size=1024) { Return $this->FStream->Get_Line($Size); }
     Function Seek($AOffset, $AWhence=0) { Return $this->FStream->Seek($AOffset, $AWhence); }

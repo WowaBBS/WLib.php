@@ -79,7 +79,7 @@
       Return $Res;
     }
   
-    Function EOF() { Return $this->Range[4]<=$this->Pos; }
+    Function Eof() { Return $this->Range[4]<=$this->Pos; }
   
     Function Seek($AOffset=0, $AWhence=0)
     {

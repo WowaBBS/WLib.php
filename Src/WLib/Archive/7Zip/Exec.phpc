@@ -53,9 +53,10 @@
     # while(!$S->Eof())
       while($S->Recv_Count()>0)
       {
-        $R=Trim($S->Get_Line());
-        if(StrPos($R, '%')!==False)
-          $Res=$R;
+        $R=Explode("\r", Trim($S->Get_Line()));
+        ForEach($R As $r)
+          if(StrPos($r, '%')!==False)
+            $Res=$r;
       }
     # ClearStatCache();
       $this->LastProgress=$Res;

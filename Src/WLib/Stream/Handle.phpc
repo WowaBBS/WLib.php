@@ -56,13 +56,15 @@
             Return $Res;
           Else
             Return False;
-        If($Out=="\r")
-           Continue;
-        If($Out=="\n")
+      //If($Out==="\r")
+      //   Continue;
+        If($Out==="\n")
            Break;
         $Res.=$Out;
       }
       While(!FEof($fp));
+      if(($l=StrLen($Res)) && $Res[$l-1]==="\r")
+        $Res=SubStr($Res, 0, -1);
       Return $Res;
     }
   

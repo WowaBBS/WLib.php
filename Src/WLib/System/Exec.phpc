@@ -87,7 +87,7 @@
         UnSet($this->Env['argv']);
     //$this->Log('Log', 'Exec_Open ', $this->Command);
       $Command=$this->Command;
-      if(PHP_OS_FAMILY==='Windows' && Is_String($Command))
+      if(PHP_OS_FAMILY==='Windows' && PHP_MAJOR_VERSION<8 && Is_String($Command))
         $Command='"'.$Command.'"';
       $this->Handle=Proc_Open(
         $Command,

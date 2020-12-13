@@ -6,6 +6,7 @@
   $App=$Loader->Create_Object('/Archive/7Zip/App');
   
   $ArchFile = __DIR__.'.7z';
+//$ArchFile = __DIR__.'/BigFile.dat';
   $Args=[
   //'Password'     =>'Test'           ,
   //'Output'       =>'InfoOutput.txt' ,
@@ -16,6 +17,6 @@
   ];
   $Info=$App->GetInfo($ArchFile, $Args);
   $Loader->Log('Debug', 'Info:')->Debug($Info);
-  $Loader->Log('Debug', 'UnpackedSize:')->Debug($App->GetUnpackedSize($ArchFile));
+  $Loader->Log('Debug', 'UnpackedSize: ', $App->GetUnpackedSize($ArchFile));
   
 ?>

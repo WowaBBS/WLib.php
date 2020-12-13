@@ -72,12 +72,12 @@
     Function ParseInfo($Res)
     {
       $Res=Str_Replace(["\r\n", "\n\r", "\r"], "\n", $Res);
-    # $Res=Preg_Replace('/ +/u', ' ', $Res);
       $Res=Explode("\n", $Res);
       $Mode=0;
       $Info=[];
       $Fields=null;
       $Files=[];
+      $Total=[];
       ForEach($Res As $i=>$Line)
         if($Line && $Line[0]==='-')
           Switch(++$Mode)
@@ -94,6 +94,7 @@
                 StrLen($s),
                 Preg_Replace('/ +/u', '', Trim(SubStr($FieldsStr, $Pos, StrLen($s)))),
               ];
+            $Fields[Count($Fields)-1][1]=null;
             Break;
           }
         Else
@@ -112,7 +113,7 @@
             $File=[];
             ForEach($Fields As $j=>[$Pos, $Size, $Field])
             {
-              $v=Trim(SubStr($Line, $Pos, $Size));
+              $v=Trim($Size? SubStr($Line, $Pos, $Size):SubStr($Line, $Pos));
               Switch($Field)
               {
               Case 'Attr'       :
@@ -161,6 +162,11 @@
             }
             Break;
           }
+      if(!$Total)
+      {
+        $this->Log('Error')->Debug($Res);
+        Return [];
+      }
       Return [
         'Info'  =>$Info  ,
         'Files' =>$Files ,
@@ -177,7 +183,14 @@
       $Exec=$this->Exec($Cmd, $Args);
       $Stream=$Exec->GetStream('Output');
       $Exec->Wait();
+      $ExitCode=$Exec->GetExitCode();
       $Res=$Stream->Get_Content();
+      if($ExitCode)
+      {
+        $Res=Str_Replace(["\r\n", "\n\r", "\r"], "\n", $Res);
+        $this->Log('Error', '7zip: ', $Res);
+        return [];
+      }
       $Res=$this->ParseInfo($Res);
       return $Res;
     }

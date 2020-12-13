@@ -24,7 +24,8 @@
   }
   $App=$Loader->Create_Object('/Archive/7Zip/App');
   
-  $ToPack   = __DIR__;
+  $ToPack   = '';
+//$ToPack   = __DIR__;
   $ArchFile = __DIR__.'.7z';
   $ToUnPack = __DIR__.'.res';
   $Args=[
@@ -36,7 +37,14 @@
     'Progress'     =>1    ,
     'Args'         =>['-mx9'],
   ];
-  $Exec=$App->Pack($ToPack  ,$ArchFile ,$Args);
+  $Files=[
+    'App.Test.php7',
+    'App.phpc',
+    'BigFile.dat',
+    '..\Zip\Builder.phpc',
+    '.Cache\7zip.path'
+  ];
+  $Exec=$App->Pack($ArchFile, $ToPack, $Files, $Args);
   $Loader->Log('Debug', $Exec->Command);
   $Exec->Wait();
   $Args=[

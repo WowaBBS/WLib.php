@@ -118,9 +118,9 @@
       //    Return $Res;
       //  Else
       //    Return False;
-      //If($Out=="\r")
+      //If($Out==="\r")
       //   Continue;
-        If($Out=="\n")
+        If($Out==="\n")
            Break;
         $Res.=$Out;
       }

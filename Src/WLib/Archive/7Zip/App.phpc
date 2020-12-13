@@ -17,19 +17,47 @@
     
     Function IsFound() { return $this->Path!==''; }
     
-    Function Pack($InputPath, $OutputFile, $Args=[])
+    Function Pack($OutputFile, $WorkDir, $Files=[], $Args=[])
     {
-      $Cmd=['a', '-w"'.$InputPath.'"', '"'.$OutputFile.'"',];
+      If(Is_Dir($WorkDir))
+      {
+        $this->Log('Error', 'Work directory not founded: ', $WorkDir);
+        $WorkDir=RealPath($WorkDir);
+      }
+      
+      $ArgsFiles=[];
+      if(!Is_Array($Files))
+        $Files=[$Files];
+      ForEach($Files As $f)
+      //If($Path=RealPath($f))
+        If($Path=$f)
+          $ArgsFiles[]='"'.$Path.'"';
+        Else
+          $this->Log('Error', 'Path not found: ', $f);
+          
+      if($WorkDir)
+        If($Path=RealPath($f))
+          $ArgsFiles[]='-w"'.$Path.'"';
+        Else
+          $this->Log('Error', 'Path not found: ', $f);
+      
+      $Cmd=['a', '"'.$OutputFile.'"', ...$ArgsFiles];
       return $this->Exec($Cmd, $Args);
     }
     
-    Function UnPack($PathOfFile, $OutputDir, $Args=[])
+    Function Check7ZipFile($PathOfFile)
     {
       If(!$PathOfFile ) { $this->Log('Error', 'Archive is not defined' ); return null; }
-      if(!$OutputDir  ) { $this->Log('Error', 'No output directory'    ); return null; }
-
       $FilePath=RealPath($PathOfFile);
       If(!Is_Readable($FilePath  )) { $this->Log('Error', 'Archive ',$PathOfFile,' is not found'); return null; }
+      return $FilePath;
+    }
+    
+    Function UnPack($FilePath, $OutputDir, $Args=[])
+    {
+      If(!$FilePath=$this->Check7ZipFile($FilePath)) return null;
+    
+      if(!$OutputDir  ) { $this->Log('Error', 'No output directory'    ); return null; }
 
       if($Args['RemoveOutput' ]?? true) DeleteFile($OutputDir);
       if($Args['CreatePath'   ]?? true) CreatePath($OutputDir);
@@ -41,10 +69,124 @@
       return $this->Exec($Cmd, $Args);
     }
     
+    Function ParseInfo($Res)
+    {
+      $Res=Str_Replace(["\r\n", "\n\r", "\r"], "\n", $Res);
+    # $Res=Preg_Replace('/ +/u', ' ', $Res);
+      $Res=Explode("\n", $Res);
+      $Mode=0;
+      $Info=[];
+      $Fields=null;
+      $Files=[];
+      ForEach($Res As $i=>$Line)
+        if($Line && $Line[0]==='-')
+          Switch(++$Mode)
+          {
+          Case 2:
+            $Matches=[];
+            If(!Preg_Match_All('/-+/', $Line, $Matches, PREG_OFFSET_CAPTURE))
+              Return $this->Log('Error', $Matches)->Ret();
+            $Fields=[];
+            $FieldsStr=$Res[$i-1];
+            ForEach($Matches[0] As [$s, $Pos])
+              $Fields[]=[
+                $Pos,
+                StrLen($s),
+                Preg_Replace('/ +/u', '', Trim(SubStr($FieldsStr, $Pos, StrLen($s)))),
+              ];
+            Break;
+          }
+        Else
+          Switch($Mode)
+          {
+          Case 0:
+            Break;
+          Case 1:
+            $Line=Explode('=', $Line, 2);
+            if(Count($Line)<2)
+              Break;
+            $Info[Trim($Line[0])]=Trim($Line[1]);
+            Break;
+          Case 2:
+          Case 3:
+            $File=[];
+            ForEach($Fields As $j=>[$Pos, $Size, $Field])
+            {
+              $v=Trim(SubStr($Line, $Pos, $Size));
+              Switch($Field)
+              {
+              Case 'Attr'       :
+                if($Mode===3)
+                  Continue 2;
+                $Field='AttrStr';
+                Break;
+              Case 'Name'       :
+                if($Mode===2)
+                {
+                  $v=StrTr($v, '\\', '/');
+                  $Field='FilePath';
+                  Break;
+                }
+                $vl=Explode(',', $v);
+                ForEach($vl As $vi)
+                {
+                  $vi=Explode(' ', $vi, 2);
+                  Switch($vi[1]?? '')
+                  {
+                  Case 'files'   : $File['Files'   ]=(Integer)$v[0]; Break;
+                  Case 'folders' : $File['Folders' ]=(Integer)$v[0]; Break;
+                  Default:
+                    $this->Log('Error', 'sdfpiou: ', $vi)->Debug($Res);
+                  }
+                }
+                $File['Files'   ]??=0;
+                $File['Folders' ]??=0;
+                Continue 2;
+              Case 'Size'       :
+              Case 'Compressed' :
+                $v=Trim($v);
+                $v=$v===''? False:(Integer)$v;
+                Break;
+              }
+
+              if($Field)
+                $File[$Field]=$v;
+            }
+            if($Mode===2)
+              $Files[]=$File;
+            Else
+            {
+              $Total=$File;
+              $Mode++;
+            }
+            Break;
+          }
+      Return [
+        'Info'  =>$Info  ,
+        'Files' =>$Files ,
+        'Total' =>$Total ,
+      ];
+    }
+    
+    Function GetInfo($FilePath, $Args=[])
+    {
+      If(!$FilePath=$this->Check7ZipFile($FilePath)) return null;
+      
+      $Args['Async']??=true;
+      $Cmd=['l', '"'.$FilePath.'"'];
+      $Exec=$this->Exec($Cmd, $Args);
+      $Stream=$Exec->GetStream('Output');
+      $Exec->Wait();
+      $Res=$Stream->Get_Content();
+      $Res=$this->ParseInfo($Res);
+      return $Res;
+    }
+    
+    Function GetUnpackedSize($FilePath, $Args=[]) { return $this->GetInfo($FilePath, $Args)['Total']['Size']?? False; }
+    
     Function CreateExec($Cmd, $Args)
     {
       $Cmd=['"'.$this->Path.'"', ...$Cmd, ...($Args['Args']??[])];
-    //$Reg->Debug($List);
       if($Password=$Args['Password']?? False) $Cmd[]='-p'.$Password;
       if(($Progress=$Args['Progress']?? False)!==False) $Cmd[]='-bsp'.$Progress;
       // -t7z
@@ -148,7 +290,6 @@
         ['Recursive'=>true]
       );
       $Reg->Done();
-    //$Reg->Debug($List);
       $Res=[];
       ForEach($List As $Item)
       {

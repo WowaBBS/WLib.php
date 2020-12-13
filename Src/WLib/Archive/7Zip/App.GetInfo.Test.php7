@@ -1,0 +1,21 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $Loader->GetLogger()->Add(__FILE__.'.log');
+  
+  $App=$Loader->Create_Object('/Archive/7Zip/App');
+  
+  $ArchFile = __DIR__.'.7z';
+  $Args=[
+  //'Password'     =>'Test'           ,
+  //'Output'       =>'InfoOutput.txt' ,
+  //'Output'       =>True,
+  //'Error'        =>'InfoError.txt'  ,
+  # 'Async'        =>True ,
+  # 'Args'         =>['-mx9'],
+  ];
+  $Info=$App->GetInfo($ArchFile, $Args);
+  $Loader->Log('Debug', 'Info:')->Debug($Info);
+  $Loader->Log('Debug', 'UnpackedSize:')->Debug($App->GetUnpackedSize($ArchFile));
+  
+?>

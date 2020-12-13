@@ -101,18 +101,8 @@
       ForEach($Pipes As $k=>$v)
         $this->OutPipes[$k]=$this->Create_Object('/Stream/Handle', ['Handle'=>$v]);
     }
-  
-    Function GetStream($i) { return $this->OutPipes[$i]??false; }
-    Function Stream_Input  () { return $this->GetStream(0); }
-    Function Stream_Output () { return $this->GetStream(1); }
-    Function Stream_Error  () { return $this->GetStream(2); }
-
-    Function _SetStream($i, $v)
-    {
-      $this->InPipes[$i]=$v;
-    }
-
-    Function SetStream($i, $v, $Op=null)
+    
+    Function GetStreamIdx($i)
     {
       if(Is_String($i))
       {
@@ -125,6 +115,22 @@
       }
       if(!Is_Integer($i))
         return $this->Log('Error', 'Invalid stream index')->Ret();
+      return $i;
+    }
+  
+    Function GetStream($i) { return $this->OutPipes[$this->GetStreamIdx($i)]??false; }
+    Function Stream_Input  () { return $this->GetStream(0); }
+    Function Stream_Output () { return $this->GetStream(1); }
+    Function Stream_Error  () { return $this->GetStream(2); }
+
+    Function _SetStream($i, $v)
+    {
+      $this->InPipes[$i]=$v;
+    }
+
+    Function SetStream($i, $v, $Op=null)
+    {
+      $i=$this->GetStreamIdx($i);
       $Op??=$i>0;
       if(Is_Bool    ($Op)) $Op=$Op? 'w':'r';
       if($v===true       ) return $this->_SetStream($i, ['pipe',              $Op]); // Default

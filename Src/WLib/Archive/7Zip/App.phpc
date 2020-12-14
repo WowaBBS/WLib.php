@@ -131,7 +131,7 @@
                 $vl=Explode(',', $v);
                 ForEach($vl As $vi)
                 {
-                  $vi=Explode(' ', $vi, 2);
+                  $vi=Explode(' ', Trim($vi), 2);
                   Switch($vi[1]?? '')
                   {
                   Case 'files'   : $File['Files'   ]=(Integer)$v[0]; Break;
@@ -182,9 +182,9 @@
       $Cmd=['l', '"'.$FilePath.'"'];
       $Exec=$this->Exec($Cmd, $Args);
       $Stream=$Exec->GetStream('Output');
+      $Res=$Stream->Get_Content();
       $Exec->Wait();
       $ExitCode=$Exec->GetExitCode();
-      $Res=$Stream->Get_Content();
       if($ExitCode)
       {
         $Res=Str_Replace(["\r\n", "\n\r", "\r"], "\n", $Res);

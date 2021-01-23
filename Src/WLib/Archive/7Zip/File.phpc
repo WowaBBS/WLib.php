@@ -1,0 +1,65 @@
+<?
+  $this->Parent_Class('/Object/Base');
+  $this->Load_Lib('/FS/Utils');
+  $this->Using_Module('/FS/IOFS');
+
+  class C_Archive_7Zip_File extends C_Object_Base
+  {
+    Var $File     = ''   ;
+    Var $App      = Null ;
+    Var $Info     = Null ;
+    Var $Args     = []   ;
+    Var $Password = Null ;
+    Var $Exec     = Null ;
+  
+    Function _Init(Array $Args)
+    {
+      $this->File     =$Args['File'     ]?? $Args[0];
+      $this->Args     =$Args['Args'     ]?? [];
+      $this->Password =$Args['Password' ]?? Null;
+      $App            =$Args['App'      ]?? [];
+      if(!Is_Object($App))
+      {
+        if(!Is_Array($App))
+          $App=$this->Log('Error', 'Unknown App args')->Debug($App)->Ret([]);
+        $App=$this->Get_Singleton('/Archive/7Zip/App', $App);
+      }
+      
+      $this->App=$App;
+      Parent::_Init($Args);
+    }
+    
+    Function _GetArgs(): Array 
+    {
+      $Res=[];
+      if(!Is_Null($this->Password)) $Res['Password']=$this->Password;
+      return $Res;
+    }
+    
+    Function Pack($WorkDir, $Files=[], Array $Args=[])
+    {
+      return $this->Pack($this->File, $WorkDir, $Files, $Args+$this->_GetArgs());
+    }
+
+    Function UnPack($OutputDir, Array $Args=[])
+    {
+      return $this->UnPack($this->File, $OutputDir, $Args+$this->_GetArgs());
+    }
+    
+    Function GetUnpackedSize($Args=[]) { return $this->GetInfo($Args)['Total']['Size']?? False; }
+    
+    Function _GetInfo(Array $Args=[])
+    {
+      return $this->App->GetInfo($this->File, $Args+$this->_GetArgs());
+    }
+    
+    Function GetInfo(Array $Args=[])
+    {
+      return $this->Info??=$this->_GetInfo($Args);
+    }
+    
+    Function Invalidate()
+    {
+      $this->Info=null;
+    }
+  }

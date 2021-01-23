@@ -20,10 +20,9 @@
     Function Pack($OutputFile, $WorkDir, $Files=[], $Args=[])
     {
       If(Is_Dir($WorkDir))
-      {
-        $this->Log('Error', 'Work directory not founded: ', $WorkDir);
         $WorkDir=RealPath($WorkDir);
-      }
+      Else
+        $this->Log('Error', 'Work directory not founded: ', $WorkDir);
       
       $ArgsFiles=[];
       if(!Is_Array($Files))
@@ -36,10 +35,10 @@
           $this->Log('Error', 'Path not found: ', $f);
           
       if($WorkDir)
-        If($Path=RealPath($f))
+        If($Path=RealPath($WorkDir))
           $ArgsFiles[]='-w"'.$Path.'"';
         Else
-          $this->Log('Error', 'Path not found: ', $f);
+          $this->Log('Error', 'WorkDir Path not found: ', $WorkDir);
       
       $Cmd=['a', '"'.$OutputFile.'"', ...$ArgsFiles];
       return $this->Exec($Cmd, $Args);
@@ -85,7 +84,7 @@
           Case 2:
             $Matches=[];
             If(!Preg_Match_All('/-+/', $Line, $Matches, PREG_OFFSET_CAPTURE))
-              Return $this->Log('Error', $Matches)->Ret();
+              Return $this->Log('Error', 'No match /-+/', $Matches)->Debug($Res)->Ret();
             $Fields=[];
             $FieldsStr=$Res[$i-1];
             ForEach($Matches[0] As [$s, $Pos])
@@ -137,7 +136,7 @@
                   Case 'files'   : $File['Files'   ]=(Integer)$v[0]; Break;
                   Case 'folders' : $File['Folders' ]=(Integer)$v[0]; Break;
                   Default:
-                    $this->Log('Error', 'sdfpiou: ', $vi)->Debug($Res);
+                    $this->Log('Error', 'Unknown property: ', $vi)->Debug($Res);
                   }
                 }
                 $File['Files'   ]??=0;
@@ -164,9 +163,12 @@
           }
       if(!$Total)
       {
-        $this->Log('Error')->Debug($Res);
+        $this->Log('Error', 'No total info')->Debug($Res);
         Return [];
       }
+      if(IsSet($Info['Blocks'        ])) { $Info['Blocks'       ]=(Int)$Info['Blocks'        ]; }
+      if(IsSet($Info['Physical Size' ])) { $Info['PhysicalSize' ]=(Int)$Info['Physical Size' ]; UnSet($Info['Physical Size' ]); }
+      if(IsSet($Info['Headers Size'  ])) { $Info['HeadersSize'  ]=(Int)$Info['Headers Size'  ]; UnSet($Info['Headers Size'  ]); }
       Return [
         'Info'  =>$Info  ,
         'Files' =>$Files ,
@@ -182,10 +184,16 @@
       $Cmd=['l', '"'.$FilePath.'"'];
       $Exec=$this->Exec($Cmd, $Args);
       $Stream=$Exec->GetStream('Output');
-      $Res=$Stream->Get_Content();
-      $Exec->Wait();
-      $ExitCode=$Exec->GetExitCode();
-      if($ExitCode)
+      if(!$Stream)
+        return [];
+    //$Res=$Stream->Get_Content();
+      $Res=[];
+      $Exec->Wait(Function() use($Stream, &$Res){
+        while(StrLen($R=$Stream->Recv(1024*1024)))
+          $Res[]=$R;
+      });
+      $Res=Implode($Res);
+      if($ExitCode=$Exec->GetExitCode())
       {
         $Res=Str_Replace(["\r\n", "\n\r", "\r"], "\n", $Res);
         $this->Log('Error', '7zip: ', $Res);
@@ -200,8 +208,8 @@
     Function CreateExec($Cmd, $Args)
     {
       $Cmd=['"'.$this->Path.'"', ...$Cmd, ...($Args['Args']??[])];
-      if($Password=$Args['Password']?? False) $Cmd[]='-p'.$Password;
-      if(($Progress=$Args['Progress']?? False)!==False) $Cmd[]='-bsp'.$Progress;
+      if( $Password =$Args['Password']?? False) $Cmd[]='-p'.$Password;
+      if(($Progress =$Args['Progress']?? False)!==False) $Cmd[]='-bsp'.$Progress;
       // -t7z
       $ExecArgs=($Args['ExecArgs']??[])+[
       //'Command'      =>$Cmd, //<TODO:

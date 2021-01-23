@@ -11,6 +11,7 @@
     Var $Handle        ;
     Var $InPipes       =[];
     Var $OutPipes      =[];
+    Var $WaitSleep     =0.1;
   
     Var $_TempFile=False;
 
@@ -19,6 +20,7 @@
       $this->Env           =$Args['Env'           ]?? $this->Env           ;
       $this->Command       =$Args['Command'       ]?? $this->Command       ;
       $this->WorkDirectory =$Args['WorkDirectory' ]?? $this->WorkDirectory ;
+      $this->WaitSleep     =$Args['WaitSleep'     ]?? $this->WaitSleep     ;
       if(Array_Key_Exists('Input'  ,$Args)) $this->SetStream_Input  ($Args['Input'  ]);
       if(Array_Key_Exists('Output' ,$Args)) $this->SetStream_Output ($Args['Output' ]);
       if(Array_Key_Exists('Error'  ,$Args)) $this->SetStream_Error  ($Args['Error'  ]);
@@ -89,6 +91,16 @@
       $Command=$this->Command;
       if(PHP_OS_FAMILY==='Windows' && PHP_MAJOR_VERSION<8 && Is_String($Command))
         $Command='"'.$Command.'"';
+      ForEach($this->InPipes As $k=>$Pipe)
+      {
+        $PipeInfo=$this->_GetStreamInfo($k);
+        if($PipeInfo['Type']!=='File' ) Continue;
+        if($PipeInfo['Mode']!=='r'    ) Continue;
+        $File=$PipeInfo['File'];
+        if($File===null   ) Continue;
+        if(Is_File($File) ) Continue;
+        $this->GetStream($k);
+      }
       $this->Handle=Proc_Open(
         $Command,
         $this->InPipes,
@@ -117,8 +129,61 @@
         return $this->Log('Error', 'Invalid stream index')->Ret();
       return $i;
     }
+    
+    Function _GetStreamInfo($i)
+    {
+      $InPipe=$this->InPipes  [$i]?? Null;
+      $Stream=$this->OutPipes [$i]?? Null;
+    //if(False)
+      $Res=[
+        'Type'   =>'Unknown',
+        'Stream' =>$Stream,
+      ];
+      if(Is_Array($InPipe))
+      {
+        Switch($Type=$InPipe[0]?? '')
+        {
+        Case 'file':
+          $Res['Type']='File';
+          $Res['File']=(($File=$InPipe[1]?? '')!==FS_Dev_Null)? $File:Null;
+          $Res['Mode']=$InPipe[2]?? '?';
+          break;
+        Case 'pipe':
+          $Res['Type']='Pipe';
+          $Res['Mode']=$InPipe[1]?? '?';
+          Break;
+        Default:
+          $Res['Type']=UCFirst($Type);
+        }
+      }
+      ElseIf(Is_Null($InPipe))
+        $Res['Type']='Null';
+      Else
+        $Res['Type']='Unknown';
+      Return $Res;
+    }
+    
+    Function GetStreamInfo($i, $IsRead=null) { return $this->_GetStreamInfo($this->GetStreamIdx($i), $IsRead); }
   
-    Function GetStream($i) { return $this->OutPipes[$this->GetStreamIdx($i)]??false; }
+    Function _GetStream($i)
+    {
+      $Info=$this->_GetStreamInfo($i);
+      Switch($Info['Type'])
+      {
+      Case 'File':
+        If($File=$Info['File'])
+          Switch($Info['Mode'])
+          {
+          Case 'a':
+          Case 'w': return $this->Create_Object('/Stream/File', [$File, false ]);
+          Case 'r': return $this->Create_Object('/Stream/File', [$File, True  ]);
+          }
+        Break;
+      }
+      return $this->Log('Error', '/System/Exec::_GetStream(', $i, ') is unsupported')->Debug($this->InPipes)->Ret(False);
+    }
+    
+    Function GetStream($i) { $i=$this->GetStreamIdx($i); return $this->OutPipes[$i]??=$this->_GetStream($i); }
     Function Stream_Input  () { return $this->GetStream(0); }
     Function Stream_Output () { return $this->GetStream(1); }
     Function Stream_Error  () { return $this->GetStream(2); }
@@ -132,16 +197,33 @@
     {
       $i=$this->GetStreamIdx($i);
       $Op??=$i>0;
-      if(Is_Bool    ($Op)) $Op=$Op? 'w':'r';
-      if($v===true       ) return $this->_SetStream($i, ['pipe',              $Op]); // Default
-      if(Is_Null     ($v)) return $this->_SetStream($i, ['file', FS_Dev_Null, $Op]);
-      if(Is_String   ($v)) return $this->_SetStream($i, ['file', $v         , $Op]);
-      if(Is_Array    ($v)) return $this->_SetStream($i,          $v               );
-      if(Is_Resource ($v)) return $this->_SetStream($i,          $v               );
+      if(Is_Bool($Op)) $Op=$Op? 'w':'r';
+      Switch(GetType($v))
+      {
+      Case 'boolean': if($v) return $this->_SetStream($i, ['pipe',              $Op]); // Default
+      Case 'NULL'          : return $this->_SetStream($i, ['file', FS_Dev_Null, $Op]);
+      Case 'string'        : return $this->_SetStream($i, ['file', $v         , $Op]);
+      Case 'array'         : return $this->_SetStream($i,          $v               ); //<TODO: Validate
+      Case 'object'        : 
+        if($v InstanceOf C_Stream_Handle)
+        {
+          $this->OutPipes[$i]=$v;
+          $v=$v->FHandle;
+        }
+        else
+          break;
+      Case 'resource'      : return $this->_SetStream($i,          $v               );
+      Case 'integer'       : break;
+      Case 'double'        : break;
+      Case 'float'         : break;
+      Case 'unknown type'  : break;
+      Case 'user function' : break;
+      Default              : break;
+      }
       #0 => ['pipe', 'r'], // stdin is a pipe that the child will read from
       #1 => ['pipe'. 'w'], // stdout is a pipe that the child will write to
       #2 => ['pipe', 'w'], // stderr is a file to write to
-      $this->Log('Fatal', 'TODO: Implement');
+      $this->Log('Fatal', 'TODO: Implement')->Debug($v);
     }
     
     Function SetStream_Input  ($v=true) { return $this->SetStream(0, $v); }
@@ -207,17 +289,18 @@
     
     Function WaitIdle()
     {
-      USleep(100000);
+      USleep(1000000*$this->WaitSleep);
     }
     
     Function Wait($CallBack=null)
     {
       while($this->Is_Alive())
       {
-        if($CallBack && $CallBack()===True)
+        if($CallBack && $CallBack(false)===True)
           Continue;
         $this->WaitIdle();
       }
+      if($CallBack) $CallBack(true);
     }
     
     Function Terminate() //TODO: Second param
@@ -248,10 +331,10 @@
         }
       }
       $Pipes=$this->OutPipes;
-      $this->OutPipes=Array();
-      If(IsSet($Pipes[0])) $Pipes[0]->Close();
-      If(IsSet($Pipes[1])) $Pipes[1]->Close();
-      If(IsSet($Pipes[2])) $Pipes[2]->Close();
+      $this->OutPipes=[];
+      ForEach($Pipes As $Pipe)
+        if($Pipe)
+          $Pipe->Close();
       Proc_Close($this->Handle);
       $this->Handle=False;
     }

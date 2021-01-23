@@ -3,21 +3,21 @@
 
   Class C_Stream_Handle Extends C_Stream_Base
   {
-    Var $FHandle=NULL;
+    Var $FHandle=Null;
   
     Function _Init(Array $Args)
     {
       Parent::_Init($Args);
-      $this->FHandle=$Args['Handle']??false;
+      $this->FHandle=$Args['Handle']?? False;
     }
     
     Function CheckHandle()
     {
       if($this->FHandle)
-        return true;
+        return True;
       if(!($this->HasNoHandleError?? False))
       {
-        $this->HasNoHandleError=true;
+        $this->HasNoHandleError=True;
         $this->Log('Error', 'No handle');
       }
       return False;
@@ -28,7 +28,7 @@
       If($this->FHandle)
       {
         FClose($this->FHandle);
-        $this->FHandle=NULL;
+        $this->FHandle=Null;
       }
     }
   
@@ -40,7 +40,7 @@
     Function Recv($Size)
     {
       if($Size<=0)
-        Error();
+        Return $this->Log('Error', 'Size<=0')->BackTrace()->Ret('');
       Return FRead($this->FHandle, $Size);
     }
   
@@ -52,10 +52,7 @@
       {
         $Out=@FRead($fp, 1);
         If($Out===False)
-          If(StrLen($Res))
-            Return $Res;
-          Else
-            Return False;
+          Return StrLen($Res)? $Res:False;
       //If($Out==="\r")
       //   Continue;
         If($Out==="\n")

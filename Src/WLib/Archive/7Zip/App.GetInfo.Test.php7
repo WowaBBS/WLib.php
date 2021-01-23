@@ -3,20 +3,27 @@
   
   $Loader->GetLogger()->Add(__FILE__.'.log');
   
-  $App=$Loader->Create_Object('/Archive/7Zip/App');
-  
-  $ArchFile = __DIR__.'.7z';
-//$ArchFile = __DIR__.'/BigFile.dat';
   $Args=[
   //'Password'     =>'Test'           ,
-  //'Output'       =>'InfoOutput.txt' ,
-  //'Output'       =>True,
-  //'Error'        =>'InfoError.txt'  ,
-  # 'Async'        =>True ,
-  # 'Args'         =>['-mx9'],
+  # 'Args'         =>['-mx9']         ,
   ];
-  $Info=$App->GetInfo($ArchFile, $Args);
-  $Loader->Log('Debug', 'Info:')->Debug($Info);
-  $Loader->Log('Debug', 'UnpackedSize: ', $App->GetUnpackedSize($ArchFile));
+  $File=$Loader->Create_Object('/Archive/7Zip/File', [__DIR__.'.7z']);
   
+//$ArchFile = __DIR__.'/BigFile.dat';
+  $Args=[
+  //'Output'       =>'InfoOutput.txt' ,
+  //'Output'       =>True             ,
+  //'Error'        =>'InfoError.txt'  ,
+  # 'Async'        =>True             ,
+  ];
+  $Info=$File->GetInfo($Args);
+  $Loader->Log('Debug', 'Info:')->Debug($Info);
+  $Loader->Log('Debug', 'UnpackedSize: ', $File->GetUnpackedSize());
+  $File->Invalidate();
+  $Args=[
+    'Output'       =>'InfoOutput.txt' ,
+  ]+$Args;
+  $Info=$File->GetInfo($Args);
+  $Loader->Log('Debug', 'Info:')->Debug($Info);
+  $Loader->Log('Debug', 'UnpackedSize: ', $File->GetUnpackedSize());
 ?>

@@ -7,15 +7,15 @@
     Var $Skip    ='..';
     Var $AddTab  ='  ';
     Var $Slashes =[
-       '"'  => '\"',
-       "\0" => '\0',
-       "\t" => '\t',
-       "\r" => '\r',
-       "\n" => '\n',
-       "\\" => '\\\\',
-       "\$" => '\$',
-       "\{" => '\{',
-     ];
+      '"'  => '\"',
+      "\0" => '\0',
+      "\t" => '\t',
+      "\r" => '\r',
+      "\n" => '\n',
+      "\\" => '\\\\',
+      "\$" => '\$',
+      "\{" => '\{',
+    ];
     Var $BinarySignReg='/[^\t\r\n\x20-\xF8]/';
     Var $ChunkLen=64;
     Var $StrMaxLen=256;
@@ -31,31 +31,32 @@
       $_TOV=GetType($Value);
       Switch($_TOV)
       {
-      Case 'boolean'       : $this->Boolean  ($Ctx, $Value); break;
-      Case 'integer'       : $this->Integer  ($Ctx, $Value); break;
-      Case 'double'        : $this->Double   ($Ctx, $Value); break;
-      Case 'string'        : $this->String   ($Ctx, $Value); break;
-      Case 'object'        : $this->Object   ($Ctx, $Value); break;
-      Case 'array'         : $this->Array    ($Ctx, $Value); break;
-      Case 'NULL'          : $this->Null     ($Ctx, $Value); break;
-      Case 'resource'      : $this->Resource ($Ctx, $Value); break;
-      Case 'float'         : $this->Float    ($Ctx, $Value); break;
-      Case 'unknown type'  : $this->UnKnown  ($Ctx, $Value); break;
-      Case 'user function' : $this->Function ($Ctx, $Value); break;
-      Default:
-        $_f='T'.$_TOV;
-        $this->$_f($Ctx, $Value);
+      Case 'boolean'           : $this->Boolean        ($Ctx, $Value); break;
+      Case 'integer'           : $this->Integer        ($Ctx, $Value); break;
+      Case 'double'            : $this->Double         ($Ctx, $Value); break;
+      Case 'string'            : $this->String         ($Ctx, $Value); break;
+      Case 'object'            : $this->Object         ($Ctx, $Value); break;
+      Case 'array'             : $this->Array          ($Ctx, $Value); break;
+      Case 'NULL'              : $this->Null           ($Ctx, $Value); break;
+      Case 'resource'          : $this->Resource       ($Ctx, $Value); break;
+      Case 'resource (closed)' : $this->ClosedResource ($Ctx, $Value); break;
+      Case 'float'             : $this->Float          ($Ctx, $Value); break;
+      Case 'unknown type'      : $this->UnKnown        ($Ctx, $Value); break;
+      Case 'user function'     : $this->Function       ($Ctx, $Value); break;
+      Default                  : $this->UnKnownType    ($Ctx, $Value); break;
       }
     }
  
-    Function Boolean  ($Ctx, $v) { $Ctx->WriteBool  ($v? 'True':'False'); }
-    Function Integer  ($Ctx, $v) { $Ctx->WriteNum   ((String)$v); }
-    Function Double   ($Ctx, $v) { $Ctx->WriteFloat ((String)$v); }
-    Function Float    ($Ctx, $v) { $Ctx->WriteFloat ((String)$v); }
-    Function Resource ($Ctx, $v) { $Ctx->WriteType  ('Resource '); $Ctx->WriteName(Get_Resource_Type($v)); $Ctx->WriteOp('('); $Ctx->Write((String)$v); $Ctx->WriteOp(')'); }
-    Function Null     ($Ctx, $v) { $Ctx->WriteNull  ('Null'); }
-    Function Function ($Ctx, $v) { $Ctx->WriteResvd ('Function '); $Ctx->Write($v); }
-    Function UnKnown  ($Ctx, $v) { $Ctx->WriteResvd ('UnKnown '); $Ctx->Write($v);  }
+    Function Boolean        ($Ctx, $v         ) { $Ctx->WriteBool  ($v? 'True':'False'); }
+    Function Integer        ($Ctx, $v         ) { $Ctx->WriteNum   ((String)$v); }
+    Function Double         ($Ctx, $v         ) { $Ctx->WriteFloat ((String)$v); }
+    Function Float          ($Ctx, $v         ) { $Ctx->WriteFloat ((String)$v); }
+    Function Resource       ($Ctx, $v, $T=null) { $Ctx->WriteType  ($T?? 'Resource '); $Ctx->WriteName(Get_Resource_Type($v)); $Ctx->WriteOp('('); $Ctx->Write((String)$v); $Ctx->WriteOp(')'); }
+    Function ClosedResource ($Ctx, $v         ) { $this->Resource  ($Ctx, $v, 'ClosedResource '); }
+    Function Null           ($Ctx, $v         ) { $Ctx->WriteNull  ('Null'         ); }
+    Function Function       ($Ctx, $v         ) { $Ctx->WriteResvd ('Function '    ); $Ctx->Write($v); }
+    Function UnKnown        ($Ctx, $v         ) { $Ctx->WriteResvd ('UnKnown '     ); $Ctx->Write($v); }
+    Function UnKnownType    ($Ctx, $v         ) { $Ctx->WriteResvd ('UnKnownType ' ); $Ctx->Write(GetType($v)); $Ctx->Write($v);  }
     
     Function AddSlashes($v) { return StrTr($v, $this->Slashes); }
   //Function IsBinary($v) { return StrLen(StrPBRK($v, $this->BinarySign))!==false; }

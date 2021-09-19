@@ -4,11 +4,13 @@
  
   Class C_Log_Logger_Stream extends C_Log_Logger_Base
   {
-    Protected $Stream =null;
+    Protected $Stream         =null;
+    Protected $AutoDoneStream =true;
     
     Function _Init(Array $Args)
     {
       parent::_Init($Args);
+      $this->AutoDoneStream=$Args['AutoDoneStream']?? $this->AutoDoneStream;
       $this->SetStream($Args['Stream']?? False, $Args);
       $this->CheckStream();
     }
@@ -27,9 +29,12 @@
     
     Function _Done()
     {
-      if($this->CheckStream())
-        $this->Stream->Done();
-      $this->Stream=null;
+      if$this->AutoDoneStream)
+      {
+        if($this->CheckStream())
+          $this->Stream->Done();
+        $this->Stream=null;
+      }
       parent::_Done();
     }
     

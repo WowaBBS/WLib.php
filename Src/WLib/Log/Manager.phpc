@@ -3,8 +3,8 @@
  
   Class C_Log_Manager extends C_Log_Logger
   {
-    Var $ByName=[];
-    Var $Loggers=[];
+    Var $ByName  =[];
+    Var $Loggers =[];
     
     Function _Init(Array $Args)
     {
@@ -22,7 +22,12 @@
     
     Function _LogItem($LogItem)
     {
-      ForEach($this->Loggers As $Logger)
+      $Loggers=$this->Loggers;
+      if($Exclude=$LogItem->Exclude)
+        ForEach($ByName As $Name->$Logger)
+          If($Exclude[$Name]?? False)
+            UnSet($Loggers[$Logger->Object_Id]);
+      ForEach($Loggers As $Logger)
         if($Logger->IsValid())
           $Logger->LogItem($LogItem);
     }
@@ -34,7 +39,7 @@
         $Name=$Args['Name']?? $Logger;
         if(IsSet($this->ByName[$Name]))
         {
-          $this->GetLoader()->Log('Error', 'Logger ', $Name, ' already exists');
+          $this->GetLogger()->Log('Error', 'Logger ', $Name, ' already exists');
           return $this->ByName[$Name];
         }
         $Logger=$this->CreateFile($Logger, $Args);
@@ -44,11 +49,11 @@
       if(StrLen($Name))
       {
         if(IsSet($this->ByName[$Name]))
-          $this->GetLoader()->Log('Warning', 'Logger ', $Name, ' already exists will be overrided');
+          $this->GetLogger()->Log('Warning', 'Logger ', $Name, ' already exists will be overrided');
         $this->ByName[$Name]=$Logger;
       }
       if(IsSet($this->Loggers[$Logger->Object_Id]))
-        $this->GetLoader()->Log('Warning', 'Logger ', $Name, ' already was added');
+        $this->GetLogger()->Log('Warning', 'Logger ', $Name, ' already was added');
       else
         $this->Loggers[$Logger->Object_Id]=$Logger;
       return $Logger;
@@ -72,7 +77,7 @@
         $Logger=$this->ByName[$Name]??False;
         if(!$Logger)
         {
-          $this->GetLoader()->Log('Error', 'Logger with name ', $Name, ' not found');
+          $this->GetLogger()->Log('Error', 'Logger with name ', $Name, ' not found');
           return false;
         }
         UnSet($this->ByName[$Name]);
@@ -80,7 +85,7 @@
     
       if(!IsSet($this->Loggers[$Logger->Object_Id]))
       {
-        $this->GetLoader()->Log('Error', 'Logder ', $Name, ' wasn\'t be added');
+        $this->GetLogger()->Log('Error', 'Logder ', $Name, ' wasn\'t be added');
         return false;
       }
       

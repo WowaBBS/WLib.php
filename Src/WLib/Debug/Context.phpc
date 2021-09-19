@@ -149,7 +149,7 @@
     
     Function Write($s)
     {
-      $this->_Write($Last);
+      $this->_Write($s);
     }
     
     Function WriteLn($s='')

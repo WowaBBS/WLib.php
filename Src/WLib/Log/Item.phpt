@@ -18,6 +18,7 @@
     Var $File      = false ;
     Var $Line      = false ;
     Var $Col       = false ;
+    Var $Exclude   = []    ;
     
     Function __Construct($Outer, $Logger, $Level, $List)
     {
@@ -36,6 +37,14 @@
       $this->AddArr($List);
       $this->Fatal  =$Level->Fatal;
       //Example: $this->Log('Fatal', 'Unreachable place');
+    }
+    
+    Function Exclude($Arg)
+    {
+      if(Is_Object($Arg))
+        $Arg=$Arg->Object_Id;
+      $this->Exclude[$Arg]=true;
+      return $this;
     }
     
     Function Done() { $this->Finish(); $this->Data=[]; $this->Outer=null; $this->Logger=null; }

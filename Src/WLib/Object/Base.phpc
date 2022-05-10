@@ -4,9 +4,17 @@
   Class C_Object_Base
   {
     Private Static $Object_Counter=0;
-    Var $Object_Id;
-    Var $Loader  =null;
+    Private $Object_Weak =null;
+    Var     $Object_Id   ;
+    Var     $Loader      =null;
  
+    //****************************************************************
+    // Object
+    
+    Function Object_GetWeak() { return $this->Object_Weak??=WeakReference::Create($this); }
+
+  //Static Function Cr($Owner, $Args):Static { return $Owner->Create_Object(Static::Class, $Args); }
+    
     //****************************************************************
     // Context
     

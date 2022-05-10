@@ -1,0 +1,5 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $Loader->Log('Log' ,'Test Format: ',[1,2=>3], ' ', ['a', 'b'=>'c']);
+?>

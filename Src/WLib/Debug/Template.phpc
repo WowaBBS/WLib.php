@@ -23,11 +23,11 @@
     Function Value($Ctx, $Value)
     {
     //$Ctx->Write('<'.$Ctx->Level.'>');
-      If($Ctx->Level_End())
-      {
-        $Ctx->WriteOp($this->Skip);
-        Return;
-      }
+    # If($Ctx->Level_End())
+    # {
+    #   $Ctx->WriteOp($this->Skip);
+    #   Return;
+    # }
       $_TOV=GetType($Value);
       Switch($_TOV)
       {
@@ -125,7 +125,7 @@
       $Ctx->WriteLn();
       $OldTab=$Ctx->Tab_Push($this->AddTab);
       $this->ArrayBody($Ctx, $Value);
-      if(!$Ctx->IsInline())
+      if(!$Ctx->IsInline() && !$Ctx->Level_End())
         $Ctx->WriteOp(',');
       $Ctx->Tab_Pop($OldTab);
       $Ctx->WriteLn();
@@ -143,11 +143,23 @@
     Function ArrayBody($Ctx, $Value)
     {
     //$Ctx->WriteLn();
+      If($Ctx->Level_End())
+      {
+        $Ctx->WriteOp($this->Skip);
+        Return;
+      }
+      $PathIdx=Count($Ctx->Path);
       $Idx=0;
+      $Separator=$Ctx->IsInline()? ' ':'';
       ForEach($Value As $k=>$V)
       {
+        $Ctx->Path[$PathIdx]=$k;
+
         if($Idx!==0)
-          $Ctx->WriteLn($Ctx->IsInline()? ', ':',');
+        {
+          $Ctx->WriteOp(',');
+          $Ctx->WriteLn($Separator);
+        }
         if($Idx===$k)
           $Idx++;
         else
@@ -160,6 +172,8 @@
         $this->Value($Ctx, $V);
         $Ctx->Level_Dec();
       }
+      
+      UnSet($Ctx->Path[$PathIdx]);
     }
     
     Function GetObjectVars($Value)
@@ -181,8 +195,21 @@
       $Ctx->WriteResvd('new ');
       $Ctx->WriteClass($Class);
       $Ctx->WriteOp('(');
-      $v=$this->GetObjectVars($Value);
-      $this->Value($Ctx, $v);
+      $Recursive=&$Ctx->Recursive[Spl_Object_Id($Value)];
+      if(Is_Null($Recursive))
+      {
+        $Recursive=Count($Ctx->Path);
+        $v=$this->GetObjectVars($Value);
+        $this->Value($Ctx, $v);
+        If(Is_Int($Recursive))
+          $Recursive=Null;
+      }
+      Else
+      {
+        if(Is_Int($Recursive))
+          $Recursive=Array_Slice($Ctx->Path, 0, $Recursive);
+        $Ctx->WriteRecursive($Recursive);
+      }
       $Ctx->WriteOp(')');
     }
  

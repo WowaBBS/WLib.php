@@ -3,9 +3,9 @@
   
   class C_Log_Format extends C_Object
   {
-    Var $Stream;
-    Var $WriteLn  =false;
-    Var $Manager;
+    Var $Stream  ;
+    Var $WriteLn =false;
+    Var $Manager ;
     
     Function _Init(Array $Args)
     {
@@ -110,7 +110,7 @@
     //****************************************************************
     // Inline
 
-    Var $IsInline =0;
+    Var $IsInline=0;
     
     Function IsInline() { return $this->IsInline>0; }
     Function Inline_Begin() { $this->IsInline++; }
@@ -121,15 +121,36 @@
     //****************************************************************
     // Debug
     
+    Var $Path      =[];
+    Var $Recursive =[];
+    
     Function Debug($v, $Level=false)
     {
-      $SaveLevel=$this->Level;
+      $SaveState=$this->GetState();
+      $this->SetState();
       if($Level!==false)
         $this->Level=$Level;
       $this->Value($v);
-      $this->Stream->Write("\n");
+      if(!$this->IsInline())
+        $this->Stream->Write("\n");
       $this->Flush();
-      $this->Level=$SaveLevel;
+      $this->SetState($SaveState);
+    }
+    
+    Function GetState()
+    {
+      return [
+        'Level'     =>$this->Level     ,
+        'Recursive' =>$this->Recursive ,
+        'Path'      =>$this->Path      ,
+      ];
+    }
+ 
+    Function SetState($State=[])
+    {
+      $this->Level     =$State['Level'    ]?? -1;
+      $this->Recursive =$State['Recursive']?? [];
+      $this->Path      =$State['Path'     ]?? [];
     }
  
     //****************************************************************
@@ -217,18 +238,20 @@
         'Fatal'   =>'Error'   ,
       ];
       Return $Res;
-    }   
+    }
     
     Function _WriteToken($Type, String $v)
     {
       $this->_Write($v);
-    } 
+    }
       
     Function Write(...$l)
-    { 
+    {
+    //$this->Inline_Begin();
       ForEach($l As $v)
         $this->WriteItem($v);
-    } 
+    //$this->Inline_End();
+    }
       
     Function WriteItem($v)
     {
@@ -271,6 +294,24 @@
     Function WriteNull  ($v=null) { $this->_WriteToken('Null'  ,Is_Null($v)? 'null':$v); }
     Function WriteBool  ($v     ) { $this->_WriteToken('Bool'  ,Is_Bool($v)? ($v? 'True':'False'):$v); }
     Function NewLine() { $this->_WriteToken('NewLine', "\n"); }
+    
+    Function WriteRecursive($Path)
+    {
+      $this->WriteResvd('Recursive');
+      $this->WriteText(' ');
+      $this->WritePath($Path);
+    }
+    
+    Function WritePath($Path)
+    {
+      ForEach($Path As $k=>$Item)
+      {
+        if($k)
+          $this->WriteOp('.');
+      //$this->WriteText($Item);
+        $this->WriteName($Item);
+      }
+    }
   
     Function WriteLogLevel($View, $Level) { $this->_WriteToken($Level->Name, $View); }
     

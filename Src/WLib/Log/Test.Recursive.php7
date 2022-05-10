@@ -1,0 +1,34 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  class T
+  {
+    Var $a;
+    Var $b;
+    Var $c;
+  }
+  
+  $v=new T();
+  $v->a=new T();
+  $v->b=new T();
+  $v->c=new T();
+  
+  $v->a->a=$v->a;
+  $v->a->b=$v->b;
+  $v->a->c=$v->c;
+  
+  $v->b->a=$v->a;
+  $v->b->b=$v->b;
+  $v->b->c=$v->c;
+  
+  $v->c->a=$v->a;
+  $v->c->b=$v->b;
+  $v->c->c=$v->c;
+  
+  $Loader->Log('Log' ,'Test Recursive:')->Debug(['Test'=>[
+    'TestV'=>$v,
+    'TestA'=>$v->a,
+    'TestB'=>$v->b,
+    'TestC'=>$v->c,
+  ]]);
+?>

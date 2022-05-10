@@ -133,7 +133,7 @@
     Function CancelUpdate()
     {
       $this->_CheckState('Write');
-      $Stream->UnLock();
+      $this->Stream->UnLock();
       $this->_SetState('Opened');
     }
     

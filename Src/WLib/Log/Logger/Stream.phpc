@@ -29,7 +29,7 @@
     
     Function _Done()
     {
-      if$this->AutoDoneStream)
+      if($this->AutoDoneStream)
       {
         if($this->CheckStream())
           $this->Stream->Done();

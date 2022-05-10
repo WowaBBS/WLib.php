@@ -1,7 +1,6 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
-  
   stream_set_read_buffer(STDIN, 1);
   $S=$Loader->Create_Object('/Storage/Stream', ['./Test.bd']);
   

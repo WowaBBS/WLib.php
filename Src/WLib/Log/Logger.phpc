@@ -77,20 +77,23 @@
     Function Error_Type($Code)
     {
       static $ErrorTypes=[
-        0    => ['Error'   ,'[Zero Error'      .'] '],
-        1    => ['Error'   ,'[Error'           .'] '],
-        2    => ['Error'   ,'[Warning'         .'] '],
-        4    => ['Error'   ,'[Parsing Error'   .'] '],
-        8    => ['Error'   ,'[Notice'          .'] '],
-        16   => ['Error'   ,'[Core Error'      .'] '],
-        32   => ['Warning' ,'[Core Warning'    .'] '],
-        64   => ['Error'   ,'[Compile Error'   .'] '],
-        128  => ['Warning' ,'[Compile Warning' .'] '],
-        256  => ['Error'   ,'[User Error'      .'] '],
-        512  => ['Warning' ,'[User Warning'    .'] '],
-        1024 => ['Note'    ,'[User Notice'     .'] '],
-        2048 => ['Note'    ,'[Runtime Notice'  .'] '],
-        4096 => ['Error'   ,'[Fatal Error'     .'] '],
+        0     => ['Error'   ,'[Zero Error'      .'] '], //
+        1     => ['Error'   ,'[Error'           .'] '], //E_ERROR
+        2     => ['Error'   ,'[Warning'         .'] '], //E_WARNING
+        4     => ['Error'   ,'[Parsing Error'   .'] '], //E_PARSE
+        8     => ['Error'   ,'[Notice'          .'] '], //E_NOTICE
+        16    => ['Error'   ,'[Core Error'      .'] '], //E_CORE_ERROR
+        32    => ['Warning' ,'[Core Warning'    .'] '], //E_CORE_WARNING
+        64    => ['Error'   ,'[Compile Error'   .'] '], //E_COMPILE_ERROR
+        128   => ['Warning' ,'[Compile Warning' .'] '], //E_COMPILE_WARNING
+        256   => ['Error'   ,'[User Error'      .'] '], //E_USER_ERROR
+        512   => ['Warning' ,'[User Warning'    .'] '], //E_USER_WARNING
+        1024  => ['Note'    ,'[User Notice'     .'] '], //E_USER_NOTICE
+        2048  => ['Note'    ,'[Runtime Notice'  .'] '], //E_STRICT
+        4096  => ['Error'   ,'[Fatal Error'     .'] '], //E_RECOVERABLE_ERROR
+        8192  => ['Note'    ,'[Deprecated'      .'] '], //E_DEPRECATED
+        16384 => ['Warning' ,'[User Deprecated' .'] '], //E_USER_DEPRECATED 
+      //32767                                           //E_ALL
       ];
   
       return $ErrorTypes[$Code]?? ['Error','[Unknown Error '.$Code.'] '];

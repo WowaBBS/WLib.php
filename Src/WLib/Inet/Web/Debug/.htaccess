@@ -1,8 +1,8 @@
-DirectoryIndex Test.php7
+DirectoryIndex Test.php8
 
 Options +FollowSymLinks
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*) Test.php7
+RewriteRule ^(.*) Test.php8
 #RewriteRule ^(([a-zA-Z0-9_]+/)*([a-zA-Z0-9_]+))/$ index.php?Mode=$1&%{QUERY_STRING}

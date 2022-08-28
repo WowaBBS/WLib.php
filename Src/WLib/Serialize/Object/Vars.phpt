@@ -20,17 +20,21 @@
       Parent::__construct($Vars->Vars, $Flags);
     }
     
-    public Function Current()
+    //****************************************************************
+    // ArrayIterator class
+
+    public Function Current():Mixed
     {
       Return $this->_ToVar(Parent::Current());
     }
     
-    public Function OffsetGet($index)
+    public Function OffsetGet($index):Mixed
     {
       Return $this->_ToVar(Parent::OffsetGet($index));
     }
   //public append ( mixed $value )
   //public offsetSet ( mixed $index , mixed $newval ) : void
+    //****************************************************************
   }
   
   class T_Serialize_Object_Vars implements ArrayAccess, Countable, IteratorAggregate
@@ -152,10 +156,10 @@
   //****************************************************************
   // ArrayAccess interface
 
-    Public Function offsetExists     ($k):bool { return $this->Has   ($k);     }
-    Public Function offsetGet        ($k)      { return $this->Get   ($k);     }
-    Public Function offsetSet        ($k ,$v)  { if(Is_Null($k)) $this->Add($v); else $this->Set($k, $v); }
-    Public Function offsetUnset      ($k)      {        $this->UnSet ($k);     }
+    Public Function offsetExists     ($k    ):Bool  { return $this->Has   ($k);     }
+    Public Function offsetGet        ($k    ):Mixed { return $this->Get   ($k);     }
+    Public Function offsetSet        ($k ,$v):Void  { if(Is_Null($k)) $this->Add($v); else $this->Set($k, $v); }
+    Public Function offsetUnset      ($k    ):Void  {        $this->UnSet ($k);     }
     
   //****************************************************************
   // Countable interface
@@ -165,7 +169,7 @@
   //****************************************************************
   // IteratorAggregate interface
     
-    public function getIterator()
+    public function getIterator():Traversable
     {
       return new T_Serialize_Object_Vars_Iterator($this);
     //return new ArrayIterator($this->Vars);

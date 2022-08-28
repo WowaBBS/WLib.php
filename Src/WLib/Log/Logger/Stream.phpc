@@ -44,7 +44,7 @@
         $Stream=$this->Create_Object('/Stream/File');
       if(Is_String($Stream))
       { // omRead for get content
-        $OpenMode=omRead|omWrite|omMakePath|omCreate|omBinary;//|omShareable; // TODO; Bug TestW.php7
+        $OpenMode=omRead|omWrite|omMakePath|omCreate|omBinary;//|omShareable; // TODO; Bug TestW.php8
         $OpenMode|=($Args['Append']??False)? omAppend:omClear;
         //omExclusive
         $Stream=$this->Create_Object('/Stream/File', [

@@ -13,15 +13,15 @@
     //****************************************************************
     // ArrayAccess interface
 
-    Public Function offsetExists     ($k):bool { return IsSet($this->List[$k]);   }
-    Public Function offsetGet        ($k)      { return       $this->List[$k];    } 
-    Public Function offsetSet        ($k ,$v)  {
+    Public Function offsetExists     ($k    ):bool  { return IsSet($this->List[$k]);   }
+    Public Function offsetGet        ($k    ):Mixed { return       $this->List[$k];    } 
+    Public Function offsetSet        ($k ,$v):Void  {
       if(is_null($k))
         $this->Add($v);
       else
         $this->List[$k]=$v; // TODO: Error?
     }
-    Public Function offsetUnset      ($k)      {        UnSet($this->List[$k]); }
+    Public Function offsetUnset      ($k    ):Void  {          UnSet($this->List[$k]); }
     
     //****************************************************************
     

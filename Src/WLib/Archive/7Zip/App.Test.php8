@@ -38,7 +38,7 @@
     'Args'         =>['-mx9'],
   ];
   $Files=[
-    'App.Test.php7',
+    'App.Test.php8',
     'App.phpc',
     'BigFile.dat',
     '..\Zip\Builder.phpc',

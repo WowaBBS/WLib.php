@@ -34,10 +34,10 @@
     //****************************************************************
     // ArrayAccess interface
 
-    Public Function offsetExists     ($k):bool { return $this->Has($k);        }
-    Public Function offsetGet        ($k)      { return $this->Get($k);        }
-    Public Function offsetSet        ($k ,$v)  {        $this->Set($k, $v);    }
-    Public Function offsetUnset      ($k)      {        $this->Set($k, false); }
+    Public Function offsetExists     ($k    ):bool  { return $this->Has($k);        }
+    Public Function offsetGet        ($k    ):Mixed { return $this->Get($k);        }
+    Public Function offsetSet        ($k ,$v):Void  {        $this->Set($k, $v);    }
+    Public Function offsetUnset      ($k    ):Void  {        $this->Set($k, false); }
     
     //****************************************************************
     

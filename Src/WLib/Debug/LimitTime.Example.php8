@@ -1,0 +1,20 @@
+<?
+  error_reporting(E_ALL);
+//Ignore_User_Abort(!False);
+ 
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+
+  $Loader->GetLogger()->Add(__FILE__.'.log');
+
+  $Loader->Load_Type('/Debug/LimitTime' );
+  
+  $a=LimitTime($Loader, [$Loader, 'Base'], 1);
+  {
+    $b=LimitTime('Sub');
+    $b=$b->Push('a');
+    Sleep(1);
+    $b=$b->Pop('a');
+    UnSet($b);
+  }
+  UnSet($a);
+?>

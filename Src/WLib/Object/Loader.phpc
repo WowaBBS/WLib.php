@@ -250,6 +250,9 @@
     
     Function GetLogger() { return $this->Logger?? $this->_CreateLogger(); }
     Function Log($LogLevel, ...$Args) { return New T_Log_Item($this, $this->GetLogger(), $LogLevel, $Args); }
+
+    Function ToDebugInfo() { return $this->_ToDebugInfo(); }
+    Function _ToDebugInfo() { return 'Loader'; }
     
     //****************************************************************
     Function Done() {} // TODO:

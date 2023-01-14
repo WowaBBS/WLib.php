@@ -18,7 +18,7 @@
       Return $Res->ToString();
     Case 'NULL':
     Default:
-      Trigger_Error('Varible no found '.$Name, E_USER_WARNING);
+      Trigger_Error('Variable no found '.$Name, E_USER_WARNING);
       Return 'Error';
     }
   }
@@ -39,7 +39,7 @@
     Case 'NULL':
     Default:
       Global $Loader;
-      $Loader->Log('Error', 'Varible no found ', Implode('.', $Path))->BackTrace()->Debug($Vars);
+      $Loader->Log('Error', 'Variable no found ', Implode('.', $Path))->BackTrace()->Debug($Vars);
       Return 'Error';
     }
   }
@@ -50,7 +50,7 @@
     $Res=_Vars_Get($Name, $Vars);
     If($Res===NULL)
     {
-      Trigger_Error("Varible no found ".$Name, E_USER_WARNING);
+      Trigger_Error("Variable no found ".$Name, E_USER_WARNING);
       $Res='Error';
     }
     Return $Res;
@@ -62,7 +62,7 @@
     $Res=_Vars_GetR_($Path, $Vars);
     If($Res===NULL)
     {
-      Trigger_Error("Varible no found ".Implode('.', $Path), E_USER_WARNING);
+      Trigger_Error("Variable no found ".Implode('.', $Path), E_USER_WARNING);
       $Res='Error';
     }
     Return $Res;
@@ -83,7 +83,7 @@
     $With=_Vars_Get($Var, $Vars);
     If($With===NULL)
     {
-      Trigger_Error("Varible no found ".$Name, E_USER_WARNING);
+      Trigger_Error("Variable no found ".$Name, E_USER_WARNING);
       $With=[];
     }
   //$R=Array_Merge($Vars, &$With);

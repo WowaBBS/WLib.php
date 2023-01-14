@@ -39,7 +39,7 @@
             $Propery->SetValue($Obj, $v);
         }
       }
-      $Vars->CheckUnused($v);
+      $Vars->CheckUnused($v, Get_Class($Obj));
       return true;
     }
     

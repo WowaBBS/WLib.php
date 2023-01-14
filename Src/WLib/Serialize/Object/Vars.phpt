@@ -139,10 +139,10 @@
       return $Res;
     }
     
-    Function CheckUnused($Outer)
+    Function CheckUnused($Outer, $Where)
     {
       ForEach($this->Vars as $k=>$v)
-        $this->Factory->Log('Error', 'Varible ', $k, ' was unused');
+        $this->Factory->Log('Error', 'Field "', $k, '" was unused in ', $Where);
     }
 
   #/****************************************************************

@@ -10,6 +10,13 @@
     Else
       $Loader->Log('Error', ...$Title);
   }
+  
+  Class Test
+  {
+    Var $a;
+    Var $b;
+    Var $c;
+  }
 
   $Object_Factory=$Loader->Get_Singleton('/Serialize/Object/Factory');
   $Vars=$Object_Factory->CreateVarsCI();
@@ -34,6 +41,9 @@
       $Loader->Log('Log', $k, '=>', 'Iterable');
     else
       $Loader->Log('Log', $k, '=>', 'Other');
+      
+  $Vars=$Object_Factory->CreateVarsCI(['a'=>'a', 'b'=>'b', 'e'=>'e',]);
+  $Vars->CopyToObj(New Test());
   //$Object_Factory->
 //TODO: See WLib/Storage/Stream.Test.Obj.php8
 ?>

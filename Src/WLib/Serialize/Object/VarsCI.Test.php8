@@ -44,6 +44,9 @@
       
   $Vars=$Object_Factory->CreateVarsCI(['a'=>'a', 'b'=>'b', 'e'=>'e',]);
   $Vars->CopyToObj(New Test());
+  // Was Bug:
+  $Vars=$Object_Factory->CreateVarsCI(['a'=>'a', 'b'=>null]);
+  $Vars->CopyToObj(New Test());
   //$Object_Factory->
 //TODO: See WLib/Storage/Stream.Test.Obj.php8
 ?>

@@ -60,7 +60,7 @@
     Function _Pop($Name) //Protected 
     {
       $Name=$this->_GetName($Name);
-      if(!IsSet($this->Vars[$Name]))
+      if(!Array_Key_Exists($Name, $this->Vars)) //!IsSet($this->Vars[$Name]))
         return null;
       $Res=$this->Vars[$Name];
       UnSet($this->Vars[$Name]);
@@ -74,7 +74,7 @@
     
     Function Has($Name)
     {
-      return IsSet($this->Vars[$this->_GetName($Name)]);
+      return Array_Key_Exists($this->_GetName($Name), $this->Vars); //IsSet($this->Vars[$this->_GetName($Name)]);
     }
     
     Function UnSet($Name)

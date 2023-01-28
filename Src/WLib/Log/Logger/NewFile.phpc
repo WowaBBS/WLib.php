@@ -10,20 +10,38 @@
       $Path  = $Args['Path' ]?? './log/';
       $Ext   = $Args['Ext'  ]?? '.log';
       
-      [$MTime, $Time]= Explode(' ',MicroTime());
-      $MTime = (Int)((Float)$MTime*1000000);
+      $FTime = $Args['Time'  ]?? MicroTime(True);
+      $Time  = (Int)Floor($FTime);
+      $MTime = (Int)((Float)($FTime-$Time)*1000000);
       
       $Path .=@Date('Ymd_His_', $Time); //<TODO: Depricated
-      $i=16;
-      Do
+      $Attempts =$Args['Attempts']?? 16;
+      While($Attempts>0)
       {
         $Add=Str_Pad($MTime, 6, '0', STR_PAD_LEFT);
         $FilePath =$Path.$Add.$Ext;
         if($this->Open($FilePath))
-          Break;
+        {
+          if($this->Stream->TryLockWrite())
+          {
+          //$this->Stream->UnLock();
+          //$this->Stream->LockRead();
+            Break;
+          }
+          $this->Stream->Close();
+        }
         $MTime++;
+        $Attempts--;
       }
-      While(--$i);
+      if($Attempts<=0)
+        $this->Disable();
+    }
+
+    Function Close()
+    {
+      If($this->Stream->CheckHandle(True))
+        $this->Stream->UnLock();
+      return Parent::Close();
     }
   };
 ?>

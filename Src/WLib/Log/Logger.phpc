@@ -41,9 +41,11 @@
     
     Function GetLogger() { return $this; }
     
+    Function IsDisabled() { return $this->Disabled; }
+    
     Final Function LogItem($LogItem)
     {
-      if($this->Disabled)
+      if($this->IsDisabled())
         return;
       if(!$this->ShowLogLevel[$LogItem->Level->Name])
         return;

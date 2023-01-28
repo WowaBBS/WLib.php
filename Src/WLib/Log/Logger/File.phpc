@@ -18,10 +18,10 @@
 
     Function _Done()
     {
-    //$this->Stream->Close();
       parent::_Done();
       if($this->RemoveUnimportant && $this->Importance<=0)
-        UnLink($this->FilePath);
+        If(Is_File($this->FilePath))
+          UnLink($this->FilePath);
     }
     
     Function Open($FilePath)

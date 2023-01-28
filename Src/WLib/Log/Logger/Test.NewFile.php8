@@ -2,7 +2,7 @@
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
   $l=$Loader->GetLogger()->CreateNewFile('./');
-  $l->Log('Log', 'Hello');
+  $l->Log('Log', 'Hello', $argv[1]??'');
 //Echo '!',$l->GetContent().'!';
   $l->Close();
 

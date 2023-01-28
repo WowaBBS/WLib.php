@@ -4,6 +4,7 @@
   Class C_Stream_Handle Extends C_Stream_Base
   {
     Var $FHandle=Null;
+    Var $HasNoHandleError=Null;
   
     Function _Init(Array $Args)
     {
@@ -11,11 +12,11 @@
       $this->FHandle=$Args['Handle']?? False;
     }
     
-    Function CheckHandle()
+    Function CheckHandle($NoError=False)
     {
       if($this->FHandle)
         return True;
-      if(!($this->HasNoHandleError?? False))
+      if(!($this->HasNoHandleError?? $NoError))
       {
         $this->HasNoHandleError=True;
         $this->Log('Error', 'No handle');

@@ -4,9 +4,9 @@
  
   Class C_Stream_File Extends C_Stream_Handle
   {
-    Var $FileName='';
-    Var $RFileName='';
-    Var $Locked=[LOCK_UN];
+    Var $FileName  ='';
+    Var $RFileName ='';
+    Var $Locked    =[LOCK_UN];
     
     Function _Init(Array $Args)
     {

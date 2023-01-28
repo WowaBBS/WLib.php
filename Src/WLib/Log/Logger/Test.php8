@@ -1,7 +1,7 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
-  $l=$Loader->GetLogger()->Create('Test.lock');
+  $l=$Loader->GetLogger()->CreateFile('Test.log');
   $l->Log('Log', 'Hello');
   Echo '!',$l->GetContent().'!';
   $l->Close();

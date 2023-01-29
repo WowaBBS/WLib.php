@@ -24,11 +24,12 @@
           UnLink($this->FilePath);
     }
     
-    Function Open($FilePath)
+    Function Open($FilePath, $Flags=null)
     {
       $this->FilePath=$FilePath;
       $this->Stream->Assign($FilePath);
-      return $this->Stream->Open(omReadWrite|omCreate|omMakePath|omBinary|omClear);
+      $Flags??=omReadWrite|omCreate|omMakePath|omBinary|omClear;
+      return $this->Stream->Open($Flags);
     }
     
     Function Task_Magic($Logger):bool

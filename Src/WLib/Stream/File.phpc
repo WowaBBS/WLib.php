@@ -7,10 +7,12 @@
     Var $FileName  ='';
     Var $RFileName ='';
     Var $Locked    =[LOCK_UN];
+    Var $MkDir     =null;
     
     Function _Init(Array $Args)
     {
       Parent::_Init($Args);
+      $this->MkDir=$Args['MkDir']?? $this->MkDir;
       if(IsSet($Args['FileName']))
       {
         $this->Assign($Args['FileName']);
@@ -57,7 +59,8 @@
           Array_Pop($Path);
           $Path=Implode('/', $Path);
         //$this->Loader->Path->Make($Path);
-          CreatePath($Path, IsSet($this->MkDir)? $this->MkDir:0700);
+          if(!CreatePath($Path, $this->MkDir))
+            Break 2;
           Break;
         Case 'Open':
           If(!$this->FHandle)
@@ -65,10 +68,10 @@
             If($Cmd[1][0]=='r')
               If(!Is_File($this->RFileName))
                 Break;
-          //echo $this->RFileName, "!\n";
+          # $this->Log('Debug', 'FOpen(', $this->RFileName, ', ', $Cmd[1], ',', $AMode, ',', Spl_Object_Id($this),')');
             $this->FHandle=@FOpen($this->RFileName, $Cmd[1]);
-            if(!$this->FHandle)
-              $this->Log('Error', 'Can\'t open file ', $this->RFileName);
+          # if(!$this->FHandle)
+          #   $this->Log('Error', 'Can\'t open file ', $this->RFileName);
           }
           Break;
         Case 'TestOpen':

@@ -1,6 +1,6 @@
 <?
   Define('FS_Dev_Null' ,PHP_OS_FAMILY==='Windows'? 'nul':'/dev/null');
-
+  
   Function Path_Simplify($v)
   {
     $v=StrTr($v, '\\', '/');
@@ -109,7 +109,16 @@
     return SubStr($FileName, 0, $Pos+1);
   }
  
-  Function CreatePath($Path, $Attr=0700)
+  Function CreatePath($Path, $Permissions=Null)
+  {
+    $Permissions??=0770; // Default Permissions
+    If($Path==='' || $Path==='/') Return True;
+    If(Is_Dir($Path)) Return True;
+    MkDir($Path, $Permissions, True);
+    Return Is_Dir($Path);
+  }
+  
+  Function CreatePathOld($Path, $Attr=0700)
   {
   //Echo 'CP ', $Path, "\n";
     If($Path==='' || $Path==='/')
@@ -118,7 +127,7 @@
       Return True;
     If(File_Exists($Path))
       Return False;
-    If(!CreatePath(GetDirPath($Path), $Attr))
+    If(!CreatePathOld(GetDirPath($Path), $Attr))
       Return False;
     if(!Is_Dir($Path))
       MkDir($Path, $Attr);

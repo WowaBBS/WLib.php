@@ -20,28 +20,13 @@
       {
         $Add=Str_Pad($MTime, 6, '0', STR_PAD_LEFT);
         $FilePath =$Path.$Add.$Ext;
-        if($this->Open($FilePath))
-        {
-          if($this->Stream->TryLockWrite())
-          {
-          //$this->Stream->UnLock();
-          //$this->Stream->LockRead();
-            Break;
-          }
-          $this->Stream->Close();
-        }
+        if($this->Open($FilePath, omReadWrite|omCreate|omMakePath|omBinary|omNotExist)) //
+          Break;
         $MTime++;
         $Attempts--;
       }
       if($Attempts<=0)
         $this->Disable();
-    }
-
-    Function Close()
-    {
-      If($this->Stream->CheckHandle(True))
-        $this->Stream->UnLock();
-      return Parent::Close();
     }
   };
 ?>

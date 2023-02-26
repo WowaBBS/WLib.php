@@ -1,0 +1,129 @@
+<?
+  $this->Parent_Class('/CharSet/Factory');
+  
+  Class C_CharSet_TestErrors Extends C_CharSet_Factory
+  {
+  
+    Function Start()
+    {
+      $this->TestErrors();
+      $this->TestCoders();
+    }
+    
+  //****************************************************************
+    
+    Function TestErrors()
+    {
+      ForEach($this->GetCoders() As $CheckerName)
+        $this->TestCoder($this->GetCoder($CheckerName));
+    }
+    
+    Function TestCoder($Coder)
+    {
+      $this->Log('Log', $Coder->GetCharsetName(), '::TestErrors');
+
+      $this->Log('Log', '  Func: ', 'ErrorCode');
+      ForEach($Coder::$CheckErrors As $CheckError)
+      {
+        $Err    =$CheckError[0];
+        $Probes =$CheckError[$Coder->IsBigEndian()? 1:2];
+        ForEach($Probes As $Probe)
+        {
+          $Probe=Hex2Bin($Probe);
+          $Err2=$Coder->GetCharErrorCode($Probe, 0);
+          $Check=$Err===$Err2;
+          $this->Log($Check? 'Log':'Error', '    ',
+            'Err: ', $Err, '=', $Err2, ' ',
+            'Str: ', Bin2Hex($Probe)
+          );
+        }
+      }
+
+      ForEach($Coder->GetCheckers()As $Checker)
+        $this->TestCoderFunc($Coder, $Checker);
+    }
+
+    Function TestCoderFunc($Coder, $Func)
+    {
+      $Coder->SetChecker($Func);
+      $this->Log('Log', '  Func: ', $Func);
+      ForEach($Coder::$CheckErrors As $CheckError)
+      {
+        $Err    =$CheckError[0];
+        $Probes =$CheckError[$Coder->IsBigEndian()? 1:2];
+        ForEach($Probes As $Probe)
+        {
+          $Probe=Hex2Bin($Probe);
+          $LenProbe =StrLen($Probe)&-$Coder->GetMinCharLen();
+          $LenRes=$Coder->Check($Probe);
+          $IsError=$LenRes<0;
+          If($IsError)
+            $LenRes=~$LenRes;
+          If(StrPos('Strong', $Func)===False)
+            $Check=$LenProbe===$LenRes || $Err && $LenRes===0;
+          Else
+            $Check=$Err? $LenRes===0:$LenProbe===$LenRes;
+          $this->Log($Check? 'Log':'Error', '    ',
+            'Len: ', $LenProbe, '=', $LenRes, ' ',
+            'Str: ', Bin2Hex($Probe)
+          );
+        }
+      }
+    }
+
+  //****************************************************************
+  // Test Coders
+
+    Function TestCoders()
+    {
+      $s=Static::Arr_AllChars();
+      ForEach($this->GetCoders() As $From)
+        ForEach($this->GetCoders() As $To)
+          $this->TestRecode($this->GetCoder($From), $this->GetCoder($To), $s);
+    }
+    
+    Function TestRecode($From, $To, $S)
+    {
+      $this->Log('Log', '  Coder ', $From->GetCharsetName(), '=>', $To->GetCharsetName(),);
+      $s     =$From ->Fast_Arr_EnCode($S);
+      $Check =$To   ->Fast_Arr_EnCode($S);
+      ForEach($To->GetCoders()As $Func)
+        $this->TestRecodeFunc($From, $To, $s, $Check, $Func);
+    }
+    
+    Function TestRecodeFunc($From, $To, $s, $Check, $Func)
+    {
+      $To->SetCoder($Func);
+      $Ok=True;
+
+      $EnCoded=$To->EnCode($From, $s);
+      If($EnCoded!==$Check)
+      {
+      //$this->Log('Error', '  ', 'LenError ',StrLen($s), '!=', $l, ' ', Bin2Hex(SubStr($s, $l<0? ~$l:$l, 4)));
+        $this->Log('Error', '  ', 'EnCoded ', Bin2Hex($EnCoded ));
+        $this->Log('Error', '  ', 'Check   ', Bin2Hex($Check   ));
+        $i=0;
+        //this->Log('Error', '  ', 'Size    ', $To::Arr_EnCodeSize($From->Arr_DeCode($s, $i, StrLen($s))));
+      //$i=0;
+      //$this->Log('Error', '  ', 'Arr     ', Iterator_To_Array($From->Arr_DeCode($s, $i, StrLen($s))));
+        $Ok=False;
+        Exit;
+      }
+      
+      $this->Log($Ok? 'Log':'Error', '    ', Str_Pad($Func, 14), $Ok? 'Ok':'');
+    }
+
+  //****************************************************************
+  // Tools
+  
+    Static Function Gen_AllChars()
+    {
+      For($i=0x0000; $i<0x00D800; $i++) Yield $i;
+      For($i=0xE000; $i<0x110000; $i++) Yield $i;
+    }
+    
+    Static Function Arr_AllChars() { Return Iterator_To_Array(Static::Gen_AllChars()); }
+    
+  //****************************************************************
+  }
+?>

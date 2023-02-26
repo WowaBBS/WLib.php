@@ -1,0 +1,304 @@
+<?
+  $this->PArent_Class('/CharSet/UtfBase');
+  
+  Class C_CharSet_Utf16 Extends C_CharSet_UtfBase
+  {
+    Var $BigEndian=True;
+  
+    Protected Function _Init(Array $Args)
+    {
+      $this->BigEndian=$Args['BigEndian' ]?? $this->BigEndian;
+      Parent::_Init($Args);
+    }
+    
+    Function GetMinCharLen() { Return 2; }
+    Function GetMaxCharLen() { Return 4; }
+    Function IsBigEndian() { Return $this->BigEndian; }
+
+    Function GetCharsetName() { Return $this->BigEndian? 'UTF-16BE':'UTF-16LE'; }
+    
+    Function Fast_Check($s, $Offset=0)
+    {
+      $l=((StrLen($s)-$Offset)&-2)+$Offset;
+      If($l===0) Return 0;
+      $k=($this->BigEndian? 0:1);
+      $t1=Ord($s[$l-2+$k])>>2;
+      If($t1===55)
+      {
+        if($l<4)
+          Return ~0;
+        $t2=Ord($s[$l-4+$k])>>2;
+        If($t2===54)
+          Return $l;
+        Else
+          Return ~($l-4);
+      }
+      If($t1!==54) Return $l;
+      if($l<4)
+        Return $l-2;
+      $t2=Ord($s[$l-4+$k])>>2;
+      If($t2===54) Return $l-4;
+      Return $l-2;
+    }
+    
+    Function Strict_Check($s, $Offset=0)
+    {
+      $k=($this->BigEndian? 0:1);
+      For($i=$Offset+$k, $l=StrLen($s)&-2; $i<$l; $i+=2)
+      {
+        Switch(Ord($s[$i])>>2)
+        {
+        Case 54:
+          If($i-$k+4>$l) Return $i-$k; //Check length of Char
+          If(Ord($s[$i+2])>>2!==55) Return ~($i-$k);
+          $i+=2;
+          Break;
+        Case 55:
+          Return ~($i-$k); //Error
+        Default: Break;
+        }
+      }
+      Return $i-$k;
+    }
+    
+    // -- 54 If($c<0xD8) Return 1; //32+16+4+2
+    // 54  1 If($c<0xDC) Return 2;
+    // 55  1 If($c<0xE0) Return 0;
+    // --  8             Return 1;
+    Static String $CharType=
+      "\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1"."\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1".
+      "\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1"."\1\1\1\1\1\1\2\0\1\1\1\1\1\1\1\1";
+      
+    // Is surrogate    $Char>>11!==27
+    // Is surrogate Lo $Char>>10!==54
+    // Is surrogateHi  $Char>>10!==55
+
+    Static Function GetByteType($c) { Return Static::$CharType[$c>> 2]; }
+    Static Function GetWordType($c) { Return Static::$CharType[$c>>10]; }
+    
+  //****************************************************************
+  // Test Errors
+  
+    Function GetCharErrorCode($s, $i)
+    {
+      $l=StrLen($s)-$i;
+      If($l===0) Return 9;
+      If($l===1) Return 1;
+      
+      $k=($this->BigEndian? 0:1);
+      $t=Ord($s[$i+$k])>>2;
+      If($t===55) Return 14;
+      If($t!==54) Return 0;
+      If($l===2) Return 2;
+      If($l===3) Return 1;
+      
+      $t=Ord($s[$i+$k+2])>>2;
+      If($t===55) Return 0;
+      
+      Return 13;
+    }
+    
+    Static $CheckErrors=[ // 00-D7  D8-DB  DC-DF  E0-FF
+      [ 1, ['00'       ,'FF'       ], ['00'       ,'FF'       ]],
+      [ 0, ['0000'     ,'D7FF'     ], ['0000'     ,'FFD7'     ]],
+      [ 0, ['E000'     ,'FFFF'     ], ['00E0'     ,'FFFF'     ]],
+      [ 2, ['D800'     ,'DBFF'     ], ['00D8'     ,'FFDB'     ]],
+      [ 1, ['DE'       ,'DF'       ], [                       ]], // Not 3
+      [14, ['DE00'     ,'DFFF'     ], ['00DE'     ,'FFDF'     ]],
+      [ 1, ['D800D8'   ,'DBFFDB'   ], ['00D800'   ,'FFDBFF'   ]],
+      [ 0, ['D800DC00' ,'DBFFDFFF' ], ['00D800DC' ,'FFDBFFDF' ]],
+      [ 1, ['D80000'   ,'DBFFDE'   ], [                       ]],
+      [ 1, ['D800DF'   ,'DBFFFF'   ], [                       ]],
+      [13, ['D8000000' ,'DBFFD700' ], ['00D80000' ,'FFDB00D7' ]],
+      [13, ['D800D800' ,'DBFFDB00' ], ['00D800D8' ,'FFDB00DB' ]],
+      [13, ['D800E000' ,'DBFFFF00' ], ['00D800E0' ,'FFDB00FF' ]],
+      [ 9, [''                     ], [''                     ]],
+    ];
+
+  //****************************************************************
+  // Regexp
+    Static $Regexp_Templates=[
+      'Le'=>'.(?:[\0-\xD7\xE0-\xFF]|[\xD8-\xDB].[\xDC-\xDF])',
+      'Be'=>'(?:[\0-\xD7\xE0-\xFF]|[\xD8-\xDB].[\xDC-\xDF]).',
+    ];
+  
+  //****************************************************************
+  // Checker
+  
+    Static $Checkers_Map=[
+      'Full'=>'RegExp' ,
+    ];
+  
+    Function SetChecker($v)
+    {
+      Switch($v=Static::$Checkers_Map[$v]?? $v)
+      {
+      Case 'Fast'       : Break;
+      Case 'Raw_Strict' : Break;
+      Case 'RegExp'     : $v='RegExp'; $this->SetCheckerRegexp($this->BigEndian? 'Be':'Le'); Break;
+      Default:
+        $this->Log('Error', 'Unnown Checker ', $v)->BackTrace();
+        $this->SetChecker('Full');
+      }
+      $this->Checker=$v;
+    }
+  
+    Function GetCheckers()
+    {
+      Return [
+        'Fast'       ,
+        'Raw_Strict' ,
+        'RegExp'     ,
+      ];
+    }
+    
+    Function Check($s, $Offset=0)
+    {
+      Switch($this->Checker)
+      {
+      Case 'Fast'       : Return $this->Fast_Check   ($s, $Offset);
+      Case 'Raw_Strict' : Return $this->Strict_Check ($s, $Offset);
+      Case 'RegExp'     : Return $this->Regexp_Check ($s, $Offset);
+      }
+      $this->Log('Error', 'Unknown checker: ', $this->Checker)->BackTrace();
+      Return $this->Fast_Check($s, $Offset);
+    }
+  
+  //****************************************************************
+  // Encoder
+  
+    Static Function Slow_Arr_EnCodeSize($a)
+    {
+      $Res=0;
+      ForEach($a As $c)
+        $Res+=Static::EnCodeCharSize($c);
+      Return $Res;
+    }
+    
+    Function Slow_Arr_EnCode(&$s, $a, $i=0) { Return $this->BigEndian? Static::Slow_Arr_EnCodeBe($s, $a, $i):Static::Slow_Arr_EnCodeLe($s, $a, $i); }
+    
+    Static Function Slow_Arr_EnCodeLe(&$s, $a, $i=0) { ForEach($a As $c) Static::EnCodeCharLe($s, $c, $i); Return $i; }
+    Static Function Slow_Arr_EnCodeBe(&$s, $a, $i=0) { ForEach($a As $c) Static::EnCodeCharBe($s, $c, $i); Return $i; }
+    
+    Static Function EnCodeCharSize($c)
+    {
+      Return Static::IsValidCharCode($c)? 1:0; //TODO: Size of bad char
+    }
+    
+    Static Function EnCodeCharLe(&$s, $c, &$i)
+    {
+      If($c<0x10000)
+        Static::EnCodeChar2Le($s, $c, $i);
+      Else//If($c<0x110000)
+      {
+        $c-=0x10000;
+        Static::EnCodeChar2Le($s, ($c>>10)|0xD800, $i);
+        Static::EnCodeChar2Le($s, $c&0x3FF|0xDC00, $i);
+      }
+    }
+    
+    Static Function EnCodeCharBe(&$s, $c, &$i)
+    {
+      If($c<0x10000)
+        Static::EnCodeChar2Be($s, $c, $i);
+      Else//If($c<0x110000)
+      {
+        $c-=0x10000;
+        Static::EnCodeChar2Be($s, ($c>>10)|0xD800, $i);
+        Static::EnCodeChar2Be($s, $c&0x3FF|0xDC00, $i);
+      }
+    }
+    
+    Static Function EnCodeChar2Le(&$s, $c, &$i)
+    {
+      $s[$i]=Chr($c    ); ++$i;
+      $s[$i]=Chr($c>> 8); ++$i;
+    }
+    
+    Static Function EnCodeChar2Be(&$s, $c, &$i)
+    {
+      $s[$i]=Chr($c>> 8); ++$i;
+      $s[$i]=Chr($c    ); ++$i;
+    }
+    
+  //****************************************************************
+  // Decoder
+  
+    Function Arr_DeCode($s, &$i, $l) { Return $this->BigEndian? $this->Arr_DeCodeBe($s, $i, $l):$this->Arr_DeCodeLe($s, $i, $l); }
+  
+    Function Arr_DeCodeLe($s, &$i, $l) { $Res=[]; While($i<$l) If(($R=Static::DeCodeCharLe($s, $i))>=0) $Res[]=$R; Return $Res; }
+    Function Arr_DeCodeBe($s, &$i, $l) { $Res=[]; While($i<$l) If(($R=Static::DeCodeCharBe($s, $i))>=0) $Res[]=$R; Return $Res; }
+  
+    Static Function DeCodeCharLe($s, &$i)
+    {
+      $c1=Static::DeCodeChar2Le($s, $i);
+      if($c1<0xD800 || $c1>=0xE000) Return $c1;
+      if($c1<0xDC00)
+      {
+        $c2=Static::DeCodeChar2Le($s, $i);
+        If($c2>=0xDC00 && $c2<0xE000)
+          Return (($c1&0x3FF)<<10 | $c2&0x3FF)+0x10000;
+        $i-=4; Return -2;
+      }
+      $i-=2; Return -1;
+    }
+    
+    Static Function DeCodeCharBe($s, &$i)
+    {
+      $c1=Static::DeCodeChar2Be($s, $i);
+      if($c1<0xD800 || $c1>=0xE000) Return $c1;
+      if($c1<0xDC00)
+      {
+        $c2=Static::DeCodeChar2Be($s, $i);
+        If($c2>=0xDC00 && $c2<0xE000)
+          Return (($c1&0x3FF)<<10 | $c2&0x3FF)+0x10000;
+        $i-=4; Return -2;
+      }
+      $i-=2; Return -1;
+    }
+    
+    Static Function DeCode2CharLe($s, &$i)
+    {
+      $c1=Static::DeCodeChar2Le($s, $i);
+      Switch($c1>>10)
+      {
+      Case 54: Break;
+      Case 55: $i-=2; Return -1;
+      Default: Return $c1;
+      }
+      $c2=Static::DeCodeChar2Le($s, $i);
+      If(($c2>>10)!==55) { $i-=4; Return -2; }
+      Return (($c1&0x3FF)<<10 | $c2&0x3FF)+0x10000;
+    }
+    
+    Static Function DeCode2CharBe($s, &$i)
+    {
+      $c1=Static::DeCodeChar2Be($s, $i);
+      Switch($c1>>10)
+      {
+      Case 54: Break;
+      Case 55: $i-=2; Return -1;
+      Default: Return $c1;
+      }
+      $c2=Static::DeCodeChar2Be($s, $i);
+      If(($c2>>10)!==55) { $i-=4; Return -2; }
+      Return (($c1&0x3FF)<<10 | $c2&0x3FF)+0x10000;
+    }
+    
+    Static Function DeCodeChar2Le($s, &$i)
+    {
+      Return
+        Ord($s[$i++])|
+        Ord($s[$i++])<<8;
+    }   
+    
+    Static Function DeCodeChar2Be($s, &$i)
+    {
+      Return
+        Ord($s[$i++])<<8|
+        Ord($s[$i++]);
+    }
+    
+  //****************************************************************
+  }
+?>

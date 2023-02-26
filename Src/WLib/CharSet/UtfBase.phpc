@@ -1,0 +1,186 @@
+<?
+  $this->Parent_Class('/Object');
+  
+  Class C_CharSet_UtfBase Extends C_Object
+  {
+    Function GetMinCharLen() { Return 1; }
+    Function GetMaxCharLen() { Return 1; }
+    Function IsBigEndian() { Return True; }
+
+    Protected Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      If($Checker =$Args['Checker' ]?? False) $this->SetChecker ($Checker );
+      If($Coder   =$Args['Coder'   ]?? False) $this->SetCoder   ($Coder   );
+    }
+    
+    Function GetCharsetName() { Return 'Bytes'; }
+    
+  //****************************************************************
+  // Check by regexp
+  
+    Var $RegExp='';
+    Static $Regexp_Limit=[];
+
+    Function SetCheckerRegexp($Name, $Limit=Null) //100, 249
+    {
+      $RegExp=Static::$Regexp_Templates[$Name]?? Null;
+      If(!$RegExp)
+        Return $this->Log('Error', 'There is no regexp with name ', $Name)->BackTrace()->Ret();
+      If(Is_Array($RegExp))
+        $RegExp=Implode('|',$RegExp);
+      
+      // Compilation failed: regular expression is too large at offset
+      $Limit??=Static::$Regexp_Limit[$Name]?? Null; //TODO: Bug
+      If($Limit)
+      { // 2 Backtrack limit exhausted //Was
+        If($Limit===True)
+          $Limit=Static::$Regexp_Limit[$Name]?? 100;
+        $this->RegExp='/\G(?:'.$RegExp.'){0,'.$Limit.'}+/msS';
+      }
+      Else
+        $this->RegExp='/\G(?'.'>'.$RegExp.')*+/msS';
+      Return True;
+    }
+    
+    Function Regexp_Check($s, $Offset)
+    {
+      $Len=StrLen($s);
+      If(!$Len)
+        Return 0;
+      $Res=$Offset;
+    //Ini_Set('pcre.backtrack_limit', 10_000_000);
+      While(True)
+      {
+        If(!Preg_Match($this->RegExp, $s, $m, 0, $Res))
+        {
+          If($Err=Preg_Last_Error())
+            $this->Log('Error', $Err, ' ', Preg_Last_Error_Msg());
+          Return ~$Res;
+        }
+        $R=StrLen($m[0]);
+        If($R===0) Break;
+        $Res+=$R;
+        If($Res===$Len)
+          Return $Res;
+      //  Break; 
+      }
+      Return ~$Res;
+    }
+    
+  # Static Function Regexp_Check($s)
+  # {
+  #   If(!Preg_Match(this->Regexp, $s, $m))
+  #     Return -1;
+  #   $Res=StrLen($m[0]);
+  #   If($Res===StrLen($s))
+  #     Return $Res;
+  #   Return ~$Res;
+  # }
+    
+  //****************************************************************
+  // Test Errors
+
+    Function GetCharErrorCode($s, $i) {  Return StrLen($s)? 0:9; }
+    
+    Static Function IsValidCharCode($v)
+    { // Fix DeCode
+      Return $v>=0 && $v>>11!==27 && $v<0x110000;
+    }
+  
+    Static $Errors=[
+       0=>'No error'                                  , // Any
+
+       1=>'Need another byte'                         ,
+       2=>'Need two more bytes'                       ,
+       3=>'Need three more bytes'                     ,
+
+       4=>'The second byte is wrong'                  , // Utf-8
+       5=>'The third byte is wrong'                   , // Utf-8
+       6=>'The fourth byte is wrong'                  , // Utf-8
+
+       7=>'Starts with middle byte 80-BF'             , // Utf-8
+       8=>'Starts with wrong byte F8-FF'              , // Utf-8
+       9=>'There is no any more bytes'                , // Any
+      
+      10=>'The length of the char is longer it needs' , // Utf-8
+      11=>'Surrogate char D800-DFFF'                  , // Utf-8, Utf-32
+      12=>'Char is out of range >=110000h'            , // Utf-8, Utf-32
+
+      13=>'The second word is wrong'                  , // Utf-16
+      14=>'The first word is surrogate D800-DBFF'     , // Utf-16
+    ];
+
+  //****************************************************************
+  // Checker
+  
+    Var $Checker='Fast';
+    
+    Function SetChecker ($v) { $this->Checker=$v; Return True; }
+    Function GetCheckers() { Return ['Fast']; }
+    
+    Function Check($s, $Offset=0) { Return StrLen($s); }
+  
+  //****************************************************************
+  // Encoder
+
+    Static $Coder_Map=[ 
+      'Fast' =>'IConv' ,
+    //'Raw'  =>'Raw'   ,
+    ];
+    
+    Var $Coder='IConv';
+    
+    Function SetCoder($v) { $this->Coder=Static::$Coder_Map[$v]?? $v; Return True; }
+    Function GetCoders() { Return ['IConv', 'Raw']; }
+
+    Function EnCode($From, $S)
+    {
+      If($this->Coder==='IConv')
+        Return IConv($From->GetCharsetName(), $this->GetCharsetName(), $S);
+      
+      If($this->Coder!=='Raw')
+      {
+        $this->Log('Error', 'Unknown coder: ', $this->Coder)->BackTrace();
+        Return IConv($From->GetCharsetName(), $this->GetCharsetName(), $S);
+      }
+      
+      $Len=IntDiv(StrLen($S)*$this->GetMaxCharLen(), $From->GetMinCharLen());
+      $i=0;
+      $Res=$From->Arr_DeCode($S, $i, StrLen($S));
+      Return $this->Raw_EnCodeArr($Res, $Len);
+    }
+  
+    Function Raw_EnCodeArr($a, $s='')
+    {
+      If(Is_Int($s))
+        $s=Str_Repeat("\0", $s);
+      $Len=$this->Slow_Arr_EnCode($s, $a);
+      If(StrLen($s)>$Len)
+        $s=SubStr($s, 0, $Len);
+      Return $s;
+    }
+    
+    Static Function Slow_Arr_EnCodeSize($a) { Return Count($a); }
+
+    Function EnCodeArr(&$s, $a, $i=0)
+    {
+      ForEach($a As $c)
+        Static::EnCodeChar($s, $c, $i);
+      Return $i;
+    }
+    
+    Static Function EnCodeCharSize($c) { Return 1; }
+    Static Function EnCodeChar(&$s, $c, &$i) { $s[$i++]=Chr($c); }
+    Static Function DeCodeChar($s, &$i) { Return Ord($s[$i++]); }
+    
+    Function Fast_Arr_EnCode($a)
+    {
+      $Res=Pack('N*', ...$a);
+      $Res=IConv('UTF-32BE', $this->GetCharsetName(), $Res);
+      Return $Res;
+    }
+
+  //****************************************************************
+  }
+?>

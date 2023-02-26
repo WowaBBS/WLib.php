@@ -1,0 +1,369 @@
+<?
+  $this->Parent_Class('/CharSet/UtfBase');
+  
+  Class C_CharSet_Utf8 Extends C_CharSet_UtfBase
+  {
+    Function GetMinCharLen() { Return 1; }
+    Function GetMaxCharLen() { Return 4; }
+
+    Function GetCharsetName() { Return 'UTF-8'; }
+    
+    Static $Checkers=[
+      'Full'=>'RegExp_Strict',
+      'Fast',
+      'Chars_Full'.
+      'Types_Full'.
+      'RegExp_Full'   =>['RegExp', 'Full'   ],
+      'RegExp_Strict' =>['RegExp', 'Strict' ],      
+    ];
+    
+    //                                       Len Bit Bits
+    // 0xxxxxxx 0 16    0<=  <128  00<=  <80  1   7    7  if($c<128) Return 0; // 1 byte
+    // 10xxxxxx 4  8  128<=  <192  80<=  <C0  0   6    0  if($c<192) Return 4; // Continue
+    // 110xxxxx 1  4  192<=  <224  C0<=  <E0  2   5   11  if($c<224) Return 1; // 2 bytes
+    // 1110xxxx 2  2  224<=  <240  E0<=  <F0  3   4   16  if($c<240) Return 2; // 3 bytes
+    // 11110xxx 3  1  240<=  <248  F0<=  <F8  4   3   21  if($c<248) Return 3; // 4 bytes
+    //-111110xx 5     248<=  <252  F8<=  <FC  5   2   26 ---         Return 5; // Bad
+    //-1111110x 5     252<=  <254  FC<=  <FE  6   1   31
+    //-11111110 5     254<=  <255  FE<=  <FF  7   0   36
+    //-11111111 5     255<=  <256  FF<=       8   0   42
+    
+    Static String $CharType=
+      "\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1".
+      "\0\0\0\0\0\0\0\0\2\2\2\2\3\3\4\5";
+    
+    Static Function GetCharType($c) { Return Static::$CharType[Ord($c)>>3]; }
+    
+  //****************************************************************
+  // Check by Chars
+  
+    Static Function Fast_Check($s, $Offet=0)
+    {
+      $l=StrLen($s);
+      $i=$l;
+      While((--$i)>=$Offet)
+      {
+        Switch($j=Ord(Static::GetCharType($s[$i])))
+        {
+        Case 0: Break;
+        Case 1: Return $i+1;
+        Case 2: 
+        Case 3: 
+        Case 4: $j+=$i; Return $l>=$j? $j: $i;
+        Case 5: $l=$i; Break;
+        }
+      }
+      Return $Offet;
+    }
+    
+    Static Function Chars_Full_Check($s, $Offet=0)
+    {
+      for($i=$Offet, $l=StrLen($s); $i<$l;)
+      {
+        $j=Static::Chars_CheckChar($s, $i);
+        If($j<=0) Return ~$i;
+        $i+=$j;
+      }
+      Return $i;
+    }
+    
+    Static Function Chars_CheckChar($s, $i)
+    {
+      Switch($j=Ord(Static::GetCharType($s[$i])))
+      {
+      Case 1: Return 1;
+      Case 4:
+      Case 3:
+      Case 2:
+        $r=StrLen($s)-$i-$j;
+        If($r<0) Return $r; //-1. -2. -3
+        If(        Static::GetCharType($s[$i+1])!=="\0") Return -4;
+        If($j>2 && Static::GetCharType($s[$i+2])!=="\0") Return -5;
+        If($j>3 && Static::GetCharType($s[$i+3])!=="\0") Return -6;
+        Return $j;
+      Case 0: Return -7;
+      Case 5: Return -8;
+      }
+    }
+  
+  //****************************************************************
+  // Check by Types
+  
+    Static Function Types_FromStr($s)
+    {
+      $r=$s;
+      for($i=0, $l=StrLen($s); $i<$l; $i++)
+        $r[$i]=Static::GetCharType($s[$i]);
+      Return $r;
+    }
+    
+    Static Function Types_CheckChar($c, $i)
+    {
+      Switch($j=Ord($c[$i]))
+      {
+      Case 1: Return 1;
+      Case 4:
+      Case 3:
+      Case 2:
+        $r=StrLen($c)-$i-$j;
+        If($r<0) Return $r; //-1. -2. -3
+        If(        $c[$i+1]!=="\0") Return -4;
+        If($j>2 && $c[$i+2]!=="\0") Return -5;
+        If($j>3 && $c[$i+3]!=="\0") Return -6;
+        Return $j;
+      Case 0: Return -7;
+      Case 5: Return -8;
+      }
+    }
+    
+    Static Function Types_Full_Check($s, $Offet=0)
+    {
+      $c=Static::Types_FromStr($s);
+      Return Static::Types_Full_CheckTypes($c, $Offet);
+    }
+    
+    Static Function Types_Full_CheckTypes($c, $Offet=0)
+    {
+    //$GLOBALS['Loader']->Log('Debug', 'CheckStr')->Debug(["\u{FEFF}", $s, $c]);
+      for($i=$Offet, $l=StrLen($c); $i<$l;)
+      {
+        $j=Static::Types_CheckChar($c, $i);
+        if($j<0)
+          Return ~$i;
+        $i+=$j;
+      }
+      Return $i;
+    }
+
+  //****************************************************************
+  // Check by regexp
+  
+    Static $Regexp_Templates=[
+      'Full'=>[
+        '[\x00-\x7F]'               ,
+        '[\xC0-\xDF][\x80-\xBF]'    ,
+        '[\xE0-\xEF][\x80-\xBF]{2}' ,
+        '[\xF0-\xF7][\x80-\xBF]{3}' ,
+      ],
+      'Strict'=>[
+        '[\x00-\x7F]'                        ,
+        '[\xC2-\xDF]'.      '[\x80-\xBF]'    ,
+        '\xE0'.  '[\xA0-\xBF][\x80-\xBF]'    ,
+        '[\xE1-\xEC\xEE-\xEF][\x80-\xBF]{2}' ,
+        '\xED'.  '[\x80-\x9F][\x80-\xBF]'    ,
+        '\xF0'.  '[\x90-\xBF][\x80-\xBF]{2}' ,
+        '[\xF1-\xF3]'.      '[\x80-\xBF]{3}' ,
+        '\xF4[\x80-\x8F]'.  '[\x80-\xBF]{2}' ,
+      ],
+    ];
+    Static $Regexp_Limit=[
+      'Full'   =>240,
+      'Strict' =>110,
+    ];
+    
+  //****************************************************************
+  // Errors
+  
+    Function GetCharErrorCode($s, $i)
+    {
+      If($i>=StrLen($s)) Return 9;
+      $Res=Static::Chars_CheckChar($s, $i);
+      If($Res<0)
+        Return -$Res;
+      $c=Static::DeCodeChar($s, $i);
+      If(Static::EnCodeCharSize($c)!==$Res) 
+      {
+      //$this->Log('Debug', Static::EnCodeCharSize($Char),'!==',$Res, ' Char:',$Char, ' Type:',Ord(Static::GetCharType($s[$i])));
+        Return 10;
+      }
+      If($c>>11===27) Return 11;
+      If($c>=0x110000) Return 12;
+      Return 0;
+    }
+    
+    Static $CheckErrors=[
+      [ 6, ['F08080F8' ,'F7BFBFFF' ]],
+      [ 5, ['F080F8F8' ,'F7BFFFFF' ]],
+      [ 4, ['F0F8F8F8' ,'F7FFFFFF' ]],
+      [ 3, ['F0'       ,'F7'       ]],
+      [ 2, ['F080'     ,'F7BF'     ]],
+      [ 1, ['F08080'   ,'F7BFBF'   ]],
+      [10, ['F0808080' ,'F08FBFBF' ]],
+      [ 0, ['F0908080' ,'F48FBFBF' ]],
+      [12, ['F4908080' ,'F7BFBFBF' ]],
+      [ 2, ['E0'       ,'EF'       ]],
+      [ 1, ['E080'     ,'EFBF'     ]],
+      [10, ['E08080'   ,'E09FBF'   ]],
+      [ 0, ['E0A080'   ,'EFBFBF'   ]],
+      [11, ['EDA080'   ,'EDBFBF'   ]],
+      [ 1, ['C0'       ,'DF'       ]],
+      [10, ['C080'     ,'C1BF'     ]],
+      [ 0, ['CC80'     ,'DFBF'     ]],
+      [ 0, ['00'       ,'7F'       ]],
+      [ 7, ['80'       ,'BF'       ]],
+      [ 8, ['F8'       ,'FF'       ]],
+      [ 9, [''         ,''         ]],
+    ];
+    
+  //****************************************************************
+  // Checker
+  
+    Static $Checkers_Map=[
+      'Full'     =>'RegExp_Strict' ,
+      'Raw_Full' =>'Chars_Full',
+    ];
+  
+    Function SetChecker($v)
+    {
+      Switch($v=Static::$Checkers_Map[$v]?? $v)
+      {
+      Case 'Fast'          :
+      Case 'Chars_Full'    :
+      Case 'Types_Full'    :
+         Break;
+      Case 'RegExp_Full'   : $v='RegExp'; $this->SetCheckerRegexp('Full'   ); Break;
+      Case 'RegExp_Strict' : $v='RegExp'; $this->SetCheckerRegexp('Strict' ); Break;
+      Default:
+        $this->Log('Error', 'Unnown Checker ', $v)->BackTrace();
+        $this->SetChecker('Full');
+      }
+      $this->Checker=$v;
+    }
+  
+    Function GetCheckers()
+    {
+      Return [
+        'Fast'          ,
+        'Chars_Full'    ,
+        'Types_Full'    ,
+        'RegExp_Full'   ,
+        'RegExp_Strict' ,
+      ];
+    }
+    
+  //Function Full_Check($s, $Offset) { Return $this->Types_FullCheck  ($s, $Offset); }
+    Function Full_Check($s, $Offset) { Return $this->Regexp_Check ($s, $Offset); }
+
+    Function Check($s, $Offset=0)
+    {
+      Switch($this->Checker)
+      {
+      Case 'Fast'       : Return $this->Fast_Check       ($s, $Offset);
+      Case 'Chars_Full' : Return $this->Chars_Full_Check ($s, $Offset);
+      Case 'Types_Full' : Return $this->Types_Full_Check ($s, $Offset);
+      Case 'RegExp'     : Return $this->Regexp_Check     ($s, $Offset);
+      }
+      $this->Log('Error', 'Unknown checker: ', $this->Checker)->BackTrace();
+      Return $this->Fast_Check($s, $Offset);
+    }
+  
+  //****************************************************************
+  // Encoder
+
+    Static Function Slow_Arr_EnCodeSize($a)
+    {
+      $Res=0;
+      ForEach($a As $c)
+        $Res+=Static::EnCodeCharSize($c);
+      Return $Res;
+    }
+    
+    Function Slow_Arr_EnCode(&$s, $a, $i=0)
+    {
+      ForEach($a As $c)
+        Static::EnCodeChar($s, $c, $i);
+      Return $i;
+    }
+    
+    Static Function EnCodeCharSize($c)
+    {
+      if($c<(1<< 7)) Return 1;
+      if($c<(1<<11)) Return 2;
+      if($c<(1<<16)) Return 3;
+      if($c<(1<<21)) Return 4;
+      Return 0;
+    }
+    
+    Static Function EnCodeChar(&$s, $c, &$i)
+    {
+      if($c<(1<< 7)) Return Static::EnCodeChar1($s, $c, $i);
+      if($c<(1<<11)) Return Static::EnCodeChar2($s, $c, $i);
+      if($c<(1<<16)) Return Static::EnCodeChar3($s, $c, $i);
+      if($c<(1<<21)) Return Static::EnCodeChar4($s, $c, $i);
+    }
+    
+    Static Function EnCodeChar1(&$s, $c, &$i)
+    {
+      $s[$i]=Chr($c); ++$i; //&0x7F
+    }
+    
+    Static Function EnCodeChar2(&$s, $c, &$i)
+    {
+      $s[$i]=Chr(($c>> 6)      |0xC0); ++$i; //&0x1F
+      $s[$i]=Chr( $c     &0x3F |0x80); ++$i;
+    }
+    
+    Static Function EnCodeChar3(&$s, $c, &$i)
+    {
+      $s[$i]=Chr(($c>>12)      |0xE0); ++$i; //&0x0F
+      $s[$i]=Chr(($c>> 6)&0x3F |0x80); ++$i;
+      $s[$i]=Chr( $c     &0x3F |0x80); ++$i;
+    }
+    
+    Static Function EnCodeChar4(&$s, $c, &$i)
+    {
+      $s[$i]=Chr(($c>>18)      |0xF0); ++$i; //&0x07
+      $s[$i]=Chr(($c>>12)&0x3F |0x80); ++$i;
+      $s[$i]=Chr(($c>> 6)&0x3F |0x80); ++$i;
+      $s[$i]=Chr( $c     &0x3F |0x80); ++$i;
+    }
+    
+  //****************************************************************
+  // Decoder
+  
+    Function Arr_DeCode($s, &$i, $l) { $Res=[]; While($i<$l) If(($R=Static::DeCodeChar($s, $i))>=0) $Res[]=$R; Return $Res; }
+  
+    Static Function DeCodeChar($s, &$i)
+    {
+      Switch(Static::GetCharType($s[$i]))
+      {
+      Case "\1": Return Static::DeCodeChar1($s, $i);
+      Case "\2": Return Static::DeCodeChar2($s, $i);
+      Case "\3": Return Static::DeCodeChar3($s, $i);
+      Case "\4": Return Static::DeCodeChar4($s, $i);
+      Default  : Return -1;
+      }
+    }
+    
+    Static Function DeCodeChar1($s, &$i)
+    {
+      Return Ord($s[$i++]); //&0x7F
+    }
+    
+    Static Function DeCodeChar2($s, &$i)
+    {
+      Return
+        (Ord($s[$i++])&0x1F)<<6 |
+        (Ord($s[$i++])&0x3F)    ;
+    }
+    
+    Static Function DeCodeChar3($s, &$i)
+    {
+      Return
+        (Ord($s[$i++])&0x0F)<<12|
+        (Ord($s[$i++])&0x3F)<< 6|
+        (Ord($s[$i++])&0x3F)    ;
+    }
+    
+    Static Function DeCodeChar4($s, &$i)
+    {
+      Return
+        (Ord($s[$i++])&0x07)<<18|
+        (Ord($s[$i++])&0x3F)<<12|
+        (Ord($s[$i++])&0x3F)<< 6|
+        (Ord($s[$i++])&0x3F)    ;
+    }
+    
+  //****************************************************************
+  }
+?>

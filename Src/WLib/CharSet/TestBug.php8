@@ -1,0 +1,23 @@
+<?
+  $S=[];
+  For($i=0x0000; $i<0x00D800; $i++) $S[]=$i;
+  For($i=0xE000; $i<0x110000; $i++) $S[]=$i;
+  $S=Pack('N*', ...$S);
+  $S=IConv('UTF-32BE', 'UTF-8', $S);
+  $Pattern=[
+    '[\x00-\x7F]'               ,
+    '[\xC0-\xDF][\x80-\xBF]'    ,
+    '[\xE0-\xEF][\x80-\xBF]{2}' ,
+    '[\xF0-\xF7][\x80-\xBF]{3}' ,
+  ];
+  $Pattern='/\G(?'.'>'.Implode('|', $Pattern).')*+/msS';
+  If(!Preg_Match($Pattern, $S))
+  {
+    If($Err=Preg_Last_Error())
+      Echo 'Bug reprodiced: ', Preg_Last_Error_Msg();
+    Else
+      Echo 'Unknown error';
+  }
+  Else
+    Echo 'Ok';
+?>

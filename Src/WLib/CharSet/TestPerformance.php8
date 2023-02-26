@@ -1,0 +1,10 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+//Set_Time_Limit(1);
+
+  $Loader->GetLogger()->Add('TestPerformance.log');
+//$Loader->GetLogger()->Get('Console')->Disable();
+  $TestPerformance=$Loader->Get_Singleton('/CharSet/TestPerformance');
+  
+  $TestPerformance->Start();
+?>

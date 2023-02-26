@@ -1,0 +1,214 @@
+<?
+  $this->Parent_Class('/CharSet/UtfBase');
+  
+  Class C_CharSet_Utf32 Extends C_CharSet_UtfBase
+  {
+    Var $BigEndian=True;
+  
+    Protected Function _Init(Array $Args)
+    {
+      $this->BigEndian=$Args['BigEndian' ]?? $this->BigEndian;
+      Parent::_Init($Args);
+    }
+    
+  //Static Function GetActualSize($s) { return StrLen($s)&-4; }
+    Function GetMinCharLen() { Return 4; }
+    Function GetMaxCharLen() { Return 4; }
+    Function IsBigEndian() { Return $this->BigEndian; }
+
+    Function GetCharsetName() { Return $this->BigEndian? 'UTF-32BE':'UTF-32LE'; }
+    
+    Static Function Fast_Check($s, $Offset=0) { Return ((StrLen($s)-$Offset)&-4)+$Offset; }
+    
+    Function Full_Check($s, $i=0) //TODO: $l
+    {
+      $k=$this->BigEndian? 0:3;
+      $l=(StrLen($s)-$i)&-4+$i;
+      For($i+=$k; $i<$l; $i+=4)
+        If(Ord($s[$i])!==0)
+          Return ~($i-$k);
+      Return $i-$k;
+    }
+    
+    Function Strict_Check($s, $i=0, $l=Null) { Return $this->BigEndian? Static::Strict_CheckBe($s, $i, $l):Static::Strict_CheckLe($s, $i, $l); }
+
+    Static Function Strict_CheckBe($s, $i, $l=Null)
+    {
+      $l=(($l?? StrLen($s))-$i)&-4+$i;
+      While($i<$l)
+        If(!Static::IsValidCharCode(Static::DeCodeCharBe($s, $i)))
+          Return ~($i-4);
+        
+      Return $i;
+    }
+    
+    Function Strict_CheckLe($s, $i, $l=Null)
+    {
+      $l=(($l?? StrLen($s))-$i)&-4+$i;
+      While($i<$l)
+        If(!Static::IsValidCharCode(Static::DeCodeCharLe($s, $i)))
+          Return ~($i-4);
+        
+      Return $i;
+    }
+    
+  //****************************************************************
+  // Regexp
+  
+    Static $Regexp_Templates=[
+      'FastLe'=>'...\0',
+      'FastBe'=>'\0...',
+
+      'FullLe'=>'..[\0-\x10]\0',
+      'FullBe'=>'\0[\0-\x10]..',
+    
+      'StrictLe'=>'.(?:[\0-\xD7\xE0-\xFF][\0-\x10]|[\xD8-\xDF][\1-\x10])\0',
+      'StrictBe'=>'\0(?:\0[\0-\xD7\xE0-\xFF]|[\1-\x10].).',
+    ];
+  
+  //****************************************************************
+  // Test Errors
+  
+    Function GetCharErrorCode($s, $i)
+    {
+      $l=StrLen($s)-$i;
+      If($l===0) Return 9;
+      If($l===1) Return 3;
+      If($l===2) Return 2;
+      If($l===3) Return 1;
+      
+      $c=$this->_DeCodeChar($s, $i);
+      If($c>>11===27) Return 11;
+      If($c>=0x110000) Return 12;
+      Return 0;
+    }
+    
+    Static $CheckErrors=[
+      [ 3, ['00'       ,'FF'       ], ['00'       ,'FF'       ]],
+      [ 2, ['0000'     ,'FFFF'     ], ['0000'     ,'FFFF'     ]],
+      [ 1, ['000000'   ,'FFFFFF'   ], ['000000'   ,'FFFFFF'   ]],
+      [ 0, ['00000000' ,'0010FFFF' ], ['00000000' ,'FFFF1000' ]],
+      [12, ['00110000' ,'FFFFFFFF' ], ['00001100' ,'FFFFFFFF' ]],
+      [11, ['0000D800' ,'0000DBFF' ], ['00D80000' ,'FFDB0000' ]],
+      [ 9, [''                     ], [''                     ]],
+    ];
+    
+  //****************************************************************
+  // Checker
+
+    Static $Checkers_Map=[
+      'Full'=>'RegExp_Strict' ,
+    ];
+
+    Function SetChecker($v)
+    {
+      Switch($v=Static::$Checkers_Map[$v]?? $v)
+      {
+      Case 'Fast'          : Break;
+      Case 'Raw_Full'      : Break;
+      Case 'Raw_Strict'    : Break;
+      Case 'RegExp_Fast'   : $v='RegExp'; $this->SetCheckerRegexp($this->BigEndian? 'FastBe'   :'FastLe'   ); Break;
+      Case 'RegExp_Full'   : $v='RegExp'; $this->SetCheckerRegexp($this->BigEndian? 'FullBe'   :'FullLe'   ); Break;
+      Case 'RegExp_Strict' : $v='RegExp'; $this->SetCheckerRegexp($this->BigEndian? 'StrictBe' :'StrictLe' ); Break;
+      Default:
+        $this->Log('Error', 'Unnown Checker ', $v)->BackTrace();
+        $this->SetChecker('Full');
+      }
+      $this->Checker=$v;
+    }
+  
+    Function GetCheckers()
+    {
+      Return [
+        'Fast'          ,
+        'Raw_Full'      ,
+        'Raw_Strict'    ,
+        'RegExp_Fast'   ,
+        'RegExp_Full'   ,
+        'RegExp_Strict' ,
+      ];
+    }
+    
+    Function Check($s, $Offset=0)
+    {
+      Switch($this->Checker)
+      {
+      Case 'Fast'       : Return $this->Fast_Check   ($s, $Offset);
+      Case 'Raw_Full'   : Return $this->Full_Check   ($s, $Offset);
+      Case 'Raw_Strict' : Return $this->Strict_Check ($s, $Offset);
+      Case 'RegExp'     : Return $this->Regexp_Check ($s, $Offset);
+      }
+      $this->Log('Error', 'Unknown checker: ', $this->Checker)->BackTrace();
+      Return $this->Fast_Check($s, $Offset);
+    }
+  
+  //****************************************************************
+  // Encoder
+  
+  //Static Function Fast_Arr_EnCodeSize($a) { Return Count($a); }
+    
+    Static Function Slow_Arr_EnCodeSize($a)
+    {
+      $Res=0;
+      ForEach($a As $c)
+        $Res+=Static::EnCodeCharSize($c);
+      Return $Res;
+    }
+    
+    Function Slow_Arr_EnCode(&$s, $a, $i=0) { Return $this->BigEndian? Static::Slow_Arr_EnCodeBe($s, $a, $i):Static::Slow_Arr_EnCodeLe($s, $a, $i); }
+    
+    Static Function Slow_Arr_EnCodeLe(&$s, $a, $i=0) { ForEach($a As $c) Static::EnCodeCharLe($s, $c, $i); Return $i; }
+    Static Function Slow_Arr_EnCodeBe(&$s, $a, $i=0) { ForEach($a As $c) Static::EnCodeCharBe($s, $c, $i); Return $i; }
+    
+    Static Function EnCodeCharSize($c)
+    {
+      Return Static::IsValidCharCode($c)? 1:0; //TODO: Size of bad char
+    }
+    
+    Static Function EnCodeCharLe(&$s, $c, &$i)
+    {
+      $s[$i]=Chr($c    ); ++$i;
+      $s[$i]=Chr($c>> 8); ++$i;
+      $s[$i]=Chr($c>>16); ++$i;
+      $s[$i]=Chr($c>>24); ++$i;
+    }
+    
+    Static Function EnCodeCharBe(&$s, $c, &$i)
+    {
+      $s[$i]=Chr($c>>24); ++$i;
+      $s[$i]=Chr($c>>16); ++$i;
+      $s[$i]=Chr($c>> 8); ++$i;
+      $s[$i]=Chr($c    ); ++$i;
+    }
+    
+  //****************************************************************
+  // Decoder
+  
+    Function Arr_DeCode($s, &$i, $l) { Return $this->BigEndian? $this->Arr_DeCodeBe($s, $i, $l):$this->Arr_DeCodeLe($s, $i, $l); }
+  
+    Function Arr_DeCodeLe($s, &$i, $l) { $Res=[]; While($i<$l) $Res[]=Static::DeCodeCharLe($s, $i); Return $Res; }
+    Function Arr_DeCodeBe($s, &$i, $l) { $Res=[]; While($i<$l) $Res[]=Static::DeCodeCharBe($s, $i); Return $Res; }
+  
+    Function _DeCodeChar($s, $i) { Return $this->BigEndian? Static::DeCodeCharBe($s, $i):Static::DeCodeCharLe($s, $i); }
+    
+    Static Function DeCodeCharLe($s, &$i)
+    {
+      Return
+        Ord($s[$i++])    |
+        Ord($s[$i++])<< 8|
+        Ord($s[$i++])<<16|
+        Ord($s[$i++])<<24;
+    }   
+    
+    Static Function DeCodeCharBe($s, &$i)
+    {
+      Return
+        Ord($s[$i++])<<24|
+        Ord($s[$i++])<<16|
+        Ord($s[$i++])<< 8|
+        Ord($s[$i++])    ;
+    }   
+    
+  //****************************************************************
+  }
+?>

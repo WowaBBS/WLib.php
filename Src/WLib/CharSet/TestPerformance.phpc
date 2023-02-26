@@ -1,0 +1,131 @@
+<?
+  $this->Parent_Class('/CharSet/Factory');
+  
+  Class C_CharSet_TestPerformance Extends C_CharSet_Factory
+  {
+    Var $CountString       = 100_00 ;
+    Var $ShortStringLength =      20 ;
+  
+    Function Start()
+    {
+      $this->Log('Log', 'TestPerformance');
+      $S=[];
+      For($i=0; $i<$this->CountString; $i++)
+        $S[]=Static::Arr_RandomChars($this->ShortStringLength);
+      
+      ForEach($this->GetCoders() As $CheckerName)
+        $this->TestChecker($this->GetCoder($CheckerName), $S);
+
+      ForEach($this->GetCoders() As $From)
+        ForEach($this->GetCoders() As $To)
+          $this->TestCoder($this->GetCoder($From), $this->GetCoder($To), $S);
+    }
+    
+  //****************************************************************
+    
+    Function TestChecker($Coder, $S)
+    {
+      $this->Log('Log', '  Checker ', $Coder->GetCharsetName(), ' Short');
+      ForEach($S As &$s)
+        $s=$Coder->Fast_Arr_EnCode($s);
+      UnSet($s);
+      $this->TestCheckerForStr($Coder, $S);
+      
+      $this->Log('Log', '  Checker ', $Coder->GetCharsetName(), ' Long');
+      $S=[Implode($S)];
+      $this->TestCheckerForStr($Coder, $S);
+    }
+
+    Function TestCheckerForStr($Coder, $S)
+    {
+      ForEach($Coder->GetCheckers()As $Func)
+        $this->TestCheckerFunc($Coder, $S, $Func);
+    }
+    
+    Function TestCheckerFunc($Coder, $S, $Func)
+    {
+      $Coder->SetChecker($Func);
+      $Ok=True;
+      $Time=HrTime(True);
+      ForEach($S As $s)
+        If(StrLen($s)!==($l=$Coder->Check($s)))
+        {
+          $this->Log('Error', '  ', 'LenError ',StrLen($s), '!=', $l, ' ', Bin2Hex(SubStr($s, $l<0? ~$l:$l, 4)));
+          $Ok=False;
+          Break;
+        }
+      $Time=HrTime(True)-$Time;
+      $this->Log($Ok? 'Log':'Error', '    ', Str_Pad($Func, 14), '=', Static::TimeToStr($Time));
+    }
+    
+  //****************************************************************
+  // Coder
+  
+    Function TestCoder($From, $To, $S)
+    {
+      $this->Log('Log', '  Coder ', $From->GetCharsetName(), '=>', $To->GetCharsetName(), ' Short');
+      ForEach($S As &$s)
+        $s=$From->Fast_Arr_EnCode($s);
+      UnSet($s);
+      $this->TestCoderForStr($From, $To, $S);
+      
+      $this->Log('Log', '  Coder ', $From->GetCharsetName(), '=>', $To->GetCharsetName(), ' Long');
+      $S=[Implode($S)];
+      $this->TestCoderForStr($From, $To, $S);
+    }
+
+    Function TestCoderForStr($From, $To, $S)
+    {
+      ForEach($To->GetCoders()As $Func)
+        $this->TestCoderFunc($From, $To, $S, $Func);
+    }
+    
+    Function TestCoderFunc($From, $To, $S, $Func)
+    {
+      $To->SetCoder($Func);
+      $Ok=True;
+      $Time=HrTime(True);
+      ForEach($S As $s)
+      {
+        $EnCoded=$To->EnCode($From, $s);
+        If(False) //TODO: Check
+        {
+          $this->Log('Error', '  ', 'LenError ',StrLen($s), '!=', $l, ' ', Bin2Hex(SubStr($s, $l<0? ~$l:$l, 4)));
+          $Ok=False;
+          Break;
+        }
+      }
+      $Time=HrTime(True)-$Time;
+      $this->Log($Ok? 'Log':'Error', '    ', Str_Pad($Func, 14), '=', Static::TimeToStr($Time));
+    }
+    
+    Function TimeToStr($Time)
+    {
+      $Time=(String)$Time;
+      $Time=IntDIv($Time, 1000);
+      $Time=Str_Pad($Time, IntDiv(StrLen($Time)+2,3)*3, ' ', STR_PAD_LEFT);
+      $Time=Trim(Implode('_', Str_Split($Time, 3)));
+      Return Str_Pad($Time, 9, ' ', STR_PAD_LEFT).'mks';
+    }
+    
+  //****************************************************************
+  // Tools
+  
+    Static Function Arr_RandomChars($c) { Return Iterator_To_Array(Static::Gen_RandomChars($c)); }
+  
+    Static Function Gen_RandomChars($c)
+    {
+      While($c>0)
+      {
+        $Bit=Random_Int(7, 21);
+        $Len=Min(1<<$Bit, 0x110000-1);
+        $v=Random_Int(0, $Len);
+      //$v=Random_Int(0, 1<<$Bit);
+        If($v>>11===27)
+          Continue;
+        Yield $v;
+        $c--;
+      }
+    }
+  }
+?>

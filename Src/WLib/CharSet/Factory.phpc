@@ -1,0 +1,34 @@
+<?
+  $this->Parent_Class('/Object');
+  
+  Class C_CharSet_Factory Extends C_Object
+  {
+    Function GetCoder($CharSet='', $Checker='Fast')
+    {
+      Switch($CharSet)
+      {
+      Case 'UTF-8'    : $Res=$this->Create_Object('/CharSet/Utf8'    ,[                    'Checker'=>$Checker]); Break;
+      Case 'UTF-16LE' : $Res=$this->Create_Object('/CharSet/Utf16'   ,['BigEndian'=>False ,'Checker'=>$Checker]); Break;
+      Case 'UTF-16BE' : $Res=$this->Create_Object('/CharSet/Utf16'   ,['BigEndian'=>True  ,'Checker'=>$Checker]); Break;
+      Case 'UTF-32LE' : $Res=$this->Create_Object('/CharSet/Utf32'   ,['BigEndian'=>False ,'Checker'=>$Checker]); Break;
+      Case 'UTF-32BE' : $Res=$this->Create_Object('/CharSet/Utf32'   ,['BigEndian'=>True  ,'Checker'=>$Checker]); Break;
+      Default         : $Res=$this->Create_Object('/CharSet/UtfBase' ,[                                       ]);
+        If($CharSet!=='')
+          $this->Log('Error', 'Unsupported charset ', $CharSet);
+      }
+      
+      Return $Res;
+    }
+    
+    Function GetCoders()
+    {
+      Return [
+        'UTF-8'    ,
+        'UTF-16LE' ,
+        'UTF-16BE' ,
+        'UTF-32LE' ,
+        'UTF-32BE' ,
+      ];
+    }
+  }
+?>

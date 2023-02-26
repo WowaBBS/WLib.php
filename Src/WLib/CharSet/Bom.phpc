@@ -1,0 +1,75 @@
+<?
+  $this->Parent_Class('/CharSet/Factory');
+  
+  Class C_CharSet_Bom Extends C_CharSet_Factory
+  {
+    Var $BomCharSets=[
+      "\xEF\xBB\xBF"     =>'UTF-8'    ,
+      "\xFF\xFE"         =>'UTF-16LE' ,
+      "\xFE\xFF"         =>'UTF-16BE' ,
+      "\xFF\xFE\x00\x00" =>'UTF-32LE' ,
+      "\x00\x00\xFE\xFF" =>'UTF-32BE' ,
+    ];
+    
+    Var $CharSet='UTF-8';
+    
+  //****************************************************************
+  // Map version
+    Var $Map; //[FirstChar=>[CharSet=>'Name', 'Bom'=>'Bom', HasMore=>False|True ,SechonChar=>[...]]]
+    
+    Function GetMap()
+    {
+      Return $this->RegMap??=$this->_GetMap();
+    }
+    
+    Function _GetMap()
+    {
+      $Def=[
+        'Bom'     =>   '',
+        'CharSet' =>   '',
+        'Len'     =>    0,
+        'HasMore' => True,
+      ];
+      $Map=$Def;
+      ForEach($this->BomCharSets As $Bom=>$CharSet)
+      {
+        $M=&$Map;
+        $Last=$Def;
+        For($i=0, $c=StrLen($Bom); $i<$c; $i++)
+        {
+          $M+=$Last;
+          [ 'Bom'     =>$Last['Bom'     ], 
+            'CharSet' =>$Last['CharSet' ]
+          ]=$M;
+          $Last['Len']++;
+          $M['HasMore']=True;
+          $M=&$M[$Bom[$i]];
+          $M??=[];
+        }
+        $M['Bom'     ]  =$Bom     ;
+        $M['CharSet' ]  =$CharSet ;
+        $M['Len'     ]  =$Last['Len'];
+        $M['HasMore' ]??=False    ;
+      }
+      Return $Map;
+    }
+    
+    Function DetectBom($S, $End=False)
+    {
+      $M=$this->GetMap();
+      For($i=0, $l=StrLen($S); $i<$l; $i++)
+        If($m=$M[$S[$i]]?? false)
+          $M=$m;
+        Else
+          Break;
+      $Bom     =$M['Bom'     ];
+      $CharSet =$M['CharSet' ];
+      $Len     =$M['Len'     ];
+      $HasMore =$M['HasMore' ]; // && ($S===$Bom || $Bom==='') && !$End;
+
+      Return [$Bom, $CharSet, $HasMore && $Len===StrLen($S) && !$End]; //$S,
+    }
+    
+  //****************************************************************
+  }
+?>

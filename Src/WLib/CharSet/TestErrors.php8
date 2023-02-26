@@ -1,0 +1,10 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+//Set_Time_Limit(1);
+
+  $Loader->GetLogger()->Add('TestErrors.log');
+//$Loader->GetLogger()->Get('Console')->Disable();
+  $Bom=$Loader->Get_Singleton('/CharSet/TestErrors');
+  
+  $Bom->Start();
+?>

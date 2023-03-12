@@ -1,0 +1,55 @@
+<?
+  $this->Parent_Class('/Object');
+
+  Class C_RegExp_CharCodes Extends C_Object
+  {
+    Var $List=[];
+  
+    Function _CharCode($Char) { Return '\\x'.StrToUpper(Bin2Hex(Chr($Char))); }
+    Function CharCode($Char) { Return $this->List[$Char]??=$this->_CharCode($Char); }
+    
+    Function CharCodeRange_Simple($From, $To)
+    {
+      If($From===0 && $To===255) Return '.';
+      If($From===$To) Return $this->CharCode($From);
+      Return False;
+    }
+    
+    Function CharCodeRange($From, $To)
+    {
+      If($Res=$this->CharCodeRange_Simple($From, $To))
+        Return $Res;
+      Return $this->CharCode($From).'-'.$this->CharCode($To);
+    }
+    
+    Function CharCodesToRegexp($List)
+    {
+      Sort($List);
+      $this->_CharCodesToRegexp($List);
+    }
+    
+    Function _CharCodesToRegexp($List)
+    {
+      $Left=-1;
+      $Res=[];
+      $Pos=-1;
+      ForEach($List As $Char)
+      {
+        If($Left<0 || $Left+1!==$Char)
+          $Pos=$Char;
+        $Left=$Res[$Pos]=$Char;
+      }
+      If(Count($Res)===1)
+        ForEach($Res As $From=>$To)
+          If($Simple=$this->CharCodeRange_Simple($From, $To))
+            Return $Simple;
+      $List=$Res;
+      $Res=[];
+      ForEach($List As $From=>$To)
+        $Res[]=$this->CharCodeRange($From, $To);
+      $Res=Implode('', $Res);
+      Return '['.$Res.']';
+    }
+  }
+  
+?>

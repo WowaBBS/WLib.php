@@ -1,0 +1,90 @@
+<?
+  $this->Parent_Class('/Object');
+  $this->Load_Type('/RegExp/CharMap');
+
+  Class C_RegExp_Builder Extends C_Object
+  {
+    Function _Init($Args)
+    {
+      $this->CharCodes=$this->Get_Singleton('/RegExp/CharCodes');
+      Parent::_Init($Args);
+    }
+  
+    Var $CharCodes=Null;
+    
+    Function CharCode           ($Char) { Return $this->CharCodes->CharCode           ($Char); }
+    Function CharCodesToRegexp  ($List) { Return $this->CharCodes->CharCodesToRegexp  ($List); }
+    Function _CharCodesToRegexp ($List) { Return $this->CharCodes->_CharCodesToRegexp ($List); }
+    
+    Var $CharMap=[];
+    Var $CharMapEnd=null;
+
+    Function CharMap_ToStatic($v) { Return ($this->CharMap[$v->GetKey()]??=$v->_ToStatic())->Get(); }
+    Function CharMap_Remove($k) { UnSet($this->CharMap[$k]); }
+    Function CharMap_Get($k) { Return $this->CharMap[$k]?->Get(); }
+    Function CharMap_Create() { Return New T_RegExp_CharMap($this); }
+    Function _CharMap_CreateEnd()
+    {
+      $this->Log('Debug')->Debug($this);
+      $Res=$this->CharMap_Create()->AddEnd()->ToStatic();
+      $this->Log('Debug', 'b')->Debug($this);
+      Return $Res;
+    }
+    
+    Function CharMap_End() { Return $this->CharMapEnd??=$this->CharMap_Create()->AddEnd()->ToStatic()->Builder_MakeWeakProxy(); }
+
+    Function _Analyze($M)
+    {
+      If(!Is_Array($M)) Return $M;
+      
+      If($End=IsSet($M[256]))
+        UnSet($M[256]);
+      
+      ForEach($M As $k=>$m)
+        $M[$k]=$this->_Analyze($m);
+      
+      $Res=$this->CharMap_Create();
+      $Res->Map=$M;
+      If($End)
+        $Res->AddEnd();
+      Return $Res->ToStatic();
+    }
+
+    Function FromListWords($L)
+    {
+      Sort($L, SORT_STRING);
+    
+      $M=[];
+      $Prev='';
+      ForEach($L As $s)
+      {
+        $Diff=StrSpn($Prev^$s ,"\0");
+        $m=&$M;
+        For($i=0, $l=StrLen($Prev); $i<$l; $i++)
+          if($i<=$Diff)
+            $m=&$m[Ord($Prev[$i])];
+          Else
+          {
+            $m=$this->_Analyze($m);
+            Break;
+          }
+        
+        $m=&$M;
+        For($i=0, $l=StrLen($s); $i<$l; $i++)
+        {
+          $m=&$m[Ord($s[$i])];
+          $m??=[];
+        }
+        $m[256]=[];
+
+        $Prev=$s;
+      }
+      $M=$this->_Analyze($M);
+      
+      Return $M->GetRegExp($this);
+    }
+
+  //****************************************************************
+  }
+  
+?>

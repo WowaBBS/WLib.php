@@ -14,9 +14,9 @@
       $Stream=$Args['Stream']??$Args[0];
     # $Backup=$Args['Backup']??False;
       Parent::_Init($Args);
-      $OpenMode=omRead|omWrite|omMakePath|omCreate|omBinary;//|omShareable; // TODO; Bug TestW.php8
       if(Is_String($Stream))
       {
+        $OpenMode=omRead|omWrite|omMakePath|omCreate|omBinary;//|omShareable; // TODO; Bug TestW.php8
         $Stream=$this->Create_Object('/Stream/File', [
           'FileName'=>$Stream   ,
           'OpenMode'=>$OpenMode ,

@@ -7,12 +7,20 @@
     Var $FLength=0;
     Var $FPos=0;
   
+    Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      $Content=$Args['Content']?? False;
+      If($Content!==False)
+        $this->FBuffer=[$Content];
+    }
+    
     Function Recv_Count()
     {
       Return $this->FLength;
     }
   
-    Function Localize()
+    Function Localize() //<TODO: Check using and think
     {
       $B=&$this->FBuffer;
       $Res=[];

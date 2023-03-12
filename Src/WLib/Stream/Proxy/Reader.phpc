@@ -53,8 +53,8 @@
       If($FPos)
       {
         $Seek=Min($FPos, $ASize);
-        $FPos-=$Seek;
-        $ASize-=$Seek;
+        $FPos  -=$Seek;
+        $ASize -=$Seek;
         $this->FLength+=$Seek;
         If(!$ASize)
           Return $Seek;

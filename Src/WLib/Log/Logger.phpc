@@ -122,6 +122,7 @@
  
     Function Error_Handler($ErrNo, $ErrStr, $ErrFile, $ErrLine) // , $Vars) Removed in PHP8
     {
+      if(!($ErrNo & Error_Reporting())) Return;
     //If($ErrNo==2048)
     //  Return;
       $Res=$ErrStr;

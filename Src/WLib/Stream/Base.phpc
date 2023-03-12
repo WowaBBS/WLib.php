@@ -130,7 +130,7 @@
       Return $Res;
     }
   
-    Function Write($Data)
+    Function Write(String $Data)
     {
       Return 0;
     }
@@ -769,5 +769,14 @@
       }
       Return $Res;
     }
+  //
+    Function TryLockRead  () { return False; }
+    Function TryLockWrite () { return False; }
+    
+    Function LockRead  () { return False; }
+    Function LockWrite () { return False; }
+    
+    Function UnLock() {}
+  //
   }
 ?>

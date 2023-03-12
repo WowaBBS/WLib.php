@@ -3,47 +3,14 @@
 
   class C_Storage_Base extends C_Object
   {
-    Function _Init(Array $Args)
-    {
-      Parent::_Init($Args);
-    }
-    
-    Function _Done()
-    {
-      Parent::_Done();
-    }
+    Function _Init(Array $Args) { Parent::_Init($Args); }
+    Function _Done() { Parent::_Done(); }
   
-    Function IsChanged()
-    {
-      $this->Log('Fatal', 'Usupported');
-      return false;
-    }
-
-    Function Get($Default=[])
-    {
-      $this->Log('Fatal', 'Usupported');
-      return $Default;
-    }
-    
-    Function BeginUpdate($Default=[])
-    {
-      $this->Log('Fatal', 'Usupported');
-      return $Default;
-    }
-
-    Function EndUpdate($Vars)
-    {
-      $this->Log('Fatal', 'Usupported');
-    }
-
-    Function CancelUpdate()
-    {
-      $this->Log('Fatal', 'Usupported');
-    }
-    
-    Function Remove()
-    {
-      $this->Log('Fatal', 'Usupported');
-    }
+    Function IsChanged    (           ) { $this->Log('Fatal', 'Usupported'); return false; }
+    Function Get          ($Default=[]) { $this->Log('Fatal', 'Usupported'); return $Default; }
+    Function BeginUpdate  ($Default=[]) { $this->Log('Fatal', 'Usupported'); return $Default; }
+    Function EndUpdate    ($Vars      ) { $this->Log('Fatal', 'Usupported'); }
+    Function CancelUpdate (           ) { $this->Log('Fatal', 'Usupported'); }
+    Function Remove       (           ) { $this->Log('Fatal', 'Usupported'); }
   }
 ?>

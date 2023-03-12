@@ -5,6 +5,6 @@
   $Loader->GetLogger()->Add('TestPerformance.log');
 //$Loader->GetLogger()->Get('Console')->Disable();
   $TestPerformance=$Loader->Get_Singleton('/CharSet/TestPerformance');
-  
+  $Loader->Log('Log', 'Jit=', OpCache_Get_Status()['jit']['enabled']?? 'None');
   $TestPerformance->Start();
 ?>

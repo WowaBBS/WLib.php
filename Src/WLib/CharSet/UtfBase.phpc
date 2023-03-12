@@ -126,41 +126,44 @@
 
     Static $Coder_Map=[ 
       'Fast' =>'IConv' ,
-    //'Raw'  =>'Raw'   ,
+      'Raw'  =>'CB'    ,
     ];
     
     Var $Coder='IConv';
     
     Function SetCoder($v) { $this->Coder=Static::$Coder_Map[$v]?? $v; Return True; }
-    Function GetCoders() { Return ['IConv', 'Raw']; }
+    Function GetCoders() { Return ['IConv', 'Arr', 'CB']; }
 
     Function EnCode($From, $S)
     {
       If($this->Coder==='IConv')
         Return IConv($From->GetCharsetName(), $this->GetCharsetName(), $S);
       
-      If($this->Coder!=='Raw')
+      $Len=IntDiv(StrLen($S)*$this->GetMaxCharLen(), $From->GetMinCharLen());
+      $Res=Str_Repeat("\0", $Len);
+      $ReadPos=0;
+      $WritePos=0;
+      
+      If($this->Coder==='Arr')
+      {
+        $Arr=$From->Arr_DeCode($S, $ReadPos, StrLen($S));
+        $WritePos=$this->Slow_Arr_EnCode($Res, $Arr, $WritePos);
+      }
+      ElseIf($this->Coder==='CB')
+      {
+        $CB=$this->CB_EnCode($Res, $WritePos);
+        $From->CB_DeCode($CB, $S, $ReadPos, StrLen($S));
+      }
+      Else
       {
         $this->Log('Error', 'Unknown coder: ', $this->Coder)->BackTrace();
         Return IConv($From->GetCharsetName(), $this->GetCharsetName(), $S);
       }
-      
-      $Len=IntDiv(StrLen($S)*$this->GetMaxCharLen(), $From->GetMinCharLen());
-      $i=0;
-      $Res=$From->Arr_DeCode($S, $i, StrLen($S));
-      Return $this->Raw_EnCodeArr($Res, $Len);
+      If(StrLen($Res)>$WritePos)
+        $Res=SubStr($Res, 0, $WritePos);
+      Return $Res;
     }
   
-    Function Raw_EnCodeArr($a, $s='')
-    {
-      If(Is_Int($s))
-        $s=Str_Repeat("\0", $s);
-      $Len=$this->Slow_Arr_EnCode($s, $a);
-      If(StrLen($s)>$Len)
-        $s=SubStr($s, 0, $Len);
-      Return $s;
-    }
-    
     Static Function Slow_Arr_EnCodeSize($a) { Return Count($a); }
 
     Function EnCodeArr(&$s, $a, $i=0)

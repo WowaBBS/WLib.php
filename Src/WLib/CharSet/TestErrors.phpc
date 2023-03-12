@@ -14,8 +14,8 @@
     
     Function TestErrors()
     {
-      ForEach($this->GetCoders() As $CheckerName)
-        $this->TestCoder($this->GetCoder($CheckerName));
+      ForEach($this->GetCoders() As $Coder)
+        $this->TestCoder($Coder);
     }
     
     Function TestCoder($Coder)
@@ -79,7 +79,7 @@
       $s=Static::Arr_AllChars();
       ForEach($this->GetCoders() As $From)
         ForEach($this->GetCoders() As $To)
-          $this->TestRecode($this->GetCoder($From), $this->GetCoder($To), $s);
+          $this->TestRecode($From, $To, $s);
     }
     
     Function TestRecode($From, $To, $S)
@@ -87,7 +87,7 @@
       $this->Log('Log', '  Coder ', $From->GetCharsetName(), '=>', $To->GetCharsetName(),);
       $s     =$From ->Fast_Arr_EnCode($S);
       $Check =$To   ->Fast_Arr_EnCode($S);
-      ForEach($To->GetCoders()As $Func)
+      ForEach($To->GetCharSets()As $Func)
         $this->TestRecodeFunc($From, $To, $s, $Check, $Func);
     }
     
@@ -99,13 +99,12 @@
       $EnCoded=$To->EnCode($From, $s);
       If($EnCoded!==$Check)
       {
-      //$this->Log('Error', '  ', 'LenError ',StrLen($s), '!=', $l, ' ', Bin2Hex(SubStr($s, $l<0? ~$l:$l, 4)));
-        $this->Log('Error', '  ', 'EnCoded ', Bin2Hex($EnCoded ));
-        $this->Log('Error', '  ', 'Check   ', Bin2Hex($Check   ));
+        For($i=0, $c=Min(StrLen($EnCoded), StrLen($Check)); $i<$c; $i++)
+          if($EnCoded[$i]!==$Check[$i])
+            Break;
+        $this->Log('Error', '  ', 'EnCoded ', Bin2Hex(SubStr($EnCoded ,Max($i-4, 0) ,16)), ' Len: ',StrLen($EnCoded ), ' Pos:', $i);
+        $this->Log('Error', '  ', 'Check   ', Bin2Hex(SubStr($Check   ,Max($i-4, 0) ,16)), ' Len: ',StrLen($Check   ), ' Pos:', $i);
         $i=0;
-        //this->Log('Error', '  ', 'Size    ', $To::Arr_EnCodeSize($From->Arr_DeCode($s, $i, StrLen($s))));
-      //$i=0;
-      //$this->Log('Error', '  ', 'Arr     ', Iterator_To_Array($From->Arr_DeCode($s, $i, StrLen($s))));
         $Ok=False;
         Exit;
       }

@@ -1,0 +1,56 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  $Loader->GetLogger()->Add('MakeRegExp.log');
+# $Loader->GetLogger()->Get('Console')->Disable();
+
+  Function TimeToStr($Time)
+  {
+    $Time=(String)$Time;
+    $Time=IntDIv($Time, 1000);
+    $Time=Str_Pad($Time, IntDiv(StrLen($Time)+2,3)*3, ' ', STR_PAD_LEFT);
+    $Time=Trim(Implode('_', Str_Split($Time, 3)));
+    Return Str_Pad($Time, 9, ' ', STR_PAD_LEFT).'mks';
+  }
+  
+  Function MeasureTime($Func, ...$Args)
+  {
+    $Time=HrTime(True);
+    $Res=$Func(...$Args);
+    $Time=HrTime(True)-$Time;
+    Return $Res.' '.TimeToStr($Time);
+  }
+  
+  Function GetAllChars($EnCode)
+  {
+    $L=[];
+    For($i=0x0000; $i<0x00D800; $i++) $L[]=IConv('UTF-32BE',$EnCode, Pack('N*', $i));
+    For($i=0xE000; $i<0x110000; $i++) $L[]=IConv('UTF-32BE',$EnCode, Pack('N*', $i));
+    Return $L;
+  }
+  
+  $CharSets=[
+    'UTF-8'    ,
+    'UTF-16BE' ,
+    'UTF-16LE' ,
+    'UTF-32BE' ,
+    'UTF-32LE' ,
+  ];
+  $Boms=[
+    "\x00\x00\xFE\xFF" ,"\x00\x00\xFE" ,"\x00\x00" ,"\x00",
+    "\xEF\xBB\xBF"                     ,"\xEF\xBB" ,"\xEF",
+    "\xFE\xFF"                                     ,"\xFE",
+    "\xFF\xFE\x00\x00" ,"\xFF\xFE\x00" ,"\xFF\xFE" ,"\xFF",
+  ];
+  
+  $RegExpBuilder=$Loader->Get_Singleton('/RegExp/Builder');
+  $Funcs=[
+    'FromListWords' =>[$RegExpBuilder, 'FromListWords' ],
+  ];
+  ForEach($Funcs As $Name=>$Func)
+  {
+    $Loader->Log('Log', $Name, ':');
+    ForEach($CharSets As $To)
+      $Loader->Log('Log', ' Regexp for ', $To,' is ', MeasureTime($Func, GetAllChars($To)));
+    $Loader->Log('Log', ' Regexp for ', 'BOM',' is ', MeasureTime($Func, $Boms));
+  }
+?>

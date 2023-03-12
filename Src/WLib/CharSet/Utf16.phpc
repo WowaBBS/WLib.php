@@ -100,10 +100,11 @@
     
     Static $CheckErrors=[ // 00-D7  D8-DB  DC-DF  E0-FF
       [ 1, ['00'       ,'FF'       ], ['00'       ,'FF'       ]],
-      [ 0, ['0000'     ,'D7FF'     ], ['0000'     ,'FFD7'     ]],
+      [ 0, ['0000'                 ], ['0000'                 ]], //Zero
+      [ 0, ['0001'     ,'D7FF'     ], ['0100'     ,'FFD7'     ]],
       [ 0, ['E000'     ,'FFFF'     ], ['00E0'     ,'FFFF'     ]],
       [ 2, ['D800'     ,'DBFF'     ], ['00D8'     ,'FFDB'     ]],
-      [ 1, ['DE'       ,'DF'       ], [                       ]], // Not 3
+      [ 1, ['DE'       ,'DF'       ], [                       ]], //Not 3
       [14, ['DE00'     ,'DFFF'     ], ['00DE'     ,'FFDF'     ]],
       [ 1, ['D800D8'   ,'DBFFDB'   ], ['00D800'   ,'FFDBFF'   ]],
       [ 0, ['D800DC00' ,'DBFFDFFF' ], ['00D800DC' ,'FFDBFFDF' ]],
@@ -175,11 +176,18 @@
       Return $Res;
     }
     
-    Function Slow_Arr_EnCode(&$s, $a, $i=0) { Return $this->BigEndian? Static::Slow_Arr_EnCodeBe($s, $a, $i):Static::Slow_Arr_EnCodeLe($s, $a, $i); }
+    Function CB_EnCode(&$s, &$i)
+    {
+      Return $this->BigEndian //C_CharSet_Utf16
+        ?Function($c) Use(&$s, &$i) { Static::EnCodeCharBe($s, $c, $i); }
+        :Function($c) Use(&$s, &$i) { Static::EnCodeCharLe($s, $c, $i); };
+    }
     
+    Function Slow_Arr_EnCode(&$s, $a, $i=0) { Return $this->BigEndian? Static::Slow_Arr_EnCodeBe($s, $a, $i):Static::Slow_Arr_EnCodeLe($s, $a, $i); }
+
     Static Function Slow_Arr_EnCodeLe(&$s, $a, $i=0) { ForEach($a As $c) Static::EnCodeCharLe($s, $c, $i); Return $i; }
     Static Function Slow_Arr_EnCodeBe(&$s, $a, $i=0) { ForEach($a As $c) Static::EnCodeCharBe($s, $c, $i); Return $i; }
-    
+
     Static Function EnCodeCharSize($c)
     {
       Return Static::IsValidCharCode($c)? 1:0; //TODO: Size of bad char
@@ -224,10 +232,14 @@
   //****************************************************************
   // Decoder
   
+    Function CB_DeCode($Res, $s, &$i, $l) { Return $this->BigEndian? $this->CB_DeCodeBe($Res, $s, $i, $l):$this->CB_DeCodeLe($Res, $s, $i, $l); }
     Function Arr_DeCode($s, &$i, $l) { Return $this->BigEndian? $this->Arr_DeCodeBe($s, $i, $l):$this->Arr_DeCodeLe($s, $i, $l); }
   
-    Function Arr_DeCodeLe($s, &$i, $l) { $Res=[]; While($i<$l) If(($R=Static::DeCodeCharLe($s, $i))>=0) $Res[]=$R; Return $Res; }
-    Function Arr_DeCodeBe($s, &$i, $l) { $Res=[]; While($i<$l) If(($R=Static::DeCodeCharBe($s, $i))>=0) $Res[]=$R; Return $Res; }
+    Function CB_DeCodeLe($Res, $s, &$i, $l) { --$l; While($i<$l) If(($R=Static::DeCodeCharLe($s, $i))>=0) $Res($R); Else Break; }
+    Function CB_DeCodeBe($Res, $s, &$i, $l) { --$l; While($i<$l) If(($R=Static::DeCodeCharBe($s, $i))>=0) $Res($R); Else Break; }
+  
+    Function Arr_DeCodeLe($s, &$i, $l) { --$l; $Res=[]; While($i<$l) If(($R=Static::DeCodeCharLe($s, $i))>=0) $Res[]=$R; Else Break; Return $Res; }
+    Function Arr_DeCodeBe($s, &$i, $l) { --$l; $Res=[]; While($i<$l) If(($R=Static::DeCodeCharBe($s, $i))>=0) $Res[]=$R; Else Break; Return $Res; }
   
     Static Function DeCodeCharLe($s, &$i)
     {

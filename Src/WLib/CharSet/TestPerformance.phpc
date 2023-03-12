@@ -13,12 +13,16 @@
       For($i=0; $i<$this->CountString; $i++)
         $S[]=Static::Arr_RandomChars($this->ShortStringLength);
       
-      ForEach($this->GetCoders() As $CheckerName)
-        $this->TestChecker($this->GetCoder($CheckerName), $S);
+      ForEach($this->GetCoders() As $Coder)
+        $this->TestChecker($Coder, $S);
 
       ForEach($this->GetCoders() As $From)
         ForEach($this->GetCoders() As $To)
-          $this->TestCoder($this->GetCoder($From), $this->GetCoder($To), $S);
+          $this->TestCoder($From, $To, $S);
+
+      ForEach($this->GetCoders() As $From)
+        ForEach($this->GetCoders() As $To)
+          $this->TestCoder($From, $To, $S);
     }
     
   //****************************************************************
@@ -76,7 +80,7 @@
 
     Function TestCoderForStr($From, $To, $S)
     {
-      ForEach($To->GetCoders()As $Func)
+      ForEach($To->GetCharSets()As $Func)
         $this->TestCoderFunc($From, $To, $S, $Func);
     }
     

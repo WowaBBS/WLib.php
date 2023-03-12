@@ -28,11 +28,11 @@
     //-11111110 5     254<=  <255  FE<=  <FF  7   0   36
     //-11111111 5     255<=  <256  FF<=       8   0   42
     
-    Static String $CharType=
-      "\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1".
-      "\0\0\0\0\0\0\0\0\2\2\2\2\3\3\4\5";
+    Const CharTypeChr ="\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1\1\0\0\0\0\0\0\0\0\2\2\2\2\3\3\4\5";
+    Const CharType    =[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,2,2,2,2,3,3,4,5];
     
-    Static Function GetCharType($c) { Return Static::$CharType[Ord($c)>>3]; }
+    Static Function GetCharType($c) { Return Static::CharType[Ord($c)>>3]; }
+    Static Function GetCharTypeChr($c) { Return Static::CharTypeChr[Ord($c)>>3]; }
     
   //****************************************************************
   // Check by Chars
@@ -43,7 +43,7 @@
       $i=$l;
       While((--$i)>=$Offet)
       {
-        Switch($j=Ord(Static::GetCharType($s[$i])))
+        Switch($j=Static::GetCharType($s[$i]))
         {
         Case 0: Break;
         Case 1: Return $i+1;
@@ -69,7 +69,7 @@
     
     Static Function Chars_CheckChar($s, $i)
     {
-      Switch($j=Ord(Static::GetCharType($s[$i])))
+      Switch($j=Static::GetCharType($s[$i]))
       {
       Case 1: Return 1;
       Case 4:
@@ -77,9 +77,9 @@
       Case 2:
         $r=StrLen($s)-$i-$j;
         If($r<0) Return $r; //-1. -2. -3
-        If(        Static::GetCharType($s[$i+1])!=="\0") Return -4;
-        If($j>2 && Static::GetCharType($s[$i+2])!=="\0") Return -5;
-        If($j>3 && Static::GetCharType($s[$i+3])!=="\0") Return -6;
+        If(        Static::GetCharType($s[$i+1])!==0) Return -4;
+        If($j>2 && Static::GetCharType($s[$i+2])!==0) Return -5;
+        If($j>3 && Static::GetCharType($s[$i+3])!==0) Return -6;
         Return $j;
       Case 0: Return -7;
       Case 5: Return -8;
@@ -93,7 +93,7 @@
     {
       $r=$s;
       for($i=0, $l=StrLen($s); $i<$l; $i++)
-        $r[$i]=Static::GetCharType($s[$i]);
+        $r[$i]=Static::GetCharTypeChr($s[$i]);
       Return $r;
     }
     
@@ -140,13 +140,16 @@
   
     Static $Regexp_Templates=[
       'Full'=>[
-        '[\x00-\x7F]'               ,
+      //'[\x00-\x7F]'                        ,
+        '[\x01-\x7F]'                        ,
         '[\xC0-\xDF][\x80-\xBF]'    ,
         '[\xE0-\xEF][\x80-\xBF]{2}' ,
         '[\xF0-\xF7][\x80-\xBF]{3}' ,
       ],
       'Strict'=>[
-        '[\x00-\x7F]'                        ,
+      //'[\x00-\x7F]'                        ,
+        '[\x01-\x7F]'                        ,
+      //'\xC0\x80'                           , // Null in Java
         '[\xC2-\xDF]'.      '[\x80-\xBF]'    ,
         '\xE0'.  '[\xA0-\xBF][\x80-\xBF]'    ,
         '[\xE1-\xEC\xEE-\xEF][\x80-\xBF]{2}' ,
@@ -173,7 +176,7 @@
       $c=Static::DeCodeChar($s, $i);
       If(Static::EnCodeCharSize($c)!==$Res) 
       {
-      //$this->Log('Debug', Static::EnCodeCharSize($Char),'!==',$Res, ' Char:',$Char, ' Type:',Ord(Static::GetCharType($s[$i])));
+      //$this->Log('Debug', Static::EnCodeCharSize($Char),'!==',$Res, ' Char:',$Char, ' Type:',Static::GetCharType($s[$i]));
         Return 10;
       }
       If($c>>11===27) Return 11;
@@ -197,9 +200,11 @@
       [ 0, ['E0A080'   ,'EFBFBF'   ]],
       [11, ['EDA080'   ,'EDBFBF'   ]],
       [ 1, ['C0'       ,'DF'       ]],
-      [10, ['C080'     ,'C1BF'     ]],
+    //[10, ['C080'                 ]], //<Zero in Java
+      [10, ['C081'     ,'C1BF'     ]],
       [ 0, ['CC80'     ,'DFBF'     ]],
-      [ 0, ['00'       ,'7F'       ]],
+      [ 0, ['00'                   ]], //<Zero
+      [ 0, ['01'       ,'7F'       ]],
       [ 7, ['80'       ,'BF'       ]],
       [ 8, ['F8'       ,'FF'       ]],
       [ 9, [''         ,''         ]],
@@ -275,6 +280,11 @@
       Return $i;
     }
     
+    Function CB_EnCode(&$s, &$i)
+    {
+      Return Function($c) Use(&$s, &$i) { Static::EnCodeChar($s, $c, $i); };
+    }
+    
     Static Function EnCodeCharSize($c)
     {
       if($c<(1<< 7)) Return 1;
@@ -321,17 +331,18 @@
   //****************************************************************
   // Decoder
   
-    Function Arr_DeCode($s, &$i, $l) { $Res=[]; While($i<$l) If(($R=Static::DeCodeChar($s, $i))>=0) $Res[]=$R; Return $Res; }
+    Function Cb_DeCode($Res, $s, &$i, $l) { While($i<$l) If(($R=Static::DeCodeChar($s, $i))>=0) $Res($R); Else Break; }
+    Function Arr_DeCode($s, &$i, $l) { $Res=[]; While($i<$l) If(($R=Static::DeCodeChar($s, $i))>=0) $Res[]=$R; Else Break; Return $Res; }
   
     Static Function DeCodeChar($s, &$i)
     {
       Switch(Static::GetCharType($s[$i]))
       {
-      Case "\1": Return Static::DeCodeChar1($s, $i);
-      Case "\2": Return Static::DeCodeChar2($s, $i);
-      Case "\3": Return Static::DeCodeChar3($s, $i);
-      Case "\4": Return Static::DeCodeChar4($s, $i);
-      Default  : Return -1;
+      Case  1: Return Static::DeCodeChar1($s, $i);
+      Case  2: Return Static::DeCodeChar2($s, $i);
+      Case  3: Return Static::DeCodeChar3($s, $i);
+      Case  4: Return Static::DeCodeChar4($s, $i);
+      Default: Return -1;
       }
     }
     

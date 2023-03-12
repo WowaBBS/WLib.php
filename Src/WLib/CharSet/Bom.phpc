@@ -3,26 +3,14 @@
   
   Class C_CharSet_Bom Extends C_CharSet_Factory
   {
-    Var $BomCharSets=[
-      "\xEF\xBB\xBF"     =>'UTF-8'    ,
-      "\xFF\xFE"         =>'UTF-16LE' ,
-      "\xFE\xFF"         =>'UTF-16BE' ,
-      "\xFF\xFE\x00\x00" =>'UTF-32LE' ,
-      "\x00\x00\xFE\xFF" =>'UTF-32BE' ,
-    ];
-    
-    Var $CharSet='UTF-8';
-    
   //****************************************************************
-  // Map version
-    Var $Map; //[FirstChar=>[CharSet=>'Name', 'Bom'=>'Bom', HasMore=>False|True ,SechonChar=>[...]]]
+  // Detect Bom
+  
+    Var $DetectBom_Map; //[FirstChar=>[CharSet=>'Name', 'Bom'=>'Bom', HasMore=>False|True ,SechonChar=>[...]]]
     
-    Function GetMap()
-    {
-      Return $this->RegMap??=$this->_GetMap();
-    }
+    Function DetectBom_GetMap() { Return $this->DetectBom_Map??=$this->DetectBom_CreateMap(); }
     
-    Function _GetMap()
+    Function DetectBom_CreateMap()
     {
       $Def=[
         'Bom'     =>   '',
@@ -31,7 +19,12 @@
         'HasMore' => True,
       ];
       $Map=$Def;
-      ForEach($this->BomCharSets As $Bom=>$CharSet)
+      $BomCharSets=[];
+      ForEach($this->GetCharSets() As $CharSet)
+        $BomCharSets[IConv('UTF-8', $CharSet, "\u{FEFF}")]=$CharSet;
+      UKSort($BomCharSets, fn($a, $b)=>StrLen($a)<=>StrLen($b));
+    //$this->Debug($BomCharSets);
+      ForEach($BomCharSets As $Bom=>$CharSet)
       {
         $M=&$Map;
         $Last=$Def;
@@ -54,9 +47,9 @@
       Return $Map;
     }
     
-    Function DetectBom($S, $End=False)
+    Function DetectBom($S)
     {
-      $M=$this->GetMap();
+      $M=$this->DetectBom_GetMap();
       For($i=0, $l=StrLen($S); $i<$l; $i++)
         If($m=$M[$S[$i]]?? false)
           $M=$m;
@@ -65,11 +58,13 @@
       $Bom     =$M['Bom'     ];
       $CharSet =$M['CharSet' ];
       $Len     =$M['Len'     ];
-      $HasMore =$M['HasMore' ]; // && ($S===$Bom || $Bom==='') && !$End;
+      $HasMore =$M['HasMore' ] && $Len===StrLen($S);
 
-      Return [$Bom, $CharSet, $HasMore && $Len===StrLen($S) && !$End]; //$S,
+      Return [$Bom, $CharSet, $HasMore];
     }
     
+  //****************************************************************
+  //Var $RegExpBom=(?:\x00(?:\x00(?:\xFE\xFF?)?)?|\xEF(?:\xBB\xBF?)?|\xFE\xFF?|\xFF(?:\xFE(?:\x00\x00?)?)?)
   //****************************************************************
   }
 ?>

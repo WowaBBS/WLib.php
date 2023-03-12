@@ -4,14 +4,13 @@
   Class C_Object_Base
   {
     Private Static $Object_Counter=0;
-    Private $Object_Weak =null;
     Var     $Object_Id   ;
     Var     $Loader      =null;
  
     //****************************************************************
     // Object
-    
-    Function Object_GetWeak() { return $this->Object_Weak??=WeakReference::Create($this); }
+
+    Function Object_GetWeak() { return WeakReference::Create($this); }
 
   //Static Function Cr($Owner, $Args):Static { return $Owner->Create_Object(Static::Class, $Args); }
     
@@ -42,7 +41,7 @@
     Protected Function _Debug_Info(Array &$Res)
     {
       if($this->Loader!==null) unset($Res['Loader'        ]);
-      if($this->Object_Inited===1) unset($Res['Object_Inited' ]);
+      if($this->Object_Inited===True) unset($Res['Object_Inited' ]);
     }
     
     /// Debug manager
@@ -65,7 +64,7 @@
     //****************************************************************
     // Time life
 
-    Private $Object_Inited =0;
+    Private $Object_Inited =False;
     
     Function IsObjectInited() { return $this->Object_Inited; }
     

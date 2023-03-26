@@ -59,11 +59,14 @@
       'FastLe'=>'...\0',
       'FastBe'=>'\0...',
 
-      'FullLe'=>'..[\0-\x10]\0',
-      'FullBe'=>'\0[\0-\x10]..',
+      'FullLe'=>'..[\0-\20]\0',
+      'FullBe'=>'\0[\0-\20]..',
     
-      'StrictLe'=>'.(?:[\0-\xD7\xE0-\xFF][\0-\x10]|[\xD8-\xDF][\1-\x10])\0',
-      'StrictBe'=>'\0(?:\0[\0-\xD7\xE0-\xFF]|[\1-\x10].).',
+      'StrictLe'=>'.(?:[\0-\xD7\xE0-\xFF][\0-\20]|[\xD8-\xDF][\1-\20])\0',
+      'StrictBe'=>'\0(?:\0[\0-\xD7\xE0-\xFF]|[\1-\20].).',
+      
+      'StrictLe1'=>'(?:\0(?:[\0\xD8-\xDF][\1-\20]\0|[\1-\xD7\xE0-\xFF][\0-\20]\0)|[\1-\xFF](?:[\0-\xD7\xE0-\xFF][\0-\20]\x00|[\xD8-\xDF][\1-\20]\0))',
+      'StrictBe1'=>'\0(?:\0(?:\0[\1-\xFF]|[\1-\xD7\xE0-\xFF].)|[\1-\20]..)',
     ];
   
   //****************************************************************
@@ -98,7 +101,8 @@
   // Checker
 
     Static $Checkers_Map=[
-      'Full'=>'RegExp_Strict' ,
+      'Full'   =>'RegExp_Strict' ,
+      'Strict' =>'RegExp_Strict' ,
     ];
 
     Function SetChecker($v)
@@ -112,7 +116,7 @@
       Case 'RegExp_Full'   : $v='RegExp'; $this->SetCheckerRegexp($this->BigEndian? 'FullBe'   :'FullLe'   ); Break;
       Case 'RegExp_Strict' : $v='RegExp'; $this->SetCheckerRegexp($this->BigEndian? 'StrictBe' :'StrictLe' ); Break;
       Default:
-        $this->Log('Error', 'Unnown Checker ', $v)->BackTrace();
+        $this->Log('Error', 'Unkown Checker ', $v)->BackTrace();
         $this->SetChecker('Full');
       }
       $this->Checker=$v;

@@ -3,6 +3,25 @@
   
   Class C_CharSet_Factory Extends C_Object
   {
+    Var $List=[
+      'UTF-8'    ,
+      'UTF-16LE' ,
+      'UTF-16BE' ,
+      'UTF-32LE' ,
+      'UTF-32BE' ,
+    ];
+    Var $Groups=[
+      'Unicode' =>['UTF-8', 'UTF-16', 'UTF-32'],
+      'UTF-16'  =>['UTF-16LE', 'UTF-16BE'],
+      'UTF-32'  =>['UTF-32LE', 'UTF-32BE'],
+    ];
+    
+    Function _Init($Args)
+    {
+      $this->List=$Args['CharSets']?? $this->List;
+      Parent::_Init($Args);
+    }
+  
     Function GetCoder($CharSet='', Array $Args=[])
     {
       $Args+=['Checker'=>'Strict', 'Coder'=>'Fast'];
@@ -30,96 +49,37 @@
       ];
     }
     
-    Function GetCharSets()
-    {
-      Return [
-        'UTF-8'    ,
-        'UTF-16LE' ,
-        'UTF-16BE' ,
-        'UTF-32LE' ,
-        'UTF-32BE' ,
-      ];
-    }
+    Function GetCharSets() { Return $this->List; }
     
   //****************************************************************
   // Detect
   
-    Function Detect($S, $Args)
+    Var $Detectors=['Bom', 'MbString', 'Manual'];
+    Var $Default_Detector='MbString';// 'Manual'
+  
+    Function GetDetectorNames() { Return $this->Detectors; }
+    Function GetDetectors($Args=[])
     {
-      If($Args['OnlyBom']?? False)
-        Return $this->DetectBom($S);
-      $Args+=[
-        'MinLen'  =>     4,
-        'MaxLen'  =>    16,
-        'Bom'     =>  True,
-      ];
-      
-      $Bom     ='';
-      $CharSet ='';
-      $HasMore =StrLen($S)<$Args['MinLen'];
-
-      ForEach($this->GetCoders()As $CharSet=>$Coder)
-      {
-      
-      }
-      
-      Return [$Bom, $CharSet, $HasMore];
+      ForEach($this->GetDetectorNames()As $Name)
+        Yield $Name=>$this->GetDetector($Name, $Args);
     }
-
-  //****************************************************************
-  // Detect Bom
-  //                      (?:\x00(?:\x00(?:\xFE\xFF?|)|)|\xEF(?:\xBB\xBF?|)|\xFE\xFF?|\xFF(?:\xFE(?:\x00\x00?|)|))
-    Static $Bom_RegExp="/^(?:\x00(?:\x00(?:\xFE\xFF?)?)?|\xEF(?:\xBB\xBF?)?|\xFE\xFF?|\xFF(?:\xFE(?:\x00\x00?)?)?)/";
-    Static $Bom_CheckMap=[
-      "\x00\x00\xFE\xFF" =>["\x00\x00\xFE\xFF" ,'UTF-32BE' ,False ],
-      "\x00\x00\xFE"     =>[''                 ,''         ,True  ],
-      "\x00\x00"         =>[''                 ,''         ,True  ],
-      "\x00"             =>[''                 ,''         ,True  ],
-      "\xEF\xBB\xBF"     =>["\xEF\xBB\xBF"     ,'UTF-8'    ,False ],
-      "\xEF\xBB"         =>[''                 ,''         ,True  ],
-      "\xEF"             =>[''                 ,''         ,True  ],
-      "\xFE\xFF"         =>["\xFE\xFF"         ,'UTF-16BE' ,False ],
-      "\xFE"             =>[''                 ,''         ,True  ],
-      "\xFF\xFE\x00\x00" =>["\xFF\xFE\x00\x00" ,'UTF-32LE' ,False ],
-      "\xFF\xFE\x00"     =>["\xFF\xFE"         ,'UTF-16LE' ,True  ],
-      "\xFF\xFE"         =>["\xFF\xFE"         ,'UTF-16LE' ,True  ],
-      "\xFF"             =>[''                 ,''         ,True  ],
-      ''                 =>[''                 ,''         ,True  ],
-      ' '                =>[''                 ,''         ,False ],
-    ];
-        
-    Function DetectBom($S)
+  
+    Function GetDetector($Name='Defaut', $Args=[])
     {
-      If($S==='') Return ['', '', True];
+      iF($Name==='Default') $Name=$this->Default_Detector;
       
-      Switch($S[0])
-      {
-      Case "\x00": $Bom="\x00\x00\xFE\xFF" ; $CharSet='UTF-32BE' ; Break;
-      Case "\xEF": $Bom="\xEF\xBB\xBF"     ; $CharSet='UTF-8'    ; Break;
-      Case "\xFE": $Bom="\xFE\xFF"         ; $CharSet='UTF-16BE' ; Break;
-      Case "\xFF": $Bom="\xFF\xFE\x00\x00" ; $CharSet='UTF-32LE' ; Break;
-      Default: Return ['', '', False];
-      }
-      $l=StrSpn($S^$Bom ,"\0");
-      $HasMore=$l===StrLen($S) && $l<StrLen($Bom);
-    //$this->Log('Debug')->Debug([$S, $Bom, $l]);
-      If($l<StrLen($Bom))
-      {
-        If($CharSet==='UTF-32LE' && $l>=2)
-        {
-          $Bom     ="\xFF\xFE";
-          $CharSet ='UTF-16LE';
-        }
-        Else
-        {
-          $Bom     ='';
-          $CharSet ='';
-        }
-      }
-
-      Return [$Bom, $CharSet, $HasMore];
+      If($Detector=$this->Create_Object('/CharSet/Detect/'.$Name, $Args+['Factory'=>$this]))
+        Return $Detector;
+      $this->Log('Error', 'Unknown Detector ',$Name);
+      Return $this->GetDetector('Default', $Args);
     }
-
+  
+    Function Detect($S, $Name='Defaut', $Args=[])
+    {
+      $Detector=$this->GetDetector($Name, $Args);
+      Return $Detector->Detect($S);
+    }
+    
   //****************************************************************
   }
 ?>

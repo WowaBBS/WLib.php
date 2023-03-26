@@ -1,0 +1,59 @@
+<?
+  $this->Parent_Class('/CharSet/Detect/Base');
+  
+  Class C_CharSet_Detect_Bom Extends C_CharSet_Detect_Base
+  {
+    Var $Match  =[];
+    Var $RegExp =[];
+    
+    Function _Init($Args)
+    {
+      Parent::_Init($Args);
+      
+      $Boms=[];
+      ForEach($this->GetCoders()As $CharSet=>$Coder)
+        ForEach($Coder->GetBoms()As $Bom)
+          $Boms[$Bom]=$CharSet;
+
+      UKSort($Boms, fn($a, $b)=>StrLen($a)<=>StrLen($b)?: StrCmp($a, $b));
+      
+      $Match=[];
+      ForEach($Boms As $Bom=>$CharSet)
+      {
+        $Prev=[0, '', True];
+        For($i=0, $c=StrLen($Bom); $i<$c; $i++)
+        {
+          $S=SubStr($Bom, 0, $i);
+          $m=$Match[$S]?? $Prev;
+          $m[2]=True;
+          $Match[$S]=$m;
+          $Prev=$m;
+        }
+        $Match[$Bom]=[StrLen($Bom), $CharSet, False];
+      }
+      UnSet($m);
+      
+      $Builder=$this->Loader->Get_Singleton('/RegExp/Builder');
+      $RegExp=$Builder->FromListWords(Array_Keys($Match));
+      $RegExp='/^'.$RegExp.'/sS';
+      
+      $this->Match  =$Match  ;
+      $this->RegExp =$RegExp ;
+    }
+    
+    Function Detect($Str)
+    {
+      $Res=[0, '', False];
+      If(Preg_Match($this->RegExp, $Str, $Match))
+      {
+        $S=$Match[0];
+        $Res=$this->Match[$S];
+        If($Res[2] && StrLen($S)!==StrLen($Str))
+          $Res[2]=False;
+      }
+      Return $Res;
+    }
+  //****************************************************************
+  }
+  
+?>

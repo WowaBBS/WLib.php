@@ -6,6 +6,10 @@
     Function GetMinCharLen() { Return 1; }
     Function GetMaxCharLen() { Return 1; }
     Function IsBigEndian() { Return True; }
+    
+    Function GetBom() { Return IConv('UTF-8', $this->GetCharsetName(), "\u{FEFF}"); }
+    Function GetBomLen() { Return StrLen($this->GetBom()); }
+    Function GetBoms() { $R=$this->GetBom(); Return $R? [$R]:[]; }
 
     Protected Function _Init(Array $Args)
     {
@@ -14,7 +18,7 @@
       If($Coder   =$Args['Coder'   ]?? False) $this->SetCoder   ($Coder   );
     }
     
-    Function GetCharsetName() { Return 'Bytes'; }
+    Function GetCharsetName() { Return 'Binary'; }
     
   //****************************************************************
   // Check by regexp
@@ -87,6 +91,8 @@
     { // Fix DeCode
       Return $v>=0 && $v>>11!==27 && $v<0x110000;
     }
+    
+    Static Function IsErrorCode($c) { Return Match($c) { 0,1,2,3,9=>False, Default=>True }; } //9?
   
     Static $Errors=[
        0=>'No error'                                  , // Any

@@ -3,7 +3,6 @@
   
   Class C_CharSet_TestErrors Extends C_CharSet_Factory
   {
-  
     Function Start()
     {
       $this->TestErrors();
@@ -87,7 +86,7 @@
       $this->Log('Log', '  Coder ', $From->GetCharsetName(), '=>', $To->GetCharsetName(),);
       $s     =$From ->Fast_Arr_EnCode($S);
       $Check =$To   ->Fast_Arr_EnCode($S);
-      ForEach($To->GetCharSets()As $Func)
+      ForEach($To->GetCoders()As $Func)
         $this->TestRecodeFunc($From, $To, $s, $Check, $Func);
     }
     
@@ -123,6 +122,27 @@
     
     Static Function Arr_AllChars() { Return Iterator_To_Array(Static::Gen_AllChars()); }
     
+  //****************************************************************
+  // Detect Bom
+
+    Static $Bom_CheckMap=[
+      "\x00\x00\xFE\xFF" =>["\x00\x00\xFE\xFF" ,'UTF-32BE' ,False ],
+      "\x00\x00\xFE"     =>[''                 ,''         ,True  ],
+      "\x00\x00"         =>[''                 ,''         ,True  ],
+      "\x00"             =>[''                 ,''         ,True  ],
+      "\xEF\xBB\xBF"     =>["\xEF\xBB\xBF"     ,'UTF-8'    ,False ],
+      "\xEF\xBB"         =>[''                 ,''         ,True  ],
+      "\xEF"             =>[''                 ,''         ,True  ],
+      "\xFE\xFF"         =>["\xFE\xFF"         ,'UTF-16BE' ,False ],
+      "\xFE"             =>[''                 ,''         ,True  ],
+      "\xFF\xFE\x00\x00" =>["\xFF\xFE\x00\x00" ,'UTF-32LE' ,False ],
+      "\xFF\xFE\x00"     =>["\xFF\xFE"         ,'UTF-16LE' ,True  ],
+      "\xFF\xFE"         =>["\xFF\xFE"         ,'UTF-16LE' ,True  ],
+      "\xFF"             =>[''                 ,''         ,True  ],
+      ''                 =>[''                 ,''         ,True  ],
+      ' '                =>[''                 ,''         ,False ],
+    ];
+        
   //****************************************************************
   }
 ?>

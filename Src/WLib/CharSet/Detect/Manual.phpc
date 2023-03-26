@@ -1,0 +1,81 @@
+<?
+  $this->Parent_Class('/CharSet/Detect/Base');
+  
+  Class C_CharSet_Detect_Manual Extends C_CharSet_Detect_Base
+  {
+    Var $StopBom =True;
+    Var $NoZero  =True;
+    
+    Function _Init($Args)
+    {
+      $this->StopBom =$Args['StopBom' ]?? $this->StopBom ;
+      $this->NoZero  =$Args['NoZero'  ]?? $this->NoZero  ;
+      
+      Parent::_Init($Args);
+    }
+    
+    Function _Detect($Str)
+    {
+      $Len=StrLen($Str);
+      $To=$this->GetCoder('UTF-8');
+      
+      $Res=[];
+      $Strs=[];
+      ForEach($this->GetCoders()As $CharSet=>$Coder) //TODO: $CharSets
+      {
+        $L=$Coder->Check($Str);
+        If($L<0) $L=~$L;
+        If($L===0) Continue; //Not detected
+        If($L<$Len)
+        {
+          $E=$Coder->GetCharErrorCode($Str, $L);
+          If($Coder::IsErrorCode($E)) Continue;
+        }
+
+        $R=$To->EnCode($Coder, SubStr($Str, 0, $L));
+        
+        If($this->NoZero && StrPos($R, "\0")!==False) Continue;
+        If($this->StopBom && Str_Starts_With($R, "\u{FEFF}")) Return $CharSet; //<TODO: May be several cases
+        
+        $Strs[$CharSet]=$R;
+        $Res[]=$CharSet;
+      }
+      
+      Switch(Count($Res))
+      {
+      Case 0: Return '';
+      Case 1: Return $Res[0];
+      Default:
+      }
+      If($Len<$this->MaxLen) Return '';
+      
+      $Diffs=[];
+      ForEach($Strs As $CharSet=>$R)
+        $Diffs[$CharSet]=$this->CalcDiff($R);
+      
+      ASort($Diffs, SORT_NUMERIC);
+      ForEach($Diffs As $CharSet=>$Diff)
+        Return $CharSet;
+
+      Return ''; //Unreacable
+    }
+
+    Function CalcDiff($S)
+    {
+      $A=UnPack('N*', IConv('UTF-8', 'UTF-32BE', $S));
+      $Diff=0;
+      $Prev=0;
+      ForEach($A As $c)
+      {
+        $Delta=Abs($Prev-$c);
+        If($Delta>=0x00080) $Diff++; // UTF-8
+        If($Delta>=0x00100) $Diff++; // UTF-16
+        If($Delta>=0x01000) $Diff++;
+        If($Delta>=0x10000) $Diff++; // UTF-32
+        $Prev=$c;
+      }
+      Return $Diff;
+    }
+
+  }
+?>

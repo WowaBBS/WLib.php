@@ -140,14 +140,29 @@
   
     Static $Regexp_Templates=[
       'Full'=>[
-      //'[\x00-\x7F]'                        ,
-        '[\x01-\x7F]'                        ,
+        '[\x00-\x7F]'               ,
         '[\xC0-\xDF][\x80-\xBF]'    ,
         '[\xE0-\xEF][\x80-\xBF]{2}' ,
         '[\xF0-\xF7][\x80-\xBF]{3}' ,
       ],
       'Strict'=>[
-      //'[\x00-\x7F]'                        ,
+        '[\x00-\x7F]'                        ,
+        '\xC0\x80'                           , // Null in Java
+        '[\xC2-\xDF]'.      '[\x80-\xBF]'    ,
+        '\xE0'.  '[\xA0-\xBF][\x80-\xBF]'    ,
+        '[\xE1-\xEC\xEE-\xEF][\x80-\xBF]{2}' ,
+        '\xED'.  '[\x80-\x9F][\x80-\xBF]'    ,
+        '\xF0'.  '[\x90-\xBF][\x80-\xBF]{2}' ,
+        '[\xF1-\xF3]'.      '[\x80-\xBF]{3}' ,
+        '\xF4[\x80-\x8F]'.  '[\x80-\xBF]{2}' ,
+      ],
+      'Full1'=>[
+        '[\x01-\x7F]'                        ,
+        '[\xC0-\xDF][\x80-\xBF]'    ,
+        '[\xE0-\xEF][\x80-\xBF]{2}' ,
+        '[\xF0-\xF7][\x80-\xBF]{3}' ,
+      ],
+      'Strict1'=>[
         '[\x01-\x7F]'                        ,
       //'\xC0\x80'                           , // Null in Java
         '[\xC2-\xDF]'.      '[\x80-\xBF]'    ,
@@ -160,8 +175,10 @@
       ],
     ];
     Static $Regexp_Limit=[
-      'Full'   =>240,
-      'Strict' =>110,
+      'Full'    =>240,
+      'Strict'  =>110,
+      'Full1'   =>240,
+      'Strict1' =>110,
     ];
     
   //****************************************************************
@@ -215,6 +232,7 @@
   
     Static $Checkers_Map=[
       'Full'     =>'RegExp_Strict' ,
+      'Strict'   =>'RegExp_Strict' ,
       'Raw_Full' =>'Chars_Full',
     ];
   
@@ -229,7 +247,7 @@
       Case 'RegExp_Full'   : $v='RegExp'; $this->SetCheckerRegexp('Full'   ); Break;
       Case 'RegExp_Strict' : $v='RegExp'; $this->SetCheckerRegexp('Strict' ); Break;
       Default:
-        $this->Log('Error', 'Unnown Checker ', $v)->BackTrace();
+        $this->Log('Error', 'Unkown Checker ', $v)->BackTrace();
         $this->SetChecker('Full');
       }
       $this->Checker=$v;

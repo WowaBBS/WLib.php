@@ -80,7 +80,7 @@
 
     Function TestCoderForStr($From, $To, $S)
     {
-      ForEach($To->GetCharSets()As $Func)
+      ForEach($To->GetCoders()As $Func)
         $this->TestCoderFunc($From, $To, $S, $Func);
     }
     

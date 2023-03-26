@@ -1,0 +1,20 @@
+<?
+  $this->Parent_Class('/CharSet/Detect/Base');
+  
+  Class C_CharSet_Detect_MbString Extends C_CharSet_Detect_Base
+  {
+    Var $Strict   = False ;
+    
+    Function _Init($Args)
+    {
+      $this->Strict=$Args['Strict']?? $this->Strict;
+      
+      Parent::_Init($Args);
+    }
+    
+    Function _Detect($Str)
+    {
+      Return Mb_Detect_EnCoding($Str, $this->GetCharSets(), $this->Strict);
+    }
+  }
+?>

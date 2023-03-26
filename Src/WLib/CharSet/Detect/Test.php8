@@ -1,0 +1,45 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+
+  $FilePath=__FILE__;
+  $Loader->GetLogger()->Add('Test.log');
+  $Factory=$Loader->Get_Singleton('/CharSet/Factory');
+
+  $SpecialWord='TheSpecialWord';
+
+  $StrRu="\u{41f}\u{440}\u{438}\u{432}\u{435}\u{442}";
+  $StrJp="\u{884c}\u{304d}\u{3066}";
+  $StrOther="\u{fdfd}\u{1f600}";
+  $Unicode=$StrRu.$StrJp.$StrOther;
+//$Loader->Log('Debug', 'Unicode=', $Unicode, ';');
+  $Content=File_Get_Contents($FilePath);
+  $Content=Str_Replace($SpecialWord ,$Unicode ,$Content);
+
+  $Tests=['Hello'];
+  ForEach($Factory->GetCharSets() As $CharSet)
+    $Tests[]='UTF-8'!==$CharSet? IConv('UTF-8', $CharSet, $Content):$Content;
+
+//$Loader->Log('Debug', 'aaa')->Debug($Reader);
+
+//$CharSet='UTF-16LE';
+
+  ForEach($Factory->GetDetectors() As $DetectorName=>$Detector)
+  {
+    $Loader->Log('Log', 'Detector ', $DetectorName);
+  
+    ForEach($Factory->GetCharSets()As $CharSet)
+      ForEach(["\u{FEFF}", '']As $Bom)
+      {
+        If($DetectorName==='Bom' && !$Bom)
+          Continue;
+        
+        $ContentFrom=IConv('UTF-8', $CharSet, $Bom.$Content);
+        
+        [$DetectBom, $DetectCharSet, $NeedMore]=$Detector->Detect($ContentFrom);
+        
+        $Ok=$CharSet===$DetectCharSet;
+        If($Ok) $Loader->Log('Log'   ,'Charset ',Str_Pad($CharSet,8), ' with',$Bom? '    ':'out ', 'bom is ok');
+        Else    $Loader->Log('Error' ,'Charset ',Str_Pad($CharSet,8), ' with',$Bom? '    ':'out ', 'bom is not ok, ', $DetectCharSet? 'detected: '.$DetectCharSet:'is not detected');
+      }
+  }
+?>

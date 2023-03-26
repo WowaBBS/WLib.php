@@ -1,0 +1,145 @@
+<?
+  $this->Parent_Class('/Object');
+  
+  Class C_CharSet_ReCoder Extends C_Object
+  {
+    Var $Factory  ;
+    
+    Var $From     ; // DeCoder
+    Var $To       ; // EnCoder
+    Var $Rest     ='';
+    Var $IsEnd    =False ;
+    Var $NeedMore =True  ;
+    Var $Debug    =False ;
+    
+    Var $DeCoder  ='Detect'; //Detect, AsIs, ReCode
+    
+    Var $Detect   =[
+      'Detector'    =>'Default', // My, MbString, Bom, Default
+    //'Detector'    =>'MbString', // My, MbString, Bom, Default
+    //'StopBom'     =>False,
+    //'Charsets'    =>['UTF-8', 'UTF-16BE', 'UTF-16LE', 'UTF-32BE', 'UTF-32LE'],
+      'Utf8AsBytes' =>True,
+    ];
+    Var $Bom      ='';
+    
+    Function _Init($Args)
+    {            
+      $Factory =$Args['Factory' ]?? Null;
+      $To      =$Args['To'      ]?? 'UTF-8';
+      $Detect  =$Args['Detect'  ]?? [];
+      $this->Debug  =$Args['Debug'   ]?? $this->Debug;
+      $this->Detect =$Detect+$this->Detect;
+      $this->To=Is_Object($To)? $To: $this->GetFactory()->GetCoder($To);
+      Parent::_Init($Args);
+    }
+    
+  //Function DeCode_AsIs($Data) { Return $Data; }
+    
+    Function GetFactory() { Return $this->Factory??=$this->Get_Singleton('/CharSet/Factory'); }
+    
+    Function IsNeedMore() { Return $this->NeedMore; }
+    
+    Function Write($Data)
+    {
+      if($Data==='')
+        $this->IsEnd=True;
+      if(($Rest=$this->Rest)!=='')
+        $Data=$Rest.$Data;
+      $this->Rest     =$Data;
+      $this->NeedMore =False;
+      Return $this->Read();
+    }
+    
+    Function NeedRead() { Return !$this->NeedMore && StrLen($this->Rest); }
+    
+    Function Read()
+    {
+      $this->NeedMore =False;
+      $Data=$this->Rest;
+      $this->Rest='';
+    Again:
+      Switch($this->DeCoder)
+      {
+      Case 'Detect' :
+        $Factory=$this->GetFactory();
+        [$Bom, $CharSet, $HasMore]=$Factory->Detect($Data, $this->Detect['Detector']?? 'Default', $this->Detect);
+        If($HasMore && !$this->IsEnd)
+        {
+          If($Bom && $this->Debug) $this->Log('Debug', 'Partical bom detected: ', $CharSet);
+        //If(StrLen($Data)>$MaxCharLen)
+        //  $this->Log('Debug', 'String is too long for detection BoM: ',StrLen($Data))->Debug($Bom_Detect->Detect($Data, 'Bom'));
+          
+          $this->Rest     =$Data ;
+          $this->NeedMore =True  ;
+          Return '';
+        }
+        
+        if($Bom)
+        {
+          $this->Bom=SubStr($Data, 0, $Bom);
+          If($this->Debug) $this->Log('Debug', 'Bom detected ', StrToUpper(Bin2Hex($this->Bom)));
+          $Data=SubStr($Data, $Bom);
+        }
+        
+        If($CharSet)
+          If($this->Detect['Utf8AsBytes']&& $CharSet==='UTF-8' && $this->To->GetCharsetName()==='UTF-8')
+            $CharSet='';
+          Else
+          {
+            If($this->Debug) $this->Log('Debug', 'CharSet detected ', $CharSet);
+            $this->From    =$Factory->GetCoder($CharSet);
+            $this->DeCoder ='ReCode';
+          }
+        
+        If($CharSet==='')
+        {
+          If($this->Debug) $this->Log('Debug', 'Binary detected ');
+          $this->DeCoder='AsIs';
+        }
+        
+        Goto Again; //Attempt to break the goto rule
+        Break;
+      Case 'AsIs'   : Return $Data;
+      Case 'ReCode' :
+        $From=$this->From;
+        $Len=$From->Check($Data);
+        If($Len<0) //If error
+        {
+          $Len=~$Len;
+          $Err=$From->GetCharErrorCode($Data, $Len);
+          If($From::IsErrorCode($Err))
+          {
+            $this->Log('Error', 'String has an error ', StrToUpper(Bin2Hex(SubStr($Data, $Len, 4))), ' at ', $Len);
+            If($Len===0)
+              $Len=$From->GetMinCharLen();
+          }
+        }
+        $Delta=StrLen($Data)-$Len;
+        If($Delta>0)
+        {
+          $IsDeltaOk=$Delta<$From->GetMaxCharLen(); // The wild comparison
+          If(!$IsDeltaOk)
+            $this->Log($IsDeltaOk? 'Debug':'Error', 'ActualSize Less By ', $Delta);
+          $this->Rest =SubStr($Data,    -$Len);
+          $Data       =SubStr($Data, 0, -$Len);
+          
+          If($Data==='')
+          {
+            $this->NeedMore=True  ;
+            Return '';
+          }
+        }
+        
+        $Data=$this->To->EnCode($this->From, $Data);
+        Return $Data;
+      Default:
+        $this->Log('Error', 'ReCoder: Wrong decoder ', $this->DeCoder);
+        Return '';
+      }
+      
+      $this->Log('Error', 'Inpossable place')->Backtrace();
+      Return '';
+    }
+  }
+?>

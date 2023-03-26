@@ -119,15 +119,18 @@
   //****************************************************************
   // Regexp
     Static $Regexp_Templates=[
-      'Le'=>'.(?:[\0-\xD7\xE0-\xFF]|[\xD8-\xDB].[\xDC-\xDF])',
-      'Be'=>'(?:[\0-\xD7\xE0-\xFF]|[\xD8-\xDB].[\xDC-\xDF]).',
+      'Le'  =>'.(?:[\0-\xD7\xE0-\xFF]|[\xD8-\xDB].[\xDC-\xDF])',
+      'Be'  =>'(?:[\0-\xD7\xE0-\xFF]|[\xD8-\xDB].[\xDC-\xDF]).',
+      'Le1' =>'.(?:[\1-\xD7\xE0-\xFF]|[\xD8-\xDB].[\xDC-\xDF])|[\1-\xFF]\0',
+      'Be1' =>'(?:[\1-\xD7\xE0-\xFF]|[\xD8-\xDB].[\xDC-\xDF]).|\0[\1-\xFF]',
     ];
   
   //****************************************************************
   // Checker
   
     Static $Checkers_Map=[
-      'Full'=>'RegExp' ,
+      'Full'   =>'RegExp' ,
+      'Strict' =>'RegExp' ,
     ];
   
     Function SetChecker($v)
@@ -138,7 +141,7 @@
       Case 'Raw_Strict' : Break;
       Case 'RegExp'     : $v='RegExp'; $this->SetCheckerRegexp($this->BigEndian? 'Be':'Le'); Break;
       Default:
-        $this->Log('Error', 'Unnown Checker ', $v)->BackTrace();
+        $this->Log('Error', 'Unkown Checker ', $v)->BackTrace();
         $this->SetChecker('Full');
       }
       $this->Checker=$v;

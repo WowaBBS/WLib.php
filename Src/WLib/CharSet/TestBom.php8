@@ -1,37 +1,36 @@
 <?
-  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  For($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
 //Set_Time_Limit(1);
 
   $Loader->GetLogger()->Add('TestBom.log');
 # $Loader->GetLogger()->Get('Console')->Disable();
-  $Bom=$Loader->Get_Singleton('/CharSet/Bom');
-# $Bom=$Loader->Get_Singleton('/CharSet/Factory');
+  $Factory=$Loader->Get_Singleton('/CharSet/Factory');
   
-//$Loader->Log('Log', 'Map')->Debug($Bom->GetMap());
+//$Loader->Log('Log', 'Map')->Debug($Factory->GetMap());
   
   $Original="\u{FEFF}Hello";
   $Tests=['Hello'];
-  ForEach($Bom->GetCharSets() As $CharSet)
+  ForEach($Factory->GetCharSets() As $CharSet)
     $Tests[]=IConv('UTF-8', $CharSet, $Original);
   ForEach($Tests As $S)
   {
-    $Detect=$Bom->DetectBom($S);
+    $Detect=$Factory->Detect($S, 'Bom');
     $DetectedCharSet=$Detect[1];
-    $Decoded=IConv($DetectedCharSet, 'UTF-8', SubStr($S, StrLen($Detect[0])));
-    $FastChecker=$Bom->GetCoder($DetectedCharSet, 'Fast');
-    $FullChecker=$Bom->GetCoder($DetectedCharSet, 'Full');
+    $Decoded=IConv($DetectedCharSet, 'UTF-8', SubStr($S, $Detect[0]));
+    $FastChecker=$Factory->GetCoder($DetectedCharSet, ['Checker'=>'Fast']);
+    $FullChecker=$Factory->GetCoder($DetectedCharSet, ['Checker'=>'Full']);
     $Min=$FastChecker->GetMinCharLen();
     $Max=$FastChecker->GetMaxCharLen();
     $Loader->Log('Log', $DetectedCharSet,' ',$Decoded, ' ', $FullChecker->Check($S), '-', $FastChecker->Check($S), '-', StrLen($S));
   }
   $Loader->Log('Log', '');
 
-  ForEach($Bom->GetCharSets() As $CharSet)
+  ForEach($Factory->GetCharSets() As $CharSet)
   {
     $Loader->Log('Log', $CharSet);
     $S=IConv('UTF-8', $CharSet, $Original);
     For($i=1; $i<7; $i++)
-      $Loader->Log('Log', 'Detect: ', [($s=SubStr($S, 0, $i)), ...$Bom->DetectBom($s)]);
+      $Loader->Log('Log', 'Detect: ', [($s=SubStr($S, 0, $i)), ...$Factory->Detect($s, 'Bom')]);
     $Loader->Log('Log', '');
   }
 ?>

@@ -1,0 +1,58 @@
+<?
+  $this->Parent_Class('/Object');
+  
+  Class C_CharSet_Detect_Base Extends C_Object
+  {
+    Var $Factory = Null ;
+    Var $MinLen  =    4 ;
+    Var $MaxLen  =  256 ;
+    
+    Function _Init($Args)
+    {
+      $this->Factory =$Args['Factory' ]?? Null           ;
+      $this->MinLen  =$Args['MinLen'  ]?? $this->MinLen  ;
+      $this->MaxLen  =$Args['MaxLen'  ]?? $this->MaxLen  ;
+      
+      Parent::_Init($Args);
+    }
+    
+    Function GetFactory  () { Return $this->Factory??=$this->Get_Singleton('/CharSet/Factory'); }
+    Function GetCharSets () { Return $this->GetFactory()->GetCharSets(); }
+    Function GetCoders   () { Return $this->GetFactory()->GetCoders(); }
+    Function GetCoder($CharSet, $Args=[]) { Return $this->GetFactory()->GetCoder($CharSet, $Args); }
+
+    
+  //****************************************************************
+    Function Detect($Str)
+    {
+      $Len=StrLen($Str);
+
+      If($Len>($MaxLen=$this->MaxLen))
+      {
+        $Len=$MaxLen;
+        $Str=SubStr($Str, 0, $Len);
+      }
+      
+      $CharSet=$this->_Detect($Str);
+
+      If($CharSet)
+      {
+        $Bom=IConv('UTF-8', $CharSet, "\u{FEFF}");
+        $Bom=Str_Starts_With($Str, $Bom)? StrLen($Bom):0;
+      }
+      Else
+        $Bom=0;
+      
+      $NeedMore=$CharSet!==''? $Len<$this->MinLen:$Len<$MaxLen;
+      
+      Return [$Bom, $CharSet ,$NeedMore];
+    }
+    
+    Function _Detect($Str)
+    {
+      Return [0, '', False];
+    }
+    
+  //****************************************************************
+  }
+?>

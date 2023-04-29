@@ -16,11 +16,13 @@
     Var $Referer  ; // Откуда пришли собственно
     Var $RelPath  ; // Путь скрипта, относительно корня '.'
     Var $RelURL   ; // URL корня '.'
+    Var $PathMode ='Auto'; // Auto, Path, Script //<TODO
   
     Function _Init(Array $Args)
     {
       Parent::_Init($Args);
-      $StartDir=$Args['StartDir'] ?? GetCwd(); //RealPath('./') // Global
+      $StartDir=$Args['StartDir']?? GetCwd(); //RealPath('./') // Global
+      $PathMode=$Args['PathMode']?? $this->PathMode; //RealPath('./') // Global
       
       $DefSrv=Array(
         'REQUEST_METHOD' => 'GET' ,
@@ -30,6 +32,8 @@
         'HTTP_REFERER'   => ''    ,
         'HTTPS'          => 'off' ,
       );
+      
+    //TODO: PathMode=If(($_SERVER['PATH_INFO']??'')==='')
    
       ForEach($DefSrv As $k=>$v)
         If(!IsSet($_SERVER[$k]))
@@ -41,18 +45,15 @@
       If($_SERVER['PHP_SELF']==='')
         $_SERVER['PHP_SELF']='/'.BaseName($_SERVER['argv'][0]);
    
-      If(IsSet($_SERVER['HTTP_HOST']))
-        $Host=$_SERVER['HTTP_HOST'];
-      ElseIf(IsSet($_SERVER['SERVER_NAME']))
-        $Host=$_SERVER['SERVER_NAME'];
-      Else
-        $Host=''; //'nohost';
+      If(IsSet($_SERVER['HTTP_HOST'   ])) $Host=$_SERVER['HTTP_HOST'   ]; Else
+      If(IsSet($_SERVER['SERVER_NAME' ])) $Host=$_SERVER['SERVER_NAME' ]; Else
+                                          $Host=''; //'nohost';
     //If(!IsSet($_SERVER['HTTP_HOST']))
     //  $_SERVER['HTTP_HOST']='';
     //If(!IsSet($_SERVER['SERVER_NAME'])) // Заменить на HTTP_HOST // Неработало у мега-телеком
     //  $_SERVER['SERVER_NAME']='';
    
-      $Prot=($_SERVER['HTTPS']=='on')?'https':'http';
+      $Prot=($_SERVER['HTTPS']==='on')?'https':'http';
       // Port 443?
    
     //$Ls=Explode('/',$_SERVER['REQUEST_URI']); // If used server as proxy
@@ -163,16 +164,18 @@
       $this->Referer  = $Referer  ;
       $this->RelPath  = $RelPath  ;
       $this->RelURL   = $RelURL   ;
+      $this->PathMode = $PathMode ;
    
-      $this->Vars=Array(
-        'CurURL'   => $CurURL   ,
-        'BaseURL'  => $BaseURL  ,
-        'CurPath'  => $CurPath  ,
-        'BasePath' => $BasePath ,
-        'ReqFile'  => $ReqFile  ,
-        'RelPath'  => $RelPath  ,
-        'RelURL'   => $RelURL   ,
-      );
+      //TODO: Remove, for using in templates
+    # $this->Vars=Array(
+    #   'CurURL'   => $CurURL   ,
+    #   'BaseURL'  => $BaseURL  ,
+    #   'CurPath'  => $CurPath  ,
+    #   'BasePath' => $BasePath ,
+    #   'ReqFile'  => $ReqFile  ,
+    #   'RelPath'  => $RelPath  ,
+    #   'RelURL'   => $RelURL   ,
+    # );
     }
   
     Function Relative_Url_Str($Url)

@@ -76,6 +76,12 @@
     Function Disable($v=true) { $this->Disabled=$v; }
     
   //****************************************************************
+    Var $Error_Handler_Setted     =False ;
+    Var $Shutdown_Function_Setted =False ;
+    Var $Exception_Handler_Old    =Null  ;
+    Var $Exception_Handler_Setted =False ;
+    Var $Back_Memory              =''    ;
+    
     Function Error_Type($Code)
     {
       static $ErrorTypes=[
@@ -103,7 +109,7 @@
     
     Function Exception_Handler(Throwable $E)
     {
-      $this->Back_Memory=True;
+      $this->Back_Memory='';
 
       if(Get_Class($E)!=='TLoggerUnsupportedException')
       {
@@ -138,7 +144,7 @@
     {
       if(!$this->Shutdown_Function_Setted)
         return;
-      $this->Back_Memory=True;
+      $this->Back_Memory='';
       if($error=Error_Get_Last())
         if($error['type']===E_ERROR)
         {
@@ -159,16 +165,16 @@
     
     Function Set_Error_Handler()
     {
-      if($this->Error_Handler_Setted?? false)
+      if($this->Error_Handler_Setted)
         return;
       Set_Error_Handler([$this, 'Error_Handler']);
       $this->Error_Handler_Setted=true;
       
-      if(!($this->Shutdown_Function_Setted?? False))
+      if(!$this->Shutdown_Function_Setted)
         Register_Shutdown_Function([$this, 'Shutdown_Function']);
       $this->Shutdown_Function_Setted=true;
       
-      if($this->Exception_Handler_Setted?? false)
+      if($this->Exception_Handler_Setted)
         return;
       $this->Exception_Handler_Old=Set_Exception_Handler([$this, 'Exception_Handler']);
       $this->Exception_Handler_Setted=true;
@@ -181,10 +187,9 @@
 
     Function Restore_Error_Handler()
     {
-      if(!($this->Error_Handler_Setted?? false))
+      if(!$this->Error_Handler_Setted)
         return;
       Restore_Error_Handler();
-      UnSet($this->Error_Handler_Setted);
       
       $this->Shutdown_Function_Setted=false;
       

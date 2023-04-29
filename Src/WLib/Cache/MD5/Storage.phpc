@@ -15,10 +15,7 @@
   //  Return $this;
   //}
   
-    Function _CalcMd5($FullPath)
-    {
-      return Md5_File($FullPath);
-    }
+    Function _CalcMd5($FullPath) { return Md5_File($FullPath); }
     
     Function CalcMD5($FullPath, $RootPath='')
     {
@@ -32,7 +29,7 @@
       $md5=$this->Get(
         $FullPath,
         $Key,
-        [$this, '_CalcMd5'],
+        $this->_CalcMd5(...),
         $FullPath
       );
       return $md5;

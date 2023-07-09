@@ -23,6 +23,7 @@
     Var $Mode      = 0       ; // Режим парсера
     Var $CDataText = []      ; // Данные CData
     Var $Match     = ""      ; // Регексп
+    Var $Unique_Id = ''      ;
  
     Var $TagsCData=[];
     Var $TagsEmpty=[];

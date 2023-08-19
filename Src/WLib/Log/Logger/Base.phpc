@@ -9,11 +9,12 @@
   
     Function _Init(Array $Args)
     {
-      $Format=$Args['Format']?? '/Log/Format';
+      Static $DefaultFormat='/Log/Format';
+      $Format=$Args['Format']?? $DefaultFormat;
       if(!Is_Object($Format))
       {
         if(Is_Array($Format))
-          $Format=$this->Get_Singleton($Format['Class']?? $Format[0], $Format);
+          $Format=$this->Get_Singleton($Format['Class']?? $Format[0]?? $DefaultFormat, $Format);
         Else
           $Format=$this->Get_Singleton($Format);
       }

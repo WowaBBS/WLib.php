@@ -1,0 +1,153 @@
+<?
+  $Loader->Parent_Class('/Object');
+ 
+  Class C_Log_Handler extends C_Object
+  {
+    Var $Logger=Null;
+  
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+      if($Args['Set_Error_Handler']?? True)
+        $this->Set_Error_Handler();
+    }
+    
+    Function _Done()
+    {
+      $this->Restore_Error_Handler();
+      Parent::_Done();
+    }
+    
+    Function GetLogger() { Return $this->Logger?? Parent::GetLogger(); }
+    Function GetOverridedLogger() { Return $this->Logger; }
+    Function SetLogger($v) { $this->Logger=$v; }
+    
+  //****************************************************************
+    Var $Error_Handler_Setted     =False ;
+    Var $Shutdown_Function_Setted =False ;
+    Var $Exception_Handler_Old    =Null  ;
+    Var $Exception_Handler_Setted =False ;
+    Var $Back_Memory              =''    ;
+    
+    Function Error_Type($Code)
+    {
+      static $ErrorTypes=[
+        0     => ['Error'   ,'[Zero Error'      .'] '], //
+        1     => ['Error'   ,'[Error'           .'] '], //E_ERROR
+        2     => ['Error'   ,'[Warning'         .'] '], //E_WARNING
+        4     => ['Error'   ,'[Parsing Error'   .'] '], //E_PARSE
+        8     => ['Error'   ,'[Notice'          .'] '], //E_NOTICE
+        16    => ['Error'   ,'[Core Error'      .'] '], //E_CORE_ERROR
+        32    => ['Warning' ,'[Core Warning'    .'] '], //E_CORE_WARNING
+        64    => ['Error'   ,'[Compile Error'   .'] '], //E_COMPILE_ERROR
+        128   => ['Warning' ,'[Compile Warning' .'] '], //E_COMPILE_WARNING
+        256   => ['Error'   ,'[User Error'      .'] '], //E_USER_ERROR
+        512   => ['Warning' ,'[User Warning'    .'] '], //E_USER_WARNING
+        1024  => ['Note'    ,'[User Notice'     .'] '], //E_USER_NOTICE
+        2048  => ['Note'    ,'[Runtime Notice'  .'] '], //E_STRICT
+        4096  => ['Error'   ,'[Fatal Error'     .'] '], //E_RECOVERABLE_ERROR
+        8192  => ['Note'    ,'[Deprecated'      .'] '], //E_DEPRECATED
+        16384 => ['Warning' ,'[User Deprecated' .'] '], //E_USER_DEPRECATED 
+      //32767                                           //E_ALL
+      ];
+  
+      return $ErrorTypes[$Code]?? ['Error','[Unknown Error '.$Code.'] '];
+    }
+    
+    Function Exception_Handler(Throwable $E)
+    {
+      $this->Back_Memory='';
+
+      if(Get_Class($E)!=='TLoggerUnsupportedException')
+      {
+        $ErrorType=$this->Error_Type($E->GetCode());
+        $this->Log($ErrorType[0], 'Exception_Handler: ', $E->GetMessage())
+          ->File($E->GetFile(), $E->GetLine())
+          ->SetStack($E->GetTrace())
+          ->ShowLevel($ErrorType[1]=='[Zero Error] '? '['.Get_Class($E).'] ':$ErrorType[1]);
+      }
+        
+      if($this->Exception_Handler_Old)
+        $this->Exception_Handler_Old($E);
+      
+      Error_Clear_Last();
+    }
+ 
+    Function Error_Handler($ErrNo, $ErrStr, $ErrFile, $ErrLine) // , $Vars) Removed in PHP8
+    {
+      if(!($ErrNo & Error_Reporting())) Return;
+    //If($ErrNo==2048)
+    //  Return;
+      $Res=$ErrStr;
+      $ErrorType=$this->Error_Type($ErrNo);
+      $this->Log($ErrorType[0], 'Error_Handler: ', $Res)
+        ->File($ErrFile, $ErrLine)
+        ->BackTrace(1)
+        ->ShowLevel($ErrorType[1]);
+    //Error_Clear_Last();
+    }
+    
+    Function Shutdown_Function()
+    {
+      if(!$this->Shutdown_Function_Setted)
+        return;
+      $this->Back_Memory='';
+      if($error=Error_Get_Last())
+        if($error['type']===E_ERROR)
+        {
+          Set_Time_Limit(10);
+          $this->Log('Error', 'Shutdown_Function: ', $error['message'])
+            ->File($error['file'], $error['line'])
+            ->ShowLevel('[Fatal Error] ')
+          //->BackTrace(1)
+            ->NoBackTrace()
+          ;
+        # $this->Error_Handler(
+        #   $error['type'], $error['message'],
+        #   $error['file'], $error['line'],
+        #   []
+        # );
+        }
+    }
+    
+    Function Set_Error_Handler()
+    {
+      if($this->Error_Handler_Setted)
+        return;
+      Set_Error_Handler($this->Error_Handler(...));
+      $this->Error_Handler_Setted=true;
+      
+      if(!$this->Shutdown_Function_Setted)
+        Register_Shutdown_Function($this->Shutdown_Function(...));
+      $this->Shutdown_Function_Setted=true;
+      
+      if($this->Exception_Handler_Setted)
+        return;
+      $this->Exception_Handler_Old=Set_Exception_Handler($this->Exception_Handler(...));
+      $this->Exception_Handler_Setted=true;
+      
+      $this->Back_Memory=Str_Repeat("\0", 1024*128);
+    //ini_set("display_errors", "off");
+    //error_reporting(E_ALL);
+    //ini_set('html_errors', 'on');
+    }
+
+    Function Restore_Error_Handler()
+    {
+      if(!$this->Error_Handler_Setted)
+        return;
+      Restore_Error_Handler();
+      
+      $this->Shutdown_Function_Setted=false;
+      
+      Restore_Exception_Handler();
+    }
+  //****************************************************************
+    Protected Function _Debug_Info(Array &$Res)
+    {
+      if(IsSet($Res['Back_Memory' ])) unset($Res['Back_Memory' ]);
+    }
+    
+  //****************************************************************
+  };
+?>

@@ -16,8 +16,12 @@
     
       $this->Manager  =$Manager  ;
       $this->Stream   =$Stream   ;
-      $this->Template =$Args['Template' ]?? $this->Get_Singleton('/Debug/Template');
-      $this->Level    =$Args['Level'    ]?? -1;
+      $this->Template =$Args['Template'  ]?? $this->Get_Singleton('/Debug/Template');
+      $this->Level    =$Args['Level'     ]?? -1;
+      $TimeStamp      =$Args['TimeStamp' ]?? False;
+      If($TimeStamp===True) $TimeStamp=$this->TimeFormat;
+      //TODO: Time format
+      $this->TimeFormat =$TimeStamp;
     }
     
     Function SetStream($Stream)
@@ -212,30 +216,32 @@
     Static Function _GetTokens()
     {
       Static $Res=[
-        'Def'     =>''        ,
+        'Def'       =>''        ,
 
-        'Resvd'   =>'Def'     ,
-        'Num'     =>'Def'     ,
-        'Str'     =>'Def'     ,
+        'TimeStamp' =>'Def'     ,
+        
+        'Resvd'     =>'Def'     ,
+        'Num'       =>'Def'     ,
+        'Str'       =>'Def'     ,
 
-        'Op'      =>'Resvd'   ,
-        'Type'    =>'Resvd'   ,
-        'Null'    =>'Resvd'   ,
-        'Bool'    =>'Resvd'   ,
+        'Op'        =>'Resvd'   ,
+        'Type'      =>'Resvd'   ,
+        'Null'      =>'Resvd'   ,
+        'Bool'      =>'Resvd'   ,
 
-        'Float'   =>'Num'     ,
-        'Name'    =>'Str'     ,
+        'Float'     =>'Num'     ,
+        'Name'      =>'Str'     ,
 
-        'File'    =>'Name'    ,
-        'Func'    =>'Name'    ,
-        'Class'   =>'Name'    ,
+        'File'      =>'Name'    ,
+        'Func'      =>'Name'    ,
+        'Class'     =>'Name'    ,
 
-        'Debug'   =>'Def'     ,
-        'Log'     =>'Def'     ,
-        'Note'    =>'Log'     ,
-        'Warning' =>'Note'    ,
-        'Error'   =>'Warning' ,
-        'Fatal'   =>'Error'   ,
+        'Debug'     =>'Def'     ,
+        'Log'       =>'Def'     ,
+        'Note'      =>'Log'     ,
+        'Warning'   =>'Note'    ,
+        'Error'     =>'Warning' ,
+        'Fatal'     =>'Error'   ,
       ];
       Return $Res;
     }
@@ -314,6 +320,24 @@
     }
   
     Function WriteLogLevel($View, $Level) { $this->_WriteToken($Level->Name, $View); }
+    
+    Var $TimeFormat ='Y-m-d H:i:s';
+  //Var $TimeFormat ='ymd His';
+    Var $TimeFrac   = ['.%04d', 1E4];
+    
+    Function WriteTimeStamp($v)
+    {
+      $F=$this->TimeFormat;
+      If(!$F) Return;
+      If($f=$this->TimeFrac)
+      {
+        $t=Floor($v);
+        $ms=SPrintF($f[0], ($v-$t)*$f[1]);
+      }
+      Else
+        $ms='';
+      $this->_WriteToken('TimeStamp' ,'['.Date($F, $t).$ms.'] ');
+    }
     
     // Structs
     Function File($File, $Line=False, $Col=False)

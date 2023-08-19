@@ -19,6 +19,7 @@
     Var $Line      = false ;
     Var $Col       = false ;
     Var $Exclude   = []    ;
+    Var $Time      = 0     ;
     
     Function __Construct($Outer, $Logger, $Level, $List)
     {
@@ -32,10 +33,11 @@
         $this->Add('[Error] ', 'LogLevel "', $Level, '" is not supported by logger');
         $Level=$Levels['Fatal'];
       }
-      $this->Level=$Level;
-      $this->ShowLevel=$Level->Show;
+      $this->Level     =$Level;
+      $this->ShowLevel =$Level->Show;
+      $this->Time      =$Logger->GetTime();
       $this->AddArr($List);
-      $this->Fatal  =$Level->Fatal;
+      $this->Fatal     =$Level->Fatal;
       //Example: $this->Log('Fatal', 'Unreachable place');
     }
     
@@ -147,6 +149,8 @@
       if($Progress)
         $Res->BeginProgress();
 
+      $Res->WriteTimeStamp($this->Time);
+      
       if($this->ShowLevel!==False)
         $Res->WriteLogLevel($this->ShowLevel, $this->Level);
         

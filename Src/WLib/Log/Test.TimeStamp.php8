@@ -1,0 +1,12 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $Loader->GetLogger()->Add('Test.TimeStamp.log', ['Format'=>['TimeStamp'=>True]]);
+  $Loader->Log('Log', 'Test1');
+  Sleep(1);
+  $Loader->Log('Debug', 'Test2');
+  Sleep(1);
+  $Loader->Log('Log', 'Test3');
+  
+  $Loader->Done();
+?>

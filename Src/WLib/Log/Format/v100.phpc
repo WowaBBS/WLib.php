@@ -45,37 +45,38 @@
     const bgDefault   ="\033[49m";
   */  
     Var $ColorRules=[
-      'Def'     =>False    ,
-    # 'Def'     =>''       ,
+      'Def'       =>False    ,
+    # 'Def'       =>''       ,
       
-    //'Resvd'   =>self::fgCyan    ,
-      'Resvd'   =>self::fgBrWhite ,
-      'Num'     =>self::fgBrGreen ,
-    //'Str'     =>self::fgRed     ,
-      'Str'     =>self::fgBrMagenta,
-      'Text'    =>false,
+    //'Resvd'     =>self::fgCyan      ,
+      'Resvd'     =>self::fgBrWhite   ,
+      'Num'       =>self::fgBrGreen   ,
+    //'Str'       =>self::fgRed       ,
+      'Str'       =>self::fgBrMagenta ,
+      'Text'      =>false             ,
+      'TimeStamp' =>self::fgCyan      ,
       
-      'NewLine' =>False,
+      'NewLine'   =>False,
       
-    # 'Op'      =>'Resvd' ,
-    # 'Type'    =>'Resvd' ,
-    # 'Null'    =>'Resvd' ,
-    # 'Bool'    =>'Resvd' ,
+    # 'Op'        =>'Resvd' ,
+    # 'Type'      =>'Resvd' ,
+    # 'Null'      =>'Resvd' ,
+    # 'Bool'      =>'Resvd' ,
       
-    # 'Float'   =>'Num'    ,
-      'Name'    =>self::fgCyan     ,// 'Str'
+    # 'Float'     =>'Num'    ,
+      'Name'      =>self::fgCyan     ,// 'Str'
       
-    # 'File'    =>'Name'   ,
-    # 'Func'    =>'Name'   ,
-    # 'Class'   =>'Name'   ,
+    # 'File'      =>'Name'   ,
+    # 'Func'      =>'Name'   ,
+    # 'Class'     =>'Name'   ,
 
-      'Debug'   =>self::fgCyan    ,
-      'Progress'=>False,
-    # 'Log'     =>
-      'Note'    =>self::fgGreen   ,
-      'Warning' =>self::fgMagenta ,
-      'Error'   =>self::fgBrRed   ,
-      'Fatal'   =>self::fgBrRed   ,
+      'Debug'     =>self::fgCyan    ,
+      'Progress'  =>False,
+    # 'Log'       =>
+      'Note'      =>self::fgGreen   ,
+      'Warning'   =>self::fgMagenta ,
+      'Error'     =>self::fgBrRed   ,
+      'Fatal'     =>self::fgBrRed   ,
     ];
     
     Function _Init(Array $Args)

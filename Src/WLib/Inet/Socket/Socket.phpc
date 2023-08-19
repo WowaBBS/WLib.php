@@ -100,8 +100,8 @@
     }
  
     Function Write($Data)
-     {
-     Return Socket_Write($this->Sock, $Data);
+    {
+      Return Socket_Write($this->Sock, $Data);
     }
  
     Function ShutDown($typ='w')

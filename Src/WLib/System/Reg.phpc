@@ -41,7 +41,7 @@
       ]);
       $Output=[];
       $Return=0;
-      $ErrCode=exec($Cmd, $Output, $Return);
+      $ErrCode=Exec($Cmd, $Output, $Return);
       ForEach($Output as $Str)
       {
         $S=SubStr($Str, 0, 4);

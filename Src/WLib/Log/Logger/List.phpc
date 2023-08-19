@@ -1,0 +1,115 @@
+<?
+  $Loader->Parent_Class('/Log/Logger');
+ 
+  Class C_Log_Logger_List extends C_Log_Logger
+  {
+    Var $ByName  =[];
+    Var $Loggers =[];
+    
+    Function _Init(Array $Args)
+    {
+      parent::_Init($Args);
+    # if($Console=$Args['Console']?? True)
+    # {
+    #   If(!Is_Object($Console))
+    #     $Console=$this->Create_Object('/Log/Logger/Echo', Is_Array($Console)? $Console:[]);
+    #   $this->Add($Console, ['Name'=>'Console']);
+    # }
+    }
+    
+    Function _Done()
+    {
+      Parent::_Done();
+    }
+    
+    Function _LogItem($LogItem)
+    {
+      $Loggers=$this->Loggers;
+      if($Exclude=$LogItem->Exclude)
+        ForEach($ByName As $Name->$Logger)
+          If($Exclude[$Name]?? False)
+            UnSet($Loggers[$Logger->Object_Id]);
+      ForEach($Loggers As $Logger)
+        if($Logger->IsValid())
+          $Logger->LogItem($LogItem);
+    }
+    
+    Function Add($Logger, $Args=[]) // String $Name, $Logger=false, $bAppend=false)
+    {
+      if(Is_String($Logger))
+      {
+        $Name=$Args['Name']?? $Logger;
+        if(IsSet($this->ByName[$Name]))
+        {
+          $this->GetLogger()->Log('Error', 'Logger ', $Name, ' already exists');
+          return $this->ByName[$Name];
+        }
+        $Logger=$this->CreateFile($Logger, $Args);
+      }
+      else
+        $Name=$Args['Name']?? '';
+      if(StrLen($Name))
+      {
+        if(IsSet($this->ByName[$Name]))
+          $this->GetLogger()->Log('Warning', 'Logger ', $Name, ' already exists will be overrided');
+        $this->ByName[$Name]=$Logger;
+      }
+      if(IsSet($this->Loggers[$Logger->Object_Id]))
+        $this->GetLogger()->Log('Warning', 'Logger ', $Name, ' already was added');
+      else
+        $this->Loggers[$Logger->Object_Id]=$Logger;
+      return $Logger;
+    }
+    
+    Function AddNewFile($Path=null, $Args=[])
+    {
+      return $this->Add($this->CreateNewFile($Path, $Args));
+    }
+    
+    Function Get($Name)
+    {
+      return $this->ByName[$Name]??False;
+    }
+    
+    Function Remove($Logger)
+    {
+      if(Is_String($Logger))
+      {
+        $Name=$Logger;
+        $Logger=$this->ByName[$Name]??False;
+        if(!$Logger)
+        {
+          $this->GetLogger()->Log('Error', 'Logger with name ', $Name, ' not found');
+          return false;
+        }
+        UnSet($this->ByName[$Name]);
+      }
+    
+      if(!IsSet($this->Loggers[$Logger->Object_Id]))
+      {
+        $this->GetLogger()->Log('Error', 'Logder ', $Name, ' wasn\'t be added');
+        return false;
+      }
+      
+      UnSet($this->Loggers[$Logger->Object_Id]);
+      return $Logger;
+    }
+    
+    Function CreateCustom($Name, $Args=[])
+    {
+      return $this->Create_Object('/Log/Logger/'.$Name, $Args);
+    }
+    
+    Function CreateFile($FilePath=null, $Args=[])
+    {
+      $Args['FilePath']=$FilePath;
+      return $this->Create_Object('/Log/Logger/File', $Args);
+    }
+    
+    Function CreateNewFile($Path=null, $Args=[])
+    {
+      $Args['Path']=$Path;
+      return $this->Create_Object('/Log/Logger/NewFile', $Args);
+    }
+  };
+?>

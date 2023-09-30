@@ -1,0 +1,62 @@
+<?
+  For($F=__FILE__; $F;) If(@Include($F=DirName($F)).'/Using.php') Break;
+  
+  $Loader->Load_Type('/Type/Map/MultiCi');
+  
+  $Map=New T_Type_Map_MultiCi();
+  $Map->Add('a', '1');
+  $Map->Add('b', '2');
+  $Map->Add('A', '3');
+  
+  $Loader->Log('Debug', 'Map:');
+  ForEach($Map As $k=>$v)
+    $Loader->Log('Debug', ' ', $k, '=>', $v);
+    
+  $Loader->Log('Debug', 'Map.List[a]:');
+  ForEach($Map->GetList('a') As $k=>$v)
+    $Loader->Log('Debug', ' ', $k, '=>', $v);
+    
+  $Map1=Clone $Map;
+  $Map1->Del('a');
+  $Loader->Log('Debug', 'Map.Del(a):');
+  ForEach($Map1 As $k=>$v)
+    $Loader->Log('Debug', ' ', $k, '=>', $v);
+
+  $Map1=Clone $Map;
+  $Map1->DelIdx('a', 0);
+  $Loader->Log('Debug', 'Map.Del(a, 0):');
+  ForEach($Map1 As $k=>$v)
+    $Loader->Log('Debug', ' ', $k, '=>', $v);
+
+  $Map1=Clone $Map;
+  $Map1->DelIdx('a', 1);
+  $Loader->Log('Debug', 'Map.Del(a, 1):');
+  ForEach($Map1 As $k=>$v)
+    $Loader->Log('Debug', ' ', $k, '=>', $v);
+
+  $Map1=Clone $Map;
+  $Map1->DelIdx('a', 2);
+  $Loader->Log('Debug', 'Map.Del(a, 2):');
+  ForEach($Map1 As $k=>$v)
+    $Loader->Log('Debug', ' ', $k, '=>', $v);
+
+  $Map1=Clone $Map;
+  $Map1->DelIdx('a', -1);
+  $Loader->Log('Debug', 'Map.Del(a, -1):');
+  ForEach($Map1 As $k=>$v)
+    $Loader->Log('Debug', ' ', $k, '=>', $v);
+
+  $Map1=Clone $Map;
+  $Map1->DelIdx('a', -2);
+  $Loader->Log('Debug', 'Map.Del(a, -2):');
+  ForEach($Map1 As $k=>$v)
+    $Loader->Log('Debug', ' ', $k, '=>', $v);
+
+  $Map1=Clone $Map;
+  $Map1['a']=4;
+  $Loader->Log('Debug', 'Map[a]=4:');
+  ForEach($Map1 As $k=>$v)
+    $Loader->Log('Debug', ' ', $k, '=>', $v);
+
+  //$Loader->Log('Debug')->Debug($Map);
+?>

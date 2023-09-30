@@ -22,10 +22,8 @@
       parent::_Init($Args);
     }
     
-    Function AddImportance($v)
-    {
-      $this->Importance+=$v;
-    }
+    Function AddImportance($v) { $this->Importance+=$v; }
+    Function ResetImportance($v=0) { $this->Importance=$v; }
     
     Function _LogItem($LogItem)
     {

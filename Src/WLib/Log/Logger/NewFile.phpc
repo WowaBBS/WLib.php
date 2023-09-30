@@ -14,7 +14,7 @@
       $Time  = (Int)Floor($FTime);
       $MTime = (Int)((Float)($FTime-$Time)*1000000);
       
-      $Path .=@Date('Ymd_His_', $Time); //<TODO: Depricated
+      $Path .=@GmDate('Ymd_His_', $Time); //<TODO: Depricated
       $Attempts =$Args['Attempts']?? 16;
       While($Attempts>0)
       {

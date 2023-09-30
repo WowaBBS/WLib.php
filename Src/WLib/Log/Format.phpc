@@ -336,7 +336,7 @@
       }
       Else
         $ms='';
-      $this->_WriteToken('TimeStamp' ,'['.Date($F, $t).$ms.'] ');
+      $this->_WriteToken('TimeStamp' ,'['.GmDate($F, $t).$ms.'] ');
     }
     
     // Structs

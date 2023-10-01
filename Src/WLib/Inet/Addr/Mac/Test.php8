@@ -1,0 +1,18 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $Loader->GetLogger()->Add('Test.log');
+  $f=$Loader->Get_Singleton('/Inet/Addr/Mac/Factory');
+  $Loader->Log('Debug', 'CurrentMac: ', $f->Current());
+  $List=[
+    '08:00:2B:01:02:03' ,
+    '08:00:2b:01:02:03' ,
+    '8::2b:1:2:3'       ,
+    '08-00-2b-01-02-03' ,
+    '0800.2b01.0203'    ,
+    '0800.2b01.0204'    , //<TODO: Error
+  ];
+  $Orig=$List[0];
+  ForEach($List As $Mac)
+    Assert($f->Parse($Mac)->ToString()===$Orig, $f->Parse($Mac)->ToString().'!='.$Orig);
+?>

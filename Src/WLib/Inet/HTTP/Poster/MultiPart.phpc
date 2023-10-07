@@ -9,11 +9,11 @@
     Function _Init($Args)
     {
       parent::_Init($Args);
-      $this->Mime  =&$this->Loader->Create_Object('/Inet/Mime/Part');
+      $this->Mime=$this->Create_Object('/Inet/Mime/Part');
       If(IsSet($Args['Files']))
         $this->Files=&$Args['Files']->_Lock();
       Else
-        $this->Files=&$this->Loader->Create_Object('/Inet/HTTP/Files');
+        $this->Files=&$this->Create_Object('/Inet/HTTP/Files');
     }
   
     Function _Done()

@@ -35,7 +35,7 @@
           $Res[$Item->Name]=$Item->Index>=$Index;
       }
       else
-        return $this->Loader->Log('Fatal', 'unsuported level type ', GetType($Level));
+        return $this->Object_GetLoader()->Log('Fatal', 'unsuported level type ', GetType($Level));
       $this->ShowLogLevel=$Res;
     }
     

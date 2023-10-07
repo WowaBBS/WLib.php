@@ -22,7 +22,7 @@
     {
       parent::_Init($Args);
       $this->Header=&New T_Inet_MIME_Header();
-      $this->Cookies=&$this->Loader->Create_Object('/Inet/HTTP/Cookie/List');
+      $this->Cookies=&$this->Create_Object('/Inet/HTTP/Cookie/List');
     }
  
     Function _Done()
@@ -58,22 +58,22 @@
     //If($this->Header->Get('transfer-coding')=='chunked')
       If($this->Header->Get('transfer-encoding')=='chunked')
       {
-        $Res=&$this->Loader->Create_Object('/Inet/Http/Coding/Chunked');
+        $Res=&$this->Create_Object('/Inet/Http/Coding/Chunked');
         $Res->Open($this->FStream);
       }
       ElseIf($this->Header->Get('Content-Length'))
       {
-        $Res=&$this->Loader->Create_Object('/Inet/Http/Coding/Size');
+        $Res=&$this->Create_Object('/Inet/Http/Coding/Size');
         $Res->Open($this->FStream, $this->Header->Get('Content-Length'));
       }
       ElseIf($this->Header->Get(' Raw'))
       {
-        $Res=&$this->Loader->Create_Object('/Inet/Http/Coding/Raw');
+        $Res=&$this->Create_Object('/Inet/Http/Coding/Raw');
         $Res->Open($this->FStream, $this->Header->Get(' Raw'));
       }
       Else
       {
-        $Res=&$this->Loader->Create_Object('/Inet/Http/Coding/Close');
+        $Res=&$this->Create_Object('/Inet/Http/Coding/Close');
         $Res->Open($this->FStream);
       }
       Return $Res;

@@ -55,7 +55,7 @@
  
     Function _Convert($FileFrom, $FileTo)
     {
-      $XML=$this->Loader->Create_Object('/XML/Document');
+      $XML=$this->Create_Object('/XML/Document');
       $XML->Parser->AddTagCData($this->Tags_CData);
       $XML->Parser->AddTagEmpty($this->Tags_Empty);
       $XML->LoadFromFile($FileFrom);
@@ -128,7 +128,7 @@
         Else
           $Str=Preg_Replace($XML_PR_Rule[0], $XML_PR_Rule[1], $Str);
   
-      $XML=$this->Loader->Create_Object('/XML/Document');
+      $XML=$this->Create_Object('/XML/Document');
       $XML->Parser->AddTagCData($this->Tags_CData);
       $XML->Parser->AddTagEmpty($this->Tags_Empty);
       $XML->Clear();
@@ -168,7 +168,7 @@
         'CssID' => $CssID?mt_rand():False,
         'Info'  => &$Info,
        );
-      $CSS=$this->Loader->Create_Object('/XML/CSS/File');
+      $CSS=$this->Create_Object('/XML/CSS/File');
       $CSS->AddStr($Str);
       $this->Convert_CSS($CSS, $Data);
       $Res=$CSS->Make();
@@ -215,7 +215,7 @@
           $ZStyle=!$Tag->_f;
           If($ZStyle)
           {
-            $CSS=$this->Loader->Create_Object('/XML/CSS/File');
+            $CSS=$this->Create_Object('/XML/CSS/File');
             $CSS->AddStr($Tag->GetCData(True));
             $this->Convert_CSS($CSS, $Data);
             $Tag->PutCData($CSS->Make(), '');
@@ -229,7 +229,7 @@
         {
           If($Tag->Attributes->IsAttr('style'))
           {
-            $Style=$this->Loader->Create_Object('/XML/CSS/Style');
+            $Style=$this->Create_Object('/XML/CSS/Style');
             $Style->AddStr($Tag->Attributes->GetAttr('style'));
             $this->Convert_Style($Style, $Data,
               Array(

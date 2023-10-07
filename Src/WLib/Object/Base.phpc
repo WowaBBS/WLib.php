@@ -4,13 +4,15 @@
   Class C_Object_Base
   {
     Private Static $Object_Counter=0;
-    Var     $Object_Id   ;
-    Var     $Loader      =null;
+    Var     $Object_Id     ;
+    Var     $Object_Loader =null;
  
     //****************************************************************
     // Object
 
     Function Object_GetWeak() { return WeakReference::Create($this); }
+    Function Object_GetLoader() { return $this->Object_Loader; }
+    Function GetLoader() { return $this->Object_Loader; }
 
   //Static Function Cr($Owner, $Args):Static { return $Owner->Create_Object(Static::Class, $Args); }
     
@@ -20,12 +22,12 @@
     Function Create_Object($Name, Array $Args=[], Array $Mode=[])
     {
       $Args['Outer']=$this;
-      return $this->Loader->Create_Object($Name, $Args, $Mode);
+      return $this->Object_GetLoader()->Create_Object($Name, $Args, $Mode);
     }
 
     Function Get_Singleton($Name, Array $Args=[], Array $Mode=[])
     {
-      return $this->Loader->Get_Singleton($Name, $Args, $Mode);
+      return $this->Object_GetLoader()->Get_Singleton($Name, $Args, $Mode);
     }
     
     //****************************************************************
@@ -34,14 +36,14 @@
     Function ToDebugInfo() { return Get_Class($this).'('.$this->_ToDebugInfo().')'; }
     Function _ToDebugInfo() { return $this->Object_Id; }
     
-    Function GetLogger() { Return $this->Loader->GetLogger(); }
-    Function Debug($Var, $Level=-1) { Return $this->Loader->Debug($Var, $Level); }
+    Function GetLogger() { Return $this->Object_GetLoader()->GetLogger(); }
+    Function Debug($Var, $Level=-1) { Return $this->Object_GetLoader()->Debug($Var, $Level); }
     Function Log($LogLevel, ...$Args) { return New T_Log_Item($this, $this->GetLogger(), $LogLevel, $Args); }
 
     Protected Function _Debug_Info(Array &$Res)
     {
-      if($this->Loader!==null) unset($Res['Loader'        ]);
-      if($this->Object_Inited===True) unset($Res['Object_Inited' ]);
+      if($this->Object_GetLoader()!==null) UnSet($Res['Object_Loader'        ]);
+      if($this->Object_Inited===True) UnSet($Res['Object_Inited' ]);
     }
     
     /// Debug manager
@@ -71,7 +73,7 @@
     Final Function __Construct(Array $Args)
     {
       $this->Object_Id=Self::$Object_Counter++;
-      $this->Loader=$Args['Loader'];
+      $this->Object_Loader=$Args['Loader'];
       UnSet($Args['Loader']);
       $this->_Init($Args);
       if(!$this->Object_Inited)

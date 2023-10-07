@@ -59,7 +59,7 @@
       if(Is_Null   ($Stream)) $Stream=$this->GetStreamDefault();
       if(Is_String ($Stream))
       {
-        $this->Loader->Load_Lib('/Stream/Utils');
+        $this->Object_GetLoader()->Load_Lib('/Stream/Utils');
         $Stream=$this->Create_Object('/Stream/File',
           [
             'FileName'=>$Stream,

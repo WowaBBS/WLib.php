@@ -32,7 +32,7 @@
       }
       If(!$this->Loaded)
       {
-        $Path=DirName($this->Loader->_Find_Lib('/Tmpl/W2/Tag/Factory', '.phpc'), 2).'/Tags/';
+        $Path=DirName($this->Object_GetLoader()->_Find_Lib('/Tmpl/W2/Tag/Factory', '.phpc'), 2).'/Tags/';
       //$Path=UnitPath('Tmpl/W2/TTag').'tags/';
         $this->LoadAllFromPath($Path);
         $this->Loaded=True;

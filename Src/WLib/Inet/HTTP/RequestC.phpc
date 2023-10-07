@@ -13,7 +13,7 @@
     {
       If(!Is_Array($Add))
         $Add=Array($Add);
-      $Cache=$this->Loader->Create_Object('/Web/Search/BD/Cache');
+      $Cache=$this->Create_Object('/Web/Search/BD/Cache');
       $URL=TUrl::Create($Link);
       $Domain=$URL->Domain();
       $Domain=$this->Convert_Domain($Domain);
@@ -41,7 +41,7 @@
   
     Function Cache_Old($A_Z_Result)
     {
-      $Sock=$this->Loader->Create_Object('/Stream/Fifo');
+      $Sock=$this->Create_Object('/Stream/Fifo');
       $Sock=$this->_Send_Request($Sock, $A_Z_Result);
       $_Req=$Sock->Get_Content();
       $Sock->_UnLock();
@@ -78,7 +78,7 @@
         Return $Res;
       }
   
-      $Sock=&$this->Loader->Create_Object('/Stream/Fifo');
+      $Sock=&$this->Create_Object('/Stream/Fifo');
       $Sock=&$this->_Send_Request(&$Sock, $A_Z_Result);
       $_Req=$Sock->Get_Content();
    

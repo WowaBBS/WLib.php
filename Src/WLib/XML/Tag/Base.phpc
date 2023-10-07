@@ -18,14 +18,14 @@
         $this->tagName = $Args['tagName'   ];
         If($Args['_f']!=='/')
         {
-          $this->Attributes=$this->Loader->Create_Object('/XML/Attributes');
+          $this->Attributes=$this->Create_Object('/XML/Attributes');
           $this->Attributes->AddStr($Args['Attributes']);
         }
         $this->_f = $Args['_f'        ];
         $this->_e = $Args['_e'        ];
       }
       Else
-        $this->Attributes=$this->Loader->Create_Object('/XML/Attributes');
+        $this->Attributes=$this->Create_Object('/XML/Attributes');
     }
  
     Function _Done()
@@ -201,7 +201,7 @@
       $this->Delete(True, False);
       If($AddComment!==False)
         $Data="\n<!--\n".$Data.$AddComment."-->\n";
-      $NewTag=$this->Loader->Create_Object('/XML/Tag/Text', Array($Data));
+      $NewTag=$this->Create_Object('/XML/Tag/Text', Array($Data));
       $this->ListAdd($NewTag);
     }
  

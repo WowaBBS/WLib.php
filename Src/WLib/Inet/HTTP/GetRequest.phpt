@@ -96,7 +96,7 @@
           $Res[]=UrlEnCode($v[0]);
         Else
           $Res[]=UrlEnCode($v[0]).'='.UrlEnCode($v[1]);
-      Return Implode("&", $Res);
+      Return Implode('&', $Res);
     }
 
     Function Deprecated_Length() //

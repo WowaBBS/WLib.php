@@ -11,8 +11,8 @@
     Function _Init(Array $Args)
     {
       parent::_Init($Args);
-    //$this->Debug=$this->Loader->Create_Object('/Stream/File');
-      $Task=$this->Loader->Object('Task'); // TODO: Deprecated?
+    //$this->Debug=$this->Create_Object('/Stream/File');
+      $Task=$this->Object_GetLoader()->Object('Task'); // TODO: Deprecated?
       $this->Debug=$Task->Create_Log('Debug_Proxy.log');
     }
 

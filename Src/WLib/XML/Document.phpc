@@ -20,7 +20,7 @@
     Function _Init($Args)
     {
       parent::_Init($Args);
-      $this->Parser=$this->Loader->Create_Object('/XML/Parser');
+      $this->Parser=$this->Create_Object('/XML/Parser');
       $this->Clear();
     //$Parser->SetDocument($this);
     //$FirstTag
@@ -47,8 +47,8 @@
       While($this->FirstTag)
         $this->FirstTag->ListDelete();
   
-      $Tag1=$this->Loader->Create_Object('/XML/Tag/Document');
-      $Tag2=$this->Loader->Create_Object('/XML/Tag/Document');
+      $Tag1=$this->Create_Object('/XML/Tag/Document');
+      $Tag2=$this->Create_Object('/XML/Tag/Document');
   
       $Tag2->_f='/';
   

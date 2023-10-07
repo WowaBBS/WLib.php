@@ -37,7 +37,7 @@
       If(!$AFilePath)
         $AFilePath=$AFileName;
     //$_File=&New C_Stream_File();
-      $_File=$this->Loader->Create_Object('/Stream/File');
+      $_File=$this->Create_Object('/Stream/File');
       If($Res=$_File->Open($AFilePath, omReadOnly|omBinary))
         $this->AddStream($AFieldName, $AFileName, $_File, $AContentType);
       $_File->_UnLock();

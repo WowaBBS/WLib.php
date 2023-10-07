@@ -41,13 +41,14 @@
     
     Function AddFuncs($Funcs)
     {
-      $Res   =&$this->Funcs;
-      $Types =&$this->Types;
+      $Res    =&$this->Funcs;
+      $Types  =&$this->Types;
+      $Loader = $this->Object_GetLoader();
       ForEach($Funcs As $Name=>$Func)
       {
         $Type=Array_Shift($Func);
         if(!IsSet($Types[$Type]))
-          $Types[$Type]=$this->Loader->Load_Type('/BD/Expr/'.$Type);
+          $Types[$Type]=$Loader->Load_Type('/BD/Expr/'.$Type);
         $Rec=[
           'Name'=>$Name,
           'Type'=>$Type,
@@ -75,7 +76,7 @@
       if(!$FuncRec)
         $this->Log('Fatal', 'FuncName ', $FuncName, ' not found');
       $Type=$FuncRec['Type'];
-      $Type='T'.$this->Types[$Type];
+      $Type=$this->Types[$Type];
       return $Type::Create($this, $FuncRec, $Arr);
     }
   }

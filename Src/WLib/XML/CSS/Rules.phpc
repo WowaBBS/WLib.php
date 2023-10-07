@@ -86,7 +86,7 @@
       $ORule=False;
       ForEach($A_Rules As $RuleArr)
       {
-        $Rule=$this->Loader->Create_Object('/XML/CSS/Rule');
+        $Rule=$this->Create_Object('/XML/CSS/Rule');
         $Rule->_Set_Array($RuleArr);
         If($ORule)
           $ORule->NextSub[]=$Rule;
@@ -167,7 +167,7 @@
             $Res[$Rr[$k1]->Object_Id]=$Rr[$k1];
       }
  
-      $R=$this->Loader->Create_Object('/XML/CSS/Rules');
+      $R=$this->Create_Object('/XML/CSS/Rules');
       $R->Add_Rules($Res);
       Return $R;
     }

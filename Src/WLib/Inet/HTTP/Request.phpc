@@ -39,8 +39,8 @@
       $this->Get     =&$this->URL->Param;
       $this->Post    =&New T_Inet_HTTP_GetRequest();
       $this->Header  =&New T_Inet_MIME_Header();
-      $this->Cookies =&$this->Loader->Create_Object('/Inet/HTTP/Cookie/List');
-      $this->Files   =&$this->Loader->Create_Object('/Inet/HTTP/Files');
+      $this->Cookies =&$this->Create_Object('/Inet/HTTP/Cookie/List');
+      $this->Files   =&$this->Create_Object('/Inet/HTTP/Files');
     //$this->Method_Set();
     }
   
@@ -58,7 +58,7 @@
       Static $Res=Array();
       If(!$Res)
       {
-        $R=&$this->Loader->Create_Object('/Inet/HTTP/Request');
+        $R=&$this->Create_Object('/Inet/HTTP/Request');
         $R->Load_Current();
         $Res[]=&$R;
       }
@@ -158,7 +158,7 @@
     Function _Create_Sock()
     {
       $Proxy=&$this->Proxy;
-      $Sock=&$this->Loader->Create_Object('/Inet/Sock');
+      $Sock=&$this->Create_Object('/Inet/Sock');
       If($Proxy)
         $Z=$Sock->Open($Proxy['URL']);
       Else
@@ -174,7 +174,7 @@
     //If($this->Method=='POST')
       If(IsSet($this->Debug))
       {
-        $Sock2=$this->Loader->Create_Object('/Stream/Debug');
+        $Sock2=$this->Create_Object('/Stream/Debug');
         $Sock2->Open($Sock);
         $Sock->_UnLock();
         $Sock=$Sock2;
@@ -224,7 +224,7 @@
     {
       If($A_Z_Result)
       {
-        $Res=$this->Loader->Create_Object('/Inet/HTTP/Response');
+        $Res=$this->Create_Object('/Inet/HTTP/Response');
         $Res->Open($Sock);
       }
       Else
@@ -259,7 +259,7 @@
         $Args=Array(
           'Files'=>&$this->Files,
         );
-        $this->FPoster=$this->Loader->Create_Object('/Inet/HTTP/Poster/'.$APoster, $Args);
+        $this->FPoster=$this->Create_Object('/Inet/HTTP/Poster/'.$APoster, $Args);
       }
       Else
         $this->FPoster=null;

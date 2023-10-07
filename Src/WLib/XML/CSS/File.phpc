@@ -88,12 +88,12 @@
             {
             //If(IsSet($this->Styles[$Key]))
             //  UnSet($this->Styles[$Key]);
-            //$this->Styles[$Key]=$this->Loader->Create_Object('/XML/CSS/Style');
+            //$this->Styles[$Key]=$this->Create_Object('/XML/CSS/Style');
             //$this->Styles[$Key]->AddArr($St);
               If(StrNCmp(StrToLower($Key), '@media ', 7)==0)
-                $Style=$this->Loader->Create_Object('/XML/CSS/File');
+                $Style=$this->Create_Object('/XML/CSS/File');
               Else
-                $Style=$this->Loader->Create_Object('/XML/CSS/Style');
+                $Style=$this->Create_Object('/XML/CSS/Style');
               $Style->Key=$Key;
               $Style->AddArr($St);
               $this->Styles[]=$Style;

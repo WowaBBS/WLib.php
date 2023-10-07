@@ -23,7 +23,7 @@
     Function CheckStream()
     {
       if($this->Stream) return true;
-      $this->Loader->Log('Error', 'Logger hasn\'t stream');
+      $this->Object_GetLoader()->Log('Error', 'Logger hasn\'t stream');
       return false;
     }
     

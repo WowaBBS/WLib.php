@@ -196,14 +196,14 @@
             $this->Add_Tag_Text($v[idxTagText]);
           // pcdate cdate
           If($v[idxTagRem    ])
-            $NewTag=$this->Loader->Create_Object('/XML/Tag/Comment' ,Array($v[idxTagRem   ]));
+            $NewTag=$this->Create_Object('/XML/Tag/Comment' ,Array($v[idxTagRem   ]));
           ElseIf($v[idxTagScript ])
-            $NewTag=$this->Loader->Create_Object('/XML/Tag/Script'  ,Array($v[idxTagScript]));
+            $NewTag=$this->Create_Object('/XML/Tag/Script'  ,Array($v[idxTagScript]));
           Else
           {
             $tagName=$this->TagConv($v[idxTagName]);
   
-            $NewTag=$this->Loader->Create_Object('/XML/Tag/Base', Array(
+            $NewTag=$this->Create_Object('/XML/Tag/Base', Array(
               'tagName'    => $tagName,
               'Attributes' => $v[idxTagAttr  ],
               '_f'         => $v[idxTagFirst ],
@@ -239,7 +239,7 @@
             $this->Add_Tag_Text($Text);
   
             $tagName=$this->TagConv($v[idxTagName]);
-            $NewTag=$this->Loader->Create_Object('/XML/Tag/Base', Array(
+            $NewTag=$this->Create_Object('/XML/Tag/Base', Array(
               'tagName'    => $tagName,
               'Attributes' => $v[idxTagAttr  ],
               '_f'         => $v[idxTagFirst ],
@@ -272,7 +272,7 @@
           $T[$i]=$this->CData_List[$T[$i]];
         $Text=Implode('', $T);
       }
-      $NewTag=$this->Loader->Create_Object('/XML/Tag/Text', Array($Text));
+      $NewTag=$this->Create_Object('/XML/Tag/Text', Array($Text));
       $this->AddTag($NewTag);
     }
  

@@ -59,7 +59,7 @@
     
     Function Write($FilePath='php://output')
     {
-      $this->Loader->Load_Lib('/Stream/Utils');
+      $this->Object_GetLoader()->Load_Lib('/Stream/Utils');
       $Stream = $this->Create_Object('/Stream/File', [
         'FileName'=>$FilePath,
         'OpenMode'=>omWrite|omCreate|omMakePath|omBinary|omExclusive,

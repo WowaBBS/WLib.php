@@ -31,7 +31,7 @@
     {
       $Name=StrTr($Name, '\\', '/');
       $this->FileName=$Name;
-    //$this->RFileName=$this->Loader->Path->Get($Name);
+    //$this->RFileName=$this->Object_GetLoader()->Path->Get($Name);
       $this->RFileName=$Name;
     }
   
@@ -58,7 +58,7 @@
           $Path=Explode('/', $this->FileName);
           Array_Pop($Path);
           $Path=Implode('/', $Path);
-        //$this->Loader->Path->Make($Path);
+        //$this->Object_GetLoader()->Path->Make($Path);
           if(!CreatePath($Path, $this->MkDir))
             Break 2;
           Break;

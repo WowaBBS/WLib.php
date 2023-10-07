@@ -51,7 +51,7 @@
     
     Function _GetExprFactory()
     {
-      return $this->ExprFactory=$this->Loader->Get_Singleton('/BD/Expr/Factory');
+      return $this->ExprFactory=$this->Get_Singleton('/BD/Expr/Factory');
     }
     
     Function GetExprFactory()

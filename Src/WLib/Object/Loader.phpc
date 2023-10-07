@@ -26,149 +26,117 @@
  
     Function Loader_Init($APath_Libs)
     {
-    //If(Is_Object($APath_Libs))
-    //{
-    //  //$this->Loader_Info[SL_Path_Libs]=$APath_Libs->Loader_Info[SL_Path_Libs];
-    //  $this->Loader_Info=&$APath_Libs->Loader_Info;
-    //  $this->Path=&$APath_Libs->Path;
-    //}
-    //Else
-      {
-        $this->_Paths=[];
-        $this->AddSearchPath($APath_Libs);
-      //$this->Load_Lib('/All');
-   
-      //$this->Load_Type('/System/Path');
-      //$this->Path=New T_System_Path();
-   
-      //$this->Load_Type('/System/Event');
-      //$this->ShutDown_List=New T_System_Event();
-      //$this->ExitProc_List=New T_System_Event();
-   
-   
-      //$this->Load_Lib('/Support/PHP4');
-        $this->Load_Class('/Object/Base');
-        $this->Load_Type('/Log/Item');
-      //$this->Loader_Info=&$this->Loader_Info;
-      }
-    //Register_ShutDown_Function([&$this, 'ShutDown']);
-    //$this->Add_ShutDown([&$this, 'Done']);
+      $this->_Paths=[];
+      $this->AddSearchPath($APath_Libs);
+      $this->Load_Class('/Object/Base');
+      $this->Load_Type('/Log/Item');
+    }
+    
+    Function _Check_Path($Path)
+    {
+      $Res=StrTr(RealPath($Path), '\\', '/');
+      if($Res!==$Path)
+        $this->Log('Error', ' _Find_Lib:',"\n",
+          '  Excepted path ', $Res ,"\n",
+          '  Actual   path ', $Path
+        );
+      Return $Res;
     }
     
     Function _Find_Lib(String $Name, String $Ext='')
     {
-      if($Name[0]!=='/')
+      If($Name[0]!=='/')
       {
         $this->Log('Error', 'Lib`s name "', $Name, '" should be started with /');
         $Name='/'.$Name;
       }
-      ForEach($this->_Paths as $__Path)
+      ForEach($this->_Paths As $__Path)
       {
         $_Path=$__Path.$Name.$Ext;
-        If(Is_File($_Path))
-        {
-          if(true) // Check windows only
-          {
-            $_RPath=StrTr(RealPath($_Path), '\\', '/');;
-            if($_RPath!==$_Path)
-            { 
-              $this->Log('Error', ' _Find_Lib:', "\n",
-                '  Excepted path ', $_RPath ,"\n",
-                '  Actual   path ', $_Path  
-              );
-              return $_Path;
-            }
-          }
-          return $_Path;
-        }
+        If(!Is_File($_Path)) Continue;
+        Return $this->_Check_Path($_Path);
       }
-      return false;
+      Return False;
     }
     
-    Function _Verify_Begin($Verify)
+    Var $LibTypes=[ // Extension      , Prefix    , Type       ,  Ext
+      'Class'     =>['.Class.php'     ,'C'        ,'Class'     ,'.phpc'  ],
+      'Interface' =>['.Interface.php' ,'I'        ,'Interface' ,'.phpi'  ],
+      'Enum'      =>['.Enum.php'      ,'E'        ,'Enum'      ,'.phpe'  ],
+      'UnitTest'  =>['.Test.php'      ,'Test'     ,'UnitTest'  ,'.phput' ],
+      'Lib'       =>['.Lib.php'       ,''         ,'Lib'       ,'.php'   ],
+      'Module'    =>['.Module.php'    ,''         ,'Lib'       ,'.phpm'  ],
+      'Trait'     =>['.Trait.php'     ,'Trait'    ,'Trait'     ,'.phpt'  ],
+      'Type'      =>['.Type.php'      ,'T'        ,'Type'      ,'.phpt'  ],
+      'Struct'    =>['.Struct.php'    ,''         ,'Lib'       ,'.phpt'  ],
+    ];
+    
+    Function _Include($Include_Path, $Include_Vars=[], $Include_Type='Include')
     {
-     #ifdef Debug
-      switch($Verify)
-      {
-      case 'Class'     : return count(Get_Declared_Classes    ());
-      case 'Interface' : return count(Get_Declared_Interfaces ());
-      }
-     #endif // Debug
-      $this->Log('Fatal', 'Unreachable place');
+      Extract($Include_Vars);
+      Return Match($Include_Type){
+        'Require'      =>Require      ($Include_Path),
+        'Include'      =>Include      ($Include_Path),
+        'Require_Once' =>Require_Once ($Include_Path),
+        'Include_Once' =>Include_Once ($Include_Path),
+      };
     }
     
-    Function _Verify_End($Verify, $Var, $Class)
+    Function _Load_Lib(String $Name, Array $Mode=[], $ArgsId='Lib')
     {
-     #ifdef Debug
-      switch($Verify)
-      {
-      case 'Class'     : $List=Get_Declared_Classes    (); $Class='C'.$Class; break;
-      case 'Interface' : $List=Get_Declared_Interfaces (); $Class='I'.$Class; break;
-      }
-      for($i=$Var, $c=Count($List); $i<$c; $i++)
-        if($List[$i]===$Class)
-          return true;
-      for($i=$Var, $c=Count($List); $i<$c; $i++)
-        if(StrCaseCmp($List[$i], $Class)===0)
-        {
-          $this->Log('Error', 'class name error: ', $Class, ' in not same ', $List[$i]);
-          return true;
-        }
-      $this->Log('Error', 'class ', $Class, ' not found');
-     #endif // Debug
-    }
-    
-    Function _Load_Lib(String $Name, Array $Mode=[], String $Ext='.php', $Verify='')
-    {
-      $AZSafe=$Mode['Safe'] ?? False;
+      $Args=$this->LibTypes[$ArgsId];
+        
+      $Ext    =$Args[3]; //'.php',
+      $Prefix =$Args[1]; // '',
+      $Type   =$Args[2]; // 'Lib'
+      
     //$Name=StrToLower($Name);
       if($Name[0]!=='/')
       {
         $this->Log('Error', 'Lib`s name "', $Name, '" should be started with /');
         $Name='/'.$Name;
       }
-      $_Libs=&$this->_Libs;
-      If(IsSet($_Libs[$Name]))
-        Return $_Libs[$Name];
-      $Res=Str_Replace('/', '_', $Name);
-      //////
-      $_Path=$this->_Find_Lib($Name, $Ext);
-      If($_Path===False) $Res=False; Else
+
+      $LibState=&$this->_Libs[$Type][$Name];
+      If(!Is_Null($LibState))
       {
-        if($Verify)
-          $VerifyVars=$this->_Verify_Begin($Verify);
-        $Loader=&$this;
-        If($AZSafe) { If(!Include_Once($_Path)) $Res=False; }
-        Else        { If(!Require_Once($_Path)) $Res=False; }
-        if($Verify)
-          $this->_Verify_End($Verify, $VerifyVars, $Res);
+        If($LibState!==True)
+          Return $LibState;
+        Return $this->Log('Error', 'Recursive loading ',$Type, ' ', $Name)->Ret();
       }
+      $LibState=True;
+      
+      $_Path=$this->_Find_Lib($Name, $Ext);
+      If($_Path===False && ($Ext2=$Args[0]?? False))
+        $_Path=$this->_Find_Lib($Name, $Ext2);
+        
+      $Res=False;
+      If($_Path!==False)
+      {
+      //$Verify=$this->Verify? $this->_Verify($Type, $TypeName):False;
+        If($Res=$this->_Include($_Path, ['Loader'=>$this]))
+        {
+        //If($Verify) $Verify();
+          $TypeName=$Prefix.Str_Replace('/', '_', $Name);
+          $this->_Check_Finish($Type, $TypeName);
+          $Res=$TypeName;
+        }
+      }
+      
+      $LibState=$Res;
+      UnSet($LibState);
       If($Res)
         $this->Included_Files[$Name.$Ext]=$_Path;
-      ElseIf(!$AZSafe)
+      Else
       {
-        Trigger_Error('Can`t load lib '.$Name.$Ext, E_USER_WARNING);
-        UnSupport();
+        $Safe=$Mode['Safe']?? False;
+        If(!$Safe)
+        {
+          Trigger_Error('Can`t load lib '.$Name.$Ext, E_USER_WARNING);
+          UnSupport();
+        }
       }
-      $_Libs[$Name]=$Res;
       Return $Res;
-    }
- 
-    Function Load_Lib($Name, Array $Mode=[])
-    {
-      $this->_Load_Lib($Name, $Mode);
-    }
- 
-    Function Load_Class($Name, Array $Mode=[])
-    {
-      $Res=$this->_Load_Lib($Name, $Mode, '.phpc', 'Class');
-      Return $Res? 'C'.$Res:$Res;
-    }
- 
-    Function Load_Interface($Name, Array $Mode=[])
-    {
-      $Res=$this->_Load_Lib($Name, $Mode, '.phpi', 'Interface');
-      Return $Res? 'I'.$Res:$Res;
     }
  
     Function Create_Object($Name, Array $Args=[], Array $Mode=[])
@@ -182,8 +150,8 @@
       If(!IsSet($Args['Loader' ])) $Args['Loader' ]=&$this;
       $Res=New $Class_Name($Args);
      #ifdef Debug
-     #if(get_class($Res)!==$Class_Name)
-     #  this->Log('Error', 'Class name error: ', get_class($Res), '!==', $Class_Name);
+     #if(Get_Class($Res)!==$Class_Name)
+     #  this->Log('Error', 'Class name error: ', Get_Class($Res), '!==', $Class_Name);
      #endif // Debug
       Return $Res;
     }
@@ -207,19 +175,27 @@
       // This is creating singleton from System/Singleton/
     }
     
+    Function Load_Lib       ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name, $Mode, 'Lib'       ); }
+    Function Load_Module    ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name, $Mode, 'Module'    ); } // TODO: Rename lib
+    Function Load_Type      ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name, $Mode, 'Type'      ); } // TODO: Rename struct
+    Function Load_Struct    ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name, $Mode, 'Struct'    ); } // TODO: Rename struct
+    Function Load_Class     ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name ,$Mode ,'Class'     ); }
+    Function Load_Interface ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name ,$Mode ,'Interface' ); }
+    Function Load_Trait     ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name ,$Mode ,'Trait'     ); }
+    Function Load_Enum      ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name ,$Mode ,'Enum'      ); }
+    Function Load_UnitTest  ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name ,$Mode ,'UnitTest'  ); }
+ 
     Function Using_Class     ($Name) {}
     Function Using_Interface ($Name) { $this->Load_Interface ($Name); }
     Function Using_Module    ($Name) { $this->Load_Module    ($Name); } // TODO: Rename lib
     Function Using_Type      ($Name) { $this->Load_Type      ($Name); } // TODO: Rename struct
     Function Using_Struct    ($Name) { $this->Load_Struct    ($Name); } // TODO: Rename struct
     
-    Function Load_Module ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name, $Mode, '.phpm'); } // TODO: Rename lib
-    Function Load_Type   ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name, $Mode, '.phpt'); } // TODO: Rename struct
-    Function Load_Struct ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name, $Mode, '.phpt'); } // TODO: Rename struct
- 
     Function Class_Implements ($Name) { $this->Load_Interface ($Name); }
     Function Class_Extends    ($Name) { $this->Load_Class     ($Name); }
     Function Parent_Class     ($Name) { $this->Load_Class     ($Name); }
+    Function Parent_Struct    ($Name) { $this->Load_Struct    ($Name); }
+  //Function Parent_UnitTest  ($Name) { $this->Load_UnitTest  ($Name); } // Not allowed
     
     Function Begin_Module () {}
     Function Begin_Class  () {}
@@ -230,6 +206,80 @@
     Function End_Class  () {}
     Function End_Type   () {}
     Function End_Lib    () {}
+
+    //****************************************************************
+    // Check
+    
+    Function _Check_Finish($Type, $TypeName)
+    {
+      Switch($Type)
+      {
+      Case 'Lib'       : Return;
+      Case 'Class'     : $z=     Class_Exists($TypeName); Break;
+      Case 'Interface' : $z= Interface_Exists($TypeName); Break;
+      Case 'Trait'     : $z=     Trait_Exists($TypeName); Break;
+      Case 'Enum'      : $z=      Enum_Exists($TypeName); Break;
+      Case 'UnitTest'  : $z=     Class_Exists($TypeName); Break;
+      Case 'Type'      : $z=     Class_Exists($TypeName); Break;
+      Default: Return $this->Log('Fatal', 'Unreachable place '.$Type)->Ret();
+      }
+      
+      If(!$z) Return $this->Log('Error', $Type, ' ', $TypeName, ' not found')->Ret();
+      
+      $Class=New ReflectionClass($TypeName);
+      $RealName=$Class->GetName();
+      If($TypeName!==$RealName)
+        $this->Log('Error', $Type, ' name error: ', $TypeName, ' in not same ', $RealName);
+    }
+    
+    //****************************************************************
+    // Old Verify functional
+    
+    Var $Verify=True;
+    
+    Function _Verify($Type, $TypeName)
+    {
+      $Var=$this->_Verify_Begin($Type);
+      Return fn()=>$this->_Verify_End($Type, $Var, $TypeName);
+    }
+
+    Function _Verify_Begin($Type): Int
+    {
+      Switch($Type)
+      {
+      Case 'Lib'       : Return 0;
+      Case 'Class'     : Return Count(Get_Declared_Classes    ());
+      Case 'Interface' : Return Count(Get_Declared_Interfaces ());
+      Case 'Trait'     : Return Count(Get_Declared_Trait      ());
+      Case 'Enum'      : Return Count(Get_Declared_Classes    ());
+      Case 'UnitTest'  : Return Count(Get_Declared_Classes    ());
+      }
+      $this->Log('Fatal', 'Unreachable place '.$Type);
+    }
+    
+    Function _Verify_End($Type, Int $Start, String $TypeName)
+    {
+      Switch($Type)
+      {
+      Case 'Lib'       : Return;
+      Case 'Class'     : $List=Get_Declared_Classes    (); Break;
+      Case 'Interface' : $List=Get_Declared_Interfaces (); Break;
+      Case 'Trait'     : $List=Get_Declared_Traits     (); Break;
+      Case 'Enum'      : $List=Get_Declared_Classes    (); Break;
+      Case 'UnitTest'  : $List=Get_Declared_Classes    (); Break;
+      }
+      $c=Count($List);
+      for($i=$Start; $i<$c; $i++)
+        if($List[$i]===$TypeName)
+          return true;
+      for($i=$Start; $i<$c; $i++)
+        if(StrCaseCmp($List[$i], $TypeName)===0)
+        {
+          $this->Log('Error', $Type, ' name error: ', $TypeName, ' in not same ', $List[$i]);
+          return true;
+        }
+      $this->Log('Error', $Type, ' ', $TypeName, ' not found');
+    }
 
     //****************************************************************
     // Debug And Log

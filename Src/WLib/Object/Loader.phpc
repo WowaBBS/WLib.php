@@ -97,14 +97,14 @@
         $Name='/'.$Name;
       }
 
-      $LibState=&$this->_Libs[$Type][$Name];
+    //$LibState=&$this->_Libs[$Type][$Name];//<Remove?
+      $LibState=&$this->_Libs[$Name];
       If(!Is_Null($LibState))
       {
         If($LibState!==True)
           Return $LibState;
         Return $this->Log('Error', 'Recursive loading ',$Type, ' ', $Name)->Ret();
       }
-      $LibState=True;
       
       $_Path=$this->_Find_Lib($Name, $Ext);
       If($_Path===False && ($Ext2=$Args[0]?? False))
@@ -113,6 +113,7 @@
       $Res=False;
       If($_Path!==False)
       {
+        $LibState=True; // Mark recursive checking
       //$Verify=$this->Verify? $this->_Verify($Type, $TypeName):False;
         If($Res=$this->_Include($_Path, ['Loader'=>$this]))
         {
@@ -131,29 +132,35 @@
       {
         $Safe=$Mode['Safe']?? False;
         If(!$Safe)
-        {
-          Trigger_Error('Can`t load lib '.$Name.$Ext, E_USER_WARNING);
-          UnSupport();
-        }
+          $this->Log('Fatal', 'Can`t load lib ',$Name.$Ext)->Ret();
       }
       Return $Res;
     }
- 
-    Function Create_Object($Name, Array $Args=[], Array $Mode=[])
+    
+    Function _Create_Object($Class_Name, Array $Args=[], Array $Mode=[])
     {
-      $Res=$this->Load_Class($Name, $Mode);
-      If(!$Res)
-        Return $Res;
-      $Class_Name=$Res;
-  
-      If(!IsSet($Args['Outer'  ])) $Args['Outer'  ]=&$this;
-      If(!IsSet($Args['Loader' ])) $Args['Loader' ]=&$this;
+      If(!$Class_Name) Return $Class_Name;
+      
+      If(!IsSet($Args['Outer'  ])) $Args['Outer'  ]=$this;
+      If(!IsSet($Args['Loader' ])) $Args['Loader' ]=$this;
       $Res=New $Class_Name($Args);
      #ifdef Debug
      #if(Get_Class($Res)!==$Class_Name)
      #  this->Log('Error', 'Class name error: ', Get_Class($Res), '!==', $Class_Name);
      #endif // Debug
       Return $Res;
+    }
+    
+    Function Create_Object($Name, Array $Args=[], Array $Mode=[])
+    {
+      $Class_Name=$this->Load_Class($Name, $Mode);
+      Return $this->_Create_Object($Class_Name, $Args, $Mode);
+    }
+    
+    Function Create_UnitTest($Name, Array $Args=[], Array $Mode=[])
+    {
+      $Class_Name=$this->Load_UnitTest($Name, $Mode);
+      Return $this->_Create_Object($Class_Name, $Args, $Mode);
     }
     
     Function Get_Singleton($Name, Array $Args=[], Array $Mode=[])

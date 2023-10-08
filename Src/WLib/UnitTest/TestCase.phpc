@@ -1,0 +1,9 @@
+<?
+  $this->Load_Class('/Object');
+  $this->Load_Trait('/UnitTest/Asserts');
+  
+  Class C_UnitTest_TestCase Extends C_Object
+  {
+    Use Trait_UnitTest_Asserts;
+  }
+?>

@@ -1,0 +1,38 @@
+<?
+  $this->Load_Class('/UnitTest/TestCase');
+  
+  Use T_URI_UUID_UUID As UUID;
+  
+  Class C_URI_UUID_Test_Base Extends C_UnitTest_TestCase
+  {
+    Var $Factory;
+    
+    Function _Init($Args)
+    {
+    //$this->Factory=$this->Get_Singleton('/URI/UUID/Factory');
+      $this->Factory=$this->Create_Object('/URI/UUID/Factory');
+      Parent::_Init($Args);
+    }
+    
+    Function GetFactory() { Return $this->Factory; }
+    
+    Function TestUnique($Ver, $Func, $Greater)
+    {
+      $Reg='/^[0-9a-f]{8}\-[0-9a-f]{4}\-'.$Ver.'[0-9a-f]{3}\-[89ab][0-9a-f]{3}\-[0-9a-f]{12}$/';
+      $u1=$Func();
+      for($x=0; $x<10000; $x++)
+      {
+        $this->Assert(Preg_Match($Reg, $u1->ToString()));
+        $u2=$Func();
+        If($Greater)
+        {
+          $this->Assert(($v1=$u1->ToString())<($v2=$u2->ToString()), $v1.'>='.$v2);
+          $this->Assert($u1->ToBinary()<$u2->ToBinary());
+        }
+        Else
+          $this->Assert($u1->ToString()!==$u2->ToString());
+        $u1=$u2;
+      }
+    }
+  }
+?>

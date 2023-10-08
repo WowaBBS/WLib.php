@@ -1,0 +1,15 @@
+<?
+//ini_set('display_errors', 'off');
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+
+//Display_Errors(False);
+//ini_set('display_errors', 'off');
+//Error_Reporting(E_ALL);
+//Ini_Set('html_errors', 'on');
+  
+  $Loader->GetLogger()->Add('Test.log');
+  $Test=$Loader->Create_UnitTest('/URI/UUID/Test/TimeBits');
+  $Test->Test();
+  $Test=$Loader->Create_UnitTest('/URI/UUID/Test/Oittaa');
+  $Test->Test();
+?>

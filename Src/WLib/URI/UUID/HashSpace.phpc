@@ -1,0 +1,51 @@
+<?
+  $Loader->Load_Class('/Object');
+  
+  Use T_URI_UUID_UUID As UUID;
+  
+  // https://www.ietf.org/archive/id/draft-ietf-uuidrev-rfc4122bis-03.txt
+  // Appendix B.  Some Hash Space IDs
+  Class C_URI_UUID_NameSpace Extends C_Object
+  { // See: https://misc.daniel-marschall.de/tools/uuid_mac_decoder/
+    Var $Factory;
+    
+    Function _Init($Args)
+    {
+      $this->Factory=$Args['Factory']->Object_GetWeak();
+      Parent::_Init($Args);
+    }
+    
+    Function GetFactory() { Return $this->Factory->Get(); }
+  
+    Protected $_List=[
+      //Driver ,Name         ,UUIDs
+      ['V3'    ,'Md5'        ,Null],
+      ['V5'    ,'Sha1'       ,Null],
+      ['Hash'  ,'Sha224'     ,'59031ca3-fbdb-47fb-9f6c-0f30e2e83145'],
+      ['Hash'  ,'Sha256'     ,'3fb32780-953c-4464-9cfd-e85dbbe9843d'],
+      ['Hash'  ,'Sha384'     ,'e6800581-f333-484b-8778-601ff2b58da8'],
+      ['Hash'  ,'Sha512'     ,'0fde22f2-e7ba-4fd1-9753-9c2ea88fa3f9'],
+      ['Hash'  ,'Sha512/224' ,'003c2038-c4fe-4b95-a672-0c26c1b79542'],
+      ['Hash'  ,'Sha512/256' ,'9475ad00-3769-4c07-9642-5e7383732306'],
+      ['Hash'  ,'Sha3-224'   ,'9768761f-ac5a-419e-a180-7ca239e8025a'],
+      ['Hash'  ,'Sha3-256'   ,'2034d66b-4047-4553-8f80-70e593176877'],
+      ['Hash'  ,'Sha3-384'   ,'872fb339-2636-4bdd-bda6-b6dc2a82b1b3'],
+      ['Hash'  ,'Sha3-512'   ,'a4920a5d-a8a6-426c-8d14-a6cafbe64c7b'],
+      ['Shake' ,'Shake128'   ,'7ea218f6-629a-425f-9f88-7439d63296bb'],
+      ['Shake' ,'Shake256'   ,'2e7fc6a4-2919-4edc-b0ba-7d7062ce4f0a'],
+    ];
+    
+    Protected $List=[];
+    
+    Function _Get($n) { Return $this->_List[StrToLower($n)]; }
+    Function Get($n)
+    {
+      Return $this->List[$n]??=
+        $this->GetFactory->Parse($this->_Get($n));
+    }
+    
+    Function GetHasher($n)
+    {
+    }
+  }
+?>

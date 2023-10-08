@@ -1,0 +1,42 @@
+<?
+  Enum E_URI_UUID_Family
+  {
+    Case Nil       ; // 00000000h
+    Case NCS       ; // b0xxxxxxx
+    Case Rfc4122   ; // b10xxxxxx
+    Case Microsoft ; // b110xxxxx
+    Case Reserved  ; // b111xxxxx
+    Case Max       ; // ffffffffh
+    Case Unknown   ; // ?????????
+  
+    Const _Nil="\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+    Const _Max="\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF";
+    
+    Static Function Get($Binary)
+    {
+      If(StrLen($Binary)!=16)   Return Self::Unknown   ;
+      $v=Ord($Binary[8]);
+      
+      If(($v&0xC0)===0x80) Return Self::Rfc4122   ;
+      If(($v&0xE0)===0xC0) Return Self::Microsoft ;
+      If( $v===Self::_Nil) Return Self::Nil       ;
+      If( $v===Self::_Max) Return Self::Max       ;
+      If(($v&0x80)===0x00) Return Self::NCS       ;
+                           Return Self::Reserved  ;
+    }
+
+    Static Function Is_Rfc4122($Binary) { Return (Ord($Binary[8])&0xC0)===0x80; }
+
+    Static Function GetVersion($Binary): Int { Return Ord($Binary[6])>>4; }
+    
+    Function GetName() { Return $this->name; }
+    
+    Static Function GetClass($Binary)
+    {
+      $Res=Static::Get($Binary);
+      If($Res===Self::Rfc4122)
+        Return Static::GetVersion($Binary);
+      Return $Res->GetName();
+    }
+  }
+?>

@@ -1,0 +1,48 @@
+<?
+  $Loader->Load_Class('/Object');
+  
+  Use T_URI_UUID_UUID As UUID;
+  
+  Class C_URI_UUID_NameSpace Extends C_Object
+  {
+    Var $Factory;
+    
+    Function _Init($Args)
+    {
+      $this->Factory=$Args['Factory']->Object_GetWeak();
+      Parent::_Init($Args);
+    }
+    
+    Function GetFactory() { Return $this->Factory->Get(); }
+  
+    Protected $_List=[
+      'nil'   =>'00000000-0000-0000-0000-000000000000',
+      'max'   =>'FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF',
+      'dns'   =>'6ba7b810-9dad-11d1-80b4-00c04fd430c8',
+      'oid'   =>'6ba7b811-9dad-11d1-80b4-00c04fd430c8',
+      'url'   =>'6ba7b812-9dad-11d1-80b4-00c04fd430c8',
+    # '?'     =>'6ba7b813-9dad-11d1-80b4-00c04fd430c8',
+      'x500'  =>'6ba7b814-9dad-11d1-80b4-00c04fd430c8',
+    ];
+    
+    Protected $List=[];
+    Function _Get($n) { Return $this->_List[StrToLower($n)]?? Null; }
+    Function Get($n): ?UUID
+    { 
+      If($n InstanceOf UUID)
+        Return $n;
+      $Factory=$this->GetFactory();
+      Return $this->List[$n]??=
+        $Factory->SafeParse($n) ??
+        $Factory->SafeParse($this->_Get($n))??
+        Throw New \TypeError('UUID NameSpace is wrong: '.$n);
+    }
+    
+    Static Function Dns  (): UUID { Return Static::Get('Dns'  ); }
+    Static Function OId  (): UUID { Return Static::Get('OId'  ); }
+    Static Function Url  (): UUID { Return Static::Get('Url'  ); }
+    Static Function X500 (): UUID { Return Static::Get('X500' ); }
+    Static Function Nil  (): UUID { Return Static::Get('Nil'  ); }
+    Static Function Max  (): UUID { Return Static::Get('Max'  ); }
+  }
+?>

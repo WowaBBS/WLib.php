@@ -1,0 +1,175 @@
+<?
+  //https://en.wikipedia.org/wiki/Universally_unique_identifier
+  //https://ru.wikipedia.org/wiki/UUID
+  //https://github.com/Fleshgrinder/php-uuid/blob/php-7.1/src/UUID.php
+  //https://github.com/oittaa/uuid-php/blob/master/src/UUID.php
+  //https://habr.com/ru/companies/vk/articles/522094/
+  
+  $Loader->Load_Class('/Object');
+  $Loader->Load_Enum('/URI/UUID/Family');
+  
+  Use E_URI_UUID_Family  As Family ;
+  Use T_URI_UUID_UUID    As UUID   ;
+  Use T_Inet_Addr_Mac_V6 As Mac    ;
+  
+  Class C_URI_UUID_Factory Extends C_Object
+  {
+    Var $PreLoad=[
+      0=>'/URI/UUID/Rfc4122/Reserved',
+      1=>'/URI/UUID/Rfc4122/V1',
+      2=>'/URI/UUID/Rfc4122/Reserved',
+      3=>'/URI/UUID/Rfc4122/V3',
+      4=>'/URI/UUID/Rfc4122/V4',
+      5=>'/URI/UUID/Rfc4122/V5',
+      6=>'/URI/UUID/Rfc4122/V6',
+      7=>'/URI/UUID/Rfc4122/V7',
+      8=>'/URI/UUID/Rfc4122/V8',
+      9=>'/URI/UUID/Rfc4122/Reserved',
+      10=>'/URI/UUID/Rfc4122/Reserved',
+      11=>'/URI/UUID/Rfc4122/Reserved',
+      12=>'/URI/UUID/Rfc4122/Reserved',
+      13=>'/URI/UUID/Rfc4122/Reserved',
+      15=>'/URI/UUID/Rfc4122/Reserved',
+      
+      'Oittaa'    =>'/URI/UUID/Rfc4122/Oittaa'   , //V8
+      'Nil'       =>'/URI/UUID/Family/Nil'       ,
+      'Max'       =>'/URI/UUID/Family/Max'       ,
+      'Rfc4122'   =>'/URI/UUID/Family/Rfc4122'   ,
+      'Microsoft' =>'/URI/UUID/Family/Microsoft' ,
+      'NCS'       =>'/URI/UUID/Family/NCS'       ,
+      'Reserved'  =>'/URI/UUID/Family/Reserved'  ,
+      'Unknown'   =>'/URI/UUID/Family/Unknown'   ,
+    ];
+    
+    Var $Structs=[];
+    
+    Function AddCustomStruct($Type, $Class) { Return $this->Structs[$Type]=$Class; }
+    
+    Function GetStruct($Type)
+    {
+      If($Res=$this->Structs[$Type]?? Null) Return $Res;
+      If(Array_Key_Exists($Type, $this->Structs)) Return Null;
+      $Res=$this->_GetStruct($Type);
+      
+      If(!$Res)
+        $this->Log('Error', 'Unknown UUID class ', $Type);
+      
+      Return $this->Structs[$Type]=$Res;
+    }
+  
+    Function _GetStruct($Type)
+    {
+      If($Res=$this->PreLoad[$Type]?? Null)
+        Return $this->Object_GetLoader()->Load_Type($Res);
+        
+      If(Class_Exists($Type, False))
+        Return $Type;
+      
+      Return Null;
+    }
+  
+    Function FromBinary(String $Binary, String $Class=Null): UUID
+    {
+      $Class??=Family::GetClass($Binary);
+      $Class=$this->GetStruct($Class);
+      Return New $Class($Binary);
+    }
+
+    Var $Parse_Regexp='/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/Ssi';
+     
+    Function _Parse(String $v): String
+    {
+      $S='urn:'  ; If(Str_Starts_With($v, $S)) $v=SubStr($v, StrLen($S));
+      $S='uuid:' ; If(Str_Starts_With($v, $S)) $v=SubStr($v, StrLen($S));
+      If(!StrLen($v)) Return '';
+      If($v[0]==='{')
+      {
+        If($v[StrLen($v)-1]!=='}') Return '';
+        $v=SubStr($v, 1, -1);
+      }
+      
+      If(!Preg_Match($this->Parse_Regexp, $v)) Return '';
+      $v=Str_Replace('-', '', $v);
+      
+      If(StrLen($v)!=32) Return '';
+
+      Return Hex2Bin($v);
+    }
+    
+    Function SafeParse(String $v, $Class=Null): ?UUID
+    {
+      $Res=$this->_Parse($v);
+      If($Res==='') Return Null;
+      Return $this->FromBinary($Res, $Class);
+    }
+    
+    Function Parse(String $v, $Class=Null): UUID
+    {
+      $Res=$this->SafeParse($v, $Class);
+      If(!$Res) Throw New \TypeError('UUID is wrong: '.$v);
+      Return $Res;
+    }
+    
+    Function Verify(String $v): Bool { Return $this->_Parse($v)!==''; }
+    
+    Function Create($Class, ...$Args):UUID { Return $this->GetStruct($Class)::_Create($this, ...$Args); }
+
+    Function V1($Mac=Null, $Rnd=Null, $Hns=Null) { Return $this->Create(1, $Mac,  $Rnd, $Hns  ); }
+    Function V3($NameSpace, $Name              ) { Return $this->Create(3, $NameSpace,  $Name ); }
+    Function V4(           $Random=Null        ) { Return $this->Create(4,        $Random     ); }
+    Function V5($NameSpace, $Name              ) { Return $this->Create(5, $NameSpace,  $Name ); }
+    Function V6($Mac=Null, $Rnd=Null, $Hns=Null) { Return $this->Create(6, $Mac,  $Rnd, $Hns  ); }
+    Function V7(           $Rnd=Null, $Hns=Null) { Return $this->Create(7,        $Rnd, $Hns  ); }
+    Function V8(           $Res=Null           ) { Return $this->Create(8,        $Res        ); }
+    Function Oittaa(       $Rnd=Null, $Hns=Null) { Return $this->Create('Oittaa', $Rnd, $Hns  ); } //V8
+    
+    Var $Vars=[];
+    
+    Function  _GetVar($Name    ) { Return $this->Vars[$Name]?? Null; }
+    Function  _SetVar($Name, $v) {        $this->Vars[$Name]=  $v  ; }
+    
+    Function TimeStamp100ns(): Int
+    {
+      [$USec, $Sec]=Explode(' ', (String)MicroTime(False), 2);
+      $Res =(Int)              $Sec*10_000_000; // 100ns tick
+      $Res+=(Int)Floor((Float)$USec*10_000_000);
+      Return $Res;
+    }
+    
+    Function Random(&$Rnd, Int $Len)
+    {
+      $Rnd??='';
+      If(StrLen($Rnd)>$Len)
+      {
+        $Res=SubStr($Rnd, 0, $Len);
+        $Rnd=SubStr($Rnd, $Len);
+      }
+      Else
+      {
+        $Res=$Rnd;
+        $Rnd='';
+      }
+      If($L=$Len-StrLen($Res))
+        $Res.=Random_Bytes($L);        
+      Return $Res;
+    }
+    
+    Function _Mac(Mac|String|Null  $Mac=Null)
+    {
+      $f=$this->Get_Singleton('/Inet/Addr/Mac/Factory');
+      $Res=$Mac? $f->Parse($Mac):$f->Current();
+      $Res=$Res->ToBinary();
+      If(StrLen($Res)!==6) Throw New \TypeError('Mac is wrong: '.$Mac);
+      Return $Res;
+    }
+    
+    Function _NS(UUID|String $NameSpace) { Return $this->GetNameSpaces()->Get($NameSpace)->ToBinary(); }
+    Function _HS(UUID|String $HashSpace) { Return $this->GetHashSpaces()->GetHasher($HashSpace); }
+    
+    Protected $NameSpaces;
+    Protected $HashSpaces;
+
+    Function GetNameSpaces() { Return $this->NameSpaces??=$this->Create_Object('/URI/UUID/NameSpace', ['Factory'=>$this]); }
+    Function GetHashSpaces() { Return $this->HashSpaces??=$this->Create_Object('/URI/UUID/HashSpace', ['Factory'=>$this]); }
+  }
+?>

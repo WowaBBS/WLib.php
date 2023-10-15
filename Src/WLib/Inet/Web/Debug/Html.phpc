@@ -1,6 +1,7 @@
 <?
   class C_Inet_Web_Debug_Html Extends C_Object
   {
+    Var $Info;
     Var $Proc;
   
     Function _Init(Array $Args)
@@ -91,13 +92,13 @@
 </table>
 <?
         }
-?>        
+?>       
   <form enctype="multipart/form-data" method="post">
    <p><input type="file" name="f[a][]" multiple>
    <input type="file" name="a[f]" multiple>
    <input type="submit" value="Отправить"></p>
   </form> 
-<?        
+<?
       }
     
       if($_FILES)

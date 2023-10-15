@@ -38,11 +38,11 @@
         Throw New \TypeError('UUID NameSpace is wrong: '.$n);
     }
     
-    Static Function Dns  (): UUID { Return Static::Get('Dns'  ); }
-    Static Function OId  (): UUID { Return Static::Get('OId'  ); }
-    Static Function Url  (): UUID { Return Static::Get('Url'  ); }
-    Static Function X500 (): UUID { Return Static::Get('X500' ); }
-    Static Function Nil  (): UUID { Return Static::Get('Nil'  ); }
-    Static Function Max  (): UUID { Return Static::Get('Max'  ); }
+    Static Function Dns  ():UUID { Return Static::Get('Dns'  ); }
+    Static Function OId  ():UUID { Return Static::Get('OId'  ); }
+    Static Function Url  ():UUID { Return Static::Get('Url'  ); }
+    Static Function X500 ():UUID { Return Static::Get('X500' ); }
+    Static Function Nil  ():UUID { Return Static::Get('Nil'  ); }
+    Static Function Max  ():UUID { Return Static::Get('Max'  ); }
   }
 ?>

@@ -1,0 +1,92 @@
+<?
+  $this->Load_Class('/Object');
+  
+  Class C_UnitTest_Suite Extends C_Object
+  {
+    Function StartDir($BaseDir, $Prefix=Null)
+    {
+      $lDir=RealPath($BaseDir);
+      If(!$lDir)
+        Return $this->Log('Error', 'TestDir ', $Dir, 'Not found')->Ret(False);
+      $BaseDir=$lDir;
+      $Loader=$this->Object_GetLoader();
+      If(!$Prefix)
+      {
+        ForEach($Loader->_Paths As $Path)
+          If(Str_Starts_With($BaseDir, $Path=RealPath($Path))|| $BaseDir===$Path)
+          {
+            $Prefix=SubStr($BaseDir, StrLen($Path));
+            If($Prefix==='') $Prefix='/';
+            $this->Log('Debug', 'Found prefix: ', $Prefix);
+          }
+        If(!$Prefix)
+        {
+          $Paths=[];
+          ForEach($Loader->_Paths As $k=>$Path)
+            $Paths[$k]=RealPath($Path);
+          Return $this->Log('Error', 'TestDir Prefix not found for dir: ', $BaseDir, ' in:')->Debug($Paths)->Ret(False);
+        }
+      }
+      If($Prefix==='/')
+        $Prefix='';
+      $Exts=['.phput', '.Test.php']; //TODO: Get from loader
+      $Res=[];
+      $Dirs=[$BaseDir.'/'];
+      While($Dirs)
+      {
+        $Dir=Array_Pop($Dirs);
+        $d=@OpenDir($Dir);
+        If(!$d)
+        {
+          $this->Log('Error', 'Can\'t OpenDir ', $Dir);
+          Continue;
+        }
+        While(False!==($File=ReadDir($d)))
+        {
+          If($File===''   ) Continue;
+          If($File==='.'  ) Continue;
+          If($File==='..' ) Continue;
+          If($File[0]==='.') Continue;
+          $Path=$Dir.$File;
+          If(Is_Dir($Path))
+          {
+            $Dirs[]=$Path.'/';
+          //$this->Log('Debug', 'Add Dir '.$Path);
+            Continue;
+          }
+          If(!Is_File($Path))
+          {
+            $this->Log('Error', 'Path is not file ', $Path);
+            Continue;
+          }
+          
+          ForEach($Exts As $Ext)
+            If(Str_Ends_With($File, $Ext))
+            {
+              $R=SubStr($Path, 0, -StrLen($Ext));
+              If(!Str_Starts_With($R, $BaseDir))
+              {
+                $this->Log('Error', 'Can\'t remove BaseDir ', $BaseDir, ' from ', $R);
+                Continue;
+              }
+              $R=StrTr($Prefix.SubStr($R, StrLen($BaseDir)), '\\', '/');
+              $this->Log('Debug', 'Found: ', $R);
+              $Res[$R]=$R;
+            }
+        }
+        CloseDir($d);
+      }
+      KSort($Res);
+      ForEach($Res As $Class)
+      {
+        $Test=$Loader->Create_UnitTest($Class, [], ['Safe'=>True]);
+        If(!$Test)
+        {
+          $this->Log('Error', 'Can\'t load test ', $Class);
+          Continue;
+        }
+        $Test->Test_Run();
+      }
+    }
+  }
+?>

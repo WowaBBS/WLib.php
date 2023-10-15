@@ -4,13 +4,31 @@
     Function Assert($Assertion, $Message='')
     {
       If($Assertion) Return False;
+      $this->Test_SetFailed();
       $this->Log('Error', 'Assert failed ', $Message)->BackTrace();
+      Return True;
+    }
+    
+    Function AssertTrue($Assertion, $Message='')
+    {
+      If($Assertion===True) Return False;
+      $this->Test_SetFailed();
+      $this->Log('Error', 'AssertTrue failed ', $Message)->BackTrace();
+      Return True;
+    }
+    
+    Function AssertFalse($Assertion, $Message='')
+    {
+      If($Assertion===False) Return False;
+      $this->Test_SetFailed();
+      $this->Log('Error', 'AssertFalse failed ', $Message)->BackTrace();
       Return True;
     }
     
     Function AssertNull($Value, $Message='')
     {
       If(Is_Null($Value)) Return False;
+      $this->Test_SetFailed();
       $this->Log('Error', 'AssertNull failed ', $Message)->BackTrace();
       Return True;
     }
@@ -18,6 +36,7 @@
     Function AssertEquals($Expected, $Actual, $Message='')
     {
       If($Expected==$Actual) Return False; //<Fast check
+      $this->Test_SetFailed();
       $Debug=[
         'Expected' =>$Expected ,
         'Actual'   =>$Actual   ,
@@ -30,6 +49,7 @@
     {
       $Diff=Abs($Expected-$Actual);
       If($Diff<=$Delta) Return False;
+      $this->Test_SetFailed();
       $Debug=[
         'Expected' =>$Expected ,
         'Actual'   =>$Actual   ,
@@ -42,32 +62,55 @@
     
     Function AssertSame($Expected, $Actual, $Message='')
     {
-      If($Expected===$Actual) Return False;
-      $z=$Expected==$Actual;
+      $Res=$this->IsIdentical($Expected, $Actual);
+      If($Res[0]) Return False;
+      $this->Test_SetFailed();
+      $z=IsNull($Res[0]);
       $Debug=[
         'Expected' =>$Expected ,
         'Actual'   =>$Actual   ,
-      ];
-      If(GetType($Expected)!==GetType($Actual))
+      ]+($Res['Debug']?? []);
+      If($Res[1]==='Type')
         Return $this->Log($z? 'Warning':'Error', 'AssertSome failed: Expected and Actual values have different types ', $Message)
           ->BackTrace()->Debug($Debug)->Ret(True);
-      If(Is_Float($Expected) && !$z)
-      {
-        $z=(String)$Expected===(String)$Actual;
-        if($z)
-        {
-          If(Is_Infinite ($Expected) && Is_Infinite ($Actual)) Return False;
-          If(Is_Nan      ($Expected) && Is_Nan      ($Actual)) Return False;
-          $Debug+=[
-            'ExpectedBin' =>Bin2Hex(Pack('d', $Expected )),
-            'ActualBin'   =>Bin2Hex(Pack('d', $Actual   )),
-            'ExpectedFmt' =>Number_Format($Expected ,20, '.', ''),
-            'ActualFmt'   =>Number_Format($Actual   ,20, '.', ''),
-          ];
-        }
-      }
       Return $this->Log($z? 'Warning':'Error', 'AssertSome failed: Expected and Actual are different ', $Message)
         ->BackTrace()->Debug($Debug)->Ret(True);
     }
+    
+    Function AssertNotSame($Expected, $Actual, $Message='')
+    {
+      $Res=$this->IsIdentical($Expected, $Actual);
+      If(!$Res[0]) Return False;
+      $this->Test_SetFailed();
+      $Debug=[
+        'Expected' =>$Expected ,
+        'Actual'   =>$Actual   ,
+      ]+($Res['Debug']?? []);
+    
+      Return $this->Log('Error', 'AssertNotSome failed: Expected and Actual values are some ', $Message)
+        ->BackTrace()->Debug($Debug)->Ret(True);
+    }
+
+    Function IsIdentical($a, $b)
+    {
+      If($a===$b) Return [True, 'Sharp'];
+      $z=$a==$b;
+      If(GetType($a)!==GetType($b))
+        Return [$z? Null:False, 'Type', 'Msg'=>['values have different types']];
+      If(Is_Float($a) && !$z && (String)$a===(String)$b)
+      {
+        If(Is_Infinite ($a) && Is_Infinite ($b)) Return [True, 'Float/Inf'];
+        If(Is_Nan      ($a) && Is_Nan      ($b)) Return [True, 'Float/Nan'];
+        $Debug=[
+          'Bin' =>[Bin2Hex(Pack('d', $a)),
+                   Bin2Hex(Pack('d', $b))],
+          'Fmt' =>[Number_Format($a ,20, '.', ''),
+                   Number_Format($b ,20, '.', '')],
+        ];
+        Return [False, 'Float/StrEquals', 'Debug'=>$Debug];
+      }
+      Return [$z? Null:False];
+    }
+
   }
 ?>

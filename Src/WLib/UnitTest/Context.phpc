@@ -1,0 +1,74 @@
+<?
+  $this->Load_Class('/Object');
+  $this->Load_Trait('/UnitTest/Asserts');
+  
+  Class C_UnitTest_Context Extends C_Object
+  {
+    Var $Argumets_ValueByType=[];
+    Var $ExpectException;
+    Var $IsFailed=False;
+    
+    Function Register_Argument_Type_Value($Value, $Type=Null)
+    {
+      $Type??=Get_Class($Value);
+      $this->Test_Argumets_ValueByType[$Type]=$Value;
+    }
+    
+    Function SetFailed($v=True) { $this->IsFailed=$v; }
+    
+    Function ExpectException($Exception) { $this->ExpectException=$Exception; }
+    
+    Function RunTest($Object)
+    {
+      $Class=New ReflectionClass($Object);
+      $this->Log('Log', 'Test ', $Class->GetName());
+      ForEach($Class->GetMethods() As $Method)
+      {
+        If( $Method->IsAbstract    ()) Continue;
+      //If( $Method->IsPrivate     ()) Continue;
+      //If( $Method->IsProtected   ()) Continue;
+      //If(!$Method->IsPublic      ()) Continue;
+      //If(!$Method->IsStatic      ()) Continue;
+      //If(!$Method->IsUserDefined ()) Continue;
+      //$Method->SetAccessable(true);
+        $Name=$Method->GetShortName();
+        If(!Str_Starts_With($Name, 'Test')) Return ;
+        $Prameters=$Method->GetParameters();
+        $Args=[];
+        $ValueByType=$this->Test_Argumets_ValueByType;
+        ForEach($Prameters As $Prameter)
+        {
+          $Type=(String)$Prameter->GetType();
+          If(!Array_Key_Exists($Type, $ValueByType))
+          {
+            $this->Log('Error', 'Not found value for ',$Type, ' ',$Prameter->GetName());
+            $Args=False;
+            Break;
+          }
+          $Args[]=$ValueByType[$Type];
+        }
+        If($Args===False)
+          Continue;
+        $OldExpectException=$this->ExpectException;
+        Try
+        {
+          $this->IsFailed=False;
+          $Ok=False;
+          $Method->InvokeArgs($Object, $Args);
+          If(!$this->ExpectException)
+            $Ok=!$this->IsFailed;
+        }
+        Catch(Throwable $e)
+        {
+          If($e InstanceOf $this->ExpectException)
+            $Ok=!$this->IsFailed;
+          Else
+            $this->Log('Error', 'TestCase chatched an exception:')->Exception($e);
+        }
+        $this->ExpectException=$OldExpectException;
+
+        $this->Log('Log', '  ', $Method->GetName(), ' ', $Ok? 'Ok':'Error');
+      }
+    }
+  }
+?>

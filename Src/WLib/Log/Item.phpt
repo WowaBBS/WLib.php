@@ -77,17 +77,21 @@
       return $this;
     }
     
-    Function __invoke(... $Args)
-    {
-      return $this->AddArr($Args);
-    }
-    
+    Function __Invoke(... $Args) { return $this->AddArr($Args); }
     Function AddArr(Array $v) { $this->Data[]=['Message', $v]; return $this; }
-    
     Function AddStr(String $Str) { return $this->AddArr([$Str]); } //<TODO: Remove?
-    
-    Function Ret($Res=Null) { Return $Res; }
 
+    // Log information about exception
+    Function Exception(Throwable $e) { $this->Data[]=['Exception', $e]; Return $this; }
+    
+    /*
+     * This method used for returning some value from log method.
+     * @example    Return $this->Log('Error', 'The result not found')->Ret(False);
+     * @param  Res The value will be returned by this method
+     * @return     The value of the first argument
+     */
+    Function Ret($Res=Null) { Return $Res; }
+    
     //****************************************************************
     // Stack
     
@@ -142,41 +146,44 @@
     
     Function ToFormat($Res)
     {
-      if($this->File!==False)
-        $Res->File($this->File, $this->Line, $this->Col);
-        
-      $Progress=$this->Data['Progress'][1]?? $this->Level->Progress;
-      if($Progress)
+      if($Progress=$this->Data['Progress'][1]?? $this->Level->Progress)
         $Res->BeginProgress();
 
       $Res->WriteTimeStamp($this->Time);
       
+      if($this->File!==False)
+        $Res->File($this->File, $this->Line, $this->Col);
+        
       if($this->ShowLevel!==False)
         $Res->WriteLogLevel($this->ShowLevel, $this->Level);
         
       ForEach($this->Data As $Data)
         Switch($Data[0])
         {
-        Case 'Message':
-          $Res->Write(... $Data[1]);
-          $Res->NewLine();
-          break;
-        Case 'Debug':
-          $Res->Debug($Data[1], $Data[2]);
-          break;
-        Case 'Stack':
-          $Res->Stack($Data[1]);
-          $Res->NewLine();
-          break;
-        Case 'Flag':
-          break;
+        Case 'Message' : $Res->Write(...$Data[1]); $Res->NewLine(); Break;
+        Case 'Debug'   : $Res->Debug(   $Data[1], $Data[2]);        Break;
+        Case 'Stack'   : $Res->Stack(   $Data[1]); $Res->NewLine(); Break;
+        Case 'Flag'    : Break;
+        Case 'Exception':
+          $e=$Data[1];
+          While($e)
+          {
+            $Res->File($e->GetFile(), $e->GetLine());
+            $Res->Write(Get_Class($e), ': ');
+            If($Code=$e->GetCode())
+              $Res->Write('(', $Code, ') ');
+            $Res->Write($e->GetMessage ()); $Res->NewLine();
+            $Res->Stack($e->GetTrace   ()); $Res->NewLine();
+            $e=$e->GetPrevious();
+          }
+          Break;
         Default:
           $Res->Write('[LogError] not ype of data', $Data[0]);
           $Res->NewLine();
           $Res->Debug($Data, 4);
-          break;
+          Break;
         }
-      if($Progress)
+      If($Progress)
         $Res->EndProgress();
     }
   }

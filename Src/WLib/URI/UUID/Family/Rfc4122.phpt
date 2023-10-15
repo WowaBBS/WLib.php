@@ -12,14 +12,24 @@
     {
       If(StrLen($Res)!==16)
         Throw New InvalidArgumentException('Expected exactly 16 bytes, but got '.StrLen($Input));
+      Static::_Fix($Res);
+      Return New (Static::Class)($Res);
+    }
+    
+    Static Function _Fix(&$Res)
+    {
       $Version=Static::GetDesiredVersion();
       If($Version<0 || $Version>15)
         Throw New InvalidArgumentException('Unknown version '.$Version);
 
-      $Res[6]=Chr(Ord($Res[6])&0b00001111|(($Version&0xF)<<4));
-      $Res[8]=Chr(Ord($Res[8])&0b00111111|0b10000000);
-      Return New (Static::Class)($Res);
+      $Res[6]=Chr(Ord($Res[6])&0x0F|($Version<<4));
+      $Res[8]=Chr(Ord($Res[8])&0x3F|0x80);
     }
-    
+
+    Static Function _UnFix(&$Res)
+    {
+      $Res[6]=Chr(Ord($Res[6])&0x0F);
+      $Res[8]=Chr(Ord($Res[8])&0x3F);
+    }
   }
 ?>

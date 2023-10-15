@@ -11,5 +11,11 @@
     {
       Return Self::_Make(Md5($F->_NS($NameSpace).$Name, True));
     }
+
+    Static Function _UnPack($Bin)
+    {
+      Static::_UnFix($Bin);
+      Return ['Class'=>'V3', 'Hash'=>$Bin];
+    }
   }
 ?>

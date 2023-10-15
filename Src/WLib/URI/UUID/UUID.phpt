@@ -24,6 +24,10 @@
     Function ToString(): String { Return VsPrintF('%s%s-%s-%s-%s-%s%s%s', Str_Split($this->ToHex(), 4)); }
 
     Function __toString() { return $this->ToString(); }
+
+    Function ToUrn(): String { Return 'urn:uuid:'.$this->ToString(); }
+    Function ToDec(): String { Return Gmp_StrVal(Gmp_Init($this->ToHex(), 16), 10); }
+    Function ToOid(): String { Return '2.25.'.$this->ToDec(); }
     
     Private Function __Clone() { Throw New Error('Cannot clone immutable '.__CLASS__.' object'); }
     Function __WakeUp(): Void { $this->Validate(); }
@@ -38,7 +42,8 @@
       Return True;
     }
     
-    Function GetTime100ns() { Return Null; }
+    Function UnPack() { Return Static::_UnPack($this->ToBinary()); }
+    Function GetTime100ns() { Return $this->UnPack()['Time']?? Null; }
     Function GetTime() { $r=$this->GetTime100ns(); Return Is_Null($r)? Null:$r*1e-7; }
     
     Function Equals  ($v) { Return $this->ToBinary()===$v->ToBinary(); }

@@ -10,23 +10,25 @@
     Static Protected $TimeOffset;
     Static Function GetTimeOffset() { Return Self::$TimeOffset??=GmMkTime(0, 0, 0, 10, 15, 1582)*10_000_000; }
     
-    Static Function _Create(Factory $F, Mac|String|Null $Mac=Null, $Rnd=Null, $Hns=Null): Self
+    Static Function _Create(Factory $F, $Hns=Null, $Seq=Null, Mac|String|Null $Mac=Null): Self
     {
       $Hns??=$F->TimeStamp100ns();
       $Hns-=Self::GetTimeOffset();
-      $Res=Pack(
-        'Nnn',
-         $Hns &0xffffffff,
-        ($Hns>>32)&0xffff,
-        ($Hns>>48)&0x0fff,
-      );
-      Return Self::_Make($Res.$F->Random($Rnd, 2).$F->_Mac($Mac));
+      $Seq=$F->_Seq($Hns, $Seq, 14, Self::Class);
+      $Res=Pack('Nnnn', $Hns, $Hns>>32, $Hns>>48, $Seq);
+      Return Self::_Make($Res.$F->_Mac($Mac));
     }
 
-    Function GetTime100ns(): ?Int
+    Static Function _UnPack($Bin)
     {
-      ['a'=>$a, 'b'=>$b, 'c'=>$c]=UnPack('Na/nb/nc', $this->ToBinary());
-      Return (($c&0x0fff)<<48 | $b<<32 | $a)+Self::GetTimeOffset();
+      Static::_UnFix($Bin);
+      ['a'=>$a, 'b'=>$b, 'c'=>$c, 'd'=>$Seq]=UnPack('Na/nb/nc/nd', $Bin);
+      Return [
+        'Class' =>'V1',
+        'Time'  =>($c<<48 | $b<<32 | $a)+Self::GetTimeOffset(),
+        'Seq'   =>$Seq,
+        'Mac'   =>SubStr($Bin, 10),
+      ];
     }
   }
 ?>

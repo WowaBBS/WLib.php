@@ -7,25 +7,28 @@
   {
     Static Function GetDesiredVersion(): Int { Return 6; }
 
-    Static Function _Create(Factory $F, Mac|String|Null $Mac=Null, $Rnd=Null, $Hns=Null): Self
+    Static Function _Create(Factory $F, $Hns=Null, $Seq=Null, Mac|String|Null $Mac=Null): Self
     {
       $Hns??=$F->TimeStamp100ns();
       $Hns-=Self::GetTimeOffset();
-      $tl= $Hns      &0x0fff;
-      $tm=($Hns>>12) &0xffff;
-      $th=($Hns>>28) &0xffffffff; //28=12+16
+      $Seq=$F->_Seq($Hns, $Seq, 14, Self::Class);
       $Res= 
-        Pack('Nnn', $th, $tm, $tl).
-        $F->Random($Rnd, 2). // clock_seq
+        Pack('Nnnn', $Hns>>28, $Hns>>12, $Hns, $Seq).
         $F->_Mac($Mac) // node
       ;
       Return Self::_Make($Res);
     }
 
-    Function GetTime100ns(): ?Int
+    Static Function _UnPack($Bin)
     {
-      ['a'=>$a, 'b'=>$b, 'c'=>$c]=UnPack('Na/nb/nc', $this->ToBinary());
-      Return ($a<<28 | $b<<12 | $c&0x0fff)+Self::GetTimeOffset();
+      Static::_UnFix($Bin);
+      ['a'=>$a, 'b'=>$b, 'c'=>$c, 'd'=>$Seq]=UnPack('Na/nb/nc/nd', $Bin);
+      Return [
+        'Class' =>'V6',
+        'Time'  =>($a<<28 | $b<<12 | $c)+Self::GetTimeOffset(),
+        'Seq'   =>$Seq,
+        'Mac'   =>SubStr($Bin, 10),
+      ];
     }
   }
 ?>

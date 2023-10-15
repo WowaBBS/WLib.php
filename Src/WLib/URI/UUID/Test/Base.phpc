@@ -1,9 +1,9 @@
 <?
-  $this->Load_Class('/UnitTest/TestCase');
+  $this->Load_Class('/UnitTest/Case');
   
   Use T_URI_UUID_UUID As UUID;
   
-  Class C_URI_UUID_Test_Base Extends C_UnitTest_TestCase
+  Class C_URI_UUID_Test_Base Extends C_UnitTest_Case
   {
     Var $Factory;
     
@@ -12,25 +12,47 @@
     //$this->Factory=$this->Get_Singleton('/URI/UUID/Factory');
       $this->Factory=$this->Create_Object('/URI/UUID/Factory');
       Parent::_Init($Args);
+      $this->Test_Register_Argument_Type_Value($this->GetFactory());
     }
     
     Function GetFactory() { Return $this->Factory; }
     
-    Function TestUnique($Ver, $Func, $Greater)
+    Function TestUnique($Func, $Greater)
     {
+      $u1=$Func();
+      for($x=0; $x<10000; $x++)
+      {
+      # If($Greater) $this->Log('Debug', $u1->ToString());
+      //Echo '  ', $u1->ToString(), "\n";
+        $u2=$Func();
+        If($Greater)
+        {
+          If($this->Assert(($v1=$u1->ToString())<($v2=$u2->ToString()), $v1.'>='.$v2)) Break;
+          If($this->Assert($u1->ToBinary()<$u2->ToBinary())) Break;
+        }
+        Else
+          If($this->AssertNotSame($u1->ToString(), $u2->ToString())) Break;
+        $u1=$u2;
+      }
+    }
+    Function TestUnique1($Ver, $Func, $Greater)
+    {
+    //Echo $Ver, "\n";
       $Reg='/^[0-9a-f]{8}\-[0-9a-f]{4}\-'.$Ver.'[0-9a-f]{3}\-[89ab][0-9a-f]{3}\-[0-9a-f]{12}$/';
       $u1=$Func();
       for($x=0; $x<10000; $x++)
       {
-        $this->Assert(Preg_Match($Reg, $u1->ToString()));
+      # If($Greater) $this->Log('Debug', $u1->ToString());
+      //Echo '  ', $u1->ToString(), "\n";
+        If($this->Assert(Preg_Match($Reg, $u1->ToString()))) Break;
         $u2=$Func();
         If($Greater)
         {
-          $this->Assert(($v1=$u1->ToString())<($v2=$u2->ToString()), $v1.'>='.$v2);
-          $this->Assert($u1->ToBinary()<$u2->ToBinary());
+          If($this->Assert(($v1=$u1->ToString())<($v2=$u2->ToString()), $v1.'>='.$v2)) Break;
+          If($this->Assert($u1->ToBinary()<$u2->ToBinary())) Break;
         }
         Else
-          $this->Assert($u1->ToString()!==$u2->ToString());
+          If($this->Assert($u1->ToString()!==$u2->ToString())) Break;
         $u1=$u2;
       }
     }

@@ -7,32 +7,27 @@
   // https://github.com/oittaa/uuid-php/blob/master/src/UUID.php  
   Class T_URI_UUID_Rfc4122_Oittaa Extends T_URI_UUID_Rfc4122_V8
   {
-  //Static Function GetDesiredVersion(): Int { Return 8; }
-
-    Static Function _Create(Factory $F, $Rnd=Null, $Hns=Null): Self
+    Static Function _Create(Factory $F, $Hns=Null, $Rnd=Null): Self
     {
-      $Hns??=$F->TimeStamp100ns();
-      $Ms=IntDiv($Hns, 10_000);
-      If($Ms>=1<<48) Throw New \TypeError('TimeStamp is too big '  .$Hns);
-      If($Hns<0    ) Throw New \TypeError('TimeStamp is too small '.$Hns);
+      $t=$F->_Time($Hns, 10_000, 48, 14, 0);
+      $F->_Seq($t, 'Zero', 0, Self::Class);
 
-      $SubSec  = IntDiv(($Hns%10_000)<<14, 10_000);
-      $SubSecA = $SubSec>>2;     //12 bit
-      $SubSecB = $SubSec & 0x03; // 2 bit
-
-      $Res=SubStr(Pack('Jn', $Ms, $SubSecA), 2).$F->Random($Rnd, 8);
-      $Res[8]=$Res[8]&"\x0f" | Chr($SubSecB<<4);
+      $Res=SubStr(Pack('Jn', $t>>14, $t>>2), 2).$F->Random($Rnd, 8);
+      $Res[8]=Chr(Ord($Res[8])&0xF | $t<<4);
       
       Return Self::_Make($Res);
     }
-
-    Function GetTime100ns(): ?Int
+    
+    Static Function _UnPack($Bin)
     {
-      ['a'=>$a, 'b'=>$b, 'c'=>$c, 'd'=>$d]=UnPack('Na/nb/nc/Cd', $this->ToBinary());
-      $Ms     =$a<<16 | $b;
-      $SubSec =(($c&0x0fff)<<2)+(($d>>4)&0x03)+1;
-      $Res=$Ms*10_000+(($SubSec*10_000)>>14);
-      Return $Res;
+      Static::_UnFix($Bin);
+      ['a'=>$a, 'b'=>$b, 'c'=>$c, 'd'=>$d]=UnPack('Na/nb/nc/Cd', $Bin);
+      $Time=$a<<30 | $b<<14 | $c<<2 | $d>>4;
+      Return [
+        'Class'  =>'Oittaa',
+        'Time'   =>Factory::_RestoreTime($Time, 10_000, 48, 14, 0),
+        'Random' =>SubStr($Bin, 8),
+      ];
     }
   }
 ?>

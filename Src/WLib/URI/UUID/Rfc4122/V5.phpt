@@ -11,5 +11,11 @@
     {
       Return Self::_Make(SubStr(Sha1($F->_NS($NameSpace).$Name, True), 0, 16));
     }
+
+    Static Function _UnPack($Bin)
+    {
+      Static::_UnFix($Bin);
+      Return ['Class'=>'V5', 'Hash'=>$Bin];
+    }
   }
 ?>

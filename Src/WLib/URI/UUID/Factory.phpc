@@ -17,7 +17,7 @@
     Var $PreLoad=[
       0=>'/URI/UUID/Rfc4122/Reserved',
       1=>'/URI/UUID/Rfc4122/V1',
-      2=>'/URI/UUID/Rfc4122/Reserved',
+      2=>'/URI/UUID/Rfc4122/V2',
       3=>'/URI/UUID/Rfc4122/V3',
       4=>'/URI/UUID/Rfc4122/V4',
       5=>'/URI/UUID/Rfc4122/V5',
@@ -74,6 +74,35 @@
       $Class=$this->GetStruct($Class);
       Return New $Class($Binary);
     }
+    
+    Function FromDec($v, $Class=Null)
+    {
+      If($R=Static::_FromOid($v))
+        Return $this->FromBinary($R, $Class);
+      Throw New \TypeError('Dec is wrong: '.$v);
+    }
+    
+    Function FromOid($v, $Class=Null)
+    {
+      If($R=Static::_FromOid($v))
+        Return $this->FromBinary($R, $Class);
+      Throw New \TypeError('OID is wrong: '.$v);
+    }
+    
+    Static Function _FromDec($v)
+    {
+      If(!Preg_Match('/^[0-9]+$/Ss',$v)) Return '';
+      $Hex=Str_Pad(Gmp_StrVal(Gmp_Init($v, 10), 16), 32, '0', STR_PAD_LEFT);
+      Return Hex2Bin($Hex);
+    }
+
+    Static Function _FromOid($v)
+    {
+      $Prefix='2.25.';
+      If(!Str_Starts_With($v, $Prefix)) Return '';
+      $Num=SubStr($v, StrLen($Prefix));
+      Return Static::_FromDec($v);
+    }
 
     Var $Parse_Regexp='/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/Ssi';
      
@@ -114,26 +143,123 @@
     
     Function Create($Class, ...$Args):UUID { Return $this->GetStruct($Class)::_Create($this, ...$Args); }
 
-    Function V1($Mac=Null, $Rnd=Null, $Hns=Null) { Return $this->Create(1, $Mac,  $Rnd, $Hns  ); }
-    Function V3($NameSpace, $Name              ) { Return $this->Create(3, $NameSpace,  $Name ); }
-    Function V4(           $Random=Null        ) { Return $this->Create(4,        $Random     ); }
-    Function V5($NameSpace, $Name              ) { Return $this->Create(5, $NameSpace,  $Name ); }
-    Function V6($Mac=Null, $Rnd=Null, $Hns=Null) { Return $this->Create(6, $Mac,  $Rnd, $Hns  ); }
-    Function V7(           $Rnd=Null, $Hns=Null) { Return $this->Create(7,        $Rnd, $Hns  ); }
-    Function V8(           $Res=Null           ) { Return $this->Create(8,        $Res        ); }
-    Function Oittaa(       $Rnd=Null, $Hns=Null) { Return $this->Create('Oittaa', $Rnd, $Hns  ); } //V8
+    Function Ncs($Node=Null, $Family=Null, $Hns=Null, $Rsrv=0 ) { Return $this->Create('NCS', $Node, $Family, $Hns, $Rsrv); }
+    Function V1(               $Hns=Null, $Seq=Null, $Mac=Null) { Return $this->Create(1,           $Hns, $Seq, $Mac  ); }
+    Function V2($Dn, $Id=Null, $Hns=Null, $Seq=Null, $Mac=Null) { Return $this->Create(2, $Dn, $Id, $Hns, $Seq, $Mac  ); }
+    Function V3($NameSpace,    $Name                          ) { Return $this->Create(3, $NameSpace,  $Name          ); }
+    Function V4(               $Random=Null                   ) { Return $this->Create(4,           $Random           ); }
+    Function V5($NameSpace,    $Name                          ) { Return $this->Create(5, $NameSpace,  $Name          ); }
+    Function V6(               $Hns=Null, $Seq=Null, $Mac=Null) { Return $this->Create(6,           $Hns, $Seq, $Mac  ); }
+    Function V7(               $Hns=Null, $Seq=Null, $Rnd=Null) { Return $this->Create(7,           $Hns, $Seq, $Rnd  ); }
+    Function V8(               $Custom=Null                   ) { Return $this->Create(8,           $Custom           ); }
+    Function Oittaa(           $Hns=Null,            $Rnd=Null) { Return $this->Create('Oittaa',    $Hns,       $Rnd  ); } //V8
     
     Var $Vars=[];
     
     Function  _GetVar($Name    ) { Return $this->Vars[$Name]?? Null; }
     Function  _SetVar($Name, $v) {        $this->Vars[$Name]=  $v  ; }
     
+    Var $OverridedTime=Null;
+    
+    Function OverrideTime($Time=Null)
+    {
+      //TODO: Parse time if it is string;
+      $this->OverridedTime=$Time;
+      $this->Seq_Old=[];
+    }
+    
     Function TimeStamp100ns(): Int
     {
+      If(!Is_Null($Res=$this->OverridedTime)) Return $Res;
       [$USec, $Sec]=Explode(' ', (String)MicroTime(False), 2);
       $Res =(Int)              $Sec*10_000_000; // 100ns tick
       $Res+=(Int)Floor((Float)$USec*10_000_000);
       Return $Res;
+    }
+    
+    Static Function _RestoreTime(
+      $Time   ,
+      $Div    = 1,
+      $Bits   =48,
+      $Shift  = 0,
+      $Offset = 0,
+    )
+    {
+      // Extract
+      $Sub   =$Time & ((1<<$Shift)-1);
+      $Res   =$Time>>$Shift;
+      // Modify
+      $Sub   =(($Sub+1)*$Div)>>$Shift;
+      $Res   =$Res*$Div+$Sub;
+      
+      Return $Res+$Offset;
+    }
+    
+    Function _Time(
+      $Time   ,
+      $Div    =1,
+      $Bits   =48,
+      $Shift  =0,
+      $Offset =0,
+    )
+    {
+      $Time??=$this->TimeStamp100ns();
+      $Res=$Time-$Offset;
+      // Extract
+      $Sub=       $Res%$Div ;
+      $Res=IntDiv($Res,$Div);
+      // Check
+      If($Res<0        ) Throw New \TypeError('TimeStamp is too small '.$Time);
+      If($Res>=1<<$Bits) Throw New \TypeError('TimeStamp is too big '  .$Time);
+      // Modify
+      $Sub=IntDiv($Sub<<$Shift, $Div);
+      $Res=      ($Res<<$Shift)|$Sub;
+      Return $Res;
+    }
+    
+    Var $Seq_Def='Random'; //'Zero'
+    Var $Seq_Rnd='';
+    Var $Seq_Old=[];
+    
+    Function _Seq(
+      Int   &$Time   ,
+             $Seq    ,
+      Int    $Bits   ,
+      String $Id     ,
+    )
+    {
+      $Mask=(1<<$Bits)-1;
+      
+      If(Is_Int($Seq))
+      {
+        If($Seq<0    ) Throw New \TypeError('Sequence is too small '.$Seq);
+        If($Seq>$Mask) Throw New \TypeError('Sequence is too big '  .$Seq);
+        Return $Seq;
+      }
+      $Seq??=$this->Seq_Def;
+      If(!Is_String($Seq)) Throw New \TypeError('Sequence has unknown type '.GetType($Seq));
+      
+      [$OldTime, $OldSeq]=$this->Seq_Old[$Id]?? [-1,-1];
+      If($OldSeq>=0 && $OldTime>$Time)
+        $OldSeq=$this->Log('Warning', 'Microtime is decreased: ', $OldTime, '=>',$Time)->Ret(-1);
+        
+      If($OldSeq>=0 && ($Diff=($Time-$OldTime)<<$Bits)<=$OldSeq)
+        $Res=$OldSeq-$Diff+1;
+      Else
+        Switch($Seq)
+        {
+        Case 'Inc'    : $Res=($OldSeq+1)&$Mask; Break;
+        Case 'Zero'   : $Res=0; Break;
+        Case 'Random' :
+          $Res=$this->Random($this->Seq_Rnd, ($Bits+7)>>3);
+          $Res=HexDec(Bin2Hex($Res)) &$Mask;
+          Break;
+        Default: Throw New \TypeError('Sequence is unknown '.$Seq);
+        }
+      $this->Seq_Old[$Id]=[$Time, $Res];
+      
+      $Time+=$Res>>$Bits; //Fix Time
+      Return $Res &$Mask;
     }
     
     Function Random(&$Rnd, Int $Len)
@@ -142,7 +268,7 @@
       If(StrLen($Rnd)>$Len)
       {
         $Res=SubStr($Rnd, 0, $Len);
-        $Rnd=SubStr($Rnd, $Len);
+        $Rnd=SubStr($Rnd,    $Len);
       }
       Else
       {
@@ -154,7 +280,7 @@
       Return $Res;
     }
     
-    Function _Mac(Mac|String|Null  $Mac=Null)
+    Function _Mac(Mac|String|Null $Mac=Null)
     {
       $f=$this->Get_Singleton('/Inet/Addr/Mac/Factory');
       $Res=$Mac? $f->Parse($Mac):$f->Current();

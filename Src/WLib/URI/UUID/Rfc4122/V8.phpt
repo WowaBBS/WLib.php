@@ -15,5 +15,14 @@
 
       Return Self::_Make($Res);
     }
+
+    Static Function _UnPack($Bin)
+    {
+      Static::_UnFix($Bin);
+      Return [
+        'Class'  =>'V8',
+        'Custom' =>$Bin,
+      ];
+    }
   }
 ?>

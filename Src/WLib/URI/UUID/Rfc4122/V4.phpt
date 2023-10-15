@@ -11,5 +11,11 @@
     {
       Return Self::_Make($F->Random($Random, 16));
     }
+
+    Static Function _UnPack($Bin)
+    {
+      Static::_UnFix($Bin);
+      Return ['Class'=>'V4', 'Random'=>$Bin];
+    }
   }
 ?>

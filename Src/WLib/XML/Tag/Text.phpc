@@ -8,14 +8,14 @@
   
     Function _Init($Args)
     {
-      parent::_Init($Args);
+      Parent::_Init($Args);
     //$this->tagName='#text';
       $this->value=$Args[0];
     }
   
     Function _Done()
     {
-      parent::_Done();
+      Parent::_Done();
     }
   
     Function TagBuild()
@@ -25,7 +25,7 @@
   
     Function TagBuildHash()
     {
-      Return Array('t'=>'t', 'v'=>$this->value);
+      Return ['t'=>'t', 'v'=>$this->value];
     }
   }
 ?>

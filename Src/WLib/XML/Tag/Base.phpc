@@ -12,7 +12,7 @@
  
     Function _Init($Args)
     {
-      parent::_Init($Args);
+      Parent::_Init($Args);
       If(IsSet($Args['tagName']))
       {
         $this->tagName = $Args['tagName'   ];
@@ -35,33 +35,32 @@
         $this->Attributes->Done();
         $this->Attributes=NULL;
       }
-      parent::_Done();
+      Parent::_Done();
     }
  
     Function TagBuild()
     {
-      $Res=Array(
+      $Res=[
         '<',
         $this->_f,
         $this->tagName,
         (IsSet($this->Attributes) && $this->Attributes->Attr? ' '.$this->Attributes->Make():''),
         $this->_e,
         '>'
-      );
+      ];
       Return Implode('', $Res);
     }
  
     Function Chields()
     {
       If($this->_f)
-        Return Array();
+        Return [];
       $ETag=$this->EndTag;
       If(!$ETag)
-        Return Array();
-      $Res=Array();
-      $Id=$ETag->Object_Id;
+        Return [];
+      $Res=[];
       $LTag=$this->ListNext;
-      While($LTag->Object_Id!=$Id)
+      While($LTag!==$ETag)
       {
         $Res[]=$LTag;
         If(IsSet($LTag->EndTag) && $LTag->EndTag)
@@ -73,11 +72,11 @@
  
     Function TagBuildHash()
     {
-      $Res=Array('t'=>'b', 'n'=>$this->tagName);
+      $Res=['t'=>'b', 'n'=>$this->tagName];
       If($this->EndTag)
       {
         $Childs=$this->Chields();
-        $R=Array();
+        $R=[];
         ForEach($Childs As $k=>$v)
           $R[]=$Childs[$k]->TagBuildHash();
         $Res['c']=$R;
@@ -92,7 +91,7 @@
         $this->EndTag->EndTag=null;
         $this->EndTag=null;
       }
-      $Res=parent::_Clear();
+      $Res=Parent::_Clear();
     //$Res=T_XML_Tag::_Clear();
       Return $Res;
     }
@@ -119,7 +118,7 @@
         If(!$ZMain)
         {
           $T1=$T1->ListNext;
-          If($T1->Object_Id===$T2->Object_Id)
+          If($T1===$T2)
             Return $this;
           $T2=$T2->ListPrev;
           $T1->ListDeleteTo($T2);
@@ -141,9 +140,9 @@
       $ETag=$this->EndTag;
       If(!$ETag)
         Return '';
-      $Res=Array();
+      $Res=[];
       $LTag=$this;
-      While($LTag->Object_Id!==$ETag->Object_Id)
+      While($LTag!==$ETag)
       {
         If($LTag->tagName=='#text')
           $Res[]=$LTag->value;
@@ -159,10 +158,10 @@
       $ETag=$this->EndTag;
       If(!$ETag)
         Return '';
-      $Res=Array();
+      $Res=[];
       $LTag=$this;
       $LTag=$LTag->ListNext;
-      While($LTag->Object_Id!==$ETag->Object_Id)
+      While($LTag!==$ETag)
       {
         $Res[]=$LTag->tagBuild();
         $LTag=$LTag->ListNext;
@@ -179,7 +178,7 @@
         Return 0;
       $Res=0;
       $LTag=$this;
-      While($LTag->Object_Id!==$ETag->Object_Id)
+      While($LTag!==$ETag)
       {
         If($LTag->tagName=='#text')
           $Res+=StrLen($LTag->value);
@@ -201,19 +200,18 @@
       $this->Delete(True, False);
       If($AddComment!==False)
         $Data="\n<!--\n".$Data.$AddComment."-->\n";
-      $NewTag=$this->Create_Object('/XML/Tag/Text', Array($Data));
+      $NewTag=$this->Create_Object('/XML/Tag/Text', [$Data]);
       $this->ListAdd($NewTag);
     }
+  
+  //****************************************************************
+  // Debug
  
-    Function _Debug()
+    Protected Function _Debug_Info(Array &$Res)
     {
-      $Res=parent::_Debug();
-      If($Res['EndTag'])
-      {
-        UnSet($Res['EndTag']);
-        $Res['EndTag']=$this->EndTag->Object_Id;
-      }
-      Return $Res;
+      Parent::_Debug_Info(Array &$Res);
+      UnSet($Res['EndTag']);
     }
+  //****************************************************************
   }
 ?>

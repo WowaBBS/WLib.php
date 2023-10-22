@@ -4,12 +4,12 @@
  
   Class C_XML_Attributes Extends C_Object
   {
-    Var $Attr=Array();
+    Var $Attr=[];
  
     Function _Done()
     {
       $this->Clear();
-      parent::_Done();
+      Parent::_Done();
     }
  
     Function Assign($Data)
@@ -22,7 +22,7 @@
  
     Function Clear()
     {
-      $this->Attr=Array();
+      $this->Attr=[];
     }
  
     Function IsAttr($Name)
@@ -72,7 +72,7 @@
       $DQw='"[^"]*"';
       $QAttr='/\\s*((?:'.$Qw.')|(?:'.$DQw.')|(?:[^\\s=]+)|(?:=))/isS';
       $Cnt=Preg_Match_All($QAttr, $Str, $_Attr);
-      $Attr=Array();
+      $Attr=[];
       $z=0;
       $Key='';
       ForEach($_Attr[1]As $A)
@@ -109,7 +109,7 @@
  
     Function Make()
     {
-      $Res=Array();
+      $Res=[];
       ForEach($this->Attr As $k=>$v)
         If($v===False)
           {}

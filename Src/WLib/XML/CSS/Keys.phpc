@@ -3,11 +3,11 @@
  
   Class C_XML_CSS_Keys Extends C_Object
   {
-    Var $Keys=Array();
+    Var $Keys=[];
  
     Function Clear()
     {
-      $this->Keys=Array();
+      $this->Keys=[];
     }
  
     Function ParseKey($Str)
@@ -18,7 +18,7 @@
       $Key=Trim($Key);
       Preg_Match_All('\(?:['.$Sp.'>]|[^'.$Sp.'>]*)\isS', $Key, $List);
       $List=$List[0];
-      $L2=Array();
+      $L2=[];
       $Typ=0;
       ForEach($List As $k)
         If($k==' ')
@@ -29,7 +29,7 @@
         {
           $Kw='\w\d_';
           Preg_Match_All('\(?>[^'.$Kw.']*['.$Kw.']+)\isS', $k, $L);
-          $L3=Array(' '=>$Typ);
+          $L3=[' '=>$Typ];
           ForEach($L As $v)
             $L3[$v]=True;
           $L2[]=$L3;
@@ -54,10 +54,10 @@
  
     Function Make()
     {
-      $Res=Array();
+      $Res=[];
       ForEach($this->Keys As $L2)
       {
-        $R2=Array();
+        $R2=[];
         ForEach($L2 As $L3)
         {
           $T=$L3[' '];

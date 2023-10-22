@@ -1,24 +1,21 @@
 <?
+  $Loader->Parent_Class('/XML/CSS/Base');
   $Loader->Load_Lib('/XML/CSS/Parser');
-  $Loader->Load_Class('/Object');
   $Loader->Load_Class('/XML/CSS/Style');
  
-  Class C_XML_CSS_File Extends C_Object
+  Class C_XML_CSS_File Extends C_XML_CSS_Base
   {
-    Var $Styles=Array();
-    Var $Key=False;
- 
     Function _Done()
     {
       $this->Clear();
-      parent::_Done();
+      Parent::_Done();
     }
  
     Function Clear()
     {
       ForEach($this->Styles As $k=>$tmp)
         $this->Styles[$k]->_UnLock();
-      $this->Styles=Array();
+      Parent::Clear();
     }
  
     Function AddKeyLeft($Key)
@@ -28,7 +25,7 @@
       {
         $S=$St[$k];
         $nk1=Explode(',', $S->Key);
-        $nk2=Array();
+        $nk2=[];
         ForEach($nk1 As $nki)
           $nk2[]=$Key.' '.$nki;
         $S->Key=Implode(',', $nk2);
@@ -41,7 +38,7 @@
         Return;
       $Z=0;
       $Key='';
-      $St=Array(Array(), Array());
+      $St=[[], []];
       ForEach($Arr[0]As $k=>$v)
         If(StrLen($v)>2 && SubStr($v, 0, 2)==='/*')
         {}
@@ -70,7 +67,7 @@
             {
               $Key=Trim($Key);
               $Z=10;
-              $St=Array(Array(), Array());
+              $St=[[], []];
             }
           }
           ElseIf($Z>10)
@@ -116,11 +113,6 @@
         }
     }
  
-    Function AddStr($Str)
-    {
-      $this->AddArr(ParseStyle($Str));
-    }
- 
     Function AddFile($Str)
     {
       $this->AddStr(File_Get_Contents($Str));
@@ -134,21 +126,16 @@
  
     Function Make()
     {
-      $Res=Array();
+      $Res=[];
       ForEach($this->Styles As $v)
         $Res[]=$v->Make();
       If($this->Key!==False)
-        $Res=Array($this->Key, '{', Implode("\n", $Res), '}');
+        $Res=[$this->Key, '{', Implode("\n", $Res), '}'];
       Else
         $Res[]='';
       Return Implode("\n", $Res);
     }
- 
-    Function _Object_Info($Args=Array())
-    {
-      $Res=parent::_Object_Info($Args);
-      $Res[class_Interface]['xml/css/file']=True;
-      Return $Res;
-    }
+
+    Function IsCssFile() { Return True; }
   }
 ?>

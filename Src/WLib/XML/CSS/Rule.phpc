@@ -3,31 +3,31 @@
  
   Class C_XML_CSS_Rule Extends C_Object
   {
-    Var $Count = 0 ; //  оличество правил, которое должно выполн€тьс€
-    Var $Rule  = Array('', ''); // Array('TagName', 'ID', 'Class1', 'Class2',);
-    Var $IsAddCheck=False; // “ребуетс€ ли дополнительна€ проверка
-    Var $Events=Array(); // —обыйти€, которые должны отработать, при выполнении услови€
-    Var $NextSub=Array(); // ƒл€ проверки подтегов
-    Var $IsInNextSub=True;
+    Var $Count       = 0 ; //  оличество правил, которое должно выполн€тьс€
+    Var $Rule        = ['', '']; // ['TagName', 'ID', 'Class1', 'Class2',];
+    Var $IsAddCheck  =False; // “ребуетс€ ли дополнительна€ проверка
+    Var $Events      =[]; // —обыйти€, которые должны отработать, при выполнении услови€
+    Var $NextSub     =[]; // ƒл€ проверки подтегов
+    Var $IsInNextSub =True;
  
     Function _Init($Args)
     {
-      parent::_Init($Args);
+      Parent::_Init($Args);
     }
  
     Function _Done()
     {
       $this->Clear();
-      parent::_Done();
+      Parent::_Done();
     }
  
     Function Clear()
     {
-      $Tg=Array();
-      $Id=Array();
-      $Cl=Array();
+      $Tg=[];
+      $Id=[];
+      $Cl=[];
       $R=$this->NextSub;
-      $this->NextSub=Array();
+      $this->NextSub=[];
       ForEach(Array_Keys($R)As $k)
         $R[$k]->_UnLock();
     }
@@ -43,7 +43,7 @@
     Function _Set_Key_Str($A_Str)
     {
       $this->Count = 0 ;
-      $this->Rule  = Array('', '');
+      $this->Rule  = ['', ''];
       If($A_Str=='*')
         Return;
       Preg_Match_All('/([\\.#:]?)(\w)+/Ss', $A_Str, $Res);
@@ -72,7 +72,7 @@
       {
         $Args=$Event[1];
         $Args['Tag']=$A_Tag;
-        Call_User_Func_Array ($Event[0], Array($Args));
+        Call_User_Func_Array ($Event[0], [$Args]);
       }
     }
  

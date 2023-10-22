@@ -14,7 +14,7 @@
   
     Function _Init(Array $Args)
     {
-      parent::_Init($Args);
+      Parent::_Init($Args);
       $Stream=$Args[0] ?? $Args['Stream'] ?? null;
       if(Is_Null   ($Stream))  $this->Stream=$this->Create_Object('/Stream/Fifo')->_Lock(); else
       if(Is_String ($Stream))  $this->Stream=$this->Create_Object('/Stream/File', [$Stream, True])->_Lock(); else
@@ -23,7 +23,7 @@
     
     Function _Done()
     {
-      parent::_Done();
+      Parent::_Done();
       $this->Stream->_UnLock();
     }
     

@@ -7,7 +7,7 @@
     
   //Function _Init($Args)
   //{
-  //  parent::_Init($Args);
+  //  Parent::_Init($Args);
   //  $this->tagName='#document';
   //}
   
@@ -18,7 +18,7 @@
   
     Function TagBuildHash()
     {
-      $Res=parent::TagBuildHash();
+      $Res=Parent::TagBuildHash();
       UnSet($Res['n']);
       $Res['t']='d';
       Return $Res;

@@ -38,12 +38,12 @@
  
 //$Str=LoadFile('entprofile.xml');
   $XML=$Loader->Create_Object('/XML/Document');
-  $XML->Parser->AddTagCData(Array('Style','Script'));
-  $XML->Parser->AddTagEmpty(Array('br','hr'));
+  $XML->Parser->AddTagCData(['Style','Script']);
+  $XML->Parser->AddTagEmpty(['br','hr']);
   $XML->LoadFromFile('01.htm');
-  $Tags=Array_Flip(Array('h1','h2','h3','h4','h5','h6'));
-  $TagsDel1=Array_Flip(Array('img')); //'style',,'head'
-  $TagsDel2=Array_Flip(Array('html','body'));
+  $Tags=Array_Flip(['h1','h2','h3','h4','h5','h6']);
+  $TagsDel1=Array_Flip(['img']); //'style',,'head'
+  $TagsDel2=Array_Flip(['html','body']);
   $z=0;
   $t='';
   $Tag=$XML->FirstTag;

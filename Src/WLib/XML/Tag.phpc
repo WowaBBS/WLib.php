@@ -132,7 +132,7 @@
     //  $Tag=$this->EndTag->ListNext;
     //Else
       $Tag=$this->ListNext;
-      If($this->EndTag->Object_Id===$Tag->Object_Id)
+      If($this->EndTag===$Tag)
         Return null;
       Return $Tag;
     }
@@ -146,7 +146,7 @@
     //  $Tag=$this->ListPrev;
     //Else
       $Tag=$this->EndTag->ListPrev;
-      If($this->Object_Id===$Tag->Object_Id)
+      If($this===$Tag)
         Return null;
       Return $Tag;
     }
@@ -252,7 +252,7 @@
       $ATag->ListPrev = $this           ;
       $ATag->ListNext = $this->ListNext ;
       $this->ListNext = $ATag           ;
-    //If($this->Document->LastTag->Object_Id===$this->Object_Id)
+    //If($this->Document->LastTag===$this)
       If($ATag->ListNext)
         $ATag->ListNext->ListPrev=$ATag;
       Else
@@ -265,7 +265,7 @@
       $ATag->ListPrev = $this->ListPrev ;
       $ATag->ListNext = $this           ;
       $this->ListPrev = $ATag           ;
-    //If($this->Document->LastTag->Object_Id===$this->Object_Id)
+    //If($this->Document->LastTag===$this)
       If($ATag->ListPrev)
         $ATag->ListPrev->ListNext=$ATag;
       Else
@@ -278,7 +278,7 @@
       $ATag->ListPrev = $this->ListPrev ;
       $ATag->ListNext = $this           ;
       $this->ListPrev = $ATag           ;
-    //If($this->Document->LastTag->Object_Id===$this->Object_Id)
+    //If($this->Document->LastTag===$this)
       If($ATag->ListPrev)
         $ATag->ListPrev->ListNext=$ATag;
       Else
@@ -308,10 +308,10 @@
     Function Event_Add($Name, $Proc, $ID=False)
     {
       If(!IsSet($this->_Events))
-        $this->_Events=Array();
+        $this->_Events=[];
       $e=$this->_Events;
       If(!IsSet($e[$Name]))
-        $e[$Name]=Array();
+        $e[$Name]=[];
       $e[$Name][]=$Proc;
       If($ID)
         FAbstract();
@@ -325,17 +325,15 @@
     Function ListDeleteTo($ETag)
     {
     /* */
-      $Id=$ETag->Object_Id;
       $T=$this;
-      While($T && $T->Object_Id!==$Id)
+      While($T && $T!==$ETag)
         $T=$T->ListDelete();
       If($T)
         $T=$T->ListDelete();
       Return $T;
     /* * /
-      $Id=$ETag->Object_Id;
       $LTag=$this;
-      While($LTag->Object_Id!==$Id)
+      While($LTag!==$ETag)
       {
         $LTag->OnEvent(OnXmlTagDelete);
         $LTag=$LTag->ListNext;
@@ -350,7 +348,7 @@
       Else
         $this->Document->LastTag =$this->ListPrev;
       $LTag=$this;
-      While($LTag->Object_Id!=$Id)
+      While($LTag!==$ETag)
       {
         $LTag2=$LTag->_Clear();
         $LTag->Done();
@@ -387,23 +385,26 @@
     {
       If($this->Document)
         $this->Delete(False);
-      parent::_Done();
+      Parent::_Done();
     }
  
-    Function _Debug()
+  //****************************************************************
+  // Debug
+ 
+    Protected Function _Debug_Info(Array &$Res)
     {
-      $Res=parent::_Debug();
+      Parent::_Debug_Info(Array &$Res);
       UnSet($Res['Document']);
       UnSet($Res['ListNext']);
       UnSet($Res['ListPrev']);
-      Return $Res;
     }
+  //****************************************************************
  
-    Function asHTML($ETagID)
+    Function asHTML(?Self $ETag=Null)
     {
-      $Res=Array();
+      $Res=[];
       $LTag=$this;
-      While($LTag->Object_Id!=$ETagID)
+      While($LTag!=$ETag)
       {
         $Res[]=$LTag->tagBuild();
         $LTag=$LTag->ListNext;

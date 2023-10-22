@@ -15,20 +15,20 @@
  
   Function TrimAll($S)
   {
-    Return Trim(MTrim(Str_Replace(Array("\n","\r",'&nbsp;'), ' ', $S)));
+    Return Trim(MTrim(Str_Replace(["\n","\r",'&nbsp;'], ' ', $S)));
   }
  
 //$Str=LoadFile('entprofile.xml');
   $XML=$Loader->Create_Object('/XML/Document');
 //$XML->LoadFromFile('01.htm');
   $XML->LoadFromFile('_.html');
-  $Tags=Array_Flip(Array('h1','h2','h3','h4','h5','h6'));
-  $TagsDel1=Array_Flip(Array('img','style','head'));
-  $TagsDel2=Array_Flip(Array('html','body'));
+  $Tags=Array_Flip(['h1','h2','h3','h4','h5','h6']);
+  $TagsDel1=Array_Flip(['img','style','head']);
+  $TagsDel2=Array_Flip(['html','body']);
   $z=0;
   $t='';
   $Tag=$XML->FirstTag;
-  $Res=Array();
+  $Res=[];
   While($Tag)
   {
     If($Tag->tagName==='#text' && Preg_Match('/^\\s*((:?\\d+\\.)+)/s',$Tag->value))
@@ -69,10 +69,10 @@
     $Tag=$Tag->ListNext;
   }
  
-  Function Recurse(&$Res, $i=0, $Num=Array(0))
+  Function Recurse(&$Res, $i=0, $Num=[0])
   {
-    $R1=Array(); // Текущий
-    $R2=Array(); // Лучший
+    $R1=[]; // Текущий
+    $R2=[]; // Лучший
     $Z1=True;
     While(IsSet($Res[$i]))
     {
@@ -126,7 +126,7 @@
   }
  
   $R=Array_Reverse(Recurse($Res));
-  $RS=Array();
+  $RS=[];
   For($i=0;$i<Count($Res);$i++)
   {
     $S=$Res[$i]->innerText();
@@ -135,7 +135,7 @@
     $RS[]=($ZZ?'!':'').'! '.$S;
   }
   File_Put_Contents('Abba.txt',Implode("\n",$RS));
-  $RS=Array();
+  $RS=[];
   For($i=0;$i<Count($R);$i++)
   {
     $S=$Res[$R[$i]]->innerText();

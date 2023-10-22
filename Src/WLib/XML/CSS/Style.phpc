@@ -1,21 +1,13 @@
 <?
+  $Loader->Parent_Class('/XML/CSS/Base');
   $Loader->Load_Lib('/XML/CSS/Parser');
-  $Loader->Load_Class('/Object');
  
-  Class C_XML_CSS_Style Extends C_Object
+  Class C_XML_CSS_Style Extends C_XML_CSS_Base
   {
-    Var $Styles=Array();
-    Var $Key=False;
- 
-    Function Clear()
-    {
-      $this->Styles=Array();
-    }
- 
     Function _AddValue($K, $V, $Z=False)
     {
       If(!IsSet($this->Styles[$K]))
-        $this->Styles[$K]=Array();
+        $this->Styles[$K]=[];
       If($Z||!Count($this->Styles[$K]))
       {
         $this->Styles[$K][]=$V;
@@ -53,7 +45,7 @@
               //Debug('!asdf');
               }
               $Key=$v;
-              $this->Styles[$Key]=Array();
+              $this->Styles[$Key]=[];
             }
           Else
             If($v==')')
@@ -105,26 +97,16 @@
       }
     }
  
-    Function AddStr($Str)
-    {
-      $this->AddArr(ParseStyle($Str));
-    }
- 
     Function Make()
     {
-      $Res=Array();
+      $Res=[];
       ForEach($this->Styles As $k=>$v)
         $Res[]=$k.':'.Implode(' ', $v).';';
       If($this->Key!==False)
-        $Res=Array($this->Key, '{', Implode(' ', $Res), '}');
+        $Res=[$this->Key, '{', Implode(' ', $Res), '}'];
       Return Implode(' ', $Res);
     }
  
-    Function _Object_Info($Args=Array())
-    {
-      $Res=parent::_Object_Info($Args);
-      $Res[class_Interface]['xml/css/style']=True;
-      Return $Res;
-    }
+    Function IsCssFile() { Return False; }
   }
 ?>

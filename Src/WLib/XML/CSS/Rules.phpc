@@ -5,37 +5,27 @@
  
   Class C_XML_CSS_Rules Extends C_Object
   {
-  //Var $Rules=Array();
+  //Var $Rules=[];
  
-    Var $Rules=Array(
-    //$ID=>$Obj,
-    );
-    Var $Tg=Array(
-    //'tag'=>Array(1=>$Obj, );
-    );
-    Var $Id=Array(
-    //'id'=>Array(1=>$Obj, );
-    );
-    Var $Cl=Array(
-    //'class'=>Array(1=>$Obj, );
-    );
-  //Var $ToNext=Array(
-  ////  1 => $Obj, ;
-  //);
+    Var $Rules =[]; // [$ID=>$Obj]
+    Var $Tg    =[]; // ['tag'=>[1=>$Obj, ]]
+    Var $Id    =[]; // ['id'=>[1=>$Obj, ]]
+    Var $Cl    =[]; // ['class'=>[1=>$Obj, ]]
+  //Var $ToNext=[]; // [1 => $Obj,]
  
     Function _Done()
     {
       $this->Clear();
-      parent::_Done();
+      Parent::_Done();
     }
  
     Function Clear()
     {
-      $Tg=Array();
-      $Id=Array();
-      $Cl=Array();
+      $Tg=[];
+      $Id=[];
+      $Cl=[];
       $R=$this->Rules;
-      $this->Rules=Array();
+      $this->Rules=[];
       ForEach(Array_Keys($R)As $k)
         $R[$k]->_UnLock();
     }
@@ -48,36 +38,36 @@
  
     Function Add_Rule($A_Rule)
     {
-      $ID=$A_Rule->Object_Id;
-      If(IsSet($this->Rules[$ID]))
+      $Id=$A_Rule->Object_GetId();
+      If(IsSet($this->Rules[$Id]))
         Return True;
-      $this->Rules[$ID]=$A_Rule->_Lock();
+      $this->Rules[$Id]=$A_Rule->_Lock();
       $Rule=$A_Rule->Rule;
   
       If($A_Rule->Count==0)
-        $this->Tg['']=Array($ID=>1);
+        $this->Tg['']=[$Id=>1];
   
       If($a=Array_Shift($Rule))
         If(!IsSet($this->Tg[$a]))
-          $this->Tg[$a]=Array($ID=>1);
+          $this->Tg[$a]=[$Id=>1];
         Else
-          $this->Tg[$a][$ID]=1;
+          $this->Tg[$a][$Id]=1;
   
       If($a=Array_Shift($Rule))
         If(!IsSet($this->Id[$a]))
-          $this->Id[$a]=Array($ID=>1);
+          $this->Id[$a]=[$Id=>1];
         Else
-          $this->Id[$a][$ID]=1;
+          $this->Id[$a][$Id]=1;
   
       ForEach($Rule As $a)
       {
         If(!IsSet($this->Cl[$a]))
-          $this->Cl[$a]=Array($ID=>1);
+          $this->Cl[$a]=[$Id=>1];
         Else
-          If(!IsSet($this->Cl[$a][$ID]))
-            $this->Cl[$a][$ID]=1;
+          If(!IsSet($this->Cl[$a][$Id]))
+            $this->Cl[$a][$Id]=1;
           Else
-            $this->Cl[$a][$ID]++;
+            $this->Cl[$a][$Id]++;
       }
     }
  
@@ -102,7 +92,7 @@
  
     Function Process_Rules_For_Tag($A_Tag)
     {
-      $R=Array();
+      $R=[];
       If(IsSet($this->Tg['']))
         $R[]=$this->Tg[''];
       If(IsSet($this->Tg[$A_Tag->tagName]))
@@ -125,7 +115,7 @@
               $R[]=$this->Cl[$a];
         }
       }
-      $Res=Array();
+      $Res=[];
       // Подсчёт результатов
       ForEach($R As $r)
         ForEach($r As $a=>$b)
@@ -152,7 +142,7 @@
  
     Function Rules_For_Tag($A_Tag)
     {
-      $Res=Array();
+      $Res=[];
       $R=$this->Rules;
       ForEach($R As $k=>$Tmp)
         If($R[$k]->IsInNextSub)
@@ -163,8 +153,7 @@
       {
         $Rr=$RR[$k]->Get_Next_Sub();
         ForEach($Rr As $k1=>$Tmp)
-          If(!IsSet($Res[$Rr[$k1]->Object_Id]))
-            $Res[$Rr[$k1]->Object_Id]=$Rr[$k1];
+          $Res[$Rr[$k1]->Object_GetId()]??=$Rr[$k1];
       }
  
       $R=$this->Create_Object('/XML/CSS/Rules');

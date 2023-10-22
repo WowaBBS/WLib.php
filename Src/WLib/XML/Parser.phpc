@@ -24,45 +24,45 @@
  
   Class C_XML_Parser Extends C_Object
   {
-    Var $LastTag=False ; // Тег, после которого будет добавляться новый!
-    Var $Rest = ''    ; // Остаток необработанного текста
-    Var $LastTags=Array(); // Теги требующие своего завершения
-    Var $Mode = 0     ; // Режим парсера
-    Var $CDataText = Array(); // Данные CData
+    Var $LastTag   =False ; // Тег, после которого будет добавляться новый!
+    Var $Rest      = ''   ; // Остаток необработанного текста
+    Var $LastTags  = []   ; // Теги требующие своего завершения
+    Var $Mode      = 0    ; // Режим парсера
+    Var $CDataText = []   ; // Данные CData
     Var $TagConv='StrToLower';
  
-    Var $TagsCData=Array('style'=>True, 'script'=>True, 'title'=>True);
-    Var $TagsEmpty=Array('br'=>True, 'hr'=>True);
+    Var $TagsCData=['style'=>True, 'script'=>True, 'title'=>True];
+    Var $TagsEmpty=['br'=>True, 'hr'=>True];
  
-  //Var $TagsCData=Array();
-  //Var $TagsEmpty=Array();
+  //Var $TagsCData=[];
+  //Var $TagsEmpty=[];
  
-    Var $CData_List=Array();
-    Var $Unique_ID=False; // TODO
+    Var $CData_List =[];
+    Var $Unique_ID  =False; // TODO
  
     Function _Init($Args)
     {
-      parent::_Init($Args);
+      Parent::_Init($Args);
       $this->Unique_ID='('.mt_rand().')'; // TODO
       $this->Clear();
     }
  
     Function _Done()
     {
-      $this->Rest='';
-      $this->LastTags=Array();
-      $this->LastTag=false;
-      $this->Mode=0;
-      parent::_Done();
+      $this->Rest     ='';
+      $this->LastTags =[];
+      $this->LastTag  =false;
+      $this->Mode     =0;
+      Parent::_Done();
     }
  
     Function Clear()
     {
-      $this->Rest='';
-      $this->LastTags=Array();
-      $this->LastTag=false;
-      $this->Mode=0;
-      $this->CDataText=Array();
+      $this->Rest      ='';
+      $this->LastTags  =[];
+      $this->LastTag   =false;
+      $this->Mode      =0;
+      $this->CDataText =[];
     }
  
     Function TagConv($Str)
@@ -71,18 +71,18 @@
       Return $T($Str);
     }
  
-    Function AddTagCData($Tags=Array())
+    Function AddTagCData($Tags=[])
     {
       If(!Is_Array($Tags))
-        $Tags=Array($Tags);
+        $Tags=[$Tags];
       ForEach($Tags As $Tag)
         $this->TagsCData[$this->TagConv($Tag)]=True;
     }
  
-    Function AddTagEmpty($Tags=Array())
+    Function AddTagEmpty($Tags=[])
     {
       If(!Is_Array($Tags))
-        $Tags=Array($Tags);
+        $Tags=[$Tags];
       ForEach($Tags As $Tag)
         $this->TagsEmply[$this->TagConv($Tag)]=True;
     }
@@ -163,7 +163,7 @@
         '/(?:(<('.
           Implode('|', Array_Keys($this->TagsCData)).
           ')[^>]*>)(.*?)(<\\/\\2[^>]*>)|(<!--.*?-->))/siS',
-        Array($this, 'Replace_CData'), $XML
+        $this->Replace_CData(...), $XML
       );
       $Len=0;
       $Count=Preg_Match_All('/'.$Q.'/isS', $XML, $_Tags, PREG_SET_ORDER);
@@ -196,19 +196,19 @@
             $this->Add_Tag_Text($v[idxTagText]);
           // pcdate cdate
           If($v[idxTagRem    ])
-            $NewTag=$this->Create_Object('/XML/Tag/Comment' ,Array($v[idxTagRem   ]));
+            $NewTag=$this->Create_Object('/XML/Tag/Comment' ,[$v[idxTagRem   ]]);
           ElseIf($v[idxTagScript ])
-            $NewTag=$this->Create_Object('/XML/Tag/Script'  ,Array($v[idxTagScript]));
+            $NewTag=$this->Create_Object('/XML/Tag/Script'  ,[$v[idxTagScript]]);
           Else
           {
             $tagName=$this->TagConv($v[idxTagName]);
   
-            $NewTag=$this->Create_Object('/XML/Tag/Base', Array(
-              'tagName'    => $tagName,
-              'Attributes' => $v[idxTagAttr  ],
-              '_f'         => $v[idxTagFirst ],
-              '_e'         => $v[idxTagEnd   ],
-            ));
+            $NewTag=$this->Create_Object('/XML/Tag/Base', [
+              'tagName'    =>$tagName,
+              'Attributes' =>$v[idxTagAttr  ],
+              '_f'         =>$v[idxTagFirst ],
+              '_e'         =>$v[idxTagEnd   ],
+            ]);
             If($NewTag->_f)
               $this->_VeryEndTag($NewTag);
             If(!$NewTag->_f && !$NewTag->_e && !IsSet($this->TagsEmply[$tagName]))
@@ -216,7 +216,7 @@
               If(IsSet($this->TagsCData[$tagName]))
               {
                 $this->Mode=1;
-                $this->CDataText=Array();
+                $this->CDataText=[];
               }
               $LastTags[Count($LastTags)]=$NewTag;
             }
@@ -234,17 +234,17 @@
           {
             $this->CDataText[]=$v[idxTagText];
             $Text=Implode('', $this->CDataText);
-            $this->CDataText=Array();
+            $this->CDataText=[];
   
             $this->Add_Tag_Text($Text);
   
             $tagName=$this->TagConv($v[idxTagName]);
-            $NewTag=$this->Create_Object('/XML/Tag/Base', Array(
-              'tagName'    => $tagName,
-              'Attributes' => $v[idxTagAttr  ],
-              '_f'         => $v[idxTagFirst ],
-              '_e'         => $v[idxTagEnd   ],
-            ));
+            $NewTag=$this->Create_Object('/XML/Tag/Base', [
+              'tagName'    =>$tagName,
+              'Attributes' =>$v[idxTagAttr  ],
+              '_f'         =>$v[idxTagFirst ],
+              '_e'         =>$v[idxTagEnd   ],
+            ]);
  
             $this->_VeryEndTag($NewTag);
             $this->Mode=0;
@@ -272,7 +272,7 @@
           $T[$i]=$this->CData_List[$T[$i]];
         $Text=Implode('', $T);
       }
-      $NewTag=$this->Create_Object('/XML/Tag/Text', Array($Text));
+      $NewTag=$this->Create_Object('/XML/Tag/Text', [$Text]);
       $this->AddTag($NewTag);
     }
  

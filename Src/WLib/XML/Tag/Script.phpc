@@ -8,7 +8,7 @@
   
     Function _Init($Args)
     {
-      parent::_Init($Args);
+      Parent::_Init($Args);
     //$this->tagName='#script';
       $this->value=$Args[0];
     }
@@ -20,7 +20,7 @@
   
     Function TagBuildHash()
     {
-      Return Array('t'=>'s', 'v'=>$this->value);
+      Return ['t'=>'s', 'v'=>$this->value];
     }
   }
 ?>

@@ -19,6 +19,6 @@
     If(Preg_Match_All('/'.$RE.'/sS', $Str, $Res))
       Return $Res;
     Else
-      Return Array();
+      Return [];
   }
 ?>

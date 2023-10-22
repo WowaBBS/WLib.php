@@ -15,7 +15,6 @@
  
     Function MakePHP($Builder, $Tag, $Tags)
     {
-      $Id=$Tag->Object_Id;
       $Builder->Add_Line('// ('.$Tag->tagName.')');
       If(IsSet($Tags['#data']))
       {
@@ -29,9 +28,9 @@
       }
       Else
       {
-        If(Function_Exists('_cmd_'.$Tag->tagName.'_'))
+        If(Function_Exists('_cmd_'.$Tag->tagName.'_')) //TODO: Factory?
         {
-          $vRes=$Builder->Var_Add('Res', $Id);
+          $vRes=$Builder->Var_Add_Tag('Res', $Tag);
           $Builder->Add_Line($vRes."=''; _cmd_".$Tag->tagName.'_('.
             "'".$Tag->GetAttr('Params')."'".', '.$vRes.', '.$Builder->Vars().');');
           $Builder->Out->Evaluate($vRes);

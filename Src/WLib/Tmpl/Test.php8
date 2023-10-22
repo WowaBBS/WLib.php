@@ -1,12 +1,12 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   $TLoader=$Loader->Create_Object('/Tmpl/Loader');
-  $Manager_Args=Array(
-    'Parser'=>Array(
+  $Manager_Args=[
+    'Parser'=>[
       'Tag_First' =>'{',
       'Tag_Last'  =>'}',
-    ),
-  );
+    ],
+  ];
   $TLoader->Types['w2_cpp']=$Loader->Create_Object('/Tmpl/W2/Manager', $Manager_Args);
   $TLoader->DefType='w2_cpp';
   
@@ -21,7 +21,7 @@
 /*
   function Templates_Init(&$TLoader, &$ConvFiles, $Dir_Out)
   {
-    $Vars=Array();
+    $Vars=[];
     ForEach($ConvFiles as $k=>$tmp)
     {
       $ConvFile=&$ConvFiles[$k];
@@ -51,7 +51,7 @@
   
   Templates_Init($TLoader, $ConvFiles, $Dir_Out);
  
-  $Vars=Array('Effects'=>&$Effects);
+  $Vars=['Effects'=>&$Effects];
   Templates_Process($ConvFiles, 'Effects', $Vars);
   
   foreach($Effects as $Effect)

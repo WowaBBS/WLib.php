@@ -13,8 +13,6 @@
  
     Function MakePHP($Builder, $Tag, $Tags)
     {
-      $ID=$Tag->ID;
-
       $Path=$Tag->Attributes->GetAttr('Var'  );
       $Path=$Builder->ParsePath($Path);
 

@@ -14,14 +14,12 @@
  
     Function MakePHP($Builder, $Tag, $Tags)
     {
-      $ID=$Tag->ID;
-  
       $Path=$Tag->Attributes->GetAttr('Var'  );
       $Path=$Builder->ParsePath($Path);
   
       $Get=$Tag->Attributes->GetAttr('Get'  ,1)? 'True':'False';
   
-      $vVar =$Builder->Var_Add('SelfMode', $ID);
+      $vVar =$Builder->Var_Add_Tag('SelfMode', $Tag);
   
       $Builder->Add_Line($vVar.'='.$Builder->Vars_Get('SelfMode').';');
       $Builder->Out->Evaluate($vVar.'->URL('.$Path.', '.$Get.')');

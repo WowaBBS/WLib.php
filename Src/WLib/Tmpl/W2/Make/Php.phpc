@@ -50,10 +50,16 @@
   //Var $dVars=[];
     Var $cVars=0;
  
-    Function Var_Add($Name, $id)
+    Function Var_Add($Name, $Id=Null)
     {
+      If(False && $Id)
+        Return '$'.$Name.$Id;
       Return '$v'.$this->cVars++;
-      Return '$'.$Name.$id;
+    }
+ 
+    Function Var_Add_Tag($Name, $Tag)
+    {
+      Return $this->Var_Add($Name); // $Id->Object_GetId()// $Id=$Id->Tag_GetId();?? $Id->TagName
     }
  
     // ********************************************************************
@@ -89,7 +95,7 @@
  
     Function Vars_WithA($Arr)
     {
-      $Str=['Array('];
+      $Str=['Array(']; // TODO: []
       ForEach($Arr As $k=>$v)
       {
         $Str[]="'";
@@ -112,7 +118,7 @@
     {
       If(StrPos($Name, '|')!==False)
         Return 'Vars_GetVarST'.($Type? '_'.$Type:'').'('.$this->Vars($ASVars).', '."'".$Name."')";
-      Return 'Vars_GetVarFST'.($Type? '_'.$Type:'').'('.$this->Vars($ASVars).", Array('".Implode("', '", Explode('.', $Name))."'))";
+      Return 'Vars_GetVarFST'.($Type? '_'.$Type:'').'('.$this->Vars($ASVars).", Array('".Implode("', '", Explode('.', $Name))."'))"; // TOOD: []
     }
  
     Function Vars_GetS($Name, $ASVars=False)

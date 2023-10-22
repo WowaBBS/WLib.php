@@ -20,33 +20,33 @@
         $this->Config_Parser=$Args['Parser'];
     }
  
-    Function FilePhp($Id)
+    Function FilePhp($Tmpl_Id)
     {
-      Return $this->Cache.$Id.'.php';
+      Return $this->Cache.$Tmpl_Id.'.php';
     }
  
-    Function IsCompiled($Id)
+    Function IsCompiled($Tmpl_Id)
     {
-      return Is_File($this->FilePhp($Id));
+      return Is_File($this->FilePhp($Tmpl_Id));
     }
  
-    Function LoadPhp($Id)
+    Function LoadPhp($Tmpl_Id)
     {
       if($this->Cache)
-        Include($this->FilePhp($Id));
+        Include($this->FilePhp($Tmpl_Id));
     }
  
-    Function FuncName($Id)
+    Function FuncName($Tmpl_Id)
     {
-       Return '_Tmpl_w2_'.$Id.'_';
+       Return '_Tmpl_w2_'.$Tmpl_Id.'_';
     }
  
-    Function IsLoaded($Id)
+    Function IsLoaded($Tmpl_Id)
     {
-      Return Function_Exists($this->FuncName($Id));
+      Return Function_Exists($this->FuncName($Tmpl_Id));
     }
  
-    Function _Complie($Str, $Id)
+    Function _Complie($Str, $Tmpl_Id)
     {
       $Args=[
         'Parser'=>$this->Config_Parser,
@@ -55,7 +55,7 @@
       $Tmpl->Parse($Str);
       $Builder=$this->Create_Object('/Tmpl/W2/Make/Php');
       $Builder->Head[]='<?'."\n";
-      $Builder->Head[]=' Function '.$this->FuncName($Id).'(&'.$Builder->Vars().")\n";
+      $Builder->Head[]=' Function '.$this->FuncName($Tmpl_Id).'(&'.$Builder->Vars().")\n";
       $Builder->Head[]=' {'."\n";
     //$Builder->Head[]='$Res=[];'."\n";
       $Builder->Out->FBegin();
@@ -69,10 +69,10 @@
       {
         if(!Is_Dir($this->Cache))
           CreatePath($this->Cache);
-        if(!SaveText($this->FilePhp($Id), $Builder->GetPHP()))
+        if(!SaveText($this->FilePhp($Tmpl_Id), $Builder->GetPHP()))
         {
           CreatePath($this->Cache);
-          SaveText($this->FilePhp($Id), $Builder->GetPHP());
+          SaveText($this->FilePhp($Tmpl_Id), $Builder->GetPHP());
         }
       }
       else
@@ -82,37 +82,37 @@
       $Tmpl=NULL;
     }
  
-    Function Get_File($FileName, $Id=False)
+    Function Get_File($FileName, $Tmpl_Id=False)
     {
       $Stat=Stat($FileName);
-      If(!$Id)
-        $Id=md5($Stat['ino'  ].'-'.$Stat['size' ].'-'.$Stat['mtime'].'-'.$FileName.'-'.$this->Version);
-      If(!$this->IsLoaded($Id))
+      If(!$Tmpl_Id)
+        $Tmpl_Id=md5($Stat['ino'  ].'-'.$Stat['size' ].'-'.$Stat['mtime'].'-'.$FileName.'-'.$this->Version);
+      If(!$this->IsLoaded($Tmpl_Id))
       {
-        If(!$this->IsCompiled($Id))
+        If(!$this->IsCompiled($Tmpl_Id))
         {
           $Str=File_Get_Contents($FileName);
           $Str=Str_Replace("\r", '', $Str); // LoadText()
-          $this->_Complie($Str, $Id);
+          $this->_Complie($Str, $Tmpl_Id);
         }
-        $this->LoadPhp($Id);
+        $this->LoadPhp($Tmpl_Id);
       }
-      $Res=$this->Create_Object('/Tmpl/W2/Template', ['Func'=>$this->FuncName($Id)]);
+      $Res=$this->Create_Object('/Tmpl/W2/Template', ['Func'=>$this->FuncName($Tmpl_Id)]);
       Return $Res;
     }
  
-    Function Get_String($Str, $Id=False)
+    Function Get_String($Str, $Tmpl_Id=False)
     {
-      If(!$Id)
-        $Id=md5($Str);
-      If(!$this->IsLoaded($Id))
+      If(!$Tmpl_Id)
+        $Tmpl_Id=md5($Str);
+      If(!$this->IsLoaded($Tmpl_Id))
       {
-        If(!$this->IsCompiled($Id))
-          $this->_Complie($Str, $Id);
+        If(!$this->IsCompiled($Tmpl_Id))
+          $this->_Complie($Str, $Tmpl_Id);
   
-        $this->LoadPhp($Id);
+        $this->LoadPhp($Tmpl_Id);
       }
-      $Res=$this->Create_Object('/Tmpl/W2/Template', ['Func'=>$this->FuncName($Id)]);
+      $Res=$this->Create_Object('/Tmpl/W2/Template', ['Func'=>$this->FuncName($Tmpl_Id)]);
       Return $Res;
     }
   }

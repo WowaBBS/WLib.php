@@ -16,13 +16,11 @@
  
     Function MakePHP($Builder, $Tag, $Tags)
     {
-      $Id=$Tag->Object_Id;
-  
       $Name=$Tag->GetAttr('Name' );
       $Op  =$Tag->GetAttr('Op'   );
   
-      $vFrames =$Builder->Var_Add('Frames' ,$Id);
-      $vFrame  =$Builder->Var_Add('Frame'  ,$Id);
+      $vFrames =$Builder->Var_Add_Tag('Frames' ,$Tag);
+      $vFrame  =$Builder->Var_Add_Tag('Frame'  ,$Tag);
   
       $Builder->Out->Capture();
       $Tags['item'][0]->MakePHPInnerId($Builder, $Tags['item'][1]);

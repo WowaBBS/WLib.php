@@ -18,16 +18,14 @@
  
     Function MakePHP($Builder, $Tag, $Tags)
     {
-      $Id=$Tag->Object_Id;
-  
       $Item=$Tag->GetAttr('Item');
       $Var =$Tag->GetAttr('Var' );
       $Key =$Tag->GetAttr('Key' );
       $Type=$Tag->GetAttr('Type');
   
-      $vVar =$Builder->Var_Add('Var' ,$Id);
-      $vm   =$Builder->Var_Add('m'   ,$Id);
-      $vv   =$Builder->Var_Add('v'   ,$Id);
+      $vVar =$Builder->Var_Add_Tag('Var' ,$Tag);
+      $vm   =$Builder->Var_Add_Tag('m'   ,$Tag);
+      $vv   =$Builder->Var_Add_Tag('v'   ,$Tag);
   
       $Builder->Add_Line($vVar.'='.$Builder->Vars_Get($Var).';');
       $Builder->Add_Line('If(Is_Array('.$vVar.'))');

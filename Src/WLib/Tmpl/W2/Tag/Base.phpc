@@ -67,9 +67,8 @@
       If(!$ETag)
         Return [];
       $Res=[];
-      $Id=$ETag->Object_Id;
       $LTag=$this->ListNext;
-      While($LTag->Object_Id!==$Id)
+      While($LTag!==$ETag)
       {
         $Res[]=$LTag;
         If(IsSet($LTag->EndTag) && $LTag->EndTag)
@@ -123,7 +122,7 @@
         If(!$ZMain)
         {
           $T1=$T1->ListNext;
-          If($T1->Object_Id===$T2->Object_Id)
+          If($T1===$T2)
             Return $this;
           $T2=$T2->ListPrev;
           $T1->ListDeleteTo($T2);
@@ -147,7 +146,7 @@
         Return '';
       $Res=[];
       $LTag=$this;
-      While($LTag->Object_Id!==$ETag->Object_Id)
+      While($LTag!==$ETag)
       {
         If($LTag->tagName==='#text')
           $Res[]=$LTag->value;
@@ -165,7 +164,7 @@
         Return 0;
       $Res=0;
       $LTag=$this;
-      While($LTag->Object_Id!==$ETag->Object_Id)
+      While($LTag!==$ETag)
       {
         If($LTag->tagName==='#text')
           $Res+=StrLen($LTag->value);
@@ -191,10 +190,10 @@
       $this->ListAdd($NewTag);
     }
  
-    Function MakePHPInnerId($Builder, $Id)
+    Function MakePHPInnerId($Builder, $EndTag)
     {
       $LTag=$this->ListNext;
-      While($LTag->Object_Id!==$Id)
+      While($LTag!==$EndTag)
       {
         $LTag->MakePHP($Builder);
         If(IsSet($LTag->EndTag) && $LTag->EndTag)
@@ -210,8 +209,7 @@
       $ETag=$this->EndTag;
       If(!$ETag)
         Return [];
-      $Id=$ETag->Object_Id;
-      $this->MakePHPInnerID($Builder, $Id);
+      $this->MakePHPInnerID($Builder, $ETag);
     }
  
     Function MakePHP($Builder)
@@ -220,17 +218,16 @@
         Return;
       $ti=$Builder->Tags->Create($this->tagName);
       $Tags=[];
-      If($this->EndTag)
+      If($ETag=$this->EndTag)
       {
         $Sub=$ti::$InnerTags;
   
-        $IdE=$Id=$this->EndTag->Object_Id;
         $T1=Array_Keys($Sub);
         $Tags=[$T1[0]=>[$this, $IdE]];
         $LLTag=$T1[0];
   
         $LTag=$this->ListNext;
-        While($LTag->Object_Id!==$Id)
+        While($LTag!==$ETag)
         {
           If(IsSet($Sub[$LTag->tagName]))
           {

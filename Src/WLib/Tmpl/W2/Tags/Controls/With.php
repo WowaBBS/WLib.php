@@ -16,9 +16,7 @@
  
     Function MakePHP($Builder, $Tag, $Tags)
     {
-      $Id=$Tag->Object_Id;
-  
-      $vVar=$Builder->Var_Add('Var', $Id);
+      $vVar=$Builder->Var_Add_Tag('Var', $Tag);
   
       $Item=$Tag->GetAttr('Data');
       If($Item)

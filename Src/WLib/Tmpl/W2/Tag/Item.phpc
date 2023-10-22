@@ -5,7 +5,6 @@
  
   Class C_Tmpl_W2_Tag_Item Extends C_Object_Release
   {
-  //Var $Id          ; // Идентификтор
     Var $tagName     ; // Имя тега
  
     Var $Document    ; // Template файл
@@ -24,7 +23,6 @@
     Function _Init(Array $Args)
     {
       parent::_Init($Args);
-    //$this->Id=$this->Object_Id; // TODO: ???
     }
  
     Function _Done()
@@ -34,8 +32,6 @@
       parent::_Done();
     }
     
-  //Function GetId() { return $this->Object_Id; }
- 
     Function ListFirst($ADocument)
     {
       $this->Document = $ADocument;
@@ -51,7 +47,7 @@
       $ATag->ListPrev = $this           ;
       $ATag->ListNext = $this->ListNext ;
       $this->ListNext = $ATag           ;
-    //If($this->Document->LastTag->Object_Id==$this->Object_Id)
+    //If($this->Document->LastTag===$this)
       If($ATag->ListNext)
         $ATag->ListNext->ListPrev=$ATag;
       Else
@@ -64,7 +60,7 @@
       $ATag->ListPrev = $this->ListPrev ;
       $ATag->ListNext = $this           ;
       $this->ListPrev = $ATag           ;
-    //If($this->Document->LastTag->Object_Id==$this->Object_Id)
+    //If($this->Document->LastTag===$this)
       If($ATag->ListPrev)
         $ATag->ListPrev->ListNext=$ATag;
       Else
@@ -91,8 +87,7 @@
       Else
         $this->Document->LastTag =$this->ListPrev;
       $LTag=$this;
-      $Id=$ETag->Object_Id;
-      While($LTag->Object_Id!==$Id)
+      While($LTag!==$ETag)
         $LTag=$LTag->_Clear();
       $Res=$LTag->_Clear();
       Return $Res;

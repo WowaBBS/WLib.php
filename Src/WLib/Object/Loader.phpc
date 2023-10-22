@@ -13,7 +13,7 @@
       {
         ForEach($Path As $Item)
           $this->AddSearchPath($Item);
-        return;
+        Return;
       }
       $Path=StrTr(RealPath($Path), '\\', '/');
       if(SubStr($Path, -1)=='/')
@@ -63,6 +63,7 @@
       'Class'     =>['.Class.php'     ,'C'        ,'Class'     ,'.phpc'  ],
       'Interface' =>['.Interface.php' ,'I'        ,'Interface' ,'.phpi'  ],
       'Enum'      =>['.Enum.php'      ,'E'        ,'Enum'      ,'.phpe'  ],
+      'Exception' =>['.Exception.php' ,'E'        ,'Exception' ,'.phpe'  ],
       'UnitTest'  =>['.Test.php'      ,'Test'     ,'UnitTest'  ,'.phput' ],
       'Lib'       =>['.Lib.php'       ,''         ,'Lib'       ,'.php'   ],
       'Module'    =>['.Module.php'    ,''         ,'Lib'       ,'.phpm'  ],
@@ -140,9 +141,9 @@
     Function _Create_Object($Class_Name, Array $Args=[], Array $Mode=[])
     {
       If(!$Class_Name) Return $Class_Name;
-      
-      If(!IsSet($Args['Outer'  ])) $Args['Outer'  ]=$this;
-      If(!IsSet($Args['Loader' ])) $Args['Loader' ]=$this;
+     
+    //$Args['Object_Outer'  ]??=$this; //$Args['Outer'  ]??=$this;
+      $Args['Object_Loader' ]??=$this; //$Args['Loader' ]??=$this;
       $Res=New $Class_Name($Args);
      #ifdef Debug
      #if(Get_Class($Res)!==$Class_Name)
@@ -190,6 +191,7 @@
     Function Load_Interface ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name ,$Mode ,'Interface' ); }
     Function Load_Trait     ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name ,$Mode ,'Trait'     ); }
     Function Load_Enum      ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name ,$Mode ,'Enum'      ); }
+    Function Load_Exception ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name ,$Mode ,'Exception' ); }
     Function Load_UnitTest  ($Name, Array $Mode=[]) { Return $this->_Load_Lib($Name ,$Mode ,'UnitTest'  ); }
  
     Function Using_Class     ($Name) {}
@@ -202,7 +204,6 @@
     Function Class_Extends    ($Name) { $this->Load_Class     ($Name); }
     Function Parent_Class     ($Name) { $this->Load_Class     ($Name); }
     Function Parent_Struct    ($Name) { $this->Load_Struct    ($Name); }
-  //Function Parent_UnitTest  ($Name) { $this->Load_UnitTest  ($Name); } // Not allowed
     
     Function Begin_Module () {}
     Function Begin_Class  () {}
@@ -226,6 +227,7 @@
       Case 'Interface' : $z= Interface_Exists($TypeName); Break;
       Case 'Trait'     : $z=     Trait_Exists($TypeName); Break;
       Case 'Enum'      : $z=      Enum_Exists($TypeName); Break;
+      Case 'Exception' : $z=     Class_Exists($TypeName); Break;
       Case 'UnitTest'  : $z=     Class_Exists($TypeName); Break;
       Case 'Type'      : $z=     Class_Exists($TypeName); Break;
       Default: Return $this->Log('Fatal', 'Unreachable place '.$Type)->Ret();
@@ -259,6 +261,7 @@
       Case 'Interface' : Return Count(Get_Declared_Interfaces ());
       Case 'Trait'     : Return Count(Get_Declared_Trait      ());
       Case 'Enum'      : Return Count(Get_Declared_Classes    ());
+      Case 'Exception' : Return Count(Get_Declared_Classes    ());
       Case 'UnitTest'  : Return Count(Get_Declared_Classes    ());
       }
       $this->Log('Fatal', 'Unreachable place '.$Type);
@@ -273,6 +276,7 @@
       Case 'Interface' : $List=Get_Declared_Interfaces (); Break;
       Case 'Trait'     : $List=Get_Declared_Traits     (); Break;
       Case 'Enum'      : $List=Get_Declared_Classes    (); Break;
+      Case 'Exception' : $List=Get_Declared_Classes    (); Break;
       Case 'UnitTest'  : $List=Get_Declared_Classes    (); Break;
       }
       $c=Count($List);

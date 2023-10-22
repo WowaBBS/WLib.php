@@ -1,19 +1,24 @@
 <?
 //$Loader->Load_Class('/Object/Base');
 
+  Use \Deprecated;
+
   Class C_Object_Base
   {
-    Private Static $Object_Counter=0;
-    Var     $Object_Id     ;
-    Var     $Object_Loader =null;
+    Private $Object_Inited = False ;
+    Var     $Object_Loader = Null  ;
  
     //****************************************************************
     // Object
 
-    Function Object_GetWeak() { return WeakReference::Create($this); }
-    Function Object_GetLoader() { return $this->Object_Loader; }
-    Function GetLoader() { return $this->Object_Loader; }
-
+    Function Object_GetWeak   () { Return WeakReference::Create($this); }
+    Function Object_GetLoader () { Return $this->Object_Loader ; }
+    Function Object_IsInited  () { Return $this->Object_Inited ; }
+    Function Object_GetId     () { Return Spl_Object_Id($this); }
+    
+    #[Deprecated("Use Object_GetLoader() instead")]
+    Function GetLoader() { return $this->Object_GetLoader(); }
+    
   //Static Function Cr($Owner, $Args):Static { return $Owner->Create_Object(Static::Class, $Args); }
     
     //****************************************************************
@@ -21,7 +26,7 @@
     
     Function Create_Object($Name, Array $Args=[], Array $Mode=[])
     {
-      $Args['Outer']=$this;
+      $Args['Object_Outer']=$this; //$Args['Outer']=$this;
       return $this->Object_GetLoader()->Create_Object($Name, $Args, $Mode);
     }
 
@@ -34,7 +39,7 @@
     // Debug And Log
     
     Function ToDebugInfo() { return Get_Class($this).'('.$this->_ToDebugInfo().')'; }
-    Function _ToDebugInfo() { return $this->Object_Id; }
+    Function _ToDebugInfo() { return $this->Object_GetId(); }
     
     Function GetLogger() { Return $this->Object_GetLoader()->GetLogger(); }
     Function Debug($Var, $Level=-1) { Return $this->Object_GetLoader()->Debug($Var, $Level); }
@@ -42,8 +47,8 @@
 
     Protected Function _Debug_Info(Array &$Res)
     {
-      if($this->Object_GetLoader()!==null) UnSet($Res['Object_Loader'        ]);
-      if($this->Object_Inited===True) UnSet($Res['Object_Inited' ]);
+      if($this->Object_GetLoader()!==Null) UnSet($Res['Object_Loader' ]);
+      if($this->Object_Inited     ===True) UnSet($Res['Object_Inited' ]);
     }
     
     /// Debug manager
@@ -66,18 +71,14 @@
     //****************************************************************
     // Time life
 
-    Private $Object_Inited =False;
-    
-    Function IsObjectInited() { return $this->Object_Inited; }
-    
-    Final Function __Construct(Array $Args)
+    Function __Construct(Array $Args) //Final
     {
-      $this->Object_Id=Self::$Object_Counter++;
-      $this->Object_Loader=$Args['Loader'];
-      UnSet($Args['Loader']);
+    //$this->Object_Loader =$Args['Loader'        ]; UnSet($Args['Loader'        ]);
+      $this->Object_Loader =$Args['Object_Loader' ]; //UnSet($Args['Object_Loader' ]);
+      
       $this->_Init($Args);
       if(!$this->Object_Inited)
-        throw new Exception('Initializing is not fully');
+        Throw New Exception('Initializing is not fully');
     //Trigger_Error('Initializing is not fully', E_USER_ERROR); // WARNING
     }
   
@@ -113,10 +114,11 @@
     //****************************************************************
     // Clone
 
-    Function Clone() { return clone $this; }
+    //TODO: Object_Clone
+    Function Clone() { Return Clone $this; }
     
     Protected Function _Cloneable() { return false; }
-    Protected Function _Clone()
+    Protected Function _Clone() //TODO: Object_OnClone($From?)
     {
       $this->Object_Inited=true;
     }
@@ -127,7 +129,6 @@
         throw new Exception('Object can`t be cloned');
       if(!$this->Object_Inited)
         throw new Exception('Object hasn`t initialized');
-      $this->Object_Id=Self::$Object_Counter++;
       $this->Object_Inited=false;
       $this->_Clone();
       if(!$this->Object_Inited)

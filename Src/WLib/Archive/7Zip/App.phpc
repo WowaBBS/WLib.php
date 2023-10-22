@@ -1,9 +1,9 @@
 <?
-  $this->Parent_Class('/Object/Base');
+  $this->Parent_Class('/Object');
   $this->Load_Lib('/FS/Utils');
   $this->Using_Module('/FS/IOFS');
 
-  class C_Archive_7Zip_App extends C_Object_Base
+  class C_Archive_7Zip_App extends C_Object
   {
     Var $Path='';
     Var $Cache='./.Cache/7zip.path';

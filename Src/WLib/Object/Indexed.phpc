@@ -1,0 +1,22 @@
+<?
+  $Loader->Parent_Class('/Object/Base');
+  
+  Class C_Object_Indexed Extends C_Object_Base
+  {
+    Private Static $Object_Counter=0;
+    Var     $Object_Id     = 1    ;
+    
+    Function Object_GetId() { Return $this->Object_Id; }
+    
+    Function __Construct(Array $Args) //Final
+    {
+      $this->Object_Id=-(++Self::$Object_Counter);
+    }
+
+    Protected Function _Clone() //TODO: Object_OnClone($From?)
+    {
+      $this->Object_Id=-(++Self::$Object_Counter);
+      Parent::_Clone();
+    }
+  }
+?>

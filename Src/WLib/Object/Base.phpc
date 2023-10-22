@@ -1,7 +1,7 @@
 <?
 //$Loader->Load_Class('/Object/Base');
 
-  Use \Deprecated;
+  Use \Deprecated As Deprecated;
 
   Class C_Object_Base
   {

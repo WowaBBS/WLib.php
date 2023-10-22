@@ -17,7 +17,7 @@
           {
             $Prefix=SubStr($BaseDir, StrLen($Path));
             If($Prefix==='') $Prefix='/';
-            $this->Log('Debug', 'Found prefix: ', $Prefix);
+            $this->Log('Debug', 'Found test prefix: ', $Prefix);
           }
         If(!$Prefix)
         {
@@ -70,7 +70,7 @@
                 Continue;
               }
               $R=StrTr($Prefix.SubStr($R, StrLen($BaseDir)), '\\', '/');
-              $this->Log('Debug', 'Found: ', $R);
+              $this->Log('Debug', 'Found test: ', $R);
               $Res[$R]=$R;
             }
         }

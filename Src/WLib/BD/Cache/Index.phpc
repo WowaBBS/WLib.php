@@ -12,7 +12,7 @@
     
     Function IsPrimary()
     {
-      return $this->Table->Primary->Object_Id===$this->Object_Id;
+      return $this->Table->Primary===$this;
     }
     
     Function SetAutoIncrement($v=1)

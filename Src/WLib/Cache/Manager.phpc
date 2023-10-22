@@ -59,7 +59,7 @@
       $Args['FullPath' ]=$FullPath ;
       $Args['RelPath'  ]=$Path     ;
       $Res=$this->Create_Object($Type, $Args);
-      $this->Objects[$Res->Object_Id]=[$Type, $Path];
+      $this->Objects[$Res->Object_GetId()]=[$Type, $Path];
       $this->Cache[$Type][$Path]=$Res;
       Return $Res;
     }
@@ -68,9 +68,10 @@
     {
       if($Obj==$this)
         return;
-      $I=$this->Objects[$Obj->Object_Id];
+      $Id=$Obj->Object_GetId();
+      $I=$this->Objects[$Id];
       UnSet($this->Cache[$I[0]][$I[1]]);
-      UnSet($this->Objects[$Obj->Object_Id]);
+      UnSet($this->Objects[$Id]);
     }
     
   }

@@ -28,7 +28,7 @@
       if($Exclude=$LogItem->Exclude)
         ForEach($ByName As $Name->$Logger)
           If($Exclude[$Name]?? False)
-            UnSet($Loggers[$Logger->Object_Id]);
+            UnSet($Loggers[$Logger->Object_GetId()]);
       ForEach($Loggers As $Logger)
         if($Logger->IsValid())
           $Logger->LogItem($LogItem);
@@ -54,10 +54,11 @@
           $this->GetLogger()->Log('Warning', 'Logger ', $Name, ' already exists will be overrided');
         $this->ByName[$Name]=$Logger;
       }
-      if(IsSet($this->Loggers[$Logger->Object_Id]))
+      $Id=$Logger->Object_GetId();
+      if(IsSet($this->Loggers[$Id]))
         $this->GetLogger()->Log('Warning', 'Logger ', $Name, ' already was added');
       else
-        $this->Loggers[$Logger->Object_Id]=$Logger;
+        $this->Loggers[$Id]=$Logger;
       return $Logger;
     }
     
@@ -85,13 +86,14 @@
         UnSet($this->ByName[$Name]);
       }
     
-      if(!IsSet($this->Loggers[$Logger->Object_Id]))
+      $Id=$Logger->Object_GetId();
+      if(!IsSet($this->Loggers[$Id]))
       {
         $this->GetLogger()->Log('Error', 'Logder ', $Name, ' wasn\'t be added');
         return false;
       }
       
-      UnSet($this->Loggers[$Logger->Object_Id]);
+      UnSet($this->Loggers[$Id]);
       return $Logger;
     }
     

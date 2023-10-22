@@ -1,0 +1,26 @@
+<?
+  $Loader->Parent_Class('/Object');
+  $Loader->Load_Lib('/XML/CSS/Parser');
+ 
+  Abstract Class C_XML_CSS_Base Extends C_Object
+  {
+    Var $Styles =[];
+    Var $Key    =False;
+ 
+    Function Clear()
+    {
+      $this->Styles=[];
+    }
+ 
+    Abstract Function AddArr($Arr);
+
+    Function AddStr($Str)
+    {
+      $this->AddArr(ParseStyle($Str));
+    }
+ 
+    Abstract Function Make();
+ 
+    Function IsCssFile() { Return False; }
+  }
+?>

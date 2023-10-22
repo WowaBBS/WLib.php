@@ -110,7 +110,7 @@
           $_Name = Is_String($k)? $k:$Name;
         }
   
-        $Fs=&SetDefault($Link, $Table->Object_Id, [''=>$Table]);
+        $Fs=&SetDefault($Link, $Table->Object_GetId(), [''=>$Table]);
         $Fs[$_Name]=true;
       }
     }

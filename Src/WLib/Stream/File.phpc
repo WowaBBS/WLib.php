@@ -68,7 +68,6 @@
             If($Cmd[1][0]=='r')
               If(!Is_File($this->RFileName))
                 Break;
-          # $this->Log('Debug', 'FOpen(', $this->RFileName, ', ', $Cmd[1], ',', $AMode, ',', Spl_Object_Id($this),')');
             $this->FHandle=@FOpen($this->RFileName, $Cmd[1]);
           # if(!$this->FHandle)
           #   $this->Log('Error', 'Can\'t open file ', $this->RFileName);

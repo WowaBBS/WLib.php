@@ -49,7 +49,7 @@
         return;
       if(!$this->ShowLogLevel[$LogItem->Level->Name])
         return;
-      if($LogItem->Exclude[$this->Object_Id]?? False)
+      if($LogItem->Exclude[$this->Object_GetId()]?? False)
         return;
       $this->_LogItem($LogItem);
     }

@@ -44,7 +44,7 @@
     Function Exclude($Arg)
     {
       if(Is_Object($Arg))
-        $Arg=$Arg->Object_Id;
+        $Arg=$Arg->Object_GetId();
       $this->Exclude[$Arg]=true;
       return $this;
     }

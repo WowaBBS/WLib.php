@@ -49,7 +49,6 @@
       if(IsSet($this->Files[$FileName]))
         return $this->Files[$FileName];
       $Res=$this->Create($FileName, $bAppend);
-    //$this->Log('Debug', 'DebugCreate(', $FileName, ")[", Implode(', ', Array_Keys($this->Files)), "]", $this->Object_Id);
       $this->Files[$FileName]=$Res;
       return $Res;
     }

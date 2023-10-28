@@ -58,7 +58,7 @@
           {
             If($Z>9)
             {
-            //Trigger_Error('XML/CSS/File "{" in '.$k);
+            //$this->Log('Error', 'XML/CSS/File "{" in ', $k);
               $Z++;
               $St[0][]=$v;
               $St[1][]=$Arr[1][$k];
@@ -80,7 +80,7 @@
           ElseIf($v=='}')
           {
             If($Z<10)
-              Trigger_Error('XML/CSS/File "}" in '.$k);
+              $this->Log('Error', 'XML/CSS/File "}" in ', $k);
             Else
             {
             //If(IsSet($this->Styles[$Key]))

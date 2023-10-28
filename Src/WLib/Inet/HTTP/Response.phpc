@@ -42,7 +42,7 @@
       If(Count($Line)<2)
       {
         $Line=Implode('', $Line);
-        Trigger_Error('HTTP Response error '.$Line, E_USER_WARNING);
+        $this->Log('Error', 'HTTP Response error ', $Line);
         $this->Header->Add(' Raw', $Line);
         Return False;
       }

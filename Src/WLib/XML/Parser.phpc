@@ -168,7 +168,7 @@
       $Len=0;
       $Count=Preg_Match_All('/'.$Q.'/isS', $XML, $_Tags, PREG_SET_ORDER);
       $LE=Preg_Last_Error();
-      Switch($LE)
+      Switch($LE) //TODO: Remove from here
       {
       Case PREG_NO_ERROR              : $LE= False ;            Break;
       Case PREG_INTERNAL_ERROR        : $LE='Internal'        ; Break;
@@ -177,7 +177,7 @@
       Case PREG_BAD_UTF8_ERROR        : $LE='Bad utf8'        ; Break;
       }
       If($LE)
-        Trigger_Error('Xml/Parser/Preg_Last_Error: '.$LE);
+        $this->Log('Error', 'Xml/Parser/Preg_Last_Error: ', $LE);
     //Debug($_Tags);
       For($i=0;$i<$Count;$i++)
     //ForEach($_Tags As $v)

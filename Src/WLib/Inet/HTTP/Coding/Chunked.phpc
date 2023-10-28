@@ -37,7 +37,7 @@
           If($ChunkLen===0)
             If($SE=$this->FStream->Get_Line())
             {
-              Trigger_Error('Chunked error '.$SE, E_USER_WARNING);
+              $this->Log('Error', 'Chunked error ', $SE);
               $this->FEOF=True;
               Break;
             }
@@ -50,7 +50,7 @@
           }
           If($ChunkLen==0)
           {
-            Trigger_Error('Chunked error2 '.$SE, E_USER_WARNING);
+            $this->Log('Error', 'Chunked error2 ', $SE);
             $this->FEOF=True;
             Break;
           }

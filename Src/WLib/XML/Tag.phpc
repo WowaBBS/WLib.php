@@ -162,7 +162,7 @@
       Case 'p' : $Tag=$this->_parent(); Break;
       Case 'r' : $Tag=$this->ListNext;  Break;
       Case 'l' : $Tag=$this->ListPrev;  Break;
-      Default  : Trigger_Error('Unknown command');
+      Default  : $this->Log('Fatal', 'Unknown command');
       }
       Return $Tag;
     }

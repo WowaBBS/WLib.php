@@ -64,7 +64,7 @@
       Else
       {
         $Info=[];
-      //Trigger_Error('Error Loading Skin '.$this->Path.'info.php');
+      //$this->Log('Error', 'Error Loading Skin ', $this->Path, 'info.php');
       }
       If(!IsSet($Info['Extends']))
         $Info['Extends']=['/_'];

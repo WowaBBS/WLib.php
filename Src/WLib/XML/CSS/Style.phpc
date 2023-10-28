@@ -41,8 +41,7 @@
             {
               If($Key)
               {
-              //Trigger_Error('WLib/XML/CSS/Style/Aldsfds');
-              //Debug('!asdf');
+              //$this->Log('Error', 'WLib/XML/CSS/Style/Aldsfds');
               }
               $Key=$v;
               $this->Styles[$Key]=[];
@@ -52,7 +51,7 @@
             {
               $this->_AddValue($Key, $v);
               If($Z<3)
-                Trigger_Error('WLib/XML/CSS/Style ")"');
+                $this->Log('Error', 'WLib/XML/CSS/Style ")"');
               ElseIf($Z==3)
                 $Z=1;
               Else
@@ -62,7 +61,7 @@
           //{
           //  $this->_AddValue($Key, $v);
           //  If($Z<3)
-          //    Trigger_Error('WLib/XML/CSS/Style "}"');
+          //    $this->Log('Error', 'WLib/XML/CSS/Style "}"');
           //  ElseIf($Z==3)
           //    $Z=1;
           //  Else

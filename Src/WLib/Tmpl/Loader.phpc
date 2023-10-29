@@ -3,7 +3,7 @@
   $Loader->Using_Class('/Tmpl/Router');
   $Loader->Using_Module('/Tmpl/Vars');
   $Loader->Load_Type('/FS/Path');
-
+  
   Class C_Tmpl_Loader Extends C_Object
   {
     Var $Router    =False;
@@ -14,7 +14,16 @@
     Protected Function _Init(Array $Args)
     {
       parent::_Init($Args);
-      $this->Router      =$this->Create_Object('/Tmpl/Router');
+      
+      $Router=$Args['Router']?? [];
+      If(!Is_Object($Router))
+      {
+        If(!Is_Array($Router))
+          $Router=$this->Log('Error', 'Wrong router arguments')->Debug($Router)->Ret([]);
+        $Router=$this->Create_Object('/Tmpl/Router', $Router);
+      }
+      
+      $this->Router      =$Router;
       $this->Types['W2'] =$this->Create_Object('/Tmpl/W2/Manager');
     }
  
@@ -34,7 +43,7 @@
        $_CurPath=_vars_getf(' CurPath', $Vars);
        If(!$_CurPath)
        {
-         Trigger_Error('??? CurPath '. $TmplName);
+         $this->Log('Error', '??? CurPath ',$TmplName);
          return '';
        }
        Return $_CurPath->ToString().$TmplName;
@@ -65,19 +74,21 @@
     Function Load_Template(&$Vars, $TmplName)
     {
       $FullName=$this->_Norm_Path($Vars, $TmplName);
-      $FileName=$this->Router->File($FullName);
-      $FileName=$this->_Real_Path($Vars, $TmplName);
+      $FileName=$this->Router->File($FullName)?? '';
+    //If(!$FileName)
+    //  Return $this->Log('Error', 'Template file "', $FullName, '" not found')->Ret();
+      $FileName=$this->_Real_Path($Vars, $TmplName)?? '';
       If(IsSet($this->Templates[$FileName]))
         Return $this->Templates[$FileName];
       If(!Is_File($FileName))
       {
         $_CurPath=_vars_getf(' CurPath', $Vars);
-        ErrStr('Template file not founded: "'.$TmplName.'" from "'.($_CurPath? $_CurPath->ToString():'').'"');
+        $this->Log('Error', 'Template file not founded: "', $TmplName, '" from "', $_CurPath?->ToString(), '"');
         $Res=$this->Create_Object('/Tmpl/Base/Template');
       }
       Else
         $Res=$this->Types[$this->DefType]->Get_File($FileName);
-      $Res->Vars[' CurPath']=TPath::Create(DirName($FullName).'/');
+      $Res->Vars[' CurPath']=T_FS_Path::Create(DirName($FullName).'/');
       $this->Templates[$FileName]=$Res;
       Return $Res;
     }

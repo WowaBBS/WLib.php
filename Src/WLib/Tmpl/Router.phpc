@@ -7,12 +7,12 @@
  
   Class C_Tmpl_Router Extends C_Object
   {
-  //Var $Path  = './modes/' ;
-  //Var $URL   =   'modes/' ;
-    Var $Dir   = 'templates' ;
+  //Var $Path  = './modes/'   ;
+  //Var $URL   =   'modes/'   ;
+    Var $Dir   = 'templates/' ;
     Var $Paths ;
   //Var $Path  = './templates/' ;
-  //Var $URL   = 'templates/' ;
+  //Var $URL   = 'templates/'   ;
     Var $LHash = [] ;
     Var $RouteFile = '.route.php'; //'location.php';
  
@@ -20,7 +20,9 @@
     {
       parent::_Init($Args);
     //$this->Paths=$GLOBALS['Paths'];
-      $this->Paths=$this->Create_Object('/FS/Paths');
+    
+      $this->Dir  =$Args['Dir']?? $this->Dir;
+      $this->Paths=$this->Create_Object('/FS/Paths'); //TODO: $Args['Paths']
       $this->Paths->AddPath('./', 'Unknown'); // TODO
     }
  
@@ -225,33 +227,14 @@
           $DefMode=$Tmp1;
       }
       $DefMode=LoadVar('Mode', $DefMode);
-    //$P=TPath::Create($DefMode);
+    //$P=T_FS_Path::Create($DefMode);
       $Res=$this->Get($Vars, $Prefix.$DefMode);
       Return $Res;
     }
  
-    Function File($AFile='')
-    {
-      $Res=$this->Paths->GetFile($this->Dir.'/'.$AFile);
-      Return $Res[0];
-    }
- 
-    Function GetFiles($AFile='')
-    {
-      $Res=$this->Paths->GetFiles($this->Dir.'/'.$AFile);
-      Return $Res;
-    }
- 
-    Function ListFiles($AFile='')
-    {
-      $Res=$this->Paths->FilesList($this->Dir.'/'.$AFile);
-      Return $Res;
-    }
- 
-    Function FileURL($AFile='')
-    {
-      $Res=$this->Paths->GetFile($this->Dir.'/'.$AFile);
-      Return $Res[1];
-    }
+    Function File      ($File) { Return $this->Paths->GetFile   ($this->Dir.$File)[0]?? ''; }
+    Function GetFiles  ($File) { Return $this->Paths->GetFiles  ($this->Dir.$File);         } 
+    Function ListFiles ($File) { Return $this->Paths->FilesList ($this->Dir.$File);         } 
+    Function FileURL   ($File) { Return $this->Paths->GetFile   ($this->Dir.$File)[1]?? ''; }
   }
 ?>

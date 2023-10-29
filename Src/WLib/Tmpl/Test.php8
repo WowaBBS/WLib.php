@@ -1,6 +1,8 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
-  $TLoader=$Loader->Create_Object('/Tmpl/Loader');
+  
+  $Loader->GetLogger()->Add('Test.log');
+  $TLoader=$Loader->Create_Object('/Tmpl/Loader', ['Router'=>['Dir'=>'']]);
   $Manager_Args=[
     'Parser'=>[
       'Tag_First' =>'{',
@@ -16,45 +18,6 @@
     'Hello'=>'World',
     'World'=>'Hello',
   ];
-//Echo $TLoader->Load_Template   ($Vars, '/Test.template')->Exec_To_Str($Vars);
-  Echo $TLoader->String_Template ($Vars, '{Var:Hello}')->Exec_To_Str($Vars);
-/*
-  function Templates_Init(&$TLoader, &$ConvFiles, $Dir_Out)
-  {
-    $Vars=[];
-    ForEach($ConvFiles as $k=>$tmp)
-    {
-      $ConvFile=&$ConvFiles[$k];
-      $ConvFile['Template' ]=$TLoader->Load_Template   ($Vars,          $ConvFile[1]);
-      $ConvFile['Output'   ]=$TLoader->String_Template ($Vars, $Dir_Out.$ConvFile[2]);
-    }
-  }
-  
-  function Templates_Process(&$ConvFiles, $Type, &$Vars)
-  {
-    ForEach($ConvFiles as $k=>$tmp)
-    {
-      $ConvFile=&$ConvFiles[$k];
-      
-      if($ConvFile[0]!==$Type) continue;
-      
-      $Content = $ConvFile['Template' ]->Exec_To_Str($Vars);
-      $Output  = $ConvFile['Output'   ]->Exec_To_Str($Vars);
-      
-      CreatePath(ExtractFilePath($Output));
-      
-      $Content=str_replace("\r", '', $Content);
-      $Content=str_replace("\n", "\r\n", $Content);
-      file_put_contents($Output, $Content);
-    }
-  }
-  
-  Templates_Init($TLoader, $ConvFiles, $Dir_Out);
- 
-  $Vars=['Effects'=>&$Effects];
-  Templates_Process($ConvFiles, 'Effects', $Vars);
-  
-  foreach($Effects as $Effect)
-    Templates_Process($ConvFiles, 'Effect', $Effect);
-*/
+  Echo $TLoader->Load_Template   ($Vars, '/Test.template')->Exec_To_Str($Vars), "\n";
+  Echo $TLoader->String_Template ($Vars, '{Var:Hello}')->Exec_To_Str($Vars), "\n";
 ?>

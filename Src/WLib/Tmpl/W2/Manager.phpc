@@ -10,7 +10,7 @@
     Var $Templates     =[];
     Var $Cache         ='./Cache/Tmpl/W2/'; // TODO: Cache object
   //Var $Cache         ='./Cache/';
-    Var $Version       ='V3x0x0';
+    Var $Version       ='V4x0x0';
     Var $Config_Parser =[];
     
     Function _Init(Array $Args)

@@ -23,7 +23,7 @@
       $vFrame  =$Builder->Var_Add_Tag('Frame'  ,$Tag);
   
       $Builder->Out->Capture();
-      $Tags['item'][0]->MakePHPInnerId($Builder, $Tags['item'][1]);
+      $Tags['item'][0]->MakePHPInnerTo($Builder, $Tags['item'][1]);
     //Debug($Op);
   
       $Builder->Add_Line($vFrames."=&".$Builder->Vars_Get('Frame').';');

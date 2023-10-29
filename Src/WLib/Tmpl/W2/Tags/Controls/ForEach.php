@@ -48,7 +48,7 @@
       $Builder->Tab=$T.'  ';
   
       If($With) $Builder->Vars_WithA($With);
-      $Tags['item'][0]->MakePHPInnerId($Builder, $Tags['item'][1]);
+      $Tags['item'][0]->MakePHPInnerTo($Builder, $Tags['item'][1]);
       If($With) $Builder->Vars_EndWith();
   
       $Builder->Tab=$T;

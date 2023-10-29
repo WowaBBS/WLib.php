@@ -20,7 +20,7 @@
       If(IsSet($Tags['#Data']))
       {
         $Builder->Out->Capture($this::$FuncFilter, True);
-        $Tags['#Data'][0]->MakePHPInnerId($Builder, $Tags['#Data'][1]);
+        $Tags['#Data'][0]->MakePHPInnerTo($Builder, $Tags['#Data'][1]);
         $Builder->Out->End(True);
       }
       Else

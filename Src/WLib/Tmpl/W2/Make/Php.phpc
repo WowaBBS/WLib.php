@@ -50,16 +50,16 @@
   //Var $dVars=[];
     Var $cVars=0;
  
-    Function Var_Add($Name, $Id=Null)
+    Function Var_Add($Name, $Tag_Id=Null)
     {
-      If(False && $Id)
-        Return '$'.$Name.$Id;
+      If(False && $Tag_Id)
+        Return '$'.$Name.$Tag_Id;
       Return '$v'.$this->cVars++;
     }
  
     Function Var_Add_Tag($Name, $Tag)
     {
-      Return $this->Var_Add($Name); // $Id->Object_GetId()// $Id=$Id->Tag_GetId();?? $Id->TagName
+      Return $this->Var_Add($Name); // $Tag->Object_GetId()// $Tag->Tag_GetId();?? $Tag->TagName
     }
  
     // ********************************************************************

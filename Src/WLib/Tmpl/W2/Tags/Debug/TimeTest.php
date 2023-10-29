@@ -20,7 +20,7 @@
       $Builder->Add_Line(' {');
       $T=$Builder->Tab;
       $Builder->Tab=$T.'  ';
-      $Tags['item'][0]->MakePHPInnerId($Builder, $Tags['item'][1]);
+      $Tags['item'][0]->MakePHPInnerTo($Builder, $Tags['item'][1]);
       $Builder->Tab=$T;
       $Builder->Add_Line(' }');
       $Builder->Add_Line("tsStop('".$Params."');");

@@ -31,7 +31,7 @@
         $Builder->Add_Line(' {');
         $T=$Builder->Tab;
         $Builder->Tab=$T.'  ';
-        $Tags['then'][0]->MakePHPInnerId($Builder, $Tags['then'][1]);
+        $Tags['then'][0]->MakePHPInnerTo($Builder, $Tags['then'][1]);
         $Builder->Tab=$T;
         $Builder->Add_Line(' }');
       }
@@ -41,7 +41,7 @@
         $Builder->Add_Line(' {');
         $T=$Builder->Tab;
         $Builder->Tab=$T.'  ';
-        $Tags['else'][0]->MakePHPInnerId($Builder, $Tags['else'][1]);
+        $Tags['else'][0]->MakePHPInnerTo($Builder, $Tags['else'][1]);
         $Builder->Tab=$T;
         $Builder->Add_Line(' }');
       }

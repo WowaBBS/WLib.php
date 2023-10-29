@@ -37,7 +37,7 @@
       Else
         $Builder->Vars_WithV($vVar.'['.$vm.']');
       If(IsSet($Tags['item']))
-        $Tags['item'][0]->MakePHPInnerId($Builder, $Tags['item'][1]);
+        $Tags['item'][0]->MakePHPInnerTo($Builder, $Tags['item'][1]);
       Else
         $Builder->Add_Line('// Error Block not avalible');
       $Builder->Vars_EndWith();

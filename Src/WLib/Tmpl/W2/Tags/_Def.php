@@ -21,7 +21,7 @@
         $Builder->Add_Line(' {');
         $T=$Builder->Tab;
         $Builder->Tab=$T.'  ';
-        $Tags['#data'][0]->MakePHPInnerId($Builder, $Tags['#data'][1]);
+        $Tags['#data'][0]->MakePHPInnerTo($Builder, $Tags['#data'][1]);
         $Builder->Tab=$T;
         $Builder->Add_Line(' }');
         $Builder->Add_Line('// (/'.$Tag->tagName.')');

@@ -30,7 +30,7 @@
         $Builder->Vars_WithA([$Item=>'&'.$vVar]);
       Else
         $Builder->Vars_WithV($vVar);
-      $Tags['#data'][0]->MakePHPInnerId($Builder, $Tags['#data'][1]);
+      $Tags['#data'][0]->MakePHPInnerTo($Builder, $Tags['#data'][1]);
       $Builder->Vars_EndWith();
       $Builder->Tab=$T;
       $Builder->Add_Line(' }');

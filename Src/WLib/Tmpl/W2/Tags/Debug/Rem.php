@@ -19,7 +19,7 @@
      $Parse=$Tag->GetAttr('Parse');
      $T=$Builder->Tab;
      $Builder->Tab=$T.'// ';
-     $Tags['#data'][0]->MakePHPInnerId($Builder, $Tags['#data'][1]);
+     $Tags['#data'][0]->MakePHPInnerTo($Builder, $Tags['#data'][1]);
      $Builder->Tab=$T;
     }
   }

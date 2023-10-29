@@ -190,7 +190,7 @@
       $this->ListAdd($NewTag);
     }
  
-    Function MakePHPInnerId($Builder, $EndTag)
+    Function MakePHPInnerTo($Builder, C_Tmpl_W2_Tag_Base $EndTag)
     {
       $LTag=$this->ListNext;
       While($LTag!==$EndTag)
@@ -209,7 +209,7 @@
       $ETag=$this->EndTag;
       If(!$ETag)
         Return [];
-      $this->MakePHPInnerID($Builder, $ETag);
+      $this->MakePHPInnerTo($Builder, $ETag);
     }
  
     Function MakePHP($Builder)
@@ -221,9 +221,9 @@
       If($ETag=$this->EndTag)
       {
         $Sub=$ti::$InnerTags;
-  
+
         $T1=Array_Keys($Sub);
-        $Tags=[$T1[0]=>[$this, $IdE]];
+        $Tags=[$T1[0]=>[$this, $ETag]];
         $LLTag=$T1[0];
   
         $LTag=$this->ListNext;
@@ -238,12 +238,12 @@
                 UnSet($Tags[$LTag->tagName]);
                 $T1=False;
               }
-              $Tags[$LTag->tagName]=[$LTag, $LTag->EndTag->Id];
+              $Tags[$LTag->tagName]=[$LTag, $LTag->EndTag];
             }
             Else
             {
-              $Tags[$LLTag][1]=$LTag->Id;
-              $Tags[$LTag->tagName]=[$LTag, $IdE];
+              $Tags[$LLTag][1]=$LTag;
+              $Tags[$LTag->tagName]=[$LTag, $ETag];
             }
             Break;
           }

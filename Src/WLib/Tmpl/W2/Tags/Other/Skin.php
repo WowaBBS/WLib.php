@@ -20,7 +20,7 @@
       $NewVars=$Builder->Vars_New();
       $Builder->Add_Line($NewVars.'=Tmpl_Skin_Begin('.$OldVars.', '."'".$Params."');");
       $Builder->Out->Capture(False);
-      $Tags['item'][0]->MakePHPInnerId($Builder, $Tags['item'][1]);
+      $Tags['item'][0]->MakePHPInnerTo($Builder, $Tags['item'][1]);
       $Builder->Out->End(False);
       $Builder->Out->Evaluate('Tmpl_Skin_End('.$Builder->Vars().')');
       $Builder->Vars_End();

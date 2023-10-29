@@ -1,0 +1,24 @@
+<?
+  $Loader->Parent_Class('/Object/Owned');
+  
+  Class C_Object_Named Extends C_Object_Owned
+  {
+    Private $Object_Name='';
+
+    Function __Construct(Array $Args) //Final
+    {
+      $this->Object_Name=$Args['Object_Name'];
+      
+      Parent::__Construct($Args);
+    }
+  
+    Function Object_GetDefaultName() { Return Static::Class; }
+    Function Object_GetName() { Return $this->Object_Name; }
+    Function Object_GetPath()
+    {
+      If($O=$this->Object_GetOuter())
+        Return $O->Object_GetPath().'/'.$this->Object_GetName();
+      Return $this->Object_GetName();
+    }
+  }
+?>

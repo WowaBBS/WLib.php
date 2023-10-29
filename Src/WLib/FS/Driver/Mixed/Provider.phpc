@@ -1,0 +1,128 @@
+<?
+  $Loader->Parent_Class('/FS/Driver/Base/Provider');
+  $Loader->Load_Type('/Inet/Url');
+  
+  Class C_FS_Driver_Mixed_Provider Extends C_FS_Driver_Base_Provider
+  {
+    Var $ListNodes=[];
+  /*
+    Function _Init($Args)
+    {
+      parent::_Init($Args);
+    }
+  */
+    Function IsFile($Path)
+    {
+      ForEach($this->ListNodes As $k=>$v)
+      {
+        $v=$this->ListNodes[$k]->Node($Path);
+        If($v->IsFile())
+          Return True;
+      }
+      Return False;
+    }
+ 
+    Function IsDir($Path)
+    {
+      ForEach($this->ListNodes As $k=>$v)
+      {
+        $v=$this->ListNodes[$k]->Node($Path);
+        If($v->IsDir())
+          Return True;
+      }
+      Return False;
+    }
+ 
+    Function Exists($Path)
+    {
+      ForEach($this->ListNodes As $k=>$v)
+      {
+        $v=$this->ListNodes[$k]->Node($Path);
+        If($v->Exsist())
+          Return True;
+       }
+      Return False;
+    }
+ 
+    Function Stream($Path,$AMode)
+    {
+      ForEach($this->ListNodes As $k=>$v)
+      {
+        $v=$this->ListNodes[$k]->Node($Path);
+        If($v->IsFile())
+        {
+          $Res=$v->Stream($AMode);
+          Return $Res;
+        }
+      }
+      Return False;
+    }
+ 
+    Function Files($Path,$Mask=False,$Attr=3)
+    {
+      $Res=[];
+      ForEach($this->ListNodes As $k=>$v)
+      {
+        $v=$this->ListNodes[$k]->Node($Path);
+        $R=$v->Files($Mask,$Attr);
+        ForEach($R As $F)
+          $Res[$F]=$F;
+      }
+      Return Array_Values($Res);
+    }
+ 
+    Function Nodes($Path)
+    {
+      $Pth=New T_FS_Path($Path);
+      If($Pth->IsRoot())
+        $Pth->Del(0);
+    //Debug($Pth);
+      $Res=[];
+      ForEach($this->ListNodes As $k=>$v)
+      {
+        $v=$this->ListNodes[$k]->Node($Path);
+        $R=$v->Nodes();
+        ForEach($R As $k=>$F)
+          $Res[]=$R[$k];
+      }
+      Return $Res;
+    }
+ 
+    Function IncludePhp($Path, $UnPack_Vars=[], $Pack_Vars=[])
+    {
+      ForEach($this->ListNodes As $k=>$v)
+      {
+        $v=$this->ListNodes[$k]->Node($Path);
+        If($v->IsFile())
+          Return $v->IncludePhp($UnPack_Vars,$Pack_Vars);
+      }
+      Return False;
+    }
+ 
+    Function URL($Path)
+    {
+      ForEach($this->ListNodes As $k=>$v)
+      {
+        $v=$this->ListNodes[$k]->Node($Path);
+        If($v->Exists())
+          Return $v->URL($Path);
+      }
+      Return New T_Inet_Url();
+    }
+ 
+    Function Vars($Path)
+    {
+      $Res=[];
+      ForEach($this->ListNodes As $k=>$v)
+      {
+        $v=$this->ListNodes[$k]->Node($Path);
+        $R=$v->Vars();
+        If($R)
+          ForEach($R As $k->$v)
+            If(!IsSet($Res[$k]))
+              $Res[$k]=&$R[$k];
+      }
+      Return $Res;
+    }
+  }
+?>

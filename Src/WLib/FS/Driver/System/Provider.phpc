@@ -1,13 +1,9 @@
 <?
-  Unit('FS/Real/TProvider');
- 
-  Uses('FS/Base/TProvider');
-  Uses('MSystem');
-  Uses('Stream/TFile');
+  $Loader->Parent_Class('/FS/Driver/Base/Provider');
   $Loader->Load_Type('/FS/Path'  );
   $Loader->Load_Type('/Inet/Url' );
 
-  Class T_FS_Real_Provider Extends T_FS_Base_Provider
+  Class C_FS_Driver_System_Provider Extends C_FS_Driver_Base_Provider
   {
     Var $BasePath = False;
     Var $BaseURL  = False;
@@ -21,7 +17,7 @@
  
     Function RealPathStr($Path)
     {
-      $P=&$this->BasePath->_Clone();
+      $P=$this->BasePath->_Clone();
       $P->Add($Path);
       Return $P->Make();
     }
@@ -44,10 +40,10 @@
       Return Is_Dir($P)||Is_File($P);
     }
  
-    Function &Stream($Path, $AMode)
+    Function Stream($Path, $AMode)
     {
       $P=$this->RealPathStr($Path->Make());
-      $Res=&$this->Create_Object('Stream/File');
+      $Res=$this->Create_Object('Stream/File');
       $Res->Assign($P);
       $Res->Open($AMode);
 
@@ -56,7 +52,7 @@
  
     Function Files($Path, $Mask=False, $Attr=3)
     {
-      $Res=Array();
+      $Res=[];
       $P=$this->RealPathStr($Path->Make());
       If(!Is_Dir($P))
         Return $Res;
@@ -66,13 +62,13 @@
     Function Nodes($Path)
     {
       If(!$this->IsFile($Path))
-        Return Array();
-      $Res=Array();
-      $Res[]=&$this->Node($Path);
+        Return [];
+      $Res=[];
+      $Res[]=$this->Node($Path);
       Return $Res;
     }
  
-    Function IncludePhp($IncludePhp_Path, $UnPack_Vars=Array(), $Pack_Vars=Array())
+    Function IncludePhp($IncludePhp_Path, $UnPack_Vars=[], $Pack_Vars=[])
     {
       Extract($UnPack_Vars);
       $Res=Include $this->RealPathStr($IncludePhp_Path);
@@ -81,11 +77,9 @@
       Return $Res;
     }
  
-    Function &URL($Path)
+    Function URL($Path)
     {
       Return $this->BaseURL->Node($Path);
     }
   }
- 
-  EndUnit();
 ?>

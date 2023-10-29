@@ -1,0 +1,47 @@
+<?
+  $Loader->Parent_Class('/Object/Named');
+  
+  Class C_Object_Owner Extends C_Object_Named
+  {
+    Var $Object_NameCounter =[];
+    Var $Object_ByName      =[];
+  
+    Function __Construct(Array $Args) //Final
+    {
+      Parent::__Construct($Args);
+    }
+    
+    Function Object_Register($Object)
+    {
+      $Name=$Object->Object_GetName();
+      If(IsSet($this->Object_ByName[$Name]))
+      {
+        Do
+        {
+          $Idx=++$this->Object_NameCounter[$Name];
+          $NewName=$Name.'_'.$Idx;
+        }
+        While(IsSet($this->Object_ByName[$NewName]));
+        $Name=$NewName;
+      }
+      $Object->Object_Name=$Name;
+      $this->Object_ByName[$Name]=$Object->Object_GetWeak();
+    }
+    
+    Function Object_UnRegister($Object)
+    {
+      $Name=$Object->Object_GetName();
+      if(IsSet($this->Object_ByName[$Name]))
+        UnSet($this->Object_ByName[$Name]);
+      Else
+        $this->Log('Error', 'Object "',$Name,'" has not registered')->BackTrace();
+    }
+    
+    Protected Function _Debug_Info(Array &$Res)
+    {
+      Parent::_Debug_Info($Res);
+      UnSet($Res['Object_NameCounter' ]);
+      UnSet($Res['Object_ByName'      ]);
+    }
+  }
+?>

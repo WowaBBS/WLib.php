@@ -1,0 +1,139 @@
+<?
+  $Loader->Parent_Class('/FS/Driver/Base/Provider');
+  $Loader->Load_Type('/Inet/Url');
+ 
+  Class C_FS_Driver_Map_Provider Extends C_FS_Driver_Base_Provider
+  {
+    Var $Map  = [];
+  /*
+    Var $BasePath ;
+    Var $BaseURL  ;
+ 
+    Function _Init($Args)
+    {
+     parent::_Init($Args);
+     $this->BasePath = New T_FS_Path();
+     $this->BaseURL  = New T_Inet_Url();
+    }
+  */
+    Function &RealVar($APath)
+    {
+      $RFalse=False;
+      $Path=New T_FS_Path($APath);
+      $File='';
+      $H=&$this->Map;
+      While(!$Path->IsNull()&&Is_Array($H))
+      {
+        $File=$Path->Get(0);
+        If(!IsSet($H[$File]))
+          Return $RFalse;
+        $Path->Del(0);
+        $H=&$H[$File];
+      }
+      If(!$Path->IsNull())
+      {
+        If(Is_String($H))
+          Return $RFalse;
+        If(Is_Object($H))
+        {
+          $H=&$H->Node($Path);
+          Return $H;
+        }
+      }
+      Return $H;
+    }
+ 
+    Function IsFile($Path)
+    {
+      $N=&$this->RealVar($Path);
+      If($N===False)
+        Return False;
+      If(Is_String($N))
+        Return True;
+      If(Is_Object($N))
+        Return $N->IsFile();
+      Return False;
+    }
+ 
+    Function IsDir($Path)
+    {
+      $N=&$this->RealVar($Path);
+      If($N===False)
+        Return False;
+      If(Is_Array($N))
+        Return True;
+      If(Is_Object($N))
+        Return $N->IsDir();
+      Return False;
+    }
+ 
+    Function Exists($Path)
+    {
+      $N=&$this->RealVar($Path);
+      If($N===False)
+        Return False;
+      If(Is_Object($N))
+        Return $N->Exists();
+      Return True;
+    }
+ 
+    Function Stream($Path,$AMode)
+    {
+      $N=&$this->RealVar($Path);
+      If(Is_Object($N))
+      {
+        $Res=&$N->Stream($AMode);
+        Return $Res;
+      }
+      Return False;
+    }
+ 
+    Function Files($Path,$Mask=False,$Attr=3)
+    {
+      $N=&$this->RealVar($Path);
+      If($N===False)
+        Return [];
+      If(Is_Array($N))
+        Return Array_Keys($N);
+      If(Is_Object($N))
+        Return $N->Files();
+      Return [];
+    }
+ 
+    Function Nodes($Path)
+    {
+      $N=&$this->RealVar($Path);
+      If($N===False)
+        Return [];
+      If(Is_Array($N))
+        Return [];
+      If(Is_Object($N))
+        Return $N->Nodes();
+      $Res=[];
+      $Res[]=&$this->Node($Path);
+      Return $Res;
+    }
+ 
+    Function IncludePhp($Include_Path, $U=[], $P=[])
+    {
+      FAbstract();
+    }
+ 
+    Function URL($Path)
+    {
+      $N=&$this->RealVar($Path);
+      If(Is_Object($N))
+        Return $N->URL();
+      Return '';
+    }
+ 
+    Function Vars($Path)
+    {
+      $N=&$this->RealVar($Path);
+      $R=[];
+      If(Is_Object($N))
+        $R=$N->Vars();
+      Return $R;
+    }
+  }
+?>

@@ -1,0 +1,17 @@
+<?
+  $Loader->Parent_Class('/FS/Driver/Base/Provider');
+  $Loader->Load_Type('/Inet/Url');
+ 
+  Class C_FS_Driver_Null_Provider Extends C_FS_Driver_Base_Provider
+  {
+    Function IsFile ($Path) { Return False; }
+    Function IsDir  ($Path) { Return False; }
+    Function Exists ($Path) { Return False; }
+    Function Stream($Path,$AMode) { Global $Null; Return $Null; }
+    Function Files($Path,$Mask=False,$Attr=3) { Return []; }
+    Function Nodes($Path) { Return []; }
+    Function IncludePhp($IncludePhp_Path, $UnPack_Vars=[], $Pack_Vars=[]) { return False; }
+    Function URL($Path) { Return ''; }
+  }
+
+?>

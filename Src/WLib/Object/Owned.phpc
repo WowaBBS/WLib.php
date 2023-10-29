@@ -1,0 +1,23 @@
+<?
+  $Loader->Parent_Class('/Object/Lockable');
+  
+  Class C_Object_Owned Extends C_Object_Lockable
+  {
+    Private $Object_Outer  = Null  ;
+
+    Function __Construct(Array $Args) //Final
+    {
+      $this->Object_Outer  =$Args['Object_Outer'  ];
+      
+      Parent::__Construct($Args);
+    }
+  
+    Function Object_GetOuter  () { Return $this->Object_Outer  ; }
+    
+    Protected Function _Debug_Info(Array &$Res)
+    {
+      Parent::_Debug_Info($Res);
+      if($this->Object_Outer) UnSet($Res['Object_Outer']);
+    }    
+  }
+?>

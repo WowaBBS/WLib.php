@@ -1,0 +1,35 @@
+<?
+  $Loader->Parent_Class('/Object/Base');
+  
+  Class C_Object_Lockable Extends C_Object_Base
+  {
+    Private $Object_Lock =0 ;
+
+    Function __Construct(Array $Args) //Final
+    {
+      Parent::__Construct($Args);
+    }
+
+    Protected Function _Done()
+    {
+      If($this->Object_Lock!==0)
+        $this->Log('Error', 'Object_Lock: ',$this->Object_Lock, '!==0');
+      Parent::_Done();
+    }
+  
+    Function Object_GetDefaultName() { Return Static::Class; }
+    Function Object_GetName   () { Return $this->Object_Name; }
+    Function Object_Lock()
+    {
+      $this->Object_Lock++;
+      Return $this;
+    }
+    
+    Function Object_UnLock()
+    {
+      $Res=--$this->Object_Lock;
+      If($Res<=0)
+        $this->Done();
+    }
+  }
+?>

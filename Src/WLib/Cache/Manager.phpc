@@ -52,7 +52,7 @@
         $this->Cache[$Type]=[];
       ElseIf(IsSet($this->Cache[$Type][$Path]))
         Return $this->Cache[$Type][$Path];
-    //$FullPath=TPath::Create($this->FullPath);
+    //$FullPath=T_FS_Path::Create($this->FullPath);
     //$FullPath->Add($Path);
       $FullPath=Static::IsAbsolute($Path)? $Path:$this->FullPath.$Path;
       $Args['Manager'  ]=$this     ;

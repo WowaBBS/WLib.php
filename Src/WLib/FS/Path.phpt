@@ -1,8 +1,9 @@
 <?
   $Loader->Using_Module('/System/Prop');
- 
-//Class T_FS_Path
-  Class TPath //Extends T_Property
+
+  Use \Deprecated As Deprecated;
+  
+  Class T_FS_Path //Extends T_Property
   {
     Var $Path=[];
     
@@ -32,7 +33,7 @@
  
     Function _Clone()
     {
-      $Res=TPath::Create($this->Path);
+      $Res=Static::Create($this->Path);
       Return $Res;
     }
  
@@ -290,4 +291,7 @@
     //Debug([$this->ToString(), $c, $i]);
     }
   }
+
+  #[Deprecated("Use T_FS_Path As TPath;")]
+  Class TPath Extends T_FS_Path {}
 ?>

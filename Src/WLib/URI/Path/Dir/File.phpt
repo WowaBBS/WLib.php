@@ -1,18 +1,19 @@
 <?
   $Loader->Begin_Type('/URI/Path/Dir/File');
- 
   $Loader->Using_Type('/URI/Path/Dir/Abstr');
- 
-  Class TFileDir Extends TAbsDir
+  
+  Use \Deprecated As Deprecated;
+
+  Class T_URI_Path_Dir_File Extends T_URI_Path_Dir_Abstr
   {
     Function __construct($Path='')
     {
       $this->Assign($Path);
     }
  
-    Static Function Create($Path=''):TFileDir
+    Static Function Create($Path=''):Static
     {
-      Return New TFileDir($Path);
+      Return New Static($Path);
     }
  
     Function IsFile()
@@ -28,7 +29,7 @@
     Function CreatePath($APath=False, $Attr=06775)
     {
       If($APath!==False)
-        TPath::Assign($APath);
+        $this->Assign($APath);
       If($this->IsDir($Path))
         Return True;
       $Pth='';
@@ -42,6 +43,9 @@
       Return IsDir($Pth);
     }
   }
+ 
+  #[Deprecated("Use T_URI_Path_Dir_File As TFileDir;")]
+  Class TFileDir Extends T_URI_Path_Dir_File {};
  
   $Loader->End_Type('/URI/Path/Dir/File');
 ?>

@@ -3,9 +3,9 @@
   
   $Loader->Load_Type('/FS/Path');
 
-  $CP=TPath::Create('dissovet/');
+  $CP=T_FS_Path::Create('dissovet/');
   Echo $CP->ToString()."\n";
-  $MP=TPath::Create('Zaschita');
+  $MP=T_FS_Path::Create('Zaschita');
   Echo $MP->ToString()."\n";
   $MP->PathFrom($CP);
   Echo $MP->ToString()."\n";

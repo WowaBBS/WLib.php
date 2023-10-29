@@ -1,87 +1,88 @@
 <?
- Unit('FS/Real/TProvider');
+  Unit('FS/Real/TProvider');
+ 
+  Uses('FS/Base/TProvider');
+  Uses('MSystem');
+  Uses('Stream/TFile');
+  $Loader->Load_Type('/FS/Path'  );
+  $Loader->Load_Type('/Inet/Url' );
 
- Uses('FS/Base/TProvider');
- Uses('MSystem');
- Uses('Stream/TFile');
- Uses('Inet/Url');
-
- Class T_FS_Real_Provider Extends T_FS_Base_Provider
- {
-   Var $BasePath = False;
-   Var $BaseURL  = False;
-
-   Function T_FS_Real_Provider()
-   {
-    $this->BasePath = TPath ::Create();
-    $this->BaseURL  = TUrl  ::Create();
-   }
-
-   Function RealPathStr($Path)
-   {
-    $P=&$this->BasePath->_Clone();
-    $P->Add($Path);
-    Return $P->Make();
-   }
-
-   Function IsFile($Path)
-   {
-    $P=$this->RealPathStr($Path->Make());
-    Return Is_File($P);
-   }
-
-   Function IsDir($Path)
-   {
-    $P=$this->RealPathStr($Path->Make());
-    Return Is_Dir($P);
-   }
-
-   Function Exists($Path)
-   {
-    $P=$this->RealPathStr($Path->Make());
-    Return Is_Dir($P)||Is_File($P);
-   }
-
-   Function &Stream($Path, $AMode)
-   {
-    $P=$this->RealPathStr($Path->Make());
-    $Res=&New T_Stream_File($P);
-    $Res->Open($AMode);
-    Return $Res;
-   }
-
-   Function Files($Path, $Mask=False, $Attr=3)
-   {
-    $Res=Array();
-    $P=$this->RealPathStr($Path->Make());
-    If(!Is_Dir($P))
+  Class T_FS_Real_Provider Extends T_FS_Base_Provider
+  {
+    Var $BasePath = False;
+    Var $BaseURL  = False;
+ 
+    Function T_FS_Real_Provider()
+    {
+      $this->BasePath = T_FS_Path  ::Create();
+      $this->BaseURL  = T_Inet_Url ::Create();
+    }
+ 
+    Function RealPathStr($Path)
+    {
+      $P=&$this->BasePath->_Clone();
+      $P->Add($Path);
+      Return $P->Make();
+    }
+ 
+    Function IsFile($Path)
+    {
+      $P=$this->RealPathStr($Path->Make());
+      Return Is_File($P);
+    }
+ 
+    Function IsDir($Path)
+    {
+      $P=$this->RealPathStr($Path->Make());
+      Return Is_Dir($P);
+    }
+ 
+    Function Exists($Path)
+    {
+      $P=$this->RealPathStr($Path->Make());
+      Return Is_Dir($P)||Is_File($P);
+    }
+ 
+    Function &Stream($Path, $AMode)
+    {
+      $P=$this->RealPathStr($Path->Make());
+      $Res=&New T_Stream_File($P);
+      $Res->Open($AMode);
       Return $Res;
-    Return ListDir($P, $Mask, $Attr);
-   }
-
-   Function Nodes($Path)
-   {
-    If(!$this->IsFile($Path))
-      Return Array();
-    $Res=Array();
-    $Res[]=&$this->Node($Path);
-    Return $Res;
-   }
-
-   Function IncludePhp($IncludePhp_Path, $UnPack_Vars=Array(), $Pack_Vars=Array())
-   {
-    Extract($UnPack_Vars);
-    $Res=Include $this->RealPathStr($IncludePhp_Path);
-    ForEach($Pack_Vars As $Pack_Var)
-      $UnPack_Vars[$Pack_Var]=${$Pack_Var};
-    Return $Res;
-   }
-
-   Function &URL($Path)
-   {
-    Return $this->BaseURL->Node($Path);
-   }
- }
-
- EndUnit();
+    }
+ 
+    Function Files($Path, $Mask=False, $Attr=3)
+    {
+      $Res=Array();
+      $P=$this->RealPathStr($Path->Make());
+      If(!Is_Dir($P))
+        Return $Res;
+      Return ListDir($P, $Mask, $Attr);
+    }
+ 
+    Function Nodes($Path)
+    {
+      If(!$this->IsFile($Path))
+        Return Array();
+      $Res=Array();
+      $Res[]=&$this->Node($Path);
+      Return $Res;
+    }
+ 
+    Function IncludePhp($IncludePhp_Path, $UnPack_Vars=Array(), $Pack_Vars=Array())
+    {
+      Extract($UnPack_Vars);
+      $Res=Include $this->RealPathStr($IncludePhp_Path);
+      ForEach($Pack_Vars As $Pack_Var)
+        $UnPack_Vars[$Pack_Var]=${$Pack_Var};
+      Return $Res;
+    }
+ 
+    Function &URL($Path)
+    {
+      Return $this->BaseURL->Node($Path);
+    }
+  }
+ 
+  EndUnit();
 ?>

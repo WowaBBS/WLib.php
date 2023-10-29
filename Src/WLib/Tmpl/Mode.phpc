@@ -62,7 +62,7 @@
       Case 1: Return $Web_HtAccess->BasePath->Make().StrToLower($Mode.($Mode===''? '':'/').($z? '?':''));
       Case 2:
         $CP=&$Web_HtAccess->CurPath;
-        $MP=TPath::Create($Mode);
+        $MP=T_FS_Path::Create($Mode);
         $MP->PathFrom($CP);
         $MP->Add('/');
         Return StrToLower($MP->Make()).($z? '?':'');
@@ -72,7 +72,7 @@
         If($CP->Len()>1)
         //\!!!!!!
           $CP->Add('/');
-        $MP=TPath::Create($Mode);
+        $MP=T_FS_Path::Create($Mode);
       //$MP->Add('/');
       //$Deb=[];
       //$Deb[]=$MP->Make();

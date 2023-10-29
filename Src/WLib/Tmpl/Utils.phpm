@@ -120,8 +120,8 @@
   
   // Tmpl_Messages_Init_Vars($Vars);
     $Vars['JScripts'  ]=&$GLOBALS['JScripts'];
-    $Vars[' CurPath'  ]=TPath::Create();
-    $Vars[' RootPath' ]=TPath::Create();
+    $Vars[' CurPath'  ]=T_FS_Path::Create();
+    $Vars[' RootPath' ]=T_FS_Path::Create();
   //$Vars['FilesURL'  ]=&$GLOBALS['FilesURL'  ];
   //$Vars['FilesPath' ]=&$GLOBALS['FilesPath' ];
   

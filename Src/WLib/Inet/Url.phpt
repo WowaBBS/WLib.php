@@ -3,7 +3,7 @@
   $Loader->Load_Struct('/Inet/Protocols');
   $Loader->Load_Struct('/FS/Path');
  
-  Class TURL
+  Class T_Inet_Url
   {
     Var $URL      ; // Full address URL Protocol://User:Password@Domain:Port/Path?Param#ID
   // Parsed
@@ -51,7 +51,7 @@
       $this->Password ='';
       $this->Domain   ='';
       $this->Port     = 0;
-      $this->Path     =TPath::Create();
+      $this->Path     =T_FS_Path::Create();
       $this->Param    =New T_Inet_HTTP_GetRequest();
       $this->ID       =False;
       $this->ProtIP   ='tcp';
@@ -316,4 +316,7 @@
       Return True;
     }
   }
+
+  #[Deprecated("Use T_Inet_Url As TUrl;")]
+  Class TUrl Extends T_Inet_Url {}
 ?>

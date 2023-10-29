@@ -1,6 +1,7 @@
 <?
   $Loader->Parent_Class('/Object');
-  $Loader->Load_Type('/Inet/Url');
+  $Loader->Load_Type('/FS/Path'  );
+  $Loader->Load_Type('/Inet/Url' );
 
   // ************************************************************************
   // * Поддержка путей с .htaccess                                          *
@@ -61,15 +62,15 @@
    
     //If(IsSet($Ls[1]) && IsSet($Ls[0][1]) && !$Ls[1]&&!$Ls[0][1])
       If($_SERVER['REQUEST_URI'][0]!='/')
-        $CurURL=TUrl::Create($_SERVER['REQUEST_URI']);
+        $CurURL=T_Inet_Url::Create($_SERVER['REQUEST_URI']);
       Else
-        $CurURL=TUrl::Create(
+        $CurURL=T_Inet_Url::Create(
           $Prot.'://'.$Host.
           ':'.$_SERVER['SERVER_PORT'].
           UrlDeCode($_SERVER['REQUEST_URI']));
     //Debug($_SERVER);
     //Debug($CurURL->ToString());
-    //$BaseURL=TUrl::Create(
+    //$BaseURL=T_Inet_Url::Create(
     //  $Prot.'://'.$Host.
     //  ':'.$_SERVER['SERVER_PORT'].
     //  $_SERVER['PHP_SELF']);
@@ -79,10 +80,10 @@
     //$_SERVER['SCRIPT_NAME']);
     //If(!$_SERVER['PHP_SELF'])
     //  $BaseURL->Path->Add('/');
-      $Referer=TUrl::Create($_SERVER['HTTP_REFERER']);
+      $Referer=T_Inet_Url::Create($_SERVER['HTTP_REFERER']);
    
-      $BasePath=TPath::Create($CurURL);
-      $CurPath=TPath::Create($CurURL);
+      $BasePath =T_FS_Path::Create($CurURL);
+      $CurPath  =T_FS_Path::Create($CurURL);
       $Z=$CurPath->Cmp($BaseURL,False,False);
     //$Z=$CurPath->Cmp($BasePath);
     //Debug(Array($CurPath->ToString(),$BaseURL->Path->ToString(),$Z));
@@ -116,12 +117,12 @@
       If($Z)
         $CurPath->Clear();
    
-    //$RelPath=TPath::Create(RealPath('.'));
-      $RelPath=TPath::Create($StartDir);
+    //$RelPath=T_FS_Path::Create(RealPath('.'));
+      $RelPath=T_FS_Path::Create($StartDir);
       // Полный путь до выполняемого скрипта
     //$SFN=$_SERVER['DOCUMENT_ROOT'].$_SERVER['PHP_SELF']
     //$RelPath->PathFrom($_SERVER('SCRIPT_FILENAME'));
-      $P1=TPath::Create(RealPath($_SERVER['DOCUMENT_ROOT']));
+      $P1=T_FS_Path::Create(RealPath($_SERVER['DOCUMENT_ROOT']));
       $RelPath->PathFrom($P1);
       If(!$RelPath->IsRoot())
         Array_UnShift($RelPath->Path,'');
@@ -131,7 +132,7 @@
       $RelURL->Path->Norm();
    
      /*
-      $P2=TPath::Create($_SERVER['PHP_SELF']);
+      $P2=T_FS_Path::Create($_SERVER['PHP_SELF']);
       If($P2->IsRoot())
         Array_Shift($P2->Path);
       $RelPath->PathFrom($P2);

@@ -10,7 +10,7 @@
 
   $Loader->Parent_Class('/Object');
   $Loader->Load_Type('/FS/Path');
-  
+
   class C_Inet_Web_File extends C_Object
   {
     const Src_None =0;
@@ -150,7 +150,7 @@
     Function TODO_MoveToFolder($Path, $bAssign=true) {}
     Function TODO_MoveTo($Path, $bAssign=true)
     {
-      $Path=TPath::Create($Path);
+      $Path=T_FS_Path::Create($Path);
       If($Path->IsDir())
         $Path->Add($this->FileName);
       $Path=$Path->ToString();

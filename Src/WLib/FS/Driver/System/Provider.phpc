@@ -12,8 +12,9 @@
     Var $BasePath = False;
     Var $BaseURL  = False;
  
-    Function T_FS_Real_Provider()
-    {
+     Function _Init($Args)
+     {
+      parent::_Init($Args);
       $this->BasePath = T_FS_Path  ::Create();
       $this->BaseURL  = T_Inet_Url ::Create();
     }
@@ -46,8 +47,10 @@
     Function &Stream($Path, $AMode)
     {
       $P=$this->RealPathStr($Path->Make());
-      $Res=&New T_Stream_File($P);
+      $Res=&$this->Create_Object('Stream/File');
+      $Res->Assign($P);
       $Res->Open($AMode);
+
       Return $Res;
     }
  

@@ -1,20 +1,44 @@
 <?
-  $Loader->Parent_Class('/FS/Driver/Base/Provider');
+  $Loader->Parent_Class('/FS/Driver/Base');
   $Loader->Load_Type('/FS/Path'  );
   $Loader->Load_Type('/Inet/Url' );
 
-  Class C_FS_Driver_System_Provider Extends C_FS_Driver_Base_Provider
+  Class C_FS_Driver_System Extends C_FS_Driver_Base
   {
     Var $BasePath = False;
     Var $BaseURL  = False;
+    Var $Context  = Null;
  
-     Function _Init($Args)
-     {
+    Function _Init($Args)
+    {
       parent::_Init($Args);
       $this->BasePath = T_FS_Path  ::Create();
       $this->BaseURL  = T_Inet_Url ::Create();
     }
  
+    Function Load($Path, $Args=[])
+    {
+      $Offset =$Args['Offset' ]?? 0     ;
+      $Length =$Args['Length' ]?? Null  ;
+    # $Lock   =$Args['Lock'   ]?? True  ;
+    # $Text   =$Args['Text'   ]?? False ;
+        
+      $P=$this->RealPathStr($Path->Make());
+      Return File_Get_Contents($P, False, $this->Context, $Offset, $Length);
+    }
+ 
+    Function Save($Path, $Data, $Args=[])
+    {
+      $Append =$Args['Append' ]?? False;
+      $Lock   =$Args['Lock'   ]?? False;
+    # $Text   =$Args['Text'   ]?? False;
+        
+      $Flags=($Append? FILE_APPEND:0)|($Lock? LOCK_EX:0);
+        
+      $P=$this->RealPathStr($Path->Make());
+      Return File_Put_Contents($P, $Data, $Flags, $this->Context);
+    }
+    
     Function RealPathStr($Path)
     {
       $P=$this->BasePath->_Clone();
@@ -40,13 +64,12 @@
       Return Is_Dir($P)||Is_File($P);
     }
  
-    Function Stream($Path, $AMode)
+    Function Stream($Path, $Mode)
     {
       $P=$this->RealPathStr($Path->Make());
       $Res=$this->Create_Object('Stream/File');
       $Res->Assign($P);
-      $Res->Open($AMode);
-
+      $Res->Open($Mode);
       Return $Res;
     }
  
@@ -68,10 +91,10 @@
       Return $Res;
     }
  
-    Function IncludePhp($IncludePhp_Path, $UnPack_Vars=[], $Pack_Vars=[])
+    Function Include($Include_Path, $UnPack_Vars=[], $Pack_Vars=[])
     {
       Extract($UnPack_Vars);
-      $Res=Include $this->RealPathStr($IncludePhp_Path);
+      $Res=Include $this->RealPathStr($Include_Path);
       ForEach($Pack_Vars As $Pack_Var)
         $UnPack_Vars[$Pack_Var]=${$Pack_Var};
       Return $Res;

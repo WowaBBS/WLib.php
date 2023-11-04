@@ -1,6 +1,5 @@
 <?
   $Loader->Parent_Class('/Object');
-  $Loader->Load_Type('/FS/Driver/Base/Node');
   $Loader->Load_Type('/Inet/Url');
  
   Class C_FS_Driver_Factory Extends C_Object
@@ -9,7 +8,7 @@
   
     Function Create($Type='System', $Args=[])
     {
-      Return $this->Create_Object('/FS/Driver/'.$Type.'/Provider', $Args);
+      Return $this->Create_Object('/FS/Driver/'.$Type, $Args);
     }
   }
 ?>

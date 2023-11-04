@@ -1,8 +1,8 @@
 <?
-  $Loader->Parent_Class('/FS/Driver/Base/Provider');
+  $Loader->Parent_Class('/FS/Driver/Base');
   $Loader->Load_Type('/Inet/Url');
   
-  Class C_FS_Driver_Mixed_Provider Extends C_FS_Driver_Base_Provider
+  Class C_FS_Driver_Mixed Extends C_FS_Driver_Base
   {
     Var $ListNodes=[];
   /*
@@ -44,27 +44,27 @@
       Return False;
     }
  
-    Function Stream($Path,$AMode)
+    Function Stream($Path, $Mode)
     {
       ForEach($this->ListNodes As $k=>$v)
       {
         $v=$this->ListNodes[$k]->Node($Path);
         If($v->IsFile())
         {
-          $Res=$v->Stream($AMode);
+          $Res=$v->Stream($Mode);
           Return $Res;
         }
       }
       Return False;
     }
  
-    Function Files($Path,$Mask=False,$Attr=3)
+    Function Files($Path, $Mask=False, $Attr=3)
     {
       $Res=[];
       ForEach($this->ListNodes As $k=>$v)
       {
         $v=$this->ListNodes[$k]->Node($Path);
-        $R=$v->Files($Mask,$Attr);
+        $R=$v->Files($Mask, $Attr);
         ForEach($R As $F)
           $Res[$F]=$F;
       }
@@ -88,13 +88,13 @@
       Return $Res;
     }
  
-    Function IncludePhp($Path, $UnPack_Vars=[], $Pack_Vars=[])
+    Function Include($Path, $UnPack=[], $Pack=[])
     {
       ForEach($this->ListNodes As $k=>$v)
       {
         $v=$this->ListNodes[$k]->Node($Path);
         If($v->IsFile())
-          Return $v->IncludePhp($UnPack_Vars,$Pack_Vars);
+          Return $v->Include($UnPack, $Pack);
       }
       Return False;
     }

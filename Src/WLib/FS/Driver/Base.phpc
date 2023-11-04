@@ -1,0 +1,70 @@
+<?
+  $Loader->Parent_Class('/Object');
+  $Loader->Load_Type('/FS/Driver/Node');
+  $Loader->Load_Type('/Inet/Url');
+ 
+  Class C_FS_Driver_Base Extends C_Object
+  {
+  //Function _Init($Args) { Parent::_Init($Args); }
+  
+    Function IsFile($Path) { Return False; }
+    Function IsDir($Path) { Return False; }
+ 
+    Function Load($Path, $Args=[])
+    {
+      $Offset =$Args['Offset' ]?? 0     ;
+      $Length =$Args['Length' ]?? Null  ;
+      $Lock   =$Args['Lock'   ]?? True  ;
+      $Text   =$Args['Text'   ]?? False ;
+        
+      $Flags=omReadOnly
+        |($Lock? omShareable:0)
+        |($Text? omText:omBinary)
+      ;
+        
+      $f=$this->Stream($Path, $Flags);
+      If(!$f)
+        Return False;
+      If($Offset) $f->Seek($Offset);
+      $Res=$Length===Null? $f->ReadAll():$f->Read($Length);
+      $f->Close();
+      Return $Res;
+    }
+ 
+    Function Save($Path, $Data, $Args=[])
+    {
+      $Append =$Args['Append' ]?? False;
+      $Lock   =$Args['Lock'   ]?? False;
+      $Text   =$Args['Text'   ]?? False;
+        
+      $Flags=omWriteOnly|omCreate
+        |($Append? omAppEnd:omClear)
+        |($Lock? omExclusive:0)
+        |($Text? omText:omBinary)
+      ;
+        
+      $f=$this->Stream($Flags);
+      If(!$f)
+        Return False;
+      $f->Write($Data);
+      $f->Close();
+    }
+ 
+    Function Include($Include_Path, $UnPack_Vars=[], $Pack_Vars=[])
+    {
+      Extract($UnPack_Vars);
+      $Res=Eval('?>'.$this->Load($Include_Path)); //.'<?'
+      ForEach($Pack_Vars As $Pack_Var)
+        $UnPack_Vars[$Pack_Var]=${$Pack_Var};
+      Return $Res;
+    }
+ 
+    Function URL($Path) { Return New T_Inet_Url(); }
+    Function Vars($Path) { Return []; }
+ 
+    Function Node($Path=False)
+    {
+      Return New T_FS_Driver_Node($this, $Path);
+    }
+  }
+?>

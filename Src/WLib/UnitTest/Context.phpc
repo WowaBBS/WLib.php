@@ -11,7 +11,7 @@
     Function Register_Argument_Type_Value($Value, $Type=Null)
     {
       $Type??=Get_Class($Value);
-      $this->Test_Argumets_ValueByType[$Type]=$Value;
+      $this->Argumets_ValueByType[$Type]=$Value;
     }
     
     Function SetFailed($v=True) { $this->IsFailed=$v; }
@@ -35,7 +35,7 @@
         If(!Str_Starts_With($Name, 'Test')) Return ;
         $Prameters=$Method->GetParameters();
         $Args=[];
-        $ValueByType=$this->Test_Argumets_ValueByType;
+        $ValueByType=$this->Argumets_ValueByType;
         ForEach($Prameters As $Prameter)
         {
           $Type=(String)$Prameter->GetType();
@@ -60,7 +60,7 @@
         }
         Catch(Throwable $e)
         {
-          If($e InstanceOf $this->ExpectException)
+          If($this->ExpectException &&($e InstanceOf $this->ExpectException))
             $Ok=!$this->IsFailed;
           Else
             $this->Log('Error', 'TestCase chatched an exception:')->Exception($e);

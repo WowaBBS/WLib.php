@@ -25,6 +25,11 @@
       Return $this->Test_GetContext()->Register_Argument_Type_Value($Value, $Type);
     }
 
+    Function Test_Register_Argument_Name_Value($Name, $Value)
+    {
+      Return $this->Test_GetContext()->Register_Argument_Name_Value($Name, $Value);
+    }
+
     Function Test_Run() { Return $this->Test_GetContext()->RunTest($this); }
   }
 ?>

@@ -5,6 +5,7 @@
   Class C_UnitTest_Context Extends C_Object
   {
     Var $Argumets_ValueByType=[];
+    Var $Argumets_ValueByName=[];
     Var $ExpectException;
     Var $IsFailed=False;
     
@@ -12,6 +13,11 @@
     {
       $Type??=Get_Class($Value);
       $this->Argumets_ValueByType[$Type]=$Value;
+    }
+    
+    Function Register_Argument_Name_Value($Arg_Name, $Value)
+    {
+      $this->Argumets_ValueByName[$Arg_Name]=$Value;
     }
     
     Function SetFailed($v=True) { $this->IsFailed=$v; }
@@ -22,8 +28,13 @@
     {
       $Class=New ReflectionClass($Object);
       $this->Log('Log', 'Test ', $Class->GetName());
+
+      $ValueByType=$this->Argumets_ValueByType;
+      $ValueByName=$this->Argumets_ValueByName;
+      
       ForEach($Class->GetMethods() As $Method)
       {
+        If($Method->GetDeclaringClass()->GetName()!==$Class->GetName()) Continue; //TODO: AllowClasses
         If( $Method->IsAbstract    ()) Continue;
       //If( $Method->IsPrivate     ()) Continue;
       //If( $Method->IsProtected   ()) Continue;
@@ -31,21 +42,34 @@
       //If(!$Method->IsStatic      ()) Continue;
       //If(!$Method->IsUserDefined ()) Continue;
       //$Method->SetAccessable(true);
-        $Name=$Method->GetShortName();
-        If(!Str_Starts_With($Name, 'Test')) Return ;
+        $Method_Name=$Method->GetShortName();
+      //$this->Log('Debug', 'Test Method ', $Method_Name);
+        If(!Str_Starts_With($Method_Name, 'Test')) Continue;
         $Prameters=$Method->GetParameters();
         $Args=[];
-        $ValueByType=$this->Argumets_ValueByType;
         ForEach($Prameters As $Prameter)
         {
-          $Type=(String)$Prameter->GetType();
-          If(!Array_Key_Exists($Type, $ValueByType))
+          $Arg_Name=$Prameter->GetName();
+          If(Array_Key_Exists($Arg_Name, $ValueByName))
           {
-            $this->Log('Error', 'Not found value for ',$Type, ' ',$Prameter->GetName());
-            $Args=False;
-            Break;
+            $Args[]=$ValueByName[$Arg_Name];
+            Continue;
           }
-          $Args[]=$ValueByType[$Type];
+          $Type=(String)$Prameter->GetType();
+          If(Array_Key_Exists($Type, $ValueByType))
+          {
+            $Args[]=$ValueByType[$Type];
+            Continue;
+          }
+          $this->Log('Error', 'Not found value for ',
+            $Type?: 'Any', ' ',$Arg_Name, 
+            ' in Method ',$Method_Name, 
+            ' Types: ', Array_Keys($ValueByType), 
+            ' Names: ', Array_Keys($ValueByName),
+          );
+          $Args=False;
+          Break;
+          
         }
         If($Args===False)
           Continue;

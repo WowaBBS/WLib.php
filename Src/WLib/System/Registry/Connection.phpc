@@ -1,0 +1,28 @@
+<?
+  $Loader->Parent_Class('/Object');
+  
+  $this->Load_Type('/System/Registry/Key'); 
+
+  Class C_System_Registry_Connection Extends C_Object
+  {
+    Protected C_System_Registry_Driver_Base $Driver;
+  
+    Function _Init(Array $Args)
+    {
+      $Driver=$Args['Type']?? 'StdRegProv';
+    //$Args=$Args['Args']?? [];
+      $this->Driver=$this->Create_Object('/System/Registry/Driver/'.$Driver, $Args);
+      Parent::_Init($Args);
+    }
+  
+    Function GetDriver() { Return $this->Driver; }
+  
+    Function GetClassesRoot   () { Return $this->GetKey('HKCR' ); }
+    Function GetCurrentConfig () { Return $this->GetKey('HKCC' ); }
+    Function GetCurrentUser   () { Return $this->GetKey('HKCU' ); }
+    Function GetLocalMachine  () { Return $this->GetKey('HKLM' ); }
+    Function GetUsers         () { Return $this->GetKey('HKU'  ); }
+    Function GetRoot          () { Return $this->GetKey(''     ); }
+    Function GetKey($Path='') { Return New T_System_Registry_Key($this->Driver, $Path); }
+  }
+?>

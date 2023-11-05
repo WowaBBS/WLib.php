@@ -1,0 +1,266 @@
+<?
+  $Loader->Parent_Class('/System/Registry/Driver/Base');
+
+  @dl('com_dotnet');
+  
+  // A wrapper around the Microsoft Windows StdRegProv WMI class.
+  // @see http://msdn.microsoft.com/en-us/library/aa393664.aspx
+  Class C_System_Registry_Driver_StdRegProv Extends C_System_Registry_Driver_Base
+  {
+    Protected \VARIANT $Object; //<An StdRegProv instance.
+  
+    Function _Init(Array $Vars)
+    {
+      $Host     =$Vars['Host'     ]?? '.' ;
+      $UserName =$Vars['UserName' ]?? Null;
+      $Password =$Vars['Password' ]?? Null;
+    
+      // create a WMI connection
+      $Locator = New \COM('WbemScripting.SWbemLocator', Null, CP_UTF8);
+      $Service = $Locator->ConnectServer($Host, 'root\default', $UserName, $Password);
+      $Service->Security_->ImpersonationLevel=3;
+  
+      // initialize registry provider
+      $this->Object=$Service->Get('StdRegProv');
+      Parent::_Init($Vars);
+    }
+  
+    Function IsValid():bool { Return $this->Object!==Null; }
+    
+    //TODO: Remove
+    Function __call($Name, $Args)
+    {
+      $ArgRefs=[];
+      ForEach($Args as $Key=>&$Arg)
+        $ArgRefs[$Key]=&$Arg;
+  
+      Return Call_User_Func_Array([$this->Object, $Name], $ArgRefs);
+    }
+  
+    //****************************************************************
+    // Key
+    
+    Function EnumKey($Path, $HKey=Null)
+    {
+      $this->NormPath($Path, $HKey);
+      $SubKeyNames=new \VARIANT();
+      $ErrorCode=$this->Object->EnumKey($HKey, $Path, $SubKeyNames);
+    //$ErrorCode=$this->__call('EnumKey', [$HKey, $Path, &$SubKeyNames]);
+      if($ErrorCode!==0) return Null;
+      if(!(Variant_Get_Type($SubKeyNames) & VT_ARRAY)) return Null; //<TODO: Remove
+      $Res=[];
+      ForEach($SubKeyNames As $v)
+        $Res[]=(String)$v;
+      Return $Res;
+    }
+      
+    Function IsKeyExists($Path, $HKey=Null)
+    {
+      $this->NormPath($Path, $HKey);
+      $sNames = new \VARIANT();
+      Return $this->Object->EnumKey($HKey, $Path, $sNames)===0;
+    }
+    
+    Function CreateKey($Path, $HKey=Null)
+    {
+      $this->NormPath($Path, $HKey);
+      Return $this->Object->CreateKey($HKey, $Path)===0;
+    }
+  
+    Function DeleteKey($Path, $HKey=Null)
+    {
+      $this->NormPath($Path, $HKey);
+      Return $this->Object->DeleteKey($HKey, $Path)===0;
+    }
+    
+    //****************************************************************
+    // Value
+    
+    Function EnumValues($Path, $HKey=Null)
+    {
+      $this->NormPath($Path, $HKey);
+  
+      // create empty variants to store out params
+      $ValueNames = new \VARIANT();
+      $ValueTypes = new \VARIANT();
+  
+      // attempt to enumerate values
+      $ErrorCode = $this->Object->EnumValues($HKey, $Path, $ValueNames, $ValueTypes);
+  
+      // make sure the enum isn't empty
+      if($ErrorCode!==0) Return Null;
+      If(!(Variant_Get_Type($ValueNames) & VT_ARRAY)) Return Null;
+      If(!(Variant_Get_Type($ValueTypes) & VT_ARRAY)) Return Null;
+  
+      $Count=Count($ValueNames);
+      $Res=[];
+      For($i=0; $i<$Count; $i++)
+        $Res[(String)$ValueNames[$i]]=Static::$TypeToName[(Integer)$ValueTypes[$i]];
+      Return $Res;
+    }
+    
+    Function IsValueExists($Path, $Name, $HKey=Null)
+    {
+      $this->NormPath($Path, $HKey);
+      // look for the suspicious "1" error code (which I believe to mean does not exist)
+      Return $this->Object->GetStringValue($HKey, $Path, $Name, null)!==1;
+    }
+    
+    Function GetValue($Path, $Name, $Type=Null, $HKey=Null)
+    {
+      $Type??=$this->GetValueType($Name);
+      $Type=Static::NormTypeInt($Type);
+      
+      $this->NormPath($Path, $HKey);
+  
+      $Value=new \VARIANT();
+      $ErrorCode=$this->RawGetValue($HKey, $Path, $Name, $Value, $Type);
+  
+      If($ErrorCode!==0)
+        Return Null;
+  
+      $Value = Static::NormGetValue($Type, $Value);
+      return $Value;
+    }
+  
+    Function SetValue($Path, $Name, $Value, $Type=Null, $HKey=Null)
+    {
+      $Type??=$this->GetValueType($Name);
+      $Type=Static::NormTypeInt($Type);
+      $this->NormPath($Path, $HKey);
+      $Value=Static::NormSetValue($Type, $Value);
+      return $this->RawSetValue($this->HKey, $this->Path, $Name, $Value, $Type)===0;
+    }
+    
+    Function DeleteValue($Path, $Name, $HKey=Null)
+    {
+      $Type??=$this->GetValueType($Name);
+      $this->NormPath($Path, $HKey);
+      $ErrorCode = $this->Object->DeleteValue($this->HKey, $this->Path, $Name);
+      return $ErrorCode===0;
+    }
+  
+    //****************************************************************
+    // Convert
+    
+    
+    Static Function NormPath(&$Path, &$HKey)
+    {
+      if(Is_Array($Path))
+        $Path=Implode('\\', $Path);
+      Else
+        $Path=StrTr($Path, '/', '\\'); //<TODO: Remove
+      if(Is_Null($HKey))
+      {
+        if(($Pos=StrPos($Path, '\\'))!==False)
+        {
+          $HKey=SubStr($Path, 0, $Pos);
+          $Path=SubStr($Path, $Pos+1);
+        }
+        else
+        {
+          $HKey=$Path;
+          $Path='';
+        }
+      }
+      $HKey=Static::NormHKeyInt($HKey);
+      $HKey=New Variant($HKey, VT_R8);
+    }
+    
+    Static Function NormGetValue($Type, $Value)
+    {
+      Switch($Type)
+      {
+      Case self::TYPE_SZ        : $Value = (String)$Value; break;
+      Case self::TYPE_EXPAND_SZ : $Value = (String)$Value; break;
+      Case self::TYPE_DWORD     : $Value = (Int   )$Value; break;
+      Case self::TYPE_QWORD     : $Value = (String)$Value; break;
+      Case self::TYPE_BINARY    :
+        $Res=''; //TODO: StrLen
+        If(Variant_Get_Type($Value) & VT_ARRAY)
+          ForEach($Value As $Byte)
+            $Res.=Chr((Int)$Byte);
+        $Value=$Res;
+        Break;
+      Case self::TYPE_MULTI_SZ:
+        $Res=[];
+        If(Variant_Get_Type($Value) & VT_ARRAY)
+          ForEach($Value As $SubValue)
+            $Res[]=(String)$SubValue;
+        $Value=$Res;
+        Break;
+      }
+      Return $Value;
+    }
+    
+    Static Function NormSetValue($Type, $Value)
+    {
+      Switch($Type) 
+      {
+      Case self::TYPE_SZ        : $Value=(String)$Value; Break;
+      Case self::TYPE_EXPAND_SZ : $Value=(String)$Value; Break;
+      Case self::TYPE_DWORD     : $Value=(Int   )$Value; Break;
+      Case self::TYPE_QWORD     : $Value=(Int   )$Value; Break;
+      Case self::TYPE_BINARY    : If(Is_String($Value)) $Value=Array_Map('ord', Str_Split($Value)); Break;
+      Case self::TYPE_MULTI_SZ  : If(!Is_Array($Value)) Throw New Exception('Cannot set non-array type as MultiString.'); Break;
+      Default: $Value=null; //TODO: Error
+      }
+      return $Value;
+    }
+    
+    //****************************************************************
+    // Raw
+    
+    Protected Function RawGetValue($HKey, $Path, $Name, $Value, $Type)
+    {
+      $H=$this->Object;
+      Switch($Type)
+      {
+      Case self::TYPE_BINARY    : Return $H->GetBinaryValue         ($HKey, $Path, $Name, $Value);
+      Case self::TYPE_DWORD     : Return $H->GetDWORDValue          ($HKey, $Path, $Name, $Value);
+      Case self::TYPE_EXPAND_SZ : Return $H->GetExpandedStringValue ($HKey, $Path, $Name, $Value);
+      Case self::TYPE_MULTI_SZ  : Return $H->GetMultiStringValue    ($HKey, $Path, $Name, $Value);
+      Case self::TYPE_QWORD     : Return $H->GetQWORDValue          ($HKey, $Path, $Name, $Value);
+      Case self::TYPE_SZ        : Return $H->GetStringValue         ($HKey, $Path, $Name, $Value);
+      Default: Return $this->Log('Error', 'Unknown registry value type ', $Type)->Ret(-1);
+      }
+    }
+  
+    Protected Function RawSetValue($HKey, $Path, $Name, $Value, $Type)
+    {
+      $H=$this->Object;
+      Switch($Type)
+      {
+      Case self::TYPE_BINARY    : Return $H->SetBinaryValue         ($HKey, $Path, $Name, $Value);
+      Case self::TYPE_DWORD     : Return $H->SetDWORDValue          ($HKey, $Path, $Name, $Value);
+      Case self::TYPE_EXPAND_SZ : Return $H->SetExpandedStringValue ($HKey, $Path, $Name, $Value);
+      Case self::TYPE_MULTI_SZ  : Return $H->SetMultiStringValue    ($HKey, $Path, $Name, $Value);
+      Case self::TYPE_QWORD     : Return $H->SetQWORDValue          ($HKey, $Path, $Name, $Value);
+      Case self::TYPE_SZ        : Return $H->SetStringValue         ($HKey, $Path, $Name, $Value);
+      Default: Return -1;
+      }
+    }
+  
+    //****************************************************************
+}
+
+//uint32 CheckAccess            (uint32 DefKey, string sSubKeyName, int uRequired, bool &bGranted)       Verifies that the user has the specified access permissions.
+//uint32 CreateKey              (uint32 DefKey, string sSubKeyName)                                      Creates a subkey.
+//uint32 DeleteKey              (uint32 DefKey, string sSubKeyName)                                      Deletes a subkey.
+//uint32 DeleteValue            (uint32 DefKey, string sSubKeyName, string sValueName)                   Deletes a named value.
+//uint32 EnumKey                (uint32 DefKey, string sSubKeyName, array<string> $sNames)                    Enumerates subkeys.
+//uint32 EnumValues             (uint32 DefKey, string sSubKeyName, array<string> $sNames,  \VARIANT &Types ) Enumerates the named values of a key.
+//uint32 GetBinaryValue         (uint32 DefKey, string sSubKeyName, string sValueName, \VARIANT &uValue) Gets the binary data value of a named value.
+//uint32 GetDWORDValue          (uint32 DefKey, string sSubKeyName, string sValueName, \VARIANT &uValue) Gets the DWORD data value of a named value.
+//uint32 GetExpandedStringValue (uint32 DefKey, string sSubKeyName, string sValueName, \VARIANT &uValue) Gets the expanded string data value of a named value.
+//uint32 GetMultiStringValue    (uint32 DefKey, string sSubKeyName, string sValueName, \VARIANT &uValue) Gets the multiple string data values of a named value.
+//uint32 GetQWORDValue          (uint32 DefKey, string sSubKeyName, string sValueName, \VARIANT &uValue) Gets the QWORD data values of a named value.
+//uint32 GetSecurityDescriptor  (uint32 DefKey, string sSubKeyName, \VARIANT $Descriptor)                Gets the security descriptor for a key.
+//uint32 GetStringValue         (uint32 DefKey, string sSubKeyName, string sValueName, \VARIANT &uValue) Gets the string data value of a named value.
+//uint32 SetBinaryValue         (uint32 DefKey, string sSubKeyName, string sValueName, \VARIANT  uValue) Sets the binary data value of a named value.
+//uint32 SetDWORDValue          (uint32 DefKey, string sSubKeyName, string sValueName, \VARIANT  uValue) Sets the DWORD data value of a named value.
+//uint32 SetExpandedStringValue (uint32 DefKey, string sSubKeyName, string sValueName, \VARIANT  uValue) Sets the expanded string data value of a named value.
+//uint32 SetMultiStringValue    (uint32 DefKey, string sSubKeyName, string sValueName, \VARIANT  uValue) Sets the multiple string values of a named value.
+//uint32 SetQWORDValue          (uint32 DefKey, string sSubKeyName, string sValueName, \VARIANT  uValue) Sets the QWORD data values of a named value.
+//uint32 SetSecurityDescriptor  (uint32 DefKey, string sSubKeyName, \VARIANT Descriptor)                 Sets the security descriptor for a key.
+//uint32 SetStringValue         (uint32 DefKey, string sSubKeyName, string sValueName, \VARIANT  uValue) Sets the string value of a named value.

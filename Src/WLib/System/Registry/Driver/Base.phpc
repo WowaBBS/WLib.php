@@ -1,0 +1,169 @@
+<?
+  $Loader->Parent_Class('/Object');
+
+  Abstract Class C_System_Registry_Driver_Base Extends C_Object
+  {
+    Const TYPE_SZ        =  1;
+    Const TYPE_EXPAND_SZ =  2;
+    Const TYPE_BINARY    =  3;
+    Const TYPE_DWORD     =  4;
+    Const TYPE_MULTI_SZ  =  7;
+    Const TYPE_QWORD     = 11;
+  
+    Const HKEY_CLASSES_ROOT   = 0x80000000;
+    Const HKEY_CURRENT_USER   = 0x80000001;
+    Const HKEY_LOCAL_MACHINE  = 0x80000002;
+    Const HKEY_USERS          = 0x80000003;
+    Const HKEY_CURRENT_CONFIG = 0x80000005;
+    
+    Static $HKeyToInt=[
+      0x80000000 =>0x80000000,
+      0x80000001 =>0x80000001,
+      0x80000002 =>0x80000002,
+      0x80000003 =>0x80000003,
+      0x80000005 =>0x80000005,
+      
+      'HKCR' =>0x80000000,
+      'HKCU' =>0x80000001,
+      'HKLM' =>0x80000002,
+      'HKU'  =>0x80000003,
+      'HKCC' =>0x80000005,
+      
+      'CR' =>0x80000000,
+      'CU' =>0x80000001,
+      'LM' =>0x80000002,
+      'U'  =>0x80000003,
+      'CC' =>0x80000005,
+      
+      'HKEY_CLASSES_ROOT'   =>0x80000000,
+      'HKEY_CURRENT_USER'   =>0x80000001,
+      'HKEY_LOCAL_MACHINE'  =>0x80000002,
+      'HKEY_USERS'          =>0x80000003,
+      'HKEY_CURRENT_CONFIG' =>0x80000005,
+  
+      'CLASSES_ROOT'   =>0x80000000,
+      'CURRENT_USER'   =>0x80000001,
+      'LOCAL_MACHINE'  =>0x80000002,
+      'USERS'          =>0x80000003,
+      'CURRENT_CONFIG' =>0x80000005,
+    ];
+    
+    Static $TypeToInt=[
+      'SZ'        =>  1,
+      'EXPAND_SZ' =>  2,
+      'BINARY'    =>  3,
+      'DWORD'     =>  4,
+      'MULTI_SZ'  =>  7,
+      'QWORD'     => 11,
+      
+        1 =>  1,
+        2 =>  2,
+        3 =>  3,
+        4 =>  4,
+        7 =>  7,
+       11 => 11,
+    ];                 
+    
+    Static $TypeToName=[
+       1=>'SZ'        ,
+       2=>'EXPAND_SZ' ,
+       3=>'BINARY'    ,
+       4=>'DWORD'     ,
+       7=>'MULTI_SZ'  ,
+      11=>'QWORD'     ,
+    ];
+    
+    //****************************************************************
+    
+    Function IsValid():bool { Return False; }
+    
+    //****************************************************************
+    // Key
+    
+    Abstract Function EnumKey     ($Path, $HKey=Null);
+    Abstract Function IsKeyExists ($Path, $HKey=Null);
+    Abstract Function CreateKey   ($Path, $HKey=Null);
+    Abstract Function DeleteKey   ($Path, $HKey=Null);
+    
+    //****************************************************************
+    // Value
+    
+    Abstract Function EnumValues    ($Path,                            $HKey=Null);
+    Abstract Function IsValueExists ($Path, $Name,                     $HKey=Null);
+    Abstract Function GetValue      ($Path, $Name,         $Type=Null, $HKey=Null);
+    Abstract Function SetValue      ($Path, $Name, $Value, $Type=Null, $HKey=Null);
+    Abstract Function DeleteValue   ($Path, $Name,                     $HKey=Null);
+  
+    //****************************************************************
+    // Convert
+  
+    Static Function NormTypeInt($v) { Return Static::$TypeToInt[$v]; }
+    Static Function NormHKeyInt($v) { Return Static::$HKeyToInt[$v]; }
+  
+    Static Function NormPath(&$Path, &$HKey)
+    {
+      if(Is_Array($Path))
+        $Path=Implode('\\', $Path);
+      Else
+        $Path=StrTr($Path, '/', '\\'); //<TODO: Remove
+      if(Is_Null($HKey))
+      {
+        if(($Pos=StrPos($Path, '\\'))!==False)
+        {
+          $HKey=SubStr($Path, 0, $Pos);
+          $Path=SubStr($Path, $Pos+1);
+        }
+        else
+        {
+          $HKey=$Path;
+          $Path='';
+        }
+      }
+      $HKey=Static::NormHKey($HKey);
+      $HKey=New Variant($HKey, VT_R8);
+    }
+    
+    Static Function NormGetValue($Type, $Value)
+    {
+      Switch($Type)
+      {
+      Case self::TYPE_SZ        : $Value = (String)$Value; break;
+      Case self::TYPE_EXPAND_SZ : $Value = (String)$Value; break;
+      Case self::TYPE_DWORD     : $Value = (Int   )$Value; break;
+      Case self::TYPE_QWORD     : $Value = (String)$Value; break;
+      Case self::TYPE_BINARY    :
+        $Res=''; //TODO: StrLen
+        If(Variant_Get_Type($Value) & VT_ARRAY)
+          ForEach($Value As $Byte)
+            $Res.=Chr((Int)$Byte);
+        $Value=$Res;
+        Break;
+      Case self::TYPE_MULTI_SZ:
+        $Res=[];
+        If(Variant_Get_Type($Value) & VT_ARRAY)
+          ForEach($Value As $SubValue)
+            $Res[]=(String)$SubValue;
+        $Value=$Res;
+        Break;
+      }
+      Return $Value;
+    }
+    
+    Static Function NormSetValue($Type, $Value)
+    {
+      Switch($Type) 
+      {
+      Case self::TYPE_SZ        : $Value=(String)$Value; Break;
+      Case self::TYPE_EXPAND_SZ : $Value=(String)$Value; Break;
+      Case self::TYPE_DWORD     : $Value=(Int   )$Value; Break;
+      Case self::TYPE_QWORD     : $Value=(Int   )$Value; Break;
+      Case self::TYPE_BINARY    : If(Is_String($Value)) $Value=Array_Map('ord', Str_Split($Value)); Break;
+      Case self::TYPE_MULTI_SZ  : If(!Is_Array($Value)) Throw New Exception('Cannot set non-array type as MultiString.'); Break;
+      Default: $Value=null; //TODO: Error
+      }
+      return $Value;
+    }
+  
+    //****************************************************************
+  }
+?>

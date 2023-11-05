@@ -1,0 +1,24 @@
+<?
+  $Loader->Parent_Class('/System/Registry/Driver/Base');
+
+  class C_System_Registry_Driver_Null extends C_System_Registry_Driver_Base
+  {
+    Function IsValid():bool { Return True; }
+    //****************************************************************
+    // Key
+    
+    Function EnumKey     ($Path, $HKey=Null) { Return []; }
+    Function IsKeyExists ($Path, $HKey=Null) { Return False; }
+    Function CreateKey   ($Path, $HKey=Null) { Return False; }
+    Function DeleteKey   ($Path, $HKey=Null) { Return False; }
+    
+    //****************************************************************
+    // Value
+    
+    Function EnumValues    ($Path,                            $HKey=Null) { Return []; }
+    Function IsValueExists ($Path, $Name,                     $HKey=Null) { Return False; }
+    Function GetValue      ($Path, $Name,         $Type=Null, $HKey=Null) { Return Null; }
+    Function SetValue      ($Path, $Name, $Value, $Type=Null, $HKey=Null) { Return False; }
+    Function DeleteValue   ($Path, $Name,                     $HKey=Null) { Return False; }
+  }
+?>

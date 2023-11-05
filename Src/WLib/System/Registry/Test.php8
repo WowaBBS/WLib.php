@@ -1,0 +1,21 @@
+<?
+  Include 'D:\MyProj\WLib.php\Src\WLib\Using.php';
+
+  $Loader->GetLogger()->Add(SubStr(__FILE__, 0, -5).'.log');
+  
+  $Loader->Load_Class('/System/Registry/Driver/Base'       );
+  $Loader->Load_Class('/System/Registry/Driver/Error'      );
+  $Loader->Load_Class('/System/Registry/Driver/Null'       );
+  $Loader->Load_Class('/System/Registry/Driver/Proxy'      );
+  $Loader->Load_Class('/System/Registry/Driver/StdRegProv' );
+  $Loader->Load_Class('/System/Registry/Driver/WshShell'   );
+  
+  $Reg=$Loader->Create_Object('/System/Registry/Connection');
+  $R=$Reg->GetKey('HKCU');
+  ForEach($R->GetSubKeys() As $K)
+    $Loader->Log('Debug', ' * ', $K->GetName());
+    
+  $R=$Reg->GetKey('HKEY_LOCAL_MACHINE\SOFTWARE\7-Zip\\'); //Path
+  ForEach($V=($R->GetValues()) As $k=>$v)
+    $Loader->Log('Debug', ' - ', $V->CurrentType(), ': ', $k, ' => ', $v);
+?>

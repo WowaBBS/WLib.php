@@ -1,0 +1,129 @@
+<?
+  $Loader->Parent_Class('/System/Registry/Driver/Proxy');
+
+  Class C_System_Registry_Driver_WshShell Extends C_System_Registry_Driver_Proxy
+  {
+    Protected $WshShell; //<An WshShell instance.
+  
+    Function _Init(Array $Args)
+    {
+      $this->WshShell=$Args['WshShell']?? new COM('WScript.Shell');
+      Super::_Init($Vars);
+    }
+  
+    Function IsValid():bool { Return $this->WshShell!==Null; }
+    //****************************************************************
+    // Key
+    
+    Function EnumKey($Path, $HKey=Null) { Return []; }
+    Function IsKeyExists($Path, $HKey=Null) { Return False; } //<TODO:
+    Function CreateKey($Path, $HKey=Null)
+    { 
+      $this->NormPath($Path, $HKey);
+      Return $this->WshShell->CreateKey($HKey, $Path)===0;
+    }
+  
+    Function DeleteKey($Path, $HKey=Null)
+    {
+      $this->NormPath($Path, $HKey);
+      Return $this->WshShell->DeleteKey($HKey, $Path)===0;
+    }
+    
+    //****************************************************************
+    // Value
+    
+    Function EnumValues($Path, $HKey=Null) { Return []; }
+    Function IsValueExists($Path, $Name, $HKey=Null) { Return False; } //<TODO
+    
+    Function GetValue($Path, $Name, $Type=Null, $HKey=Null)
+    {
+      $this->NormPath($Path, $HKey);
+      $Value=$this->WshShell->regRead($Path);
+      return $Value;
+    }
+  
+    Function SetValue($Path, $Name, $Value, $Type=Null, $HKey=Null)
+    {
+      $this->NormPath($Path, $HKey);
+      $Value=Static::NormSetValue($Type, $Value);
+      return $this->WshShell->regWrite($Path, $Value, $Type)===1;
+    }
+    
+    Function DeleteValue($Path, $Name, $HKey=Null)
+    {
+      $Type??=$this->GetValueType($Name);
+      $this->NormPath($Path, $HKey);
+      $ErrorCode = $this->WshShell->deleteValue($Path, $Name);
+      return $ErrorCode===0;
+    }
+  
+    //****************************************************************
+    // Convert
+    
+    Function NormPathLongHKey(&$Path, &$HKey)
+    {
+      if(Is_Array($Path))
+        $Path=Implode('\\', $Path);
+      Else
+        $Path=StrTr($Path, '/', '\\'); //<TODO: Remove
+      if(Is_Null($HKey))
+      {
+        if(($Pos=StrPos($Path, '\\'))!==False)
+        {
+          $HKey=SubStr($Path, 0, $Pos);
+          $Path=SubStr($Path, $Pos+1);
+        }
+        else
+        {
+          $HKey=$Path;
+          $Path='';
+        }
+      }
+      $HKey=Static::NormHKey($HKey);
+      $HKey=New Variant($HKey, VT_R8);
+    }
+    
+    Static Function NormGetValue($Type, $Value)
+    {
+      Switch($Type)
+      {
+      Case self::TYPE_SZ        : $Value = (String)$Value; break;
+      Case self::TYPE_EXPAND_SZ : $Value = (String)$Value; break;
+      Case self::TYPE_DWORD     : $Value = (Int   )$Value; break;
+      Case self::TYPE_QWORD     : $Value = (String)$Value; break;
+      Case self::TYPE_BINARY    :
+        $Res=''; //TODO: StrLen
+        If(Variant_Get_Type($Value) & VT_ARRAY)
+          ForEach($Value As $Byte)
+            $Res.=Chr((Int)$Byte);
+        $Value=$Res;
+        Break;
+      Case self::TYPE_MULTI_SZ:
+        $Res=[];
+        If(Variant_Get_Type($Value) & VT_ARRAY)
+          ForEach($Value As $SubValue)
+            $Res[]=(String)$SubValue;
+        $Value=$Res;
+        Break;
+      }
+      Return $Value;
+    }
+    
+    Static Function NormSetValue($Type, $Value)
+    {
+      Switch($Type) 
+      {
+      Case self::TYPE_SZ        : $Value=(String)$Value; Break;
+      Case self::TYPE_EXPAND_SZ : $Value=(String)$Value; Break;
+      Case self::TYPE_DWORD     : $Value=(Int   )$Value; Break;
+      Case self::TYPE_QWORD     : $Value=(Int   )$Value; Break;
+      Case self::TYPE_BINARY    : If(Is_String($Value)) $Value=Array_Map('ord', Str_Split($Value)); Break;
+      Case self::TYPE_MULTI_SZ  : If(!Is_Array($Value)) Throw New Exception('Cannot set non-array type as MultiString.'); Break;
+      Default: $Value=null; //TODO: Error
+      }
+      return $Value;
+    }
+    
+    //****************************************************************
+  }
+?>

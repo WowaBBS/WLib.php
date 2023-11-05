@@ -4,9 +4,17 @@
   $Loader->Load_Type('/Inet/Url');
  
   Class C_FS_Driver_Base Extends C_Object
+    Implements ArrayAccess
   {
-  //Function _Init($Args) { Parent::_Init($Args); }
+    Var $Attr;
   
+    Function _Init($Args)
+    {
+      $this->Attr=$this->Create_Object('/FS/Attr/Manager');
+      Parent::_Init($Args);
+      $this->Attr_Init($this->Attr);
+    }
+    
     Function IsFile($Path) { Return False; }
     Function IsDir($Path) { Return False; }
  
@@ -66,5 +74,30 @@
     {
       Return New T_FS_Driver_Node($this, $Path);
     }
+    
+  //****************************************************************
+    Function Attr_Init($Attr)
+    {
+    }
+    
+    Function GetAttributes(String $Path, Array $List)
+    {
+      Return $this->Attr->Get(['Driver'=>$this, 'Path'=>$Path], $List);
+    }
+    
+    Function SetAttributes(String $Path, Array $Values)
+    {
+      Return $this->Attr->Set(['Driver'=>$this, 'Path'=>$Path], $Values);
+    }
+    
+  //****************************************************************
+  // ArrayAccess interface
+
+    Public Function OffsetExists ($k    ):Bool  { return True;     }
+    Public Function OffsetGet    ($k    ):Mixed { return $this->Node($k); }
+    Public Function OffsetSet    ($k ,$v):Void  { $this->Log('Fatal', 'Unsupported'); }
+    Public Function OffsetUnset  ($k    ):Void  { $this->Log('Fatal', 'Unsupported'); }
+    
+  //****************************************************************
   }
 ?>

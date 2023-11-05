@@ -128,12 +128,12 @@
     {
       $Path=Self::PathAsArray($Path);
       If(!$Path)
-        Return;
+        Return $this;
       $c=Count($this->Path);
       If(($c==0)||(($c==1)&&($this->Path[0]==='')))
       {
         $this->Path=$Path;
-        Return;
+        Return $this;
       }
       $z0=$Path[0]==='';
       If($z0)//&&!Count($this->Path))
@@ -145,6 +145,7 @@
         Array_Splice($this->Path, Count($this->Path)-1, 1, $Path);
       Else
         Array_Splice($this->Path, Count($this->Path), 0, $Path);
+      Return $this;
     }
  
     // ƒобавл€ет путь $Path слева к существующему пути
@@ -204,12 +205,9 @@
       Return Array_Splice($this->Path, $Idx, $Count);
     }
     
-    Function __toString() { return $this->ToString(); }
- 
-    Function ToString()
-    {
-      Return Implode('/', $this->Path);
-    }
+    Function __toString() { return $this->ToString(); } 
+    Function ToString() { Return Implode('/', $this->Path); }
+    Function Make() { return $this->ToString(); }
  
     Function ToUrl()
     {

@@ -1,0 +1,25 @@
+<?
+  $Loader->Parent_Class('/Object');
+  $Loader->Load_Type('/FS/Driver/Node');
+  $Loader->Load_Type('/Inet/Url');
+ 
+  Class C_FS_Attr_Manager Extends C_Object
+  {
+    Var $List;
+  
+    Function Register($List)
+    {
+    }
+
+    Function Get($Res, $List)
+    {
+    //If(Array_Key_Exists($Name, $Res))
+      Return $Res;
+    }
+    
+    Function Set($Res, $Values)
+    {
+      Return $Res;
+    }
+  }
+?>

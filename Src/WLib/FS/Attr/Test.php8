@@ -1,0 +1,9 @@
+<?
+//ini_set('display_errors', 'off');
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  $Loader->Load_Type('/FS/Attr/Mode');
+
+  $Loader->GetLogger()->Add('Test.log');
+  $Test=$Loader->Create_Object('/UnitTest/Suite');
+  $Test->StartDir(__Dir__);
+?>

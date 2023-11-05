@@ -2,6 +2,9 @@
   $Loader->Parent_Class('/FS/Driver/Base');
   $Loader->Load_Type('/FS/Path'  );
   $Loader->Load_Type('/Inet/Url' );
+  $Loader->Load_Type('/FS/Attr/Date/UnixTime' );
+  
+  Use T_FS_Attr_Date_UnixTime As FileTime;
 
   Class C_FS_Driver_System Extends C_FS_Driver_Base
   {
@@ -23,7 +26,7 @@
     # $Lock   =$Args['Lock'   ]?? True  ;
     # $Text   =$Args['Text'   ]?? False ;
         
-      $P=$this->RealPathStr($Path->Make());
+      $P=$this->RealPath($Path);
       Return File_Get_Contents($P, False, $this->Context, $Offset, $Length);
     }
  
@@ -35,38 +38,26 @@
         
       $Flags=($Append? FILE_APPEND:0)|($Lock? LOCK_EX:0);
         
-      $P=$this->RealPathStr($Path->Make());
+      $P=$this->RealPath($Path);
       Return File_Put_Contents($P, $Data, $Flags, $this->Context);
     }
     
-    Function RealPathStr($Path)
+    Function RealPath($Path)
     {
-      $P=$this->BasePath->_Clone();
-      $P->Add($Path);
-      Return $P->Make();
-    }
+      Return $this->BasePath->_Clone()->Add(Is_Object($Path)? $Path->Make():$Path)->Make(); }
  
-    Function IsFile($Path)
-    {
-      $P=$this->RealPathStr($Path->Make());
-      Return Is_File($P);
-    }
- 
-    Function IsDir($Path)
-    {
-      $P=$this->RealPathStr($Path->Make());
-      Return Is_Dir($P);
-    }
+    Function IsFile ($Path) { Return Is_File($this->RealPath($Path)); }
+    Function IsDir  ($Path) { Return Is_Dir($this->RealPath($Path)); }
  
     Function Exists($Path)
     {
-      $P=$this->RealPathStr($Path->Make());
+      $P=$this->RealPath($Path);
       Return Is_Dir($P)||Is_File($P);
     }
  
     Function Stream($Path, $Mode)
     {
-      $P=$this->RealPathStr($Path->Make());
+      $P=$this->RealPath($Path);
       $Res=$this->Create_Object('Stream/File');
       $Res->Assign($P);
       $Res->Open($Mode);
@@ -76,7 +67,7 @@
     Function Files($Path, $Mask=False, $Attr=3)
     {
       $Res=[];
-      $P=$this->RealPathStr($Path->Make());
+      $P=$this->RealPath($Path);
       If(!Is_Dir($P))
         Return $Res;
       Return ListDir($P, $Mask, $Attr);
@@ -94,7 +85,7 @@
     Function Include($Include_Path, $UnPack_Vars=[], $Pack_Vars=[])
     {
       Extract($UnPack_Vars);
-      $Res=Include $this->RealPathStr($Include_Path);
+      $Res=Include $this->RealPath($Include_Path);
       ForEach($Pack_Vars As $Pack_Var)
         $UnPack_Vars[$Pack_Var]=${$Pack_Var};
       Return $Res;
@@ -104,5 +95,58 @@
     {
       Return $this->BaseURL->Node($Path);
     }
+  //****************************************************************
+  // Attributes
+  
+    // Node:
+    //  IsDir       Boolean
+    //  IsFile      Boolean
+    //  IsLink      Boolean
+    //  Type        EnumString [File, Directory, Link, Socket, ... Fifo, Char, Block]
+    //  Writeble    Boolean
+    //  Readable    Boolean
+    //# Executable  Boolean //?
+    //  Exists      Boolean
+    //  Created     FileDate
+    //  Modified    FileDate
+    //  LastAccess  FileDate
+    //SymLink:
+    //  Link        String
+    //File:
+    //  Size        Integer
+    //  Content     String <|Stream
+    //  Stream      Stream
+    //  Md5         String
+    //Optional:
+    //  Stat
+    //  LStat
+    //
+    //Device:
+    //  DeviceId
+    //  FreeSpace
+    //  TotalSpace
+    
+    Function Attr_Init($Attr)
+    {
+      Parent::Attr_Init($Attr);
+      $Attr->Register([
+        'RealPath'   =>[fn($Driver, $Path)=>$Driver->RealPath($Path), 'Private'=>True],
+        'Stat'       => fn($RealPath)=>Stat       ($RealPath),
+        'LStat'      => fn($RealPath)=>LStat      ($RealPath),
+
+        'IsDir'      => fn($RealPath)=>Is_Dir     ($RealPath),
+        'IsFile'     => fn($RealPath)=>Is_File    ($RealPath),
+        'IsLink'     => fn($RealPath)=>Is_Link    ($RealPath),
+        'Exists'     => fn($RealPath)=>FileExists ($RealPath),
+
+        'Md5'        =>[fn($RealPath)=>Md5_File($RealPath), 'Cache'=>'File'],
+        
+        'Created'    => fn($RealPath)=>New FileTime(FileCTime($RealPath)),
+        'Modified'   =>[fn($RealPath)=>New FileTime(FileMTime($RealPath)), fn($RealPath, $Modified, $LastAccess)=>Touch($RealPath, $Modified, $LastAccess), ],
+        'LastAccess' =>[fn($RealPath)=>New FileTime(FileATime($RealPath)), fn($RealPath, $Modified, $LastAccess)=>Touch($RealPath, $Modified, $LastAccess), ],
+      ]);
+    }
+    
+  //****************************************************************
   }
 ?>

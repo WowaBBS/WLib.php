@@ -1,0 +1,20 @@
+<?
+  $this->Parent_Class('/System/Thread/Base/Factory');
+
+  Class C_System_Thread_Fiber_Factory Extends C_System_Thread_Base_Factory
+  {
+    Function Run(Callable $StartAddress, Int $Parameter=0)
+    {
+      $Fiber=New Fiber($StartAddress);
+      Return $this->Create_Object('/System/Thread/Fiber/Thread', [
+        'Factory' =>$this  ,
+        'Fiber'   =>$Fiber ,
+      ]);
+    }
+    
+    Function Join($Thread)
+    {
+      $this->Log('Error', 'Join in not implemented');
+    }
+  }
+?>

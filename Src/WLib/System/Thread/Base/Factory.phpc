@@ -1,0 +1,15 @@
+<?
+  $this->Parent_Class('/Object');
+  
+  Class C_System_Thread_Base_Factory Extends C_Object
+  {
+    Function _Init($Args)
+    {
+    }
+    
+    Function Run(Callable $StartAddress, Int $Parameter=0)
+    {
+      $Res=$StartAddress($Parameter);
+    }
+  }
+?>

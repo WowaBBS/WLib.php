@@ -1,0 +1,20 @@
+<?
+  $this->Parent_Class('/Object');
+  
+  Class C_System_Thread_Base_Thread Extends C_Object
+  {
+    Var $Factory;
+    
+    Function _Init($Args)
+    {
+      $this->Factory=$Args['Factory'];
+    //$this->Proc=$Args['Proc'];
+      Parent::_Init($Args);
+    }
+    
+    Function Join($Thread)
+    {
+      $this->Factory->Join($this);
+    }
+  }
+?>

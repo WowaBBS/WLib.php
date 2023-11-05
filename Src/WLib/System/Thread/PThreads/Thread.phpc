@@ -1,0 +1,14 @@
+<?
+  $this->Parent_Class('/System/Thread/Base/Thread');
+  
+  Class C_System_Thread_PThreads_Thread Extends C_System_Thread_Base_Thread
+  {
+    Var $Worker;
+    
+    Function _Init($Args)
+    {
+      $this->Worker=$Args['Worker'];
+      Parent::_Init($Args);
+    }
+  }
+?>

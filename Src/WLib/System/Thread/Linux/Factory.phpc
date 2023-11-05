@@ -1,0 +1,34 @@
+<?
+  $this->Parent_Class('/System/Thread/Base/Factory');
+  
+  Class C_System_Thread_Linux_Factory Extends C_System_Thread_Base_Factory
+  {
+    Var $FFI;
+    
+    Function _Init($Args)
+    {
+      $Header=__DIR__.'/Header.h';
+      If(Extension_Loaded('FFI') || @dl('FFI'))
+      {
+        $this->FFI=FFI::CDef(File_Get_Contents($Header), 'libpthread.so.0');
+      # $this->FFI=FFI::Load($Header);
+      }
+      Parent::_Init($Args);
+    }
+    
+    Function Run(Callable $StartAddress, Int $Parameter=0)
+    {
+      $Thread = $this->ffi->new('pthread_t');
+      $this->FFI->PThread_Create(FFI::Addr($Thread), Null, $StartAddress, Null);
+      Return $this->Create_Object('/System/Thread/Linux/Thread', [
+        'Factory' =>$this   ,
+        'Thread'  =>$Thread ,
+      ]);
+    }
+
+    Function Join($Thread)
+    {
+      $this->FFI->PThread_Join($this->thread->cdata, Null);
+    }
+  }
+?>

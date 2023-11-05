@@ -1,0 +1,15 @@
+<?
+  Include 'D:\MyProj\WLib.php\Src\WLib\Using.php';
+
+  $Loader->GetLogger()->Add(SubStr(__FILE__, 0, -5).'.log');
+  
+  $Types=['Base', 'Fiber', 'Linux', 'PThreads', 'Windows'];
+  
+  ForEach($Types As $Type)
+  {
+    $Type='/System/Thread/'.$Type;
+    $Loader->Load_Class($Type.'/Factory');
+    $Loader->Load_Class($Type.'/Thread');
+  }
+  
+?>

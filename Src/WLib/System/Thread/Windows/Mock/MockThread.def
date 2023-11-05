@@ -1,0 +1,7 @@
+LIBRARY MockThread
+EXPORTS
+
+; export list for theoraenc
+CreateThread        =MyCreateThread
+WaitForSingleObject =MyWaitForSingleObject
+CloseHandle         =MyCloseHandle

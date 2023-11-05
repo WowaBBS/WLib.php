@@ -1,0 +1,60 @@
+<?php
+  @dl('FFI');
+  
+  Class A
+  {
+    Function Run($Param)
+    {
+      fwrite(STDOUT, '!!!!!!!!!!!bbb!!!!!!!!!!!!!'.$Param."\n");
+    }
+  }
+    
+  Function ThreadFunction($Param)
+  {
+    fwrite(STDOUT, '!!!!!!!!!!!aaa!!!!!!!!!!!!!'.$Param."\n");
+  # sleep(3);
+  # echo "World\n";
+  //return 0;
+  }
+
+  $Header=__DIR__.'/Header.h';
+  
+  $ffi=FFI::CDef(File_Get_Contents($Header), 'kernel32.dll'); //'CreateThread.dll'
+# $ffi=FFI::Load($Header);
+
+  $a=New A;
+  
+# $StartAddress='ThreadFunction';
+# $StartAddress=ThreadFunction(...);
+# $StartAddress=[$a, 'Run'];
+  $StartAddress=$a->Run(...);
+  
+  $ThreadId=$ffi->new("unsigned long");
+  
+  Echo "Starting\n";
+  $Handle = $ffi->CreateThread(
+    null ,  //$lpThreadAttributes, 
+    0    ,  //$dwStackSize, 
+    $StartAddress, 
+    137  , //lpParameter
+    0    , //$dwCreationFlags, 
+    FFI::addr($ThreadId)
+  );
+  Echo "Started\n";
+  
+  Echo 'Handle: ', $Handle, "\n";
+  Echo 'ThreadId: ', $ThreadId, "\n";
+  if(!$Handle) Die("Failed to create thread\n");
+  Sleep(1);
+  
+  // Wait for finishing thread
+  Echo "Waiting\n";
+  $Result=$ffi->WaitForSingleObject($Handle, -1);
+  If($Result!==0) Die("Wait for thread failed\n");
+  Echo "Ok\n";
+  
+  // Close thread descriptor
+  Echo "Closing\n";
+  $ffi->CloseHandle($Handle);
+  
+  Echo "Thread closed\n";

@@ -1,0 +1,29 @@
+<?
+  $this->Parent_Class('/System/Thread/Base/Factory');
+  
+  Use T_System_Thread_PThreads_Worker As Worker;
+
+  Class C_System_Thread_PThreads_Factory Extends C_System_Thread_Base_Factory
+  {
+    Function _Init($Args)
+    {
+      If(@dl('pthreads'))
+        $this->Load_Type('/System/Thread/PThreads/Worker');
+      Parent::_Init($Args);
+    }
+  
+    Function Run(Callable $StartAddress, Int $Parameter=0)
+    {
+      $Fiber=New Worker($StartAddress, $Parameter);
+      Return $this->Create_Object('/System/Thread/Fiber/Thread', [
+        'Factory' =>$this  ,
+        'Fiber'   =>$Fiber ,
+      ]);
+    }
+    
+    Function Join($Thread)
+    {
+      $Thread->Worker->Join();
+    }
+  }
+?>

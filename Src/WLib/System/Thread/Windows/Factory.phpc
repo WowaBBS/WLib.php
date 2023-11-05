@@ -1,0 +1,53 @@
+<?
+  $this->Parent_Class('/System/Thread/Base/Factory');
+
+  //Doesn't work properly
+  //TODO: Fix initializing php heap when thread starts in thread safe mode
+  
+  Class C_System_Thread_Windows_Factory Extends C_System_Thread_Base_Factory
+  {
+    Var $FFI;
+    
+    Function _Init($Args)
+    {
+      $Header=__DIR__.'/Header.h';
+      If(Extension_Loaded('FFI') || @dl('FFI'))
+      {
+        $this->FFI=FFI::CDef(File_Get_Contents($Header), 'kernel32.dll'); //'MockThread.dll'
+      # $this->FFI=FFI::Load($Header);
+      }
+      Parent::_Init($Args);
+    }
+    
+    Function Run(Callable $StartAddress, Int $Parameter=0)
+    {
+      $CreationFlags=0;
+      $ffi=$this->FFI;
+      $ThreadId=$ffi->New('unsigned long');
+      $Handle=$ffi->CreateThread(
+        null           , //lpThreadAttributes , 
+        0              , //dwStackSize        ,
+        $StartAddress  , 
+        $Parameter     , //lpParameter        ,
+        $CreationFlags , //dwCreationFlags    ,
+        FFI::Addr($ThreadId),
+      );
+      if(!$Handle)
+        Return $this->Log('Error', 'Failed to create thread')->Ret();
+      Return $this->Create_Object('/System/Thread/Windows/Thread', [
+        'Factory'  =>$this     ,
+        'Handle'   =>$Handle   ,
+        'ThreadId' =>$ThreadId ,
+      ]);
+    }
+    
+    Function Join($Thread)
+    {
+      $Result=$ffi->WaitForSingleObject($Thread->Handle, -1);
+      If($Result!==0) 
+        $this->Log('Error', 'Wait for thread failed');
+      
+      $ffi->CloseHandle($Thread->Handle);
+    }
+  }
+?>

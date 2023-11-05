@@ -156,15 +156,15 @@
   //****************************************************************
   // ArrayAccess interface
 
-    Public Function offsetExists     ($k    ):Bool  { return $this->Has   ($k);     }
-    Public Function offsetGet        ($k    ):Mixed { return $this->Get   ($k);     }
-    Public Function offsetSet        ($k ,$v):Void  { if(Is_Null($k)) $this->Add($v); else $this->Set($k, $v); }
-    Public Function offsetUnset      ($k    ):Void  {        $this->UnSet ($k);     }
+    Public Function OffsetExists ($k    ):Bool  { return $this->Has   ($k);     }
+    Public Function OffsetGet    ($k    ):Mixed { return $this->Get   ($k);     }
+    Public Function OffsetSet    ($k ,$v):Void  { if(Is_Null($k)) $this->Add($v); else $this->Set($k, $v); }
+    Public Function OffsetUnset  ($k    ):Void  {        $this->UnSet ($k);     }
     
   //****************************************************************
   // Countable interface
 
-    Public Function count():int { return Count($this->Vars);     }
+    Public Function Count():int { return Count($this->Vars);     }
     
   //****************************************************************
   // IteratorAggregate interface

@@ -23,11 +23,11 @@
     Function CharMap_Remove($k) { UnSet($this->CharMap[$k]); }
     Function CharMap_Get($k) { Return $this->CharMap[$k]?->Get(); }
     Function CharMap_Create() { Return New T_RegExp_CharMap($this); }
-    Function _CharMap_CreateEnd()
+    Function _CharMap_CreateEnd() //<TODO: Remove
     {
-      $this->Log('Debug')->Debug($this);
+    //$this->Log('Debug')->Debug($this);
       $Res=$this->CharMap_Create()->AddEnd()->ToStatic();
-      $this->Log('Debug', 'b')->Debug($this);
+    //$this->Log('Debug', 'b')->Debug($this);
       Return $Res;
     }
     

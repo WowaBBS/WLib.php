@@ -8,7 +8,7 @@
   {
     Protected $Current=Null;
   
-    Function Current() { Return $this->Curent??=New Mac($this->_Current()); }
+    Function Current() { Return $this->Current??=New Mac($this->_Current()); }
     
     Function _Current()
     {

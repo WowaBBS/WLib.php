@@ -63,6 +63,7 @@
           ForEach($Exts As $Ext)
             If(Str_Ends_With($File, $Ext))
             {
+            //$this->Log('Debug', 'Debug:')->Debug([$File, $Ext]);
               $R=SubStr($Path, 0, -StrLen($Ext));
               If(!Str_Starts_With($R, $BaseDir))
               {

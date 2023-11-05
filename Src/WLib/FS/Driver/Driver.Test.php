@@ -27,8 +27,10 @@
     Function TestSystem($Factory)
     {
       $FS=$Factory->Create('System');
-      $this->Log('Debug', 'Debug:')->Debug($FS[__FILE__]);
-      $this->Log('Debug', 'Debug:')->Debug($FS[__FILE__]->GetAttributes([]));
+      $this->Log('Debug', 'Node:')->Debug($FS[__FILE__]);
+      $Attrs=$FS[__FILE__]->GetAttributes(['Path', 'Created', 'Mode']);
+      UnSet($Attrs['Driver']);
+      $this->Log('Debug', 'Attributes:')->Debug($Attrs);
     }
   }
 ?>

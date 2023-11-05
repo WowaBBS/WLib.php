@@ -5,21 +5,104 @@
  
   Class C_FS_Attr_Manager Extends C_Object
   {
-    Var $List;
+    Var $List=[];
   
     Function Register($List)
     {
+      ForEach($List As $Name=>$Info)
+        $this->Add($Name, $Info);
     }
-
-    Function Get($Res, $List)
+    
+    Function Add($Name, $Info)
     {
-    //If(Array_Key_Exists($Name, $Res))
+      If(!Is_Array($Info))
+        $Info=[$Info];
+        
+      $this->List[$Name]=$this->Create_Object('/FS/Attr/Item', ['Manager'=>$this, 'Name'=>$Name, 'Info'=>$Info]);
+    }
+    
+    Function GetArgsAttrs(Array $Args, String $Exclude)
+    {
+      $Res=[];
+      $Attrs=$this->List;
+      ForEach($Args As $Name=>$v)
+        If($Name!==$Exclude)
+          If($Item=$Attrs[$Name]?? Null)
+            $Res[$Name]=$Item;
+          Else
+          {
+            $this->Log('Error', 'Unknown agrument ', $Name, ' for ', $Exclude);
+            $Res[$Name]=Null;
+          }
+      Return $Res;
+    }
+    
+    Function Get($Vars, $List)
+    {
+      If(!True)
+        $Vars=$this->GetLinear($Vars, $List);
+      Else
+        $Vars=$this->GetRecursive($Vars, $List);
+      $Res=[];
+      ForEach($List As $k=>$v)
+      {
+        $Key=Is_String($k)? $k:$v;
+        $Res[$Key]=$Vars[$Key];
+      }
+      Return $Res;
+    }
+    
+    Function GetRecursive($Res, $List)
+    {
+      $Attrs=$this->List;
+      ForEach($List As $Name)
+        If(!Array_Key_Exists($Name, $Res))
+        {
+          $Item=$Attrs[$Name]?? Null;
+          If(!$Item) { $this->Log('Error', 'Attribute ', $Name, ' is not exists'); $Res[$Name]=Null; Continue; }
+          $Res[$Name]=$Item->GetRecursive($Res);
+        }
+      Return $Res;
+    }
+    
+    Function GetLinear($Res, $List)
+    {
+      $Attrs=$this->List;
+      
+      $Delayed=[];
+      ForEach($List As $Name)
+        If(!Array_Key_Exists($Name, $Res))
+        {
+          $Item=$Attrs[$Name]?? Null;
+          If(!$Item) { $this->Log('Error', 'Attribute ', $Name, ' is not exists'); $Res[$Name]=Null; Continue; }
+          $Delayed[$Name]=$Item;
+        }
+      
+      While($Delayed)
+      {
+        $List=$Delayed;
+        $Delayed=[];
+        ForEach($List As $Name)
+          If(!Array_Key_Exists($Name, $Res))
+          {
+            $Item=$this->List[$Name]?? Null;
+            If(!$Item) { $this->Log('Error', 'Attribute ', $Name, ' is not exists'); $Res[$Name]=Null; Continue; }
+            $Delayed[$Name]=$Item;
+          }
+      }
+    
       Return $Res;
     }
     
     Function Set($Res, $Values)
     {
       Return $Res;
+    }
+    
+    Function Deps_Invalidate()
+    {
+      ForEach($this->List As $Item)
+        $Item->Deps_Invalidate();
     }
   }
 ?>

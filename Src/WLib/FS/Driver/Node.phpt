@@ -59,5 +59,13 @@
     Function SetAttributes(Array $Values ) { Return $this->Driver->SetAttributes($this->Path, $Values ); }
 
   //****************************************************************
+  // Debug
+  
+    Function _Debug_Serialize(Array &$Res)
+    {
+      UnSet($Res['Driver']); //TODO: Debug_Inline;
+    }
+  
+  //****************************************************************
   }
 ?>

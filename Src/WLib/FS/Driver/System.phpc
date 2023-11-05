@@ -3,8 +3,10 @@
   $Loader->Load_Type('/FS/Path'  );
   $Loader->Load_Type('/Inet/Url' );
   $Loader->Load_Type('/FS/Attr/Date/UnixTime' );
+  $Loader->Load_Type('/FS/Attr/Mode');
   
-  Use T_FS_Attr_Date_UnixTime As FileTime;
+  Use T_FS_Attr_Date_UnixTime As FileTime ;
+  Use T_FS_Attr_Mode          As Mode     ;
 
   Class C_FS_Driver_System Extends C_FS_Driver_Base
   {
@@ -130,7 +132,8 @@
     {
       Parent::Attr_Init($Attr);
       $Attr->Register([
-        'RealPath'   =>[fn($Driver, $Path)=>$Driver->RealPath($Path), 'Private'=>True],
+        'RealPath'   =>[fn($Driver, $Path)=>$Driver->RealPath($Path) ,'Private'=>True],
+        'Context'    =>[fn($Driver       )=>$Driver->Context         ,'Private'=>True],
         'Stat'       => fn($RealPath)=>Stat       ($RealPath),
         'LStat'      => fn($RealPath)=>LStat      ($RealPath),
 
@@ -138,6 +141,7 @@
         'IsFile'     => fn($RealPath)=>Is_File    ($RealPath),
         'IsLink'     => fn($RealPath)=>Is_Link    ($RealPath),
         'Exists'     => fn($RealPath)=>FileExists ($RealPath),
+        'Mode'       => fn($Stat)=>New Mode($Stat['mode']),
 
         'Md5'        =>[fn($RealPath)=>Md5_File($RealPath), 'Cache'=>'File'],
         

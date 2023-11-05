@@ -1,0 +1,109 @@
+<?
+  $Loader->Parent_Class('/Object');
+  $Loader->Load_Type('/FS/Driver/Node');
+  $Loader->Load_Type('/Inet/Url');
+ 
+  Class C_FS_Attr_Item Extends C_Object
+  {
+    Var $Manager =Null  ;
+    Var $Name    =''    ;
+    Var $Setter  =Null  ;
+    Var $Getter  =Null  ;
+    Var $Private =False ;
+    Var $Cache   =True  ;
+    Var $GetArgs =[]    ;
+    Var $SetArgs =[]    ;
+    Var $GetDeps =Null  ;
+    Var $SetDeps =Null  ;
+    
+    Function _Init($Args)
+    {
+      $this->Manager =$Args['Manager' ]->Object_GetWeak();
+      $this->Name    =$Args['Name'    ];
+      $Info          =$Args['Info'    ];
+      If(!Is_Array($Info))
+        $Info=[$Info];
+        
+      $this->Getter  =$Info['Getter'  ]?? $Info[0]?? Null; UnSet($Info['Getter'  ]); UnSet($Info[0]);
+      $this->Setter  =$Info['Setter'  ]?? $Info[1]?? Null; UnSet($Info['Setter'  ]); UnSet($Info[1]);
+      $this->Private =$Info['Private' ]?? False;           UnSet($Info['Private' ]);
+      $this->Cache   =$Info['Cache'   ]?? False;           UnSet($Info['Cache'   ]);
+      
+      $this->GetArgs =$this->GetArgsClosure($this->Getter, False );
+      $this->SetArgs =$this->GetArgsClosure($this->Setter, True  );
+      
+      $this->GetDeps =Null;
+      $this->SetDeps =Null;
+      
+      If($Info)
+        $this->Log('Error', 'Unknown properties of the attribute ', $Name)->Debug($Info);
+      
+      Parent::_Init($Args);
+    }
+    
+    Function GetManager() { Return $this->Manager->Get(); }
+    
+    Function GetArgsClosure($Closure, $IsNotGet=False)
+    {
+      $Res=[];
+      If(!$Closure) Return $Res;
+      $Refl=New ReflectionFunction($Closure);
+      $Parameters=$Refl->GetParameters();
+      $Attr_Name=$this->Name;
+      ForEach($Parameters As $Parameter)
+      {
+        $Arg_Name=$Parameter->GetName();
+        If($Arg_Name===$Attr_Name && !$IsNotGet)
+        {
+          $this->Log('Error', 'Getter for ', $Attr_Name, ' uses the same agrument')->File($Refl);
+          $Arg_Name='Unknown';
+        }
+        $Res[$Arg_Name]=True; // IsRerqured?
+      }
+      
+      If($IsNotGet && !IsSet($Res[$Attr_Name]))
+        $this->Log('Error', 'Setter for ', $Attr_Name, ' does\'n have ', $Attr_Name, ' argument')->File($Refl);
+      
+      Return $Res;
+    }
+    
+    Function Deps_Invalidate()
+    {
+      $this->GetDeps=Null;
+      $this->SetDeps=Null;
+    }
+    
+    Function GetDeps() { Return $this->GetDeps??=$this->GetManager()->GetArgsAttrs($this->GetArgs, $this->Name); }
+    Function SetDeps() { Return $this->SetDeps??=$this->GetManager()->GetArgsAttrs($this->SetArgs, $this->Name); }
+    
+    Function Get($Map)
+    {
+      $Args=[];
+      ForEach($this->GetArgs As $Name=>$Info)
+        $Args[]=$Map[$Name]?? Null;
+      Return ($this->Getter)(...$Args);
+    }
+    
+    Function Set($Map)
+    {
+      $Args=[];
+      ForEach($this->SetArgs As $Name=>$Info)
+        $Args[]=$Map[$Name]?? Null;
+      Return ($this->Setter)(...$Args);
+    }
+    
+    Function GetRecursive(&$Res)
+    {
+      ForEach($this->GetDeps() As $Name=>$Item)
+        If(!Array_Key_Exists($Name, $Res))
+          $Res[$Name]=$Item->GetRecursive($Res);
+    
+      Return $this->Get($Res);
+    }
+    
+    Function SetRecursive($Res, $Values)
+    {
+      Return $Res;
+    }
+  }
+?>

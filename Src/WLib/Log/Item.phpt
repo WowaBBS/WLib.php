@@ -62,7 +62,20 @@
     
     Function File($File, $Line=false, $Col=false)
     {
-      if(Is_Array($File))
+      If(Is_Object($File))
+      {
+        If($File InstanceOF \ReflectionFunctionAbstract)
+        {
+          $this->File =$File->GetFileName  ();
+          $this->Line =$File->GetStartLine ();
+          $this->Col  =$Col;
+        }
+        Else
+        {
+          $this->File ='Unknown_file_class.'.GetClass($File);
+        }
+      }
+      ElseIf(Is_Array($File))
       {
         $this->File = $File['File' ]?? $File[0]         ;
         $this->Line = $File['Line' ]?? $File[1]?? $Line ;

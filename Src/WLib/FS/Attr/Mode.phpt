@@ -45,6 +45,15 @@
         '-xTtSs'[$x+($z<<$p)];
     }
     
+  //****************************************************************
+  // Debug
+  
     Function ToDebug() { Return $this->ToString().' '.$this->ToOct().' '.$this->GetType(); }
+    Function _Debug_Serialize(Array &$Res)
+    {
+      $Res=$this->ToDebug();
+    }
+  
+  //****************************************************************
   }
 ?>

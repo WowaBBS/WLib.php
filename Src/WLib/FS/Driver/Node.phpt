@@ -55,8 +55,8 @@
   //****************************************************************
   // Attributes
 
-    Function GetAttributes(Array $List   ) { Return $this->Driver->GetAttributes($this->Path, $List   ); }
-    Function SetAttributes(Array $Values ) { Return $this->Driver->SetAttributes($this->Path, $Values ); }
+    Function GetAttrs(Array $List   ) { Return $this->Driver->GetAttrs($this->Path, $List   ); }
+    Function SetAttrs(Array $Values ) { Return $this->Driver->SetAttrs($this->Path, $Values ); }
 
   //****************************************************************
   // Debug

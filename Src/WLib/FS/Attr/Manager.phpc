@@ -6,19 +6,96 @@
   Class C_FS_Attr_Manager Extends C_Object
   {
     Var $List=[];
+    
+    Static Function _GetN(&$Vars, $Name, $Def=Null)
+    {
+      If(!Array_Key_Exists($Name, $Vars)) Return $Def;
+      $Res=$Vars[$Name];
+      UnSet($Vars[$Name]);
+      Return $Res;
+    }
+  
+    Static Function _GetI(&$Vars, $Name, $Def=Null)
+    {
+      If(Array_Key_Exists($Name, $Vars)) Return Static::_GetN($Vars, $Name, $Def);
+      If(!$Vars) Return $Def;
+      ForEach($Vars As $k=>$v)
+        Break;
+      If($k!==0) Return $Def;
+      Array_Shift($Vars);
+      Return $v;
+    }
   
     Function Register($List)
     {
-      ForEach($List As $Name=>$Info)
-        $this->Add($Name, $Info);
+      ForEach($List As $Id=>$Info)
+        If(!$this->Add($Id, $Info))
+          $this->Log('Error', 'Unknown item ', $Id)->Debug($Info);
     }
     
     Function Add($Name, $Info)
     {
+      $Id=$Name;
+      If(!Is_String($Id))
+      {
+        If(!Is_Array($Info))
+          Return $this->AddSetter($Info);
+        $Name=Static::_GetI($Info, 'Name');
+      }
+      If(!Is_String($Name)) Return False;
+
       If(!Is_Array($Info))
         $Info=[$Info];
         
-      $this->List[$Name]=$this->Create_Object('/FS/Attr/Item', ['Manager'=>$this, 'Name'=>$Name, 'Info'=>$Info]);
+      $Item=$this->List[$Name]??=$this->Create_Object('/FS/Attr/Item', ['Manager'=>$this, 'Name'=>$Name]);
+      
+      $Args=[
+        'Getter'  =>Static::_GetI($Info, 'Getter'  ),
+        'Setter'  =>Static::_GetI($Info, 'Setter'  ),
+        'Private' =>Static::_GetN($Info, 'Private' ),
+        'Cache'   =>Static::_GetN($Info, 'Cache'   ),
+      //'Info'    =>$Info,
+      ];
+      If($Info)
+        $this->Log('Error', 'Therea are Unknown properties in the attribute ', $Id)->Debug($Info);
+      $Item->Init($Args);
+      Return True;
+    }
+    
+    Function AddSetter($Setter)
+    {
+      If(!$Setter) Return False;
+      $Refl=New ReflectionFunction($Setter);
+      $Parameters=$Refl->GetParameters();
+
+      $Attrs=$this->List;
+      $Res=[];
+      ForEach($Parameters As $Parameter)
+      {
+        $Name=$Parameter->GetName();
+        If(Array_Key_Exists($Name, $Res)) 
+          Return $this->Log('Error', 'Setter uses ', $Name, 'several times')->File($Refl)->Ret(False);
+        
+        $Attr=$Attrs[$Name]?? Null;
+        If(!$Attr) 
+          Return $this->Log('Error', 'Attribute ', $Name, ' not found in')->File($Refl)->Ret(False);
+        
+        If($Attr->CanHaveSetter())
+          $Res[$Name]=$Attr;
+      }
+      If(!$Res)
+         Return $this->Log('Error', 'Setter don\'t have setters')->File($Refl)->Ret(False);
+      
+      ForEach($Res As $Attr)
+        $Attr->SetSetter($Setter);
+      
+    //$this->Log('Debug', 'TODO: Add Setter')->File($Refl);
+      Return True;
+    }
+    
+    Function GetArgsClosure($Setter)
+    {
+      Return $Res;
     }
     
     Function GetArgsAttrs(Array $Args, String $Exclude)
@@ -26,6 +103,7 @@
       $Res=[];
       $Attrs=$this->List;
       ForEach($Args As $Name=>$v)
+      {
         If($Name!==$Exclude)
           If($Item=$Attrs[$Name]?? Null)
             $Res[$Name]=$Item;
@@ -34,6 +112,7 @@
             $this->Log('Error', 'Unknown agrument ', $Name, ' for ', $Exclude);
             $Res[$Name]=Null;
           }
+      }
       Return $Res;
     }
     

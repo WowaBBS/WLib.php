@@ -2,11 +2,13 @@
   $Loader->Parent_Class('/FS/Driver/Base');
   $Loader->Load_Type('/FS/Path'  );
   $Loader->Load_Type('/Inet/Url' );
+  $Loader->Load_Type('/FS/Attr/Hash');
   $Loader->Load_Type('/FS/Attr/Date/UnixTime' );
-  $Loader->Load_Type('/FS/Attr/Mode');
   
   Use T_FS_Attr_Date_UnixTime As FileTime ;
   Use T_FS_Attr_Mode          As Mode     ;
+  Use T_FS_Attr_Hash          As Hash     ;
+  Use T_FS_Attr_IntId         As IntId    ;
 
   Class C_FS_Driver_System Extends C_FS_Driver_Base
   {
@@ -21,18 +23,17 @@
       $this->BaseURL  = T_Inet_Url ::Create();
     }
  
-    Function Load($Path, $Args=[])
+    Function _Load($Path, $Args=[])
     {
       $Offset =$Args['Offset' ]?? 0     ;
       $Length =$Args['Length' ]?? Null  ;
     # $Lock   =$Args['Lock'   ]?? True  ;
     # $Text   =$Args['Text'   ]?? False ;
         
-      $P=$this->RealPath($Path);
-      Return File_Get_Contents($P, False, $this->Context, $Offset, $Length);
+      Return File_Get_Contents($Path, False, $this->Context, $Offset, $Length);
     }
  
-    Function Save($Path, $Data, $Args=[])
+    Function _Save($Path, $Data, $Args=[])
     {
       $Append =$Args['Append' ]?? False;
       $Lock   =$Args['Lock'   ]?? False;
@@ -40,16 +41,19 @@
         
       $Flags=($Append? FILE_APPEND:0)|($Lock? LOCK_EX:0);
         
-      $P=$this->RealPath($Path);
-      Return File_Put_Contents($P, $Data, $Flags, $this->Context);
+      Return File_Put_Contents($Path, $Data, $Flags, $this->Context);
     }
     
+    Function Save($Path, $Data, $Args=[]) { Return $this->_Save($this->RealPath($Path), $Data, $Args); }
+    Function Load($Path,        $Args=[]) { Return $this->_Load($this->RealPath($Path),        $Args); }
+ 
     Function RealPath($Path)
     {
-      Return $this->BasePath->_Clone()->Add(Is_Object($Path)? $Path->Make():$Path)->Make(); }
+      Return $this->BasePath->_Clone()->Add(Is_Object($Path)? $Path->Make():$Path)->Make();
+    }
  
-    Function IsFile ($Path) { Return Is_File($this->RealPath($Path)); }
-    Function IsDir  ($Path) { Return Is_Dir($this->RealPath($Path)); }
+    Function IsFile ($Path) { Return Is_File ($this->RealPath($Path)); }
+    Function IsDir  ($Path) { Return Is_Dir  ($this->RealPath($Path)); }
  
     Function Exists($Path)
     {
@@ -97,6 +101,7 @@
     {
       Return $this->BaseURL->Node($Path);
     }
+    
   //****************************************************************
   // Attributes
   
@@ -121,7 +126,7 @@
     //  Md5         String
     //Optional:
     //  Stat
-    //  LStat
+    //  LinkStat
     //
     //Device:
     //  DeviceId
@@ -134,20 +139,56 @@
       $Attr->Register([
         'RealPath'   =>[fn($Driver, $Path)=>$Driver->RealPath($Path) ,'Private'=>True],
         'Context'    =>[fn($Driver       )=>$Driver->Context         ,'Private'=>True],
-        'Stat'       => fn($RealPath)=>Stat       ($RealPath),
-        'LStat'      => fn($RealPath)=>LStat      ($RealPath),
+        'Content'    =>[fn($Driver, $RealPath, $Args)=>$Driver->_Load($RealPath, $Args), fn($Driver, $Content, $RealPath, $Args)=>$Driver->_Save($RealPath, $Content, $Args) ,'Cache'=>True],
+        'Stat'       => fn($RealPath)=>@Stat      ($RealPath),
+        'LinkStat'   => fn($RealPath)=>@LStat     ($RealPath),
 
+        'Executable' => fn($RealPath)=>Is_Executable ($RealPath),
+        'Readable'   => fn($RealPath)=>Is_Readable   ($RealPath),
+        'Writable'   => fn($RealPath)=>Is_Writable   ($RealPath),
+        
         'IsDir'      => fn($RealPath)=>Is_Dir     ($RealPath),
         'IsFile'     => fn($RealPath)=>Is_File    ($RealPath),
         'IsLink'     => fn($RealPath)=>Is_Link    ($RealPath),
         'Exists'     => fn($RealPath)=>FileExists ($RealPath),
-        'Mode'       => fn($Stat)=>New Mode($Stat['mode']),
 
-        'Md5'        =>[fn($RealPath)=>Md5_File($RealPath), 'Cache'=>'File'],
+        'Md5'        =>[fn($RealPath)=>New Hash(Md5_File  ($RealPath, True), 'Md5'  ), 'Cache'=>'File'],
+        'Sha1'       =>[fn($RealPath)=>New Hash(Sha1_File ($RealPath, True), 'Sha1' ), 'Cache'=>'File'],
         
-        'Created'    => fn($RealPath)=>New FileTime(FileCTime($RealPath)),
-        'Modified'   =>[fn($RealPath)=>New FileTime(FileMTime($RealPath)), fn($RealPath, $Modified, $LastAccess)=>Touch($RealPath, $Modified, $LastAccess), ],
-        'LastAccess' =>[fn($RealPath)=>New FileTime(FileATime($RealPath)), fn($RealPath, $Modified, $LastAccess)=>Touch($RealPath, $Modified, $LastAccess), ],
+        'Type'       => fn($RealPath)=>             FileType  ($RealPath) ,
+        'DeviceId'   => fn($Stat    )=>New IntId   ($Stat['dev'     ]), // 0
+        'NodeId'     => fn($RealPath)=>New IntId   (FileINode ($RealPath)), // 1
+        'Mode'       =>[fn($RealPath)=>New Mode    (FilePerms ($RealPath)), fn($RealPath, $Mode    )=>ChMod($RealPath, $Mode->ToInt()), ],
+        'NumLinks'   => fn($Stat    )=>             $Stat['nlink'   ]     , // 3
+        'UserId'     =>[fn($RealPath)=>             FileOwner ($RealPath) , fn($RealPath, $UserId  )=>ChOwn($RealPath, $UserId  ), ],
+        'GroupId'    =>[fn($RealPath)=>             FileGroup ($RealPath) , fn($RealPath, $GroupId )=>ChGrp($RealPath, $GroupId ), ],
+        'DeviceType' => fn($Stat    )=>             $Stat['rdev'    ]     , // 6
+        'Size'       => fn($RealPath)=>             FileSize  ($RealPath) ,
+        'LastAccess' => fn($RealPath)=>New FileTime(FileATime ($RealPath)),
+        'Modified'   => fn($RealPath)=>New FileTime(FileMTime ($RealPath)),
+        'Created'    => fn($RealPath)=>New FileTime(FileCTime ($RealPath)),
+        'BlockSize'  => fn($Stat    )=>             $Stat['blksize' ] , //11
+        'Blocks'     => fn($Stat    )=>             $Stat['blocks'  ] , //12
+        
+        fn($RealPath, $Modified, $LastAccess)=>Touch($RealPath, $Modified, $LastAccess),
+        
+        'UserName'  =>[fn($UserId  )=>(Posix_GetPwUId($UserId  )?:[])['name']?? '' ,fn($RealPath, $UserName  )=>ChOwn($RealPath, $UserName  )],
+        'GroupName' =>[fn($GroupId )=>(Posix_GetGrGId($GroupId )?:[])['name']?? '' ,fn($RealPath, $GroupName )=>ChGrp($RealPath, $GroupName )],
+        
+        'LinkUserName'  =>[fn($LinkUserId  )=>(Posix_GetPwUId($LinkUserId  )?:[])['name']?? '' ,fn($RealPath, $LinkUserName  )=>ChOwn($RealPath, $LinkUserName  )],
+        'LinkGroupName' =>[fn($LinkGroupId )=>(Posix_GetGrGId($LinkGroupId )?:[])['name']?? '' ,fn($RealPath, $LinkGroupName )=>ChGrp($RealPath, $LinkGroupName )],
+        
+        'DiskTotal' => fn($RealPath)=>Disk_Total_Space ($RealPath),
+        'DiskFree'  => fn($RealPath)=>Disk_Free_Space  ($RealPath),
+        'DiskUsed'  => fn($DiskTotal, $DiskFree)=>$DiskTotal? $DiskTotal-$DiskFree:$DiskTotal,
+        
+        'SymLink'  =>[fn($RealPath)=>ReadLink($RealPath), fn($RealPath, $SymLink )=>SymLink($RealPath, $SymLink )],
+        'HardLink' =>[Null                              , fn($RealPath, $HardLink)=>   Link($RealPath, $HardLink)],
+        
+        fn($RealPath, $LinkGroupId   )=>LChGrp($RealPath, $LinkGroupId   ),
+        fn($RealPath, $LinkGroupName )=>LChGrp($RealPath, $LinkGroupName ),
+        fn($RealPath, $LinkUserId    )=>LChOwn($RealPath, $LinkUserId    ),
+        fn($RealPath, $LinkUserName  )=>LChOwn($RealPath, $LinkUserName  ),
       ]);
     }
     

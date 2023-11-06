@@ -2,7 +2,16 @@
   $Loader->Parent_Class('/Object');
   $Loader->Load_Type('/FS/Driver/Node');
   $Loader->Load_Type('/Inet/Url');
- 
+  $Loader->Load_Type('/FS/Attr/Mode');
+  $Loader->Load_Type('/FS/Attr/Hash');
+  $Loader->Load_Type('/FS/Attr/IntId');
+  $Loader->Load_Type('/FS/Attr/Date/UnixTime' );
+
+  Use T_FS_Attr_Date_UnixTime As FileTime ;
+  Use T_FS_Attr_Mode          As Mode     ;
+  Use T_FS_Attr_Hash          As Hash     ;
+  Use T_FS_Attr_IntId         As IntId    ;
+
   Class C_FS_Driver_Base Extends C_Object
     Implements ArrayAccess
   {
@@ -78,14 +87,68 @@
   //****************************************************************
     Function Attr_Init($Attr)
     {
+      $Attr->Register([
+        'Args'       =>[fn()=>[]   ,'Private'=>True, 'Cache'=>False], //System
+        'Attr'       =>[fn()=>[]   ,'Private'=>True, 'Cache'=>False], //System??
+        'Driver'     =>[fn()=>Null ,'Private'=>True, 'Cache'=>False], //System
+        'Path'       =>[fn()=>''   ,'Private'=>True, 'Cache'=>False], //System
+      //'Stat'       => fn()=>Static::_EmptyStat(),
+      //'LinkStat'   => fn()=>Static::_EmptyStat(),
+      //'Content'    =>[fn($Driver, $Path, $Args)=>$Driver->_Load($Path, $Args), fn($Driver, $Content, $RealPath, $Args)=>$Driver->_Save($Path, $Content, $Args) ,'Cache'=>True],
+      
+        'PathInfo'   => fn($Path)=>PathInfo($Path),
+        
+        'FileDir'    => fn($PathInfo)=>$PathInfo['dirname'   ], // /www/htdocs/inc
+        'FileName'   => fn($PathInfo)=>$PathInfo['basename'  ], // lib.inc.php
+        'FileExt'    => fn($PathInfo)=>$PathInfo['extension' ], // php
+        'FileNick'   => fn($PathInfo)=>$PathInfo['filename'  ], // lib.inc
+
+        'IsDir'      => fn($RealPath)=>Is_Dir     ($RealPath),
+        'IsFile'     => fn($RealPath)=>Is_File    ($RealPath),
+        'IsLink'     => fn($RealPath)=>Is_Link    ($RealPath),
+        'Exists'     => fn($RealPath)=>FileExists ($RealPath),
+
+        'Md5'        => fn($Content)=>New Hash(Md5  ($Content, True), 'Md5'  ),
+        'Sha1'       => fn($Content)=>New Hash(Sha1 ($Content, True), 'Sha1' ),
+        
+        'Type'       => fn($Mode)=>$Mode->GetType(),
+        'DeviceId'   => fn($Stat)=>New IntId   ($Stat['dev'     ]), // 0
+        'NodeId'     => fn($Stat)=>New IntId   ($Stat['ino'     ]), // 1
+        'Mode'       => fn($Stat)=>New Mode    ($Stat['mode'    ]), // 2
+        'NumLinks'   => fn($Stat)=>             $Stat['nlink'   ] , // 3
+        'UserId'     => fn($Stat)=>             $Stat['uid'     ] , // 4
+        'GroupId'    => fn($Stat)=>             $Stat['gid'     ] , // 5
+        'DeviceType' => fn($Stat)=>             $Stat['rdev'    ] , // 6
+        'Size'       => fn($Stat)=>             $Stat['size'    ] , // 7
+        'LastAccess' => fn($Stat)=>New FileTime($Stat['atime'   ]), // 8
+        'Modified'   => fn($Stat)=>New FileTime($Stat['mtime'   ]), // 9
+        'Created'    => fn($Stat)=>New FileTime($Stat['ctime'   ]), //10
+        'BlockSize'  => fn($Stat)=>             $Stat['blksize' ] , //11
+        'Blocks'     => fn($Stat)=>             $Stat['blocks'  ] , //12
+
+        'LinkType'       => fn($LinkMode)=>$Mode->GetType(),
+        'LinkDeviceId'   => fn($LinkStat)=>New IntId   ($Stat['dev'     ]), // 0
+        'LinkNodeId'     => fn($LinkStat)=>New IntId   ($Stat['ino'     ]), // 1
+        'LinkMode'       => fn($LinkStat)=>New Mode    ($Stat['mode'    ]), // 2
+        'LinkNumLinks'   => fn($LinkStat)=>             $Stat['nlink'   ] , // 3
+        'LinkUserId'     => fn($LinkStat)=>             $Stat['uid'     ] , // 4
+        'LinkGroupId'    => fn($LinkStat)=>             $Stat['gid'     ] , // 5
+        'LinkDeviceType' => fn($LinkStat)=>             $Stat['rdev'    ] , // 6
+        'LinkSize'       => fn($LinkStat)=>             $Stat['size'    ] , // 7
+        'LinkLastAccess' => fn($LinkStat)=>New FileTime($Stat['atime'   ]), // 8
+        'LinkModified'   => fn($LinkStat)=>New FileTime($Stat['mtime'   ]), // 9
+        'LinkCreated'    => fn($LinkStat)=>New FileTime($Stat['ctime'   ]), //10
+        'LinkBlockSize'  => fn($LinkStat)=>             $Stat['blksize' ] , //11
+        'LinkBlocks'     => fn($LinkStat)=>             $Stat['blocks'  ] , //12
+      ]);
     }
     
-    Function GetAttributes(String $Path, Array $List)
+    Function GetAttrs(String $Path, Array $List)
     {
       Return $this->Attr->Get(['Driver'=>$this, 'Path'=>$Path], $List);
     }
     
-    Function SetAttributes(String $Path, Array $Values)
+    Function SetAttrs(String $Path, Array $Values)
     {
       Return $this->Attr->Set(['Driver'=>$this, 'Path'=>$Path], $Values);
     }

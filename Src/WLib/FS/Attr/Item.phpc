@@ -52,18 +52,27 @@
     Function Get($Map) { Return $this->Getter->Call($this, $Map); }
     Function Set($Map) { Return $this->Setter->Call($this, $Map); }
     
-    Function GetRecursive(&$Res)
+    Function GetRecursive(&$Vars, $Args)
     {
       ForEach($this->GetDeps() As $Name=>$Item)
-        If(!Array_Key_Exists($Name, $Res))
-          $Res[$Name]=$Item->GetRecursive($Res);
+        If(!Array_Key_Exists($Name, $Vars))
+          $Vars[$Name]=$Item->GetRecursive($Vars, []);
     
-      Return $this->Get($Res);
+      $Vars['Args']=$Args;
+      Return $this->Get($Vars);
     }
     
-    Function SetRecursive($Res, $Values)
+    Function SetRecursive(&$Vars, $Args, $List)
     {
-      Return $Res;
+      ForEach($this->SetDeps() As $Name=>$Item)
+      {
+        If(!Array_Key_Exists($Name, $Vars))
+          $Vars[$Name]=$Item->GetRecursive($Vars, []);
+        UnSet($List[$Name]); //Remove for to aviod duplicate calls for setters with several args like Touch
+      }
+    
+      $Vars['Args']=$Args;
+      Return $this->Set($Vars);
     }
   }
 ?>

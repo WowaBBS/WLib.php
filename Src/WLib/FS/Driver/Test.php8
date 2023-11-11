@@ -2,7 +2,7 @@
 //ini_set('display_errors', 'off');
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
 
-  $Loader->GetLogger()->Add('Test.log');
+  $Loader->GetLogger()->Add(SubStr(__FILE__,0,-5).'.log');
   $Test=$Loader->Create_Object('/UnitTest/Suite');
   $Test->StartDir(__Dir__);
 ?>

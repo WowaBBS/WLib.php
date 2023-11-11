@@ -39,9 +39,10 @@
       Return $Res;
     }
 
-    Function IsFile  (                     ) { Return $this->Driver->IsFile  ($this->Path                 ); }
-    Function IsDir   (                     ) { Return $this->Driver->IsDir   ($this->Path                 ); }
-    Function Exists  (                     ) { Return $this->Driver->Exists  ($this->Path                 ); }
+    Function IsFile  (                     ) { Return $this->Get('IsFile' ); }
+    Function IsDir   (                     ) { Return $this->Get('IsDir'  ); }
+    Function IsLink  (                     ) { Return $this->Get('IsLink' ); }
+    Function Exists  (                     ) { Return $this->Get('Exists' ); }
     Function Stream  ($Mode                ) { Return $this->Driver->Stream  ($this->Path, $Mode          ); }
     Function Files   ($Mask=False, $Attr=3 ) { Return $this->Driver->Files   ($this->Path, $Mask, $Attr   ); }
     Function Nodes   (                     ) { Return $this->Driver->Nodes   ($this->Path                 ); }
@@ -54,13 +55,38 @@
 
   //****************************************************************
   // Attributes
+  
+  // Usage:
+  //   Get one attribute      : $Value=Attr('Name')
+  //   Get several attributes : [$v1, $v2]=Attr(['N1', 'N2'])
+  //   Set value attribute    : Attr('Name', $Value);
+  //   Set values attributes  : Attr(['N1'=>$v1, 'N2'=>$v2]);
+  # Function Attr($Get, $Set=Null) { Return $this->Driver->Attr($this->Path, $Get, $Set); }
+  # Function GetAttrs(Array $List   ) { Return $this->Driver->GetAttrs($this->Path, $List   ); }
+  # Function SetAttrs(Array $Values ) { Return $this->Driver->SetAttrs($this->Path, $Values ); }
+    Function GetSet(Array $Key, Array $Args=[]) { Return $this->Driver->GetSet($this->Path, $Key, $Args); }
+    Function Get($Key, $Args=[])
+    {
+      If(Is_String($Key))
+        Return $this->GetSet([$Key], [$Key=>$Args])[$Key]?? Null;
+      Return $this->GetSet($Key ,$Args);
+    }
+    
+    Function Set(String $Key, $Value=[], $Args=Null)
+    {
+    //If(Is_String($Key))
+        Return $this->GetSet([$Key=>$Value], [$Key=>$Args??[]])[$Key]?? Null;
+    //Return $this->GetSet($Key ,$Args?? $Value);
+    }
 
-    Function GetAttrs(Array $List   ) { Return $this->Driver->GetAttrs($this->Path, $List   ); }
-    Function SetAttrs(Array $Values ) { Return $this->Driver->SetAttrs($this->Path, $Values ); }
+    Function Call(String $Key, $Args=[])
+    {
+      Return $this->GetSet([$Key], [$Key=>$Args])[$Key]?? Null;
+    }
 
   //****************************************************************
   // Debug
-  
+
     Function _Debug_Serialize(Array &$Res)
     {
       UnSet($Res['Driver']); //TODO: Debug_Inline;

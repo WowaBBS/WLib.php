@@ -116,44 +116,71 @@
       Return $Res;
     }
     
-    Function Get($Vars, $List)
+    Function GetSet($List, $Args, $Vars)
     {
-      If(!True)
-        $Vars=$this->GetLinear($Vars, $List);
-      Else
-        $Vars=$this->GetRecursive($Vars, $List);
-      $Res=[];
-      ForEach($List As $k=>$v)
-      {
-        $Key=Is_String($k)? $k:$v;
-        $Res[$Key]=$Vars[$Key];
+      If(Is_String($List))
+      { //Warning?
+        If(!Array_Key_Exists('Value', $Args))
+          Return $this->GetSet([$List], [$List=>$Args], $Vars)[$List];
+        $Value=$Args['Value']; UnSet($Args['Value']);
+        Return $this->GetSet([$List=>$Value], [$List=>$Args], $Vars)[$List];
       }
+      ForEach($List As $k=>$v) //Setters
+        If(Is_String($k))
+          $Vars[$k]=$v;
+      $Res=[];
+      If(!True)
+        $this->_Linear($Res, $Vars, $List, $Args);
+      Else
+        $this->_Recursive($Res, $Vars, $List, $Args);
+    # ForEach($List As $k=>$v)
+    # {
+    #   $Key=Is_String($k)? $k:$v;
+    #   $Res[$Key]=$Vars[$Key];
+    # }
       Return $Res;
     }
     
-    Function GetRecursive($Res, $List)
+    Function _Recursive(&$Res, &$Vars, $List, $Args)
     {
       $Attrs=$this->List;
-      ForEach($List As $Name)
-        If(!Array_Key_Exists($Name, $Res))
+      ForEach($List As $k=>$v)
+      {
+        If(Is_String($k)) //Set
+        {
+          $Name=$k;
+          $Item=$Attrs[$Name]?? Null;
+          If(!$Item) { $this->Log('Error', 'Attribute ', $Name, ' is not exists'); $Vars[$Name]=Null; Continue; }
+          $R=$Item->SetRecursive($Vars, $Args[$Name]?? [], $List);
+          $Res[$Name]??=$R;
+          Continue;
+        }
+        $Name=$v;
+        If(Array_Key_Exists($Name, $Vars))
+        { //Has already exists
+          $R=$Vars[$Name];
+        }
+        Else
         {
           $Item=$Attrs[$Name]?? Null;
-          If(!$Item) { $this->Log('Error', 'Attribute ', $Name, ' is not exists'); $Res[$Name]=Null; Continue; }
-          $Res[$Name]=$Item->GetRecursive($Res);
+          If(!$Item) { $this->Log('Error', 'Attribute ', $Name, ' is not exists'); $Vars[$Name]=Null; Continue; }
+          $R=$Item->GetRecursive($Vars, $Args[$Name]?? []);
+          $Vars[$Name]=$R;
         }
-      Return $Res;
+        $Res[$Name]=$R;
+      }
     }
     
-    Function GetLinear($Res, $List)
-    {
+    Function _Linear(&$Res, &$Vars, $List, $Args)
+    { //TODO:
       $Attrs=$this->List;
       
       $Delayed=[];
       ForEach($List As $Name)
-        If(!Array_Key_Exists($Name, $Res))
+        If(!Array_Key_Exists($Name, $Vars))
         {
           $Item=$Attrs[$Name]?? Null;
-          If(!$Item) { $this->Log('Error', 'Attribute ', $Name, ' is not exists'); $Res[$Name]=Null; Continue; }
+          If(!$Item) { $this->Log('Error', 'Attribute ', $Name, ' is not exists'); $Vars[$Name]=Null; Continue; }
           $Delayed[$Name]=$Item;
         }
       
@@ -162,20 +189,13 @@
         $List=$Delayed;
         $Delayed=[];
         ForEach($List As $Name)
-          If(!Array_Key_Exists($Name, $Res))
+          If(!Array_Key_Exists($Name, $Vars))
           {
             $Item=$this->List[$Name]?? Null;
-            If(!$Item) { $this->Log('Error', 'Attribute ', $Name, ' is not exists'); $Res[$Name]=Null; Continue; }
+            If(!$Item) { $this->Log('Error', 'Attribute ', $Name, ' is not exists'); $Vars[$Name]=Null; Continue; }
             $Delayed[$Name]=$Item;
           }
       }
-    
-      Return $Res;
-    }
-    
-    Function Set($Res, $Values)
-    {
-      Return $Res;
     }
     
     Function Deps_Invalidate()

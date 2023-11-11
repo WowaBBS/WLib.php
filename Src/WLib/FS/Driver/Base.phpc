@@ -24,8 +24,10 @@
       $this->Attr_Init($this->Attr);
     }
     
-    Function IsFile($Path) { Return False; }
-    Function IsDir($Path) { Return False; }
+    Function IsFile ($Path) { Return Get($Path, 'IsFile' ); }
+    Function IsDir  ($Path) { Return Get($Path, 'IsDir'  ); }
+    Function IsLink ($Path) { Return Get($Path, 'IsLink' ); }
+    Function Exists ($Path) { Return Get($Path, 'Exists' ); }
  
     Function Load($Path, $Args=[])
     {
@@ -96,15 +98,16 @@
       //'LinkStat'   => fn()=>Static::_EmptyStat(),
       //'Content'    =>[fn($Driver, $Path, $Args)=>$Driver->_Load($Path, $Args), fn($Driver, $Content, $RealPath, $Args)=>$Driver->_Save($Path, $Content, $Args) ,'Cache'=>True],
       
-        'PathInfo'   => fn($Path)=>PathInfo($Path),
+        'PathInfo'   => fn($Path)=>PathInfo($Path),             // /www/htdocs/inc/lib.inc.php
         
-        'FileDir'    => fn($PathInfo)=>$PathInfo['dirname'   ], // /www/htdocs/inc
-        'FileName'   => fn($PathInfo)=>$PathInfo['basename'  ], // lib.inc.php
-        'FileExt'    => fn($PathInfo)=>$PathInfo['extension' ], // php
-        'FileNick'   => fn($PathInfo)=>$PathInfo['filename'  ], // lib.inc
+        'Folder'     => fn($PathInfo)=>$PathInfo['dirname'   ], // /www/htdocs/inc
+        'Name'       => fn($PathInfo)=>$PathInfo['basename'  ], // lib.inc.php
+        'Ext'        => fn($PathInfo)=>$PathInfo['extension' ], // php
+        'Nick'       => fn($PathInfo)=>$PathInfo['filename'  ], // lib.inc
+        'NoExt'      => fn($PathInfo)=>$PathInfo['extension' ], // /www/htdocs/inc/lib.inc
 
-        'IsDir'      => fn($RealPath)=>Is_Dir     ($RealPath),
-        'IsFile'     => fn($RealPath)=>Is_File    ($RealPath),
+        'IsDir'      => fn($RealPath)=>False ,
+        'IsFile'     => fn($RealPath)=>False ,
         'IsLink'     => fn($RealPath)=>Is_Link    ($RealPath),
         'Exists'     => fn($RealPath)=>FileExists ($RealPath),
 
@@ -140,18 +143,16 @@
         'LinkCreated'    => fn($LinkStat)=>New FileTime($Stat['ctime'   ]), //10
         'LinkBlockSize'  => fn($LinkStat)=>             $Stat['blksize' ] , //11
         'LinkBlocks'     => fn($LinkStat)=>             $Stat['blocks'  ] , //12
+        
+        'TestFunc' => fn($Driver, $Args)=>$Driver->Log('Debug', 'TestFunc ', $Args)->Ret('TestResult'),
+        'Test'  =>[fn($Driver, $Args)=>$Driver->Log('Debug', 'TestGet ', $Args)->Ret('TestValue'), fn($Driver, $Test, $Args)=>$Driver->Log('Debug', 'TestSet ', $Test, ' ', $Args)->Ret('TestRes')],
       ]);
     }
     
-    Function GetAttrs(String $Path, Array $List)
-    {
-      Return $this->Attr->Get(['Driver'=>$this, 'Path'=>$Path], $List);
-    }
-    
-    Function SetAttrs(String $Path, Array $Values)
-    {
-      Return $this->Attr->Set(['Driver'=>$this, 'Path'=>$Path], $Values);
-    }
+  # Function Attr(String $Path, $Get, $Set=[]) { Return $this->Attr->GetSet(['Driver'=>$this, 'Path'=>$Path], $Get, $Set); }
+  # Function GetAttrs(String $Path, Array $List   ) { Return $this->Attr->Get(['Driver'=>$this, 'Path'=>$Path], $List   ); }
+  # Function SetAttrs(String $Path, Array $Values ) { Return $this->Attr->Set(['Driver'=>$this, 'Path'=>$Path], $Values ); } 
+    Function GetSet(String $Path ,Array $Key ,$Args=[]) { Return $this->Attr->GetSet($Key ,$Args, ['Driver'=>$this, 'Path'=>$Path]); }
     
   //****************************************************************
   // ArrayAccess interface

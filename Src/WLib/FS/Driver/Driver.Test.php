@@ -26,6 +26,8 @@
 
     Function TestSystem($Factory)
     {
+      Include 'Example.Attr.php8';
+    /*
       $FS=$Factory->Create('System');
       $this->Log('Debug', 'Node:' )->Debug($FS[__FILE__  ]);
       $this->Log('Debug', 'Mode: ',        $FS[__FILE__  ]->Get('Mode'));
@@ -40,6 +42,7 @@
       $this->Log('Debug', 'UnknownFunc : ', $Node->Call('UnknownFunc', ['a'=>1, 'b'=>2]));
       $this->Log('Debug', 'UnknownGet  : ', $Node->Get('Unknown', ['a'=>1, 'b'=>2]));
       $this->Log('Debug', 'UnknownSet  : ', $Node->Set('Unknown', 'InTestValue', ['a'=>1, 'b'=>2]));
+    */
     }
   }
 ?>

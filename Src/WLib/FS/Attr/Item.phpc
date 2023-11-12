@@ -56,7 +56,7 @@
     {
       ForEach($this->GetDeps() As $Name=>$Item)
         If(!Array_Key_Exists($Name, $Vars))
-          $Vars[$Name]=$Item->GetRecursive($Vars, []);
+          $Vars[$Name]=$Item->GetRecursive($Vars, Null);
     
       $Vars['Args']=$Args;
       Return $this->Get($Vars);
@@ -67,7 +67,7 @@
       ForEach($this->SetDeps() As $Name=>$Item)
       {
         If(!Array_Key_Exists($Name, $Vars))
-          $Vars[$Name]=$Item->GetRecursive($Vars, []);
+          $Vars[$Name]=$Item->GetRecursive($Vars, Null);
         UnSet($List[$Name]); //Remove for to aviod duplicate calls for setters with several args like Touch
       }
     

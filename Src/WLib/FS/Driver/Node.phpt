@@ -2,6 +2,7 @@
   $Loader->Load_Type('/FS/Path');
 
   Class T_FS_Driver_Node
+    Implements ArrayAccess
   {
     Var $Driver =False;
     Var $Path   =False;
@@ -16,15 +17,15 @@
 
   //Function Clone() { Return New $this->Create_Object('/FS/Driver/Node', $this->Driver, $this->Path); }
 
-    Function ChDir($Path)
-    {
-      $Path=T_FS_Path::Create($Path);
-      If($Path->Path)
-      {
-        $Path->Norm($this->Path);
-        $this->Path->Assign($Path);
-      }
-    }
+  # Function ChDir($Path)
+  # {
+  #   $Path=T_FS_Path::Create($Path);
+  #   If($Path->Path)
+  #   {
+  #     $Path->Norm($this->Path);
+  #     $this->Path->Assign($Path);
+  #   }
+  # }
 
     Function Node($Path='')
     {
@@ -53,18 +54,32 @@
     Function Load    (       $Args=[]      ) { Return $this->Driver->Load    ($this->Path       , $Args   ); }
     Function Save    ($Data, $Args=[]      ) { Return $this->Driver->Save    ($this->Path, $Data, $Args   ); }
 
+    Function MkDir  ($Recursive=True, $Mode=0777) { Return $this->Call('MkDir'  ,['Mode'=>$Mode, 'Recursive'=>$Recursive]); }
+    
+    Function UnLink (                ) { Return $this->Call('UnLink' ); }
+    Function RmDir  ($Recursive=False) { Return $this->Call('RmDir'  ,['Recursive'=>$Recursive]); }
+    Function Remove ($Recursive=False) { Return $this->Call('Remove' ,['Recursive'=>$Recursive]); }
+    
+    Function _Remove($Args)
+    {
+      If($this->IsFile())
+        Return $this->UnLink();
+      If(!$this->IsDir()) Return;
+    //If(!$this->IsLink())
+      Return $this->RmDir($Args['Recursive']?? Null);
+    }
+
   //****************************************************************
   // Attributes
   
   // Usage:
-  //   Get one attribute      : $Value=Attr('Name')
-  //   Get several attributes : [$v1, $v2]=Attr(['N1', 'N2'])
-  //   Set value attribute    : Attr('Name', $Value);
-  //   Set values attributes  : Attr(['N1'=>$v1, 'N2'=>$v2]);
-  # Function Attr($Get, $Set=Null) { Return $this->Driver->Attr($this->Path, $Get, $Set); }
-  # Function GetAttrs(Array $List   ) { Return $this->Driver->GetAttrs($this->Path, $List   ); }
-  # Function SetAttrs(Array $Values ) { Return $this->Driver->SetAttrs($this->Path, $Values ); }
-    Function GetSet(Array $Key, Array $Args=[]) { Return $this->Driver->GetSet($this->Path, $Key, $Args); }
+  //   Get one attribute      : $Value=Get('Name')
+  //   Get several attributes : ['N1'=>$v1, 'N2'=>$v2]=GetSet(['N1', 'N2'])
+  //                            ['N1'=>$v1, 'N2'=>$v2]=Get(['N1', 'N2'])
+  //   Set value attribute    : Set('Name', $Value);
+  //                            GetSet(['Name'=>$Value]);
+  //   Set values attributes  : GetSet(['N1'=>$v1, 'N2'=>$v2]);
+    Function GetSet(Array $Key, Array $Args=[]) { Return $this->Driver->GetSet($this->Path, $Key, $Args, ['Node'=>$this]); }
     Function Get($Key, $Args=[])
     {
       If(Is_String($Key))
@@ -83,7 +98,17 @@
     {
       Return $this->GetSet([$Key], [$Key=>$Args])[$Key]?? Null;
     }
+    
+    Function Supports($Key) { Return True; } //TODO: Check attribute exists
 
+  //****************************************************************
+  // ArrayAccess interface
+
+    Public Function OffsetExists ($k    ):Bool  { return $this->Supports($k); }
+    Public Function OffsetGet    ($k    ):Mixed { return $this->Get($k); }
+    Public Function OffsetSet    ($k ,$v):Void  { $this->Set($k, $v); }
+    Public Function OffsetUnset  ($k    ):Void  { $this->Log('Fatal', 'Unsupported'); }
+    
   //****************************************************************
   // Debug
 
@@ -91,7 +116,7 @@
     {
       UnSet($Res['Driver']); //TODO: Debug_Inline;
     }
-  
+
   //****************************************************************
   }
 ?>

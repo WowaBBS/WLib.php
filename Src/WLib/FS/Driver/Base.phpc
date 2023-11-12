@@ -6,11 +6,13 @@
   $Loader->Load_Type('/FS/Attr/Hash');
   $Loader->Load_Type('/FS/Attr/IntId');
   $Loader->Load_Type('/FS/Attr/Date/UnixTime' );
+  $Loader->Load_Type('/FS/Driver/Attr' );
 
   Use T_FS_Attr_Date_UnixTime As FileTime ;
   Use T_FS_Attr_Mode          As Mode     ;
   Use T_FS_Attr_Hash          As Hash     ;
   Use T_FS_Attr_IntId         As IntId    ;
+  Use T_FS_Driver_Attr        As Attr     ;
 
   Class C_FS_Driver_Base Extends C_Object
     Implements ArrayAccess
@@ -24,11 +26,6 @@
       $this->Attr_Init($this->Attr);
     }
     
-    Function IsFile ($Path) { Return Get($Path, 'IsFile' ); }
-    Function IsDir  ($Path) { Return Get($Path, 'IsDir'  ); }
-    Function IsLink ($Path) { Return Get($Path, 'IsLink' ); }
-    Function Exists ($Path) { Return Get($Path, 'Exists' ); }
- 
     Function Load($Path, $Args=[])
     {
       $Offset =$Args['Offset' ]?? 0     ;
@@ -69,10 +66,27 @@
       $f->Close();
     }
  
-    Function Include($Include_Path, $UnPack_Vars=[], $Pack_Vars=[])
+    Function Include($Include_Path, $UnPack_Vars=[], $Pack_Vars=[]) { $this->Call($Path, 'Include', ['UnPack_Vars'=>$UnPack_Vars, 'Pack_Vars'=>$Pack_Vars]); }
+  //Function Include($Include_Path, $UnPack_Vars=[], $Pack_Vars=[]) { Return $this->Content_Include($this->Load($Include_Path), ['UnPack_Vars'=>$UnPack_Vars, 'Pack_Vars'=>$Pack_Vars]); }
+  //Function Include($Include_Path, $UnPack_Vars=[], $Pack_Vars=[]) { Return $this->Real_Include($this->RealPath($Include_Path), ['UnPack_Vars'=>$UnPack_Vars, 'Pack_Vars'=>$Pack_Vars]); }
+ 
+    Function _Content_Include($Content, $Args=[])
     {
+      $UnPack_Vars =$Args['UnPack_Vars' ]?? [];
+      $Pack_Vars   =$Args['Pack_Vars'   ]?? [];
       Extract($UnPack_Vars);
-      $Res=Eval('?>'.$this->Load($Include_Path)); //.'<?'
+      $Res=Eval('?>'.$Content); //.'<?'
+      ForEach($Pack_Vars As $Pack_Var)
+        $UnPack_Vars[$Pack_Var]=${$Pack_Var};
+      Return $Res;
+    }
+ 
+    Function _Real_Include($RealPath, $Args=[])
+    {
+      $UnPack_Vars =$Args['UnPack_Vars' ]?? [];
+      $Pack_Vars   =$Args['Pack_Vars'   ]?? [];
+      Extract($UnPack_Vars);
+      $Res=Include $RealPath;
       ForEach($Pack_Vars As $Pack_Var)
         $UnPack_Vars[$Pack_Var]=${$Pack_Var};
       Return $Res;
@@ -89,70 +103,28 @@
   //****************************************************************
     Function Attr_Init($Attr)
     {
+      Attr::Init_System  ($Attr);
+      Attr::Init_Path    ($Attr);
+      Attr::Init_Stat    ($Attr);
+      Attr::Init_Test    ($Attr);
+      $this->Attr_Init_Content ($Attr);
+
       $Attr->Register([
-        'Args'       =>[fn()=>[]   ,'Private'=>True, 'Cache'=>False], //System
-        'Attr'       =>[fn()=>[]   ,'Private'=>True, 'Cache'=>False], //System??
-        'Driver'     =>[fn()=>Null ,'Private'=>True, 'Cache'=>False], //System
-        'Path'       =>[fn()=>''   ,'Private'=>True, 'Cache'=>False], //System
-      //'Stat'       => fn()=>Static::_EmptyStat(),
-      //'LinkStat'   => fn()=>Static::_EmptyStat(),
-      //'Content'    =>[fn($Driver, $Path, $Args)=>$Driver->_Load($Path, $Args), fn($Driver, $Content, $RealPath, $Args)=>$Driver->_Save($Path, $Content, $Args) ,'Cache'=>True],
-      
-        'PathInfo'   => fn($Path)=>PathInfo($Path),             // /www/htdocs/inc/lib.inc.php
-        
-        'Folder'     => fn($PathInfo)=>$PathInfo['dirname'   ], // /www/htdocs/inc
-        'Name'       => fn($PathInfo)=>$PathInfo['basename'  ], // lib.inc.php
-        'Ext'        => fn($PathInfo)=>$PathInfo['extension' ], // php
-        'Nick'       => fn($PathInfo)=>$PathInfo['filename'  ], // lib.inc
-        'NoExt'      => fn($PathInfo)=>$PathInfo['extension' ], // /www/htdocs/inc/lib.inc
-
-        'IsDir'      => fn($RealPath)=>False ,
-        'IsFile'     => fn($RealPath)=>False ,
-        'IsLink'     => fn($RealPath)=>Is_Link    ($RealPath),
-        'Exists'     => fn($RealPath)=>FileExists ($RealPath),
-
-        'Md5'        => fn($Content)=>New Hash(Md5  ($Content, True), 'Md5'  ),
-        'Sha1'       => fn($Content)=>New Hash(Sha1 ($Content, True), 'Sha1' ),
-        
-        'Type'       => fn($Mode)=>$Mode->GetType(),
-        'DeviceId'   => fn($Stat)=>New IntId   ($Stat['dev'     ]), // 0
-        'NodeId'     => fn($Stat)=>New IntId   ($Stat['ino'     ]), // 1
-        'Mode'       => fn($Stat)=>New Mode    ($Stat['mode'    ]), // 2
-        'NumLinks'   => fn($Stat)=>             $Stat['nlink'   ] , // 3
-        'UserId'     => fn($Stat)=>             $Stat['uid'     ] , // 4
-        'GroupId'    => fn($Stat)=>             $Stat['gid'     ] , // 5
-        'DeviceType' => fn($Stat)=>             $Stat['rdev'    ] , // 6
-        'Size'       => fn($Stat)=>             $Stat['size'    ] , // 7
-        'LastAccess' => fn($Stat)=>New FileTime($Stat['atime'   ]), // 8
-        'Modified'   => fn($Stat)=>New FileTime($Stat['mtime'   ]), // 9
-        'Created'    => fn($Stat)=>New FileTime($Stat['ctime'   ]), //10
-        'BlockSize'  => fn($Stat)=>             $Stat['blksize' ] , //11
-        'Blocks'     => fn($Stat)=>             $Stat['blocks'  ] , //12
-
-        'LinkType'       => fn($LinkMode)=>$Mode->GetType(),
-        'LinkDeviceId'   => fn($LinkStat)=>New IntId   ($Stat['dev'     ]), // 0
-        'LinkNodeId'     => fn($LinkStat)=>New IntId   ($Stat['ino'     ]), // 1
-        'LinkMode'       => fn($LinkStat)=>New Mode    ($Stat['mode'    ]), // 2
-        'LinkNumLinks'   => fn($LinkStat)=>             $Stat['nlink'   ] , // 3
-        'LinkUserId'     => fn($LinkStat)=>             $Stat['uid'     ] , // 4
-        'LinkGroupId'    => fn($LinkStat)=>             $Stat['gid'     ] , // 5
-        'LinkDeviceType' => fn($LinkStat)=>             $Stat['rdev'    ] , // 6
-        'LinkSize'       => fn($LinkStat)=>             $Stat['size'    ] , // 7
-        'LinkLastAccess' => fn($LinkStat)=>New FileTime($Stat['atime'   ]), // 8
-        'LinkModified'   => fn($LinkStat)=>New FileTime($Stat['mtime'   ]), // 9
-        'LinkCreated'    => fn($LinkStat)=>New FileTime($Stat['ctime'   ]), //10
-        'LinkBlockSize'  => fn($LinkStat)=>             $Stat['blksize' ] , //11
-        'LinkBlocks'     => fn($LinkStat)=>             $Stat['blocks'  ] , //12
-        
-        'TestFunc' => fn($Driver, $Args)=>$Driver->Log('Debug', 'TestFunc ', $Args)->Ret('TestResult'),
-        'Test'  =>[fn($Driver, $Args)=>$Driver->Log('Debug', 'TestGet ', $Args)->Ret('TestValue'), fn($Driver, $Test, $Args)=>$Driver->Log('Debug', 'TestSet ', $Test, ' ', $Args)->Ret('TestRes')],
+        'Remove' =>fn($Node, $Args)=>$Node->_Remove($Args),
       ]);
     }
     
-  # Function Attr(String $Path, $Get, $Set=[]) { Return $this->Attr->GetSet(['Driver'=>$this, 'Path'=>$Path], $Get, $Set); }
-  # Function GetAttrs(String $Path, Array $List   ) { Return $this->Attr->Get(['Driver'=>$this, 'Path'=>$Path], $List   ); }
-  # Function SetAttrs(String $Path, Array $Values ) { Return $this->Attr->Set(['Driver'=>$this, 'Path'=>$Path], $Values ); } 
-    Function GetSet(String $Path ,Array $Key ,$Args=[]) { Return $this->Attr->GetSet($Key ,$Args, ['Driver'=>$this, 'Path'=>$Path]); }
+    Function Attr_Init_Content($Attr)
+    {
+      $Attr->Register([
+      //'Content'    =>[fn($Driver, $Path, $Args)=>$Driver->_Load($Path, $Args), fn($Driver, $Content, $RealPath, $Args)=>$Driver->_Save($Path, $Content, $Args) ,'Cache'=>True],
+
+        'Md5'        => fn($Content)=>New Hash(Md5  ($Content, True), 'Md5'  ),
+        'Sha1'       => fn($Content)=>New Hash(Sha1 ($Content, True), 'Sha1' ),
+      ]);
+    }
+    
+    Function GetSet(String $Path ,Array $Key ,$Args=[], $Vars=[]) { Return $this->Attr->GetSet($Key ,$Args, $Vars+['Driver'=>$this, 'Path'=>$Path, 'Args'=>[]]); }
     
   //****************************************************************
   // ArrayAccess interface

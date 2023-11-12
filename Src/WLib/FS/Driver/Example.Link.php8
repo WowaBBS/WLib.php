@@ -1,0 +1,59 @@
+<?
+  If(!IsSet($Factory))
+  {
+    for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+    $Loader->GetLogger()->Add(SubStr(__FILE__,0,-5).'.log');
+    
+    $Factory=$Loader->Create_Object('/FS/Driver/Factory');
+  }
+  
+  $Dir='Test';
+  @MkDir($Dir);
+  $OldCwd=GetCwd();
+  ChDir($Dir);
+  
+  $FS=$Factory->Create('System'); //, ['Path'=>$Dir]);
+  
+  $FS->Log('Debug', 'GetCwd()=', GetCwd());
+  
+  If(!$FS['a']->IsDir())
+  {
+    $FS['TestFile.txt' ]['Content'  ]='Hello world';
+    $FS['a/x'          ]->MkDir();
+  
+    $FS['SymLink.txt'  ]['SymLink'  ]='TestFile.txt';
+    $FS['HardLink.txt' ]['HardLink' ]='TestFile.txt';
+    $FS['b'            ]['SymLink'  ]='a';
+
+    $FS->Log('Log' ,'Content of TestFile.txt is ', $FS['TestFile.txt']['Content']);
+
+    If(True)
+    {
+      $FS['TestFile.txt:Stream' ]['Content' ]='Bye war';
+      $FS->Log('Log' ,'Content of TestFile.txt is:Stream ', $FS['TestFile.txt:Stream']['Content']);
+    }
+  }
+  Else
+  {
+    $FS['SymLink.txt'  ]->Remove();
+    $FS['HardLink.txt' ]->Remove();
+    $FS['TestFile.txt' ]->Remove();
+    $FS['b'            ]->Remove();
+    $FS['a/x'          ]->Remove();
+    $FS['a'            ]->Remove();
+  }
+  
+# SymLink ('TestFile.txt', 'SymLink.txt'  );
+# Link    ('TestFile.txt', 'HardLink.txt' );
+#
+# MkDir('a\x');
+# SymLink('a', 'b');
+#
+# Print_R(LStat('b'));
+# 
+# UnLink('SymLink.txt'  );
+# UnLink('HardLink.txt' );
+# RmDir('b');
+
+  ChDir($OldCwd);

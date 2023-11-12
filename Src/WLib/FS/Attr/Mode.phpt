@@ -45,6 +45,9 @@
         '-xTtSs'[$x+($z<<$p)];
     }
     
+    Static Function _GetType($v) { Return Static::$Types[$i=$v>>12][1]?? 'Unknown'.$i; }
+  //Static Function _IsLink($v) { Return $v>>12===10; }
+    
   //****************************************************************
   // Debug
   

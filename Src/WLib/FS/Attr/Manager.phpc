@@ -151,7 +151,7 @@
           $Name=$k;
           $Item=$Attrs[$Name]?? Null;
           If(!$Item) { $this->Log('Error', 'Attribute ', $Name, ' is not exists'); $Vars[$Name]=Null; Continue; }
-          $R=$Item->SetRecursive($Vars, $Args[$Name]?? [], $List);
+          $R=$Item->SetRecursive($Vars, $Args[$Name]?? Null, $List);
           $Res[$Name]??=$R;
           Continue;
         }
@@ -162,9 +162,10 @@
         }
         Else
         {
-          $Item=$Attrs[$Name]?? Null;
-          If(!$Item) { $this->Log('Error', 'Attribute ', $Name, ' is not exists'); $Vars[$Name]=Null; Continue; }
-          $R=$Item->GetRecursive($Vars, $Args[$Name]?? []);
+          If($Item=$Attrs[$Name]?? Null)
+            $R=$Item->GetRecursive($Vars, $Args[$Name]?? Null);
+          Else
+            $R=$this->Log('Error', 'Attribute ', $Name, ' is not exists')->Ret();
           $Vars[$Name]=$R;
         }
         $Res[$Name]=$R;

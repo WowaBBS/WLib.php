@@ -321,6 +321,7 @@
   
     Function WriteLogLevel($View, $Level) { $this->_WriteToken($Level->Name, $View); }
     
+    // TODO: Y-m-d H:i:s.u  Y-m-d H:i:s.v
     Var $TimeFormat ='Y-m-d H:i:s';
   //Var $TimeFormat ='ymd His';
     Var $TimeFrac   = ['.%04d', 1E4];

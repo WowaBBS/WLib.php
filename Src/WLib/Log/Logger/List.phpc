@@ -36,24 +36,27 @@
     
     Function Add($Logger, $Args=[]) // String $Name, $Logger=false, $bAppend=false)
     {
+      $Name=$Args['Name']?? (Is_String($Logger)? $Logger:'');
+      
+      $Override=$Args['Override']?? Null;
+      $OldNamed=StrLen($Name)? $this->ByName[$Name]:Null;
+      If($OldNamed && !$Override)
+      {
+        If($Override===False) Return $OldNamed;
+        If(Is_String($Logger))
+          Return $this->GetLogger()->Log('Error', 'Logger ', $Name, ' already exists')->Ret($OldNamed);
+        $this->GetLogger()->Log('Warning', 'Logger ', $Name, ' already exists will be overrided');
+      }
+        
       if(Is_String($Logger))
-      {
-        $Name=$Args['Name']?? $Logger;
-        if(IsSet($this->ByName[$Name]))
-        {
-          $this->GetLogger()->Log('Error', 'Logger ', $Name, ' already exists');
-          return $this->ByName[$Name];
-        }
         $Logger=$this->CreateFile($Logger, $Args);
-      }
-      else
-        $Name=$Args['Name']?? '';
-      if(StrLen($Name))
-      {
-        if(IsSet($this->ByName[$Name]))
-          $this->GetLogger()->Log('Warning', 'Logger ', $Name, ' already exists will be overrided');
+
+      If($OldNamed)
+        $this->Remove($OldNamed);
+      
+      If(StrLen($Name))
         $this->ByName[$Name]=$Logger;
-      }
+        
       $Id=$Logger->Object_GetId();
       if(IsSet($this->Loggers[$Id]))
         $this->GetLogger()->Log('Warning', 'Logger ', $Name, ' already was added');

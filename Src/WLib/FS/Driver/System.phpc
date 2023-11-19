@@ -15,14 +15,14 @@
   Class C_FS_Driver_System Extends C_FS_Driver_Base
   {
     Var $BasePath = False;
-    Var $BaseURL  = False;
+    Var $BaseUrl  = False;
     Var $Context  = Null;
  
     Function _Init($Args)
     {
       parent::_Init($Args);
       $this->BasePath = T_FS_Path  ::Create($Args['Path' ]?? '');
-      $this->BaseURL  = T_Inet_Url ::Create($Args['Url'  ]?? '');
+      $this->BaseUrl  = T_Inet_Url ::Create($Args['Url'  ]?? '');
     }
  
     Function _Load($Path, $Args=[])
@@ -46,56 +46,83 @@
       Return File_Put_Contents($Path, $Data, $Flags, $this->Context);
     }
     
-    Function Save($Path, $Data, $Args=[]) { Return $this->_Save($this->RealPath($Path), $Data, $Args); }
-    Function Load($Path,        $Args=[]) { Return $this->_Load($this->RealPath($Path),        $Args); }
- 
-    Function RealPath($Path)
+    Function _SysPath($Path)
     {
       Return $this->BasePath->_Clone()->Add(Is_Object($Path)? $Path->Make():$Path)->Make();
     }
  
-    Function IsFile ($Path) { Return Is_File ($this->RealPath($Path)); }
-    Function IsDir  ($Path) { Return Is_Dir  ($this->RealPath($Path)); }
- 
-    Function Exists($Path)
+    Function _Stream($SysPath, Array $Args=[])
     {
-      $P=$this->RealPath($Path);
-      Return Is_Dir($P)||Is_File($P);
-    }
- 
-    Function Stream($Path, $Mode)
-    {
-      $P=$this->RealPath($Path);
       $Res=$this->Create_Object('Stream/File');
-      $Res->Assign($P);
-      $Res->Open($Mode);
+      $Res->Assign($SysPath);
+      If($Mode=$Args['Mode']?? False)
+        $Res->Open($Mode);
       Return $Res;
     }
  
-    Function Files($Path, $Mask=False, $Attr=3)
-    {
-      $Res=[];
-      $P=$this->RealPath($Path);
-      If(!Is_Dir($P))
-        Return $Res;
-      Return ListDir($P, $Mask, $Attr);
-    }
- 
-    Function Nodes($Path)
-    {
-      If(!$this->IsFile($Path))
+    Function _Files($SysPath, Array $Args=[])
+    { //TODO: Remove
+      $Mask=$Args['Mask']?? False ;
+      $Attr=$Args['Attr']?? 3     ;
+    
+      If(!Is_Dir($SysPath))
         Return [];
-      $Res=[];
-      $Res[]=$this->Node($Path);
-      Return $Res;
+      Return ListDir($SysPath, $Mask, $Attr);
     }
  
-    Function URL($Path)
+    Function _Nodes($SysPath)
     {
-      Return $this->BaseURL->Node($Path);
+    # If(!Is_File($RealPat))
+        Return [];
+    # $Res=[];
+    # $Res[]=$this->Node($SysPath);
+    # Return $Res;
+    }
+ 
+    Function Url($Path) { Return $this->BaseUrl->Node($Path); }
+    
+    Function _ClearCache($Path, $Args=[])
+    {
+      $Res=Parent::_ClearCache($Path);
+      If($SysPath=$Args['SysPath']?? False)
+        $Res['SysPath']=ClearStatCache(True, $SysPath);
+      Return $Res;
     }
     
   //****************************************************************
+    Function _List($SysPath, $Args, $Path)
+    {
+      $Mask   =$Args['Mask'   ]?? False;
+      $RegExp =$Args['RegExp' ]?? Static::MaskToRegex($Mask);
+      $Attr   =$Args['Attr'   ]?? 3;
+      $File   =$Args['File'   ]?? ($Attr&1)? ['Stat']:[];
+      $Dir    =$Args['Dir'    ]?? ($Attr&2)? ['Stat']:[];
+      
+      $Filter=$RegExp ? fn($File)=>Preg_Match ($RegExp ,$File):Null;
+    //$Filter=$Mask   ? fn($File)=>FnMatch    ($Mask   ,$File, $MaskFlag):Null;
+      
+      If(!Is_Dir($SysPath))
+        Return;
+      $Handle=@OpenDir($SysPath);
+      If(!$Handle)
+        Return;
+        
+      If(StrLen($Path)) $Path.='/';
+
+      While(False!==($File=ReadDir($Handle)))
+      {
+        If($File=='.'  ) Continue;
+        If($File=='..' ) Continue;
+        $ItemPath=$Path.$File;
+        If(Is_File ($ItemPath) && !$File ) Continue;
+        If(Is_Dir  ($ItemPath) && !$Dir  ) Continue;
+        If($Filter && !$Filter($File)) Continue;
+        Yield $this->Node($ItemPath);
+      }
+      CloseDir($Handle);
+    }
+  //****************************************************************
+  // User&Group
   
     Function _GetUserById  ($Id) { Return Function_Exists('Posix_GetPwUId')? (Posix_GetPwUId($Id)?:[])['name']?? 'Unknown'.$Id: ($Id? '':'User'  .$Id); } 
     Function _GetGroupById ($Id) { Return Function_Exists('Posix_GetGrGId')? (Posix_GetGrGId($Id)?:[])['name']?? 'Unknown'.$Id: ($Id? '':'Group' .$Id); } 
@@ -103,41 +130,45 @@
   //****************************************************************
   // Attributes
   
-    Static Function MyStat($RealPath)
+    Static Function MyStat($SysPath)
     {
-      $Stat=@LStat($RealPath);
+      $Stat=@LStat($SysPath);
       If(!$Stat)
         Return [];
       $Type=Mode::_GetType($Stat['mode']);
       $IsLink=$Type==='Link';
       if($IsLink)
-      { //TODO: Totally switch byt config
-        $Stat2 =@Stat($RealPath);
+      { //TODO: Totally switch by config
+        $Stat2 =@Stat($SysPath);
         $Stat['mode']=$Stat2['mode'];
       }
       $Stat['IsLink']=$IsLink;
-        
+      
       Return $Stat;
-    }    
+    }
     
     Function Attr_Init($Attr)
     {
       Parent::Attr_Init($Attr);
       $Attr->Register([
-        'RealPath'   =>[fn($Driver, $Path)=>$Driver->RealPath($Path) ,'Private'=>True],
+        'SysPath'    =>[fn($Driver, $Path)=>$Driver->_SysPath($Path) ,'Private'=>True],
         'Context'    =>[fn($Driver       )=>$Driver->Context         ,'Private'=>True],
-        'Content'    =>[fn($Driver, $RealPath, $Args)=>$Driver->_Load($RealPath, $Args), fn($Driver, $Content, $RealPath, $Args)=>$Driver->_Save($RealPath, $Content, $Args) ,'Cache'=>False],
-        'Stat'       => Static::MyStat(...),//fn($RealPath)=>Static::MyStat($RealPath),
+        'Content'    =>[fn($Driver, $SysPath, $Args)=>$Driver->_Load   ($SysPath, $Args), fn($Driver, $Content, $SysPath, $Args)=>$Driver->_Save($SysPath, $Content, $Args) ,'Cache'=>False],
+        'Stream'     => fn($Driver, $SysPath, $Args)=>$Driver->_Stream ($SysPath, $Args),
+        'Files'      => fn($Driver, $SysPath, $Args)=>$Driver->_Files  ($SysPath, $Args), //<TODO: Remove
+        'Stat'       => Static::MyStat(...),//fn($SysPath)=>Static::MyStat($SysPath),
 
-        'Md5'        =>[fn($RealPath)=>New Hash(Md5_File  ($RealPath, True), 'Md5'  ), 'Cache'=>'File'],
-        'Sha1'       =>[fn($RealPath)=>New Hash(Sha1_File ($RealPath, True), 'Sha1' ), 'Cache'=>'File'],
+        'Md5'        =>[fn($SysPath)=>Is_File($SysPath)? Hash::FromFile($SysPath, 'Md5'  ):Null, 'Cache'=>'File'],
+        'Sha1'       =>[fn($SysPath)=>Is_File($SysPath)? Hash::FromFile($SysPath, 'Sha1' ):Null, 'Cache'=>'File'],
         
-        'SymLink'  =>[fn($RealPath)=>ReadLink($RealPath), fn($RealPath, $SymLink )=>SymLink($SymLink  ,$RealPath)], //Bug checking $SymLink is exists in window
-        'HardLink' =>[Null                              , fn($RealPath, $HardLink)=>   Link($HardLink ,$RealPath)],
+        'SymLink'    =>[fn($SysPath)=>ReadLink($SysPath), fn($SysPath, $SymLink )=>SymLink($SymLink  ,$SysPath)], //Bug checking $SymLink is exists in window
+        'HardLink'   =>[Null                            , fn($SysPath, $HardLink)=>   Link($HardLink ,$SysPath)],
         
-        'MkDir'  =>fn($Context, $RealPath, $Args)=>MkDir  ($RealPath, $Args['Mode']?? 0777, $Args['Recursive']?? True, $Context),
-        'UnLink' =>fn($Context, $RealPath       )=>UnLink ($RealPath, $Context),
-        'RmDir'  =>fn($Context, $RealPath       )=>RmDir  ($RealPath, $Context),
+        'MkDir'      =>fn($Context, $SysPath, $Args)=>MkDir  ($SysPath, $Args['Mode']?? 0777, $Args['Recursive']?? True, $Context),
+        'UnLink'     =>fn($Context, $SysPath       )=>UnLink ($SysPath, $Context),
+        'RmDir'      =>fn($Context, $SysPath       )=>RmDir  ($SysPath, $Context),
+        'ClearCache' =>fn($Driver, $SysPath, $Args, $Path)=>$Driver->_ClearCache($Path, $Args+['SysPath'=>$SysPath]),
+        'List'       =>fn($Driver, $SysPath, $Args, $Path)=>$Driver->_List($SysPath, $Args, $Path),
       ]);
       
       If(False)
@@ -152,12 +183,12 @@
         'UserName'  =>fn($Driver, $UserId  )=>$Driver->_GetUserById  ($UserId  ),
         'GroupName' =>fn($Driver, $GroupId )=>$Driver->_GetGroupById ($GroupId ),
         
-        fn($RealPath, $Mode)=>ChMod($RealPath, $Mode->ToInt()),
-        fn($RealPath, $IsLink, $UserId    )=>$IsLink? LChGrp($RealPath, $GroupId   ):ChOwn($RealPath, $UserId    ),
-        fn($RealPath, $IsLink, $UserName  )=>$IsLink? LChGrp($RealPath, $GroupName ):ChOwn($RealPath, $UserName  ),
-        fn($RealPath, $IsLink, $GroupId   )=>$IsLink? LChOwn($RealPath, $UserId    ):ChGrp($RealPath, $GroupId   ),
-        fn($RealPath, $IsLink, $GroupName )=>$IsLink? LChOwn($RealPath, $UserName  ):ChGrp($RealPath, $GroupName ),
-        fn($RealPath, $Modified, $LastAccess)=>Touch($RealPath, $Modified, $LastAccess),
+        fn($SysPath, $Mode)=>ChMod($SysPath, $Mode->ToInt()),
+        fn($SysPath, $IsLink, $UserId    )=>$IsLink? LChGrp($SysPath, $GroupId   ):ChOwn($SysPath, $UserId    ),
+        fn($SysPath, $IsLink, $UserName  )=>$IsLink? LChGrp($SysPath, $GroupName ):ChOwn($SysPath, $UserName  ),
+        fn($SysPath, $IsLink, $GroupId   )=>$IsLink? LChOwn($SysPath, $UserId    ):ChGrp($SysPath, $GroupId   ),
+        fn($SysPath, $IsLink, $GroupName )=>$IsLink? LChOwn($SysPath, $UserName  ):ChGrp($SysPath, $GroupName ),
+        fn($SysPath, $Modified, $LastAccess)=>Touch($SysPath, $Modified, $LastAccess),
       ]);
     }
   //****************************************************************

@@ -68,7 +68,7 @@
  
     Function Include($Include_Path, $UnPack_Vars=[], $Pack_Vars=[]) { $this->Call($Path, 'Include', ['UnPack_Vars'=>$UnPack_Vars, 'Pack_Vars'=>$Pack_Vars]); }
   //Function Include($Include_Path, $UnPack_Vars=[], $Pack_Vars=[]) { Return $this->Content_Include($this->Load($Include_Path), ['UnPack_Vars'=>$UnPack_Vars, 'Pack_Vars'=>$Pack_Vars]); }
-  //Function Include($Include_Path, $UnPack_Vars=[], $Pack_Vars=[]) { Return $this->Real_Include($this->RealPath($Include_Path), ['UnPack_Vars'=>$UnPack_Vars, 'Pack_Vars'=>$Pack_Vars]); }
+  //Function Include($Include_Path, $UnPack_Vars=[], $Pack_Vars=[]) { Return $this->Real_Include($this->SysPath($Include_Path), ['UnPack_Vars'=>$UnPack_Vars, 'Pack_Vars'=>$Pack_Vars]); }
  
     Function _Content_Include($Content, $Args=[])
     {
@@ -81,12 +81,12 @@
       Return $Res;
     }
  
-    Function _Real_Include($RealPath, $Args=[])
+    Function _Real_Include($SysPath, $Args=[])
     {
       $UnPack_Vars =$Args['UnPack_Vars' ]?? [];
       $Pack_Vars   =$Args['Pack_Vars'   ]?? [];
       Extract($UnPack_Vars);
-      $Res=Include $RealPath;
+      $Res=Include $SysPath;
       ForEach($Pack_Vars As $Pack_Var)
         $UnPack_Vars[$Pack_Var]=${$Pack_Var};
       Return $Res;
@@ -100,6 +100,25 @@
       Return New T_FS_Driver_Node($this, $Path);
     }
     
+    Static Function MaskToRegex($Mask)
+    {
+      If(!$Mask) Return '';
+    
+      $Mask=Str_Replace('.', '\.', $Mask);
+      $Mask=Str_Replace('*', '.*', $Mask);
+      $Mask=Str_Replace('?', '.?', $Mask);
+      Return '/^'.$Mask.'$/iSs';
+    }
+    
+  //****************************************************************
+  // Cache
+  
+    Function _ClearCache($Path, $Args)
+    {
+      $Res=[];
+      Return $Res;
+    }
+    
   //****************************************************************
     Function Attr_Init($Attr)
     {
@@ -111,16 +130,17 @@
 
       $Attr->Register([
         'Remove' =>fn($Node, $Args)=>$Node->_Remove($Args),
+        'ClearCache' =>fn($Driver, $Path, $Args)=>$Driver->_ClearCache($Path, $Args),
       ]);
     }
     
     Function Attr_Init_Content($Attr)
     {
       $Attr->Register([
-      //'Content'    =>[fn($Driver, $Path, $Args)=>$Driver->_Load($Path, $Args), fn($Driver, $Content, $RealPath, $Args)=>$Driver->_Save($Path, $Content, $Args) ,'Cache'=>True],
+      //'Content'    =>[fn($Driver, $Path, $Args)=>$Driver->_Load($Path, $Args), fn($Driver, $Content, $SysPath, $Args)=>$Driver->_Save($Path, $Content, $Args) ,'Cache'=>True],
 
-        'Md5'        => fn($Content)=>New Hash(Md5  ($Content, True), 'Md5'  ),
-        'Sha1'       => fn($Content)=>New Hash(Sha1 ($Content, True), 'Sha1' ),
+        'Md5'  => fn($Content)=>Hash::FromBinary($Content, 'Md5'  ),
+        'Sha1' => fn($Content)=>Hash::FromBinary($Content, 'Sha1' ),
       ]);
     }
     

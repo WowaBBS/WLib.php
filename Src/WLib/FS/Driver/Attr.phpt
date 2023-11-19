@@ -55,9 +55,9 @@
         'PathInfo'   => fn($Path)=>PathInfo($Path),             // /www/htdocs/inc/lib.inc.php
         'Folder'     => fn($PathInfo)=>$PathInfo['dirname'   ], // /www/htdocs/inc
         'Name'       => fn($PathInfo)=>$PathInfo['basename'  ], // lib.inc.php
-        'Ext'        => fn($PathInfo)=>$PathInfo['extension' ], // php
+        'Ext'        => fn($PathInfo)=>$PathInfo['extension' ]?? '', // php
         'Nick'       => fn($PathInfo)=>$PathInfo['filename'  ], // lib.inc
-        'NoExt'      => fn($PathInfo)=>$PathInfo['extension' ], // /www/htdocs/inc/lib.inc
+        'NoExt'      => fn($Path, $Ext)=>($l=StrLen($Ext))? SubStr($Path, 0, -$l):$Path, // /www/htdocs/inc/lib.inc
       ]);
     }
   
@@ -69,7 +69,7 @@
         'IsDir'      => fn($Type)=>$Type==='Dir' ,
         'IsFile'     => fn($Type)=>$Type==='File' ,
         'IsLink'     => fn($Stat)=>$Stat['Is_Link'],
-        'Exists'     => fn($RealPath)=>(Bool)$Stat,
+        'Exists'     => fn($SysPath)=>(Bool)$Stat,
 
         'Type'       => fn($Mode)=>$Mode->GetType(),
         'DeviceId'   => fn($Stat)=>New IntId   ($Stat['dev'     ]), // 0
@@ -85,35 +85,41 @@
         'Created'    => fn($Stat)=>New FileTime($Stat['ctime'   ]), //10
         'BlockSize'  => fn($Stat)=>             $Stat['blksize' ] , //11
         'Blocks'     => fn($Stat)=>             $Stat['blocks'  ] , //12
+
+        'DirSize'     => fn($Node)=>$Node->IsDir()?     $Node->ForEachRes(0                  ,fn($Res, $n)=>$Res +    $n['DirSize'     ]  ):$Node['Size'     ],
+        'DirModified' => fn($Node)=>$Node->IsDir()?     $Node->ForEachRes($Node['Modified' ] ,fn($Res, $n)=>$Res->Max($n['DirModified' ] )):$Node['Modified' ],
+        'DirMd5'      => fn($Node)=>$Node->IsDir()? Hash::FromBinary($Node->ForEachRes(''                 ,fn($Res, $n)=>$Res .    $n['_HashMd5Str' ] ), 'Md5'):$Node['Md5'      ],
+        
+        '_HashMd5Str' => fn($Modified, $Created, $Size, $DirMd5)=>$Modified.'|'.$Created.'|'.$Size.'|'.$DirMd5.';',
       ]);
     }    
 
     Static Function Init_StatAlt($Attr)
     {
       $Attr->Register([
-        'Executable' => fn($RealPath)=>Is_Executable ($RealPath),
-        'Readable'   => fn($RealPath)=>Is_Readable   ($RealPath),
-        'Writable'   => fn($RealPath)=>Is_Writable   ($RealPath),
+        'Executable' => fn($SysPath)=>Is_Executable ($SysPath),
+        'Readable'   => fn($SysPath)=>Is_Readable   ($SysPath),
+        'Writable'   => fn($SysPath)=>Is_Writable   ($SysPath),
         
-        'IsDir'      => fn($RealPath)=>Is_Dir        ($RealPath),
-        'IsFile'     => fn($RealPath)=>Is_File       ($RealPath),
-        'IsLink'     => fn($RealPath)=>Is_Link       ($RealPath),
-        'Exists'     => fn($RealPath)=>FileExists    ($RealPath),
+        'IsDir'      => fn($SysPath)=>Is_Dir        ($SysPath),
+        'IsFile'     => fn($SysPath)=>Is_File       ($SysPath),
+        'IsLink'     => fn($SysPath)=>Is_Link       ($SysPath),
+        'Exists'     => fn($SysPath)=>FileExists    ($SysPath),
 
-        'Type'       => fn($RealPath)=>             FileType  ($RealPath) ,
-        'DeviceId'   => fn($RealPath)=>New IntId   (LinkInfo  ($RealPath)), // 0
-        'NodeId'     => fn($RealPath)=>New IntId   (FileINode ($RealPath)), // 1
-        'Mode'       => fn($RealPath)=>New Mode    (FilePerms ($RealPath)),
-      //'NumLinks'   => fn($Stat    )=>             $Stat['nlink'   ]     , // 3
-        'UserId'     => fn($RealPath)=>             FileOwner ($RealPath) ,
-        'GroupId'    => fn($RealPath)=>             FileGroup ($RealPath) ,
-      //'DeviceType' => fn($Stat    )=>             $Stat['rdev'    ]     , // 6
-        'Size'       => fn($RealPath)=>             FileSize  ($RealPath) ,
-        'LastAccess' => fn($RealPath)=>New FileTime(FileATime ($RealPath)),
-        'Modified'   => fn($RealPath)=>New FileTime(FileMTime ($RealPath)),
-        'Created'    => fn($RealPath)=>New FileTime(FileCTime ($RealPath)),
-      //'BlockSize'  => fn($Stat    )=>             $Stat['blksize' ] , //11
-      //'Blocks'     => fn($Stat    )=>             $Stat['blocks'  ] , //12
+        'Type'       => fn($SysPath)=>             FileType  ($SysPath) ,
+        'DeviceId'   => fn($SysPath)=>New IntId   (LinkInfo  ($SysPath)), // 0
+        'NodeId'     => fn($SysPath)=>New IntId   (FileINode ($SysPath)), // 1
+        'Mode'       => fn($SysPath)=>New Mode    (FilePerms ($SysPath)),
+      //'NumLinks'   => fn($Stat   )=>             $Stat['nlink'   ]     , // 3
+        'UserId'     => fn($SysPath)=>             FileOwner ($SysPath) ,
+        'GroupId'    => fn($SysPath)=>             FileGroup ($SysPath) ,
+      //'DeviceType' => fn($Stat   )=>             $Stat['rdev'    ]     , // 6
+        'Size'       => fn($SysPath)=>             FileSize  ($SysPath) ,
+        'LastAccess' => fn($SysPath)=>New FileTime(FileATime ($SysPath)),
+        'Modified'   => fn($SysPath)=>New FileTime(FileMTime ($SysPath)),
+        'Created'    => fn($SysPath)=>New FileTime(FileCTime ($SysPath)),
+      //'BlockSize'  => fn($Stat   )=>             $Stat['blksize' ] , //11
+      //'Blocks'     => fn($Stat   )=>             $Stat['blocks'  ] , //12
       ]);
     }
     
@@ -129,8 +135,8 @@
     Static Function Init_Disk($Attr)
     {
       $Attr->Register([
-        'DiskTotal' => fn($RealPath)=>Disk_Total_Space ($RealPath),
-        'DiskFree'  => fn($RealPath)=>Disk_Free_Space  ($RealPath),
+        'DiskTotal' => fn($SysPath)=>Disk_Total_Space ($SysPath),
+        'DiskFree'  => fn($SysPath)=>Disk_Free_Space  ($SysPath),
         'DiskUsed'  => fn($DiskTotal, $DiskFree)=>$DiskTotal>0? $DiskTotal-$DiskFree:$DiskTotal,
       ]);
     }

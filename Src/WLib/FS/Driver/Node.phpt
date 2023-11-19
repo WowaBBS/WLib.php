@@ -2,7 +2,7 @@
   $Loader->Load_Type('/FS/Path');
 
   Class T_FS_Driver_Node
-    Implements ArrayAccess
+    Implements ArrayAccess, IteratorAggregate 
   {
     Var $Driver =False;
     Var $Path   =False;
@@ -44,10 +44,10 @@
     Function IsDir   (                     ) { Return $this->Get('IsDir'  ); }
     Function IsLink  (                     ) { Return $this->Get('IsLink' ); }
     Function Exists  (                     ) { Return $this->Get('Exists' ); }
-    Function Stream  ($Mode                ) { Return $this->Driver->Stream  ($this->Path, $Mode          ); }
-    Function Files   ($Mask=False, $Attr=3 ) { Return $this->Driver->Files   ($this->Path, $Mask, $Attr   ); }
-    Function Nodes   (                     ) { Return $this->Driver->Nodes   ($this->Path                 ); }
-    Function Include ($UnPack=[], $Pack=[] ) { Return $this->Driver->Include ($this->Path, $UnPack, $Pack ); }
+    Function Stream  ($Mode                ) { Return $this->Call('Stream'  ,['Mode'=>$Mode                    ]); }
+    Function Files   ($Mask=False, $Attr=3 ) { Return $this->Call('Files'   ,['Mask'=>$Mask     ,'Attr'=>$Attr ]); }
+    Function Nodes   (                     ) { Return $this->Call('Nodes'   ,[                                 ]); }
+    Function Include ($UnPack=[], $Pack=[] ) { Return $this->Call('Include' ,['UnPack'=>$UnPack ,'Pack'=>$Pack ]); }
     Function URL     (                     ) { Return $this->Driver->URL     ($this->Path                 ); }
     Function Vars    (                     ) { Return $this->Driver->Vars    ($this->Path                 ); }
 
@@ -68,7 +68,22 @@
     //If(!$this->IsLink())
       Return $this->RmDir($Args['Recursive']?? Null);
     }
+    
+    Function ForEach($Func, ...$Args)
+    {
+      ForEach($this As $Node)
+        $Func($Node, ...$Args);
+    }
 
+    Function ForEachRes($Res, $Func, ...$Args)
+    {
+      ForEach($this As $Node)
+        $Res=$Func($Res, $Node, ...$Args);
+      Return $Res;
+    }
+
+    Function getIterator(): Traversable { Return $this['List']; }
+    
   //****************************************************************
   // Attributes
   

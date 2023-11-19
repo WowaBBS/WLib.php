@@ -7,13 +7,13 @@
     Var $Map  = [];
   /*
     Var $BasePath ;
-    Var $BaseURL  ;
+    Var $BaseUrl  ;
  
     Function _Init($Args)
     {
      parent::_Init($Args);
      $this->BasePath = New T_FS_Path();
-     $this->BaseURL  = New T_Inet_Url();
+     $this->BaseUrl  = New T_Inet_Url();
     }
   */
     Function &RealVar($APath)

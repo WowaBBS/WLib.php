@@ -11,53 +11,6 @@
       parent::_Init($Args);
     }
   */
-    Function IsFile($Path)
-    {
-      ForEach($this->ListNodes As $k=>$v)
-      {
-        $v=$this->ListNodes[$k]->Node($Path);
-        If($v->IsFile())
-          Return True;
-      }
-      Return False;
-    }
- 
-    Function IsDir($Path)
-    {
-      ForEach($this->ListNodes As $k=>$v)
-      {
-        $v=$this->ListNodes[$k]->Node($Path);
-        If($v->IsDir())
-          Return True;
-      }
-      Return False;
-    }
- 
-    Function Exists($Path)
-    {
-      ForEach($this->ListNodes As $k=>$v)
-      {
-        $v=$this->ListNodes[$k]->Node($Path);
-        If($v->Exsist())
-          Return True;
-       }
-      Return False;
-    }
- 
-    Function Stream($Path, $Mode)
-    {
-      ForEach($this->ListNodes As $k=>$v)
-      {
-        $v=$this->ListNodes[$k]->Node($Path);
-        If($v->IsFile())
-        {
-          $Res=$v->Stream($Mode);
-          Return $Res;
-        }
-      }
-      Return False;
-    }
- 
     Function Files($Path, $Mask=False, $Attr=3)
     {
       $Res=[];
@@ -116,11 +69,8 @@
       ForEach($this->ListNodes As $k=>$v)
       {
         $v=$this->ListNodes[$k]->Node($Path);
-        $R=$v->Vars();
-        If($R)
-          ForEach($R As $k->$v)
-            If(!IsSet($Res[$k]))
-              $Res[$k]=&$R[$k];
+        If($R=$v->Vars();)
+          $Res+=$R;
       }
       Return $Res;
     }

@@ -11,7 +11,7 @@
     
     Function ToUnixTime() { Return $this->Value; }
     
-    Function ToString() { Return GmDate('Y-M-d H:i:s', $this->Value); }
-    Function ToDebug() { Return $this->ToString().' '.$this->Value; }
+  //Function ToString() { Return GmDate('Y-M-d H:i:s', $this->Value); }
+  //Function ToDebug() { Return $this->ToString().' '.$this->Value; }
   }
 ?>

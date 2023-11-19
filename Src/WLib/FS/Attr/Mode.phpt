@@ -1,5 +1,6 @@
 <?
   Class T_FS_Attr_Mode
+    Implements Stringable 
   {
     Public Int $Value=0;
     
@@ -30,6 +31,7 @@
       $Res.=Static::ToChar($m, 0);
       Return $Res; //.' '.$this->GetType();
     }
+    Function __ToString() { Return $this->ToString(); }
 
     Static Function ToChar($m, $p)
     {

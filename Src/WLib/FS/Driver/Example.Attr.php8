@@ -1,0 +1,34 @@
+<?
+  If(!IsSet($Factory))
+  {
+    for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+    $Loader->GetLogger()->Add(SubStr(__FILE__,0,-5).'.log');
+    
+    $Factory=$Loader->Create_Object('/FS/Driver/Factory');
+  }
+  
+  $Loader->Load_Type('/Debug/Table'); Use T_Debug_Table As Table;
+  
+  $FS=$Factory->Create('System');
+
+  $FS->Log('Debug', 'Node:' )->Debug($FS[__FILE__  ]);
+  $FS->Log('Debug', 'Mode: ',        $FS[__FILE__  ]->Get('Mode'));
+  $FS->Log('Debug', 'Attrs:')->Debug($FS[__FILE__  ]->Get(['Path', 'Created', 'Mode', 'DeviceId', 'NodeId', 'Md5', 'Sha1', 'Content']));
+  $FS->Log('Debug', 'Attrs:')->Debug($FS[__DIR__   ]->Get(['Path', 'Created', 'Mode', 'DeviceId', 'NodeId'])); //TODO:, 'Md5', 'Sha1'
+  $FS->Log('Debug', 'Attrs:')->Debug($FS['Unknown' ]->Get(['Path', 'Stat'])); //TODO:'Created', 'Mode', 'Md5', 'Sha1'
+  $List=[];
+  ForEach($FS[__DIR__]->Call('List')As $Item)
+    $List[]=$Item->Get(['Nick', 'Ext', 'Size', 'DirSize', 'Created', 'Modified', 'DirModified', 'Mode', 'Md5', 'DirMd5']);
+  Table::Cr($List)->ToLog($FS->Log('Debug', 'List:' ));
+  
+  $Node=$FS['Test'];
+  $FS->Log('Debug', 'TestFunc    : ', $Node->Call ('TestFunc'               ,['a'=>1, 'b'=>2]));
+  $FS->Log('Debug', 'TestGet     : ', $Node->Get  ('Test'                   ,['a'=>1, 'b'=>2]));
+  $FS->Log('Debug', 'TestSet     : ', $Node->Set  ('Test'    ,'InTestValue' ,['a'=>1, 'b'=>2]));
+  $FS->Log('Debug', 'UnknownFunc : ', $Node->Call ('UnknownFunc'            ,['a'=>1, 'b'=>2]));
+  $FS->Log('Debug', 'UnknownGet  : ', $Node->Get  ('Unknown'                ,['a'=>1, 'b'=>2]));
+  $FS->Log('Debug', 'UnknownSet  : ', $Node->Set  ('Unknown' ,'InTestValue' ,['a'=>1, 'b'=>2]));
+  $FS->Log('Debug', 'TestGet     : ', $Node['Test']);
+  $FS->Log('Debug', 'TestSet     : ', $Node['Test']='InTestValue');
+?>

@@ -55,7 +55,7 @@
   
     Function &Get_Current()
     {
-      Static $Res=Array();
+      Static $Res=[];
       If(!$Res)
       {
         $R=&$this->Create_Object('/Inet/HTTP/Request');
@@ -256,9 +256,9 @@
         $this->FPoster->_UnLock();
       If($APoster)
       {
-        $Args=Array(
+        $Args=[
           'Files'=>&$this->Files,
-        );
+        ];
         $this->FPoster=$this->Create_Object('/Inet/HTTP/Poster/'.$APoster, $Args);
       }
       Else

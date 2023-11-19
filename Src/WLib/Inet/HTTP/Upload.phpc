@@ -185,7 +185,7 @@
     {
       $AH=&$this->AHeaders;
       $AH[0]=HTTP_Answer($this->Status);
-      $SLevel=Array(304=>1, 200=>2, 206=>2);
+      $SLevel=[304=>1, 200=>2, 206=>2];
       $SL=$SLevel[$this->Status] ?? 0;
       If($SL<1)
         Return False;
@@ -230,7 +230,7 @@
  
     Function Send_Content()
     {
-      $SLevel=Array(304=>1, 200=>2, 206=>2);
+      $SLevel=[304=>1, 200=>2, 206=>2];
       $SL=IsSet($SLevel[$this->Status])?$SLevel[$this->Status]:0;
       If($SL<2)
         Return;

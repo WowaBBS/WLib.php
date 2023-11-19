@@ -39,7 +39,7 @@
  
     Function Get_Req()
     {
-      $Res=Array();
+      $Res=[];
       ForEach($this->Map->Values As $l)
         $Res[]=UrlEnCode($l[0]).'='.UrlEnCode($l[1]->Value);
       Return Implode('; ', $Res);

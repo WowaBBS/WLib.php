@@ -27,7 +27,7 @@
     Function Read($Size) TODO: Recv
     {
       $ChunkLen=&$this->ChunkLen;
-      $Res=Array('');
+      $Res=[''];
       While($Size)
       {
         If($ChunkLen<=0)
@@ -76,9 +76,10 @@
 
     Function Write($Data) TODO: Send
     {
-      $this->FStream->Write(DecHex(StrLen($Data))."\n");
-      $this->FStream->Write($Data);
-      $this->FStream->Write("\n");
+      $Stream=$this->FStream;
+      $Stream->Write(DecHex(StrLen($Data))."\n");
+      $Stream->Write($Data);
+      $Stream->Write("\n");
     }
 
     Function ShutDown($typ='w')

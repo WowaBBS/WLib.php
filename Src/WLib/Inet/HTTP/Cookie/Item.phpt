@@ -16,7 +16,7 @@
     {
       $l=Explode(';', $Str);
       $kv=Explode('=', Trim(Array_Shift($l)), 2);
-      $r=Array();
+      $r=[];
       ForEach($l As $i)
       {
         $i=Explode('=', Trim($i), 2);
@@ -30,10 +30,10 @@
  
     Function ToString()
     {
-      $Res=Array(RawUrlEnCode($this->Name).'='.RawUrlEnCode($this->Value));
-      If($this->Expires) { $Res[]='expires='.GMDate("D, d M Y H:i:s", $this->Expires).' GMT'; }
-      If($this->Domain ) { $Res[]='domain='.$this->Domain; }
-      If($this->Path   ) { $Res[]='path='  .$this->Path  ; }
+      $Res=[RawUrlEnCode($this->Name).'='.RawUrlEnCode($this->Value)];
+      If($this->Expires) $Res[]='expires='.GMDate("D, d M Y H:i:s", $this->Expires).' GMT';
+      If($this->Domain ) $Res[]='domain='.$this->Domain;
+      If($this->Path   ) $Res[]='path='  .$this->Path  ;
       If($this->Secure ) $Res[]='secure';
       Return Implode('; ', $Res);
     }

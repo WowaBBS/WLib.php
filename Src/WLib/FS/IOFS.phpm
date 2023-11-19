@@ -17,7 +17,7 @@
   {
     If(Is_Array($Path)) // TODO: Create another function
     {
-      $Res=Array();
+      $Res=[];
       ForEach($Path As $k=>$Item)
         $Res[$k]=ExtractFilePath($Item);
       Return $Res;
@@ -38,7 +38,7 @@
   {
     If(Is_Array($Path)) // TODO: Create another function
     {
-      $Res=Array();
+      $Res=[];
       ForEach($Path As $k=>$Item)
         $Res[$k]=ExtractFileName($Item);
       Return $Res;
@@ -53,7 +53,7 @@
   {
     If(Is_Array($Path)) // TODO: Create another function
     {
-      $Res=Array();
+      $Res=[];
       ForEach($Path As $k=>$Item)
         $Res[$k]=ExtractFileExt($Item);
       Return $Res;
@@ -72,7 +72,7 @@
   {
     If(Is_Array($Path)) // TODO: Create another function
     {
-      $Res=Array();
+      $Res=[];
       ForEach($Path As $k=>$Item)
         $Res[$k]=ExtractFileNick($Item);
       Return $Res;
@@ -88,7 +88,7 @@
   {
     If(Is_Array($Path)) // TODO: Create another function
     {
-      $Res=Array();
+      $Res=[];
       ForEach($Path As $k=>$Item)
         $Res[$k]=PathToDir($Item);
       Return $Res;
@@ -101,7 +101,7 @@
   {
     If(Is_Array($Path)) // TODO: Create another function
     {
-      $Res=Array();
+      $Res=[];
       ForEach($Path As $k=>$Item)
         $Res[$k]=DirToPath($Item);
       Return $Res;
@@ -124,7 +124,7 @@
   {
     If(Is_Array($Path))
     {
-      $Res=Array();
+      $Res=[];
       ForEach($Path As $k=>$Item)
         $Res[$k]=ChangeNameMask($Item, $Mask);
       Return $Res;
@@ -183,21 +183,21 @@
   { // TODO: See /Builder/Asset/FS/PathBase.phpc method NormPath
     If(Is_Array($Path))
     {
-      $Res=Array();
+      $Res=[];
       ForEach($Path As $k=>$Item)
         $Res[$k]=Deprecated_NormPath($Item, $Host);
       Return $Res;
     }
     $Path=Str_Replace('\\', '/', $Path);
     $Tmp=Explode('/', $Path);
-    $List=Array('');
+    $List=[''];
     ForEach($Tmp As $v)
     {
       $v=Trim($v);
       If($v=='')
         Continue;
       If($v=='.')
-        $List=Array('');
+        $List=[''];
       ElseIf($v=='..')
       {
         If(Count($List)>1)
@@ -223,7 +223,7 @@
   // Добавляет строку $Dir слева к каждому элементу массива $Files
   Function AddPaths($Dir, $Files)
   {
-    $Res=Array();
+    $Res=[];
     ForEach($Files As $File)
       $Res[]=$Dir.$File;
     Return $Res;
@@ -233,7 +233,7 @@
   {
     If(Is_Array($Path))
     {
-      $Res=Array();
+      $Res=[];
       ForEach($Path As $k=>$Item)
         $Res[$k]=ParsePath($Item);
       Return $Res;
@@ -241,7 +241,7 @@
   //$Path=Str_Replace("\\", '/', $Path);
     $Path=StrTr(Trim($Path), '\\', '/');
     If($Path&&($Path[StrLen($Path)-1])=='/')
-      $Res=Array('dirname'=>SubStr($Path, 0, StrLen($Path)-1), 'basename'=>'');
+      $Res=['dirname'=>SubStr($Path, 0, StrLen($Path)-1), 'basename'=>''];
     Else
       $Res=PathInfo($Path);
     Extract($Res);
@@ -536,7 +536,7 @@
     If(!$Dir)
       Return NULL;
  
-    $Res=Array();
+    $Res=[];
     While(False!==($File=ReadDir($Dir)))
     {
       If($File=='.'  ) Continue;

@@ -9,10 +9,10 @@
       Return Implode('/', Array_Values(Array_Reverse(Explode('.', StrToLower($Domain)))));
     }
   
-    Function &Get_Cache_Link($Link, $Add=Array())
+    Function &Get_Cache_Link($Link, $Add=[])
     {
       If(!Is_Array($Add))
-        $Add=Array($Add);
+        $Add=[$Add];
       $Cache=$this->Create_Object('/Web/Search/BD/Cache');
       $URL=TUrl::Create($Link);
       $Domain=$URL->Domain();
@@ -49,7 +49,7 @@
     //Echo '-----------------------';
    
       $Hash=MD5($_Req);
-      $Cache=&$this->Get_Cache_Link($this->URL, Array(False, $Hash, '.result'));
+      $Cache=&$this->Get_Cache_Link($this->URL, [False, $Hash, '.result']);
       $Cache->Lock();
       $D=$Cache->Load();
       $ZTO=$Cache->IsTimeOut(0);
@@ -78,13 +78,13 @@
         Return $Res;
       }
   
-      $Sock=&$this->Create_Object('/Stream/Fifo');
-      $Sock=&$this->_Send_Request(&$Sock, $A_Z_Result);
+      $Sock=$this->Create_Object('/Stream/Fifo');
+      $Sock=$this->_Send_Request($Sock, $A_Z_Result);
       $_Req=$Sock->Get_Content();
    
-      $Cache=&$this->Get_Cache_Link($this->URL, Array($this->ReqHash.'.result'));
+      $Cache=$this->Get_Cache_Link($this->URL, [$this->ReqHash.'.result']);
       $Cache->Lock();
-      //$ZTO=$Cache->IsTimeOut(30*24*60*60);
+    //$ZTO=$Cache->IsTimeOut(30*24*60*60);
       $ZTO=$Cache->IsTimeOut(0);
       $D=$Cache->Load();
       If($ZTO||!IsSet($D['Res'])||!$D['Res'])
@@ -99,7 +99,7 @@
       $Cache->UnLock();
       $Cache->_UnLock();
       $Sock->Write($D['Res']);
-      $Res=&$this->_Create_Response(&$Sock, $A_Z_Result);
+      $Res=$this->_Create_Response(&$Sock, $A_Z_Result);
       Return $Res;
     }
   }

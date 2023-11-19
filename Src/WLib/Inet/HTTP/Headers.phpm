@@ -1,11 +1,11 @@
 <?
   Function _Http_Headers()
   {
-    $Others=Array(
+    $Others=[
       'CONTENT_LENGTH' => True,
       'CONTENT_TYPE'   => True,
       'REDIRECT_AUTHORIZATION'=>'Authorization',
-    );
+    ];
     ForEach($_SERVER as $Name=>$Value)
       If(IsSet($Others[$Name]))
       {
@@ -34,7 +34,7 @@
       $R=GetAllHeaders();
     Else
       $R=_Http_Headers();
-    $Res=Array();
+    $Res=[];
     ForEach($R As $Name=>$Value)
     {
       $Name=StrTr(

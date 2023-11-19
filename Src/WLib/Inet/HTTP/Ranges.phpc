@@ -3,8 +3,8 @@
  
   Class C_INet_HTTP_Ranges Extends T_Object//_Release
   {
-    Var $Ranges=Array();
-    Var $Size=0;
+    Var $Ranges =[] ;
+    Var $Size   =0  ;
  
     Function Set_Size($ASize)
     {
@@ -15,7 +15,7 @@
     {
       $R=&$this->Ranges;
       $S=$this->Size-1;
-      $R=Array();
+      $R=[];
       $Rn=Explode(',', $Str);
       ForEach($Rn As $r)
       {
@@ -57,8 +57,8 @@
       $C=Count($R);
       If($C<2)
         Return;
-      USort($R, Array(&$this, '__cmpReg'));
-      $N=Array(&$R[0]);
+      USort($R, $this->__cmpReg(...));
+      $N=[&$R[0]];
       $n=&$N[0][1];
       For($i=1;$i<$C;$i++)
       {
@@ -83,7 +83,7 @@
  
     Function ToString()
     {
-      $Res=Array();
+      $Res=[];
       ForEach($this->Ranges As $r)
         $Res[]=$r[0].'-'.$r[1];
       Return Implode(',', $Res);

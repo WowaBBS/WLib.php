@@ -24,14 +24,8 @@
       $Factory->Create('System' );
     }
 
-    Function TestSystem($Factory)
-    {
-      Include 'Example.Attr.php8';
-    }
-    
-    Function TestLink($Factory)
-    { //TODO:
-    # Include 'Example.Link.php8';
-    }
+    Function TestSystem ($Loader, $Factory) { Include 'Example/Attr.php8'; }
+  # Function TestLink   ($Loader, $Factory) { Include 'Example/Link.php8'; }
+    Function TestDisk   ($Loader, $Factory) { Include 'Example/Disk.php8'; }
   }
 ?>

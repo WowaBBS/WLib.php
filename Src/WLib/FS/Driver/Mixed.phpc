@@ -69,7 +69,7 @@
       ForEach($this->ListNodes As $k=>$v)
       {
         $v=$this->ListNodes[$k]->Node($Path);
-        If($R=$v->Vars();)
+        If($R=$v->Vars())
           $Res+=$R;
       }
       Return $Res;

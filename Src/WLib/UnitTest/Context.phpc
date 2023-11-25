@@ -9,6 +9,12 @@
     Var $ExpectException;
     Var $IsFailed=False;
     
+    Function _Init(Array $Args)
+    {
+      $this->Register_Argument_Name_Value('Loader', $this->Object_GetLoader());
+      Parent::_Init($Args);
+    }
+    
     Function Register_Argument_Type_Value($Value, $Type=Null)
     {
       $Type??=Get_Class($Value);
@@ -52,13 +58,17 @@
           $Arg_Name=$Prameter->GetName();
           If(Array_Key_Exists($Arg_Name, $ValueByName))
           {
-            $Args[]=$ValueByName[$Arg_Name];
+            $Value=$ValueByName[$Arg_Name];
+            // TODO: If closure
+            $Args[]=$Value;
             Continue;
           }
           $Type=(String)$Prameter->GetType();
           If(Array_Key_Exists($Type, $ValueByType))
           {
-            $Args[]=$ValueByType[$Type];
+            $Value=$ValueByType[$Type];
+            // TODO: If closure
+            $Args[]=$Value;
             Continue;
           }
           $this->Log('Error', 'Not found value for ',

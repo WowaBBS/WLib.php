@@ -18,9 +18,9 @@
   $FS->Log('Debug', 'Attrs:')->Debug($FS[__DIR__   ]->Get(['Path', 'Created', 'Mode', 'DeviceId', 'NodeId'])); //TODO:, 'Md5', 'Sha1'
   $FS->Log('Debug', 'Attrs:')->Debug($FS['Unknown' ]->Get(['Path', 'Stat'])); //TODO:'Created', 'Mode', 'Md5', 'Sha1'
   $List=[];
-  ForEach($FS[__DIR__]->Call('List')As $Item)
+  ForEach($FS[RealPath(__DIR__.'/..')]->Call('List')As $Item)
     $List[]=$Item->Get(['Nick', 'Ext', 'Size', 'DirSize', 'Created', 'Modified', 'DirModified', 'Mode', 'Md5', 'DirMd5']);
-  Table::Cr($List)->ToLog($FS->Log('Debug', 'List:' ));
+  Table::Cr($List)->ToLog($FS->Log('Debug', 'List:'));
   
   $Node=$FS['Test'];
   $FS->Log('Debug', 'TestFunc    : ', $Node->Call ('TestFunc'               ,['a'=>1, 'b'=>2]));

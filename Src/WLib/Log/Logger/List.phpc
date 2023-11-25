@@ -39,7 +39,7 @@
       $Name=$Args['Name']?? (Is_String($Logger)? $Logger:'');
       
       $Override=$Args['Override']?? Null;
-      $OldNamed=StrLen($Name)? $this->ByName[$Name]:Null;
+      $OldNamed=StrLen($Name)? $this->ByName[$Name]?? Null:Null;
       If($OldNamed && !$Override)
       {
         If($Override===False) Return $OldNamed;

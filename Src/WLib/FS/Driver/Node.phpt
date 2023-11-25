@@ -40,10 +40,10 @@
       Return $Res;
     }
 
-    Function IsFile  (                     ) { Return $this->Get('IsFile' ); }
-    Function IsDir   (                     ) { Return $this->Get('IsDir'  ); }
-    Function IsLink  (                     ) { Return $this->Get('IsLink' ); }
-    Function Exists  (                     ) { Return $this->Get('Exists' ); }
+    Function Is_File (                     ) { Return $this->Get('Is_File' ); }
+    Function Is_Dir  (                     ) { Return $this->Get('Is_Dir'  ); }
+    Function Is_Link (                     ) { Return $this->Get('Is_Link' ); }
+    Function Exists  (                     ) { Return $this->Get('Exists'  ); }
     Function Stream  ($Mode                ) { Return $this->Call('Stream'  ,['Mode'=>$Mode                    ]); }
     Function Files   ($Mask=False, $Attr=3 ) { Return $this->Call('Files'   ,['Mask'=>$Mask     ,'Attr'=>$Attr ]); }
     Function Nodes   (                     ) { Return $this->Call('Nodes'   ,[                                 ]); }
@@ -62,10 +62,10 @@
     
     Function _Remove($Args)
     {
-      If($this->IsFile())
+      If($this->Is_File())
         Return $this->UnLink();
-      If(!$this->IsDir()) Return;
-    //If(!$this->IsLink())
+      If(!$this->Is_Dir()) Return;
+    //If(!$this->Is_Link())
       Return $this->RmDir($Args['Recursive']?? Null);
     }
     

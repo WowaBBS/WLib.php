@@ -2,17 +2,12 @@
   $Loader->Parent_Class('/Object');
   $Loader->Load_Type('/FS/Driver/Node');
   $Loader->Load_Type('/Inet/Url');
-  $Loader->Load_Type('/FS/Attr/Mode');
-  $Loader->Load_Type('/FS/Attr/Hash');
-  $Loader->Load_Type('/FS/Attr/IntId');
-  $Loader->Load_Type('/FS/Attr/Date/UnixTime' );
-  $Loader->Load_Type('/FS/Driver/Attr' );
-
-  Use T_FS_Attr_Date_UnixTime As FileTime ;
-  Use T_FS_Attr_Mode          As Mode     ;
-  Use T_FS_Attr_Hash          As Hash     ;
-  Use T_FS_Attr_IntId         As IntId    ;
-  Use T_FS_Driver_Attr        As Attr     ;
+  
+# $Loader->Load_Type('/FS/Attr/Date/UnixTime' ); Use T_FS_Attr_Date_UnixTime As FileTime ;
+# $Loader->Load_Type('/FS/Attr/Mode'          ); Use T_FS_Attr_Mode          As Mode     ;
+  $Loader->Load_Type('/FS/Attr/Hash'          ); Use T_FS_Attr_Hash          As Hash     ;
+# $Loader->Load_Type('/FS/Attr/IntId'         ); Use T_FS_Attr_IntId         As IntId    ;
+  $Loader->Load_Type('/FS/Driver/Attr'        ); Use T_FS_Driver_Attr        As Attr     ;
 
   Class C_FS_Driver_Base Extends C_Object
     Implements ArrayAccess

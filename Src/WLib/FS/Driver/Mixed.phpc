@@ -46,7 +46,7 @@
       ForEach($this->ListNodes As $k=>$v)
       {
         $v=$this->ListNodes[$k]->Node($Path);
-        If($v->IsFile())
+        If($v->Is_File())
           Return $v->Include($UnPack, $Pack);
       }
       Return False;

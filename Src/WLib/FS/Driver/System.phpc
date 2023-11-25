@@ -3,14 +3,12 @@
   $Loader->Load_Type('/FS/Path'  );
   $Loader->Load_Type('/Inet/Url' );
   $Loader->Load_Type('/FS/Attr/Hash');
-  $Loader->Load_Type('/FS/Attr/Date/UnixTime' );
-  $Loader->Load_Type('/FS/Driver/Attr' );
-  
-  Use T_FS_Attr_Date_UnixTime As FileTime ;
-  Use T_FS_Attr_Mode          As Mode     ;
-  Use T_FS_Attr_Hash          As Hash     ;
-  Use T_FS_Attr_IntId         As IntId    ;
-  Use T_FS_Driver_Attr        As Attr     ;
+
+# $Loader->Load_Type('/FS/Attr/Date/UnixTime' ); Use T_FS_Attr_Date_UnixTime As FileTime ;
+  $Loader->Load_Type('/FS/Attr/Mode'          ); Use T_FS_Attr_Mode          As Mode     ;
+  $Loader->Load_Type('/FS/Attr/Hash'          ); Use T_FS_Attr_Hash          As Hash     ;
+# $Loader->Load_Type('/FS/Attr/IntId'         ); Use T_FS_Attr_IntId         As IntId    ;
+  $Loader->Load_Type('/FS/Driver/Attr'        ); Use T_FS_Driver_Attr        As Attr     ;
 
   Class C_FS_Driver_System Extends C_FS_Driver_Base
   {
@@ -136,13 +134,13 @@
       If(!$Stat)
         Return [];
       $Type=Mode::_GetType($Stat['mode']);
-      $IsLink=$Type==='Link';
-      if($IsLink)
+      $Is_Link=$Type==='Link';
+      if($Is_Link)
       { //TODO: Totally switch by config
         $Stat2 =@Stat($SysPath);
         $Stat['mode']=$Stat2['mode'];
       }
-      $Stat['IsLink']=$IsLink;
+      $Stat['Is_Link']=$Is_Link;
       
       Return $Stat;
     }
@@ -184,10 +182,10 @@
         'GroupName' =>fn($Driver, $GroupId )=>$Driver->_GetGroupById ($GroupId ),
         
         fn($SysPath, $Mode)=>ChMod($SysPath, $Mode->ToInt()),
-        fn($SysPath, $IsLink, $UserId    )=>$IsLink? LChGrp($SysPath, $GroupId   ):ChOwn($SysPath, $UserId    ),
-        fn($SysPath, $IsLink, $UserName  )=>$IsLink? LChGrp($SysPath, $GroupName ):ChOwn($SysPath, $UserName  ),
-        fn($SysPath, $IsLink, $GroupId   )=>$IsLink? LChOwn($SysPath, $UserId    ):ChGrp($SysPath, $GroupId   ),
-        fn($SysPath, $IsLink, $GroupName )=>$IsLink? LChOwn($SysPath, $UserName  ):ChGrp($SysPath, $GroupName ),
+        fn($SysPath, $Is_Link, $UserId    )=>$Is_Link? LChGrp($SysPath, $GroupId   ):ChOwn($SysPath, $UserId    ),
+        fn($SysPath, $Is_Link, $UserName  )=>$Is_Link? LChGrp($SysPath, $GroupName ):ChOwn($SysPath, $UserName  ),
+        fn($SysPath, $Is_Link, $GroupId   )=>$Is_Link? LChOwn($SysPath, $UserId    ):ChGrp($SysPath, $GroupId   ),
+        fn($SysPath, $Is_Link, $GroupName )=>$Is_Link? LChOwn($SysPath, $UserName  ):ChGrp($SysPath, $GroupName ),
         fn($SysPath, $Modified, $LastAccess)=>Touch($SysPath, $Modified, $LastAccess),
       ]);
     }

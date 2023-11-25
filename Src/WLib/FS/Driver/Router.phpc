@@ -75,7 +75,7 @@
         ElseIf($F===-1)
         { // Следущая директория - это папка в текущей
           $Node=$this->_GetNode($Path,$Fld);
-          If($Node->IsDir())
+          If($Node->Is_Dir())
           {
             $L['Mode']=$Fld;
             Return $L;
@@ -166,8 +166,8 @@
       Return $this->Get_Singleton('/FS/Driver/Null')->Node($Path);
     }
  
-    Function IsFile  ($Path                       ) { $Base=$this->BaseNode($Path); Return $Base->IsFile  (              ); }
-    Function IsDir   ($Path                       ) { $Base=$this->BaseNode($Path); Return $Base->IsDir   (              ); }
+    Function Is_File ($Path                       ) { $Base=$this->BaseNode($Path); Return $Base->Is_File (              ); }
+    Function Is_Dir  ($Path                       ) { $Base=$this->BaseNode($Path); Return $Base->Is_Dir  (              ); }
     Function Exists  ($Path                       ) { $Base=$this->BaseNode($Path); Return $Base->Exists  (              ); }
     Function Stream  ($Path, $Mode                ) { $Base=$this->BaseNode($Path); Return $Base->Stream  ($Mode         ); }
     Function Files   ($Path, $Mask=False, $Attr=3 ) { $Base=$this->BaseNode($Path); Return $Base->Files   ($Mask, $Attr  ); }

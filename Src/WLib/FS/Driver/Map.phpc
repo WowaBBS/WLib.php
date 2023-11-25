@@ -43,7 +43,7 @@
       Return $H;
     }
  
-    Function IsFile($Path)
+    Function Is_File($Path)
     {
       $N=&$this->RealVar($Path);
       If($N===False)
@@ -51,11 +51,11 @@
       If(Is_String($N))
         Return True;
       If(Is_Object($N))
-        Return $N->IsFile();
+        Return $N->Is_File();
       Return False;
     }
  
-    Function IsDir($Path)
+    Function Is_Dir($Path)
     {
       $N=&$this->RealVar($Path);
       If($N===False)
@@ -63,7 +63,7 @@
       If(Is_Array($N))
         Return True;
       If(Is_Object($N))
-        Return $N->IsDir();
+        Return $N->Is_Dir();
       Return False;
     }
  

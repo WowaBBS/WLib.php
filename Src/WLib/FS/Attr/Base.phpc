@@ -1,0 +1,39 @@
+<?
+  $Loader->Parent_Class('/Object');
+  $Loader->Load_Type('/FS/Driver/Node');
+  $Loader->Load_Type('/Inet/Url');
+  $Loader->Load_Type('/FS/Attr/Func');
+  
+  Class C_FS_Attr_Base Extends C_Object
+  {
+    Var $Name    =''    ;
+    Var $Manager =Null  ;
+    Var $Parent  =Null  ;
+    
+    Function _Init($Args)
+    {
+      $this->Manager =$Args['Manager' ]?->Object_GetWeak();
+    //$this->Parent  =$Args['Parent'  ]?->Object_GetWeak();
+      $this->Name    =$Args['Name'    ];
+
+      Parent::_Init($Args);
+    }
+    
+    Function Init($Args)
+    {
+    # If(Array_Key_Exists($n='Private' ,$Args)) $this->Private  =$Args[$n] ;
+    # If(Array_Key_Exists($n='Cache'   ,$Args)) $this->Cache    =$Args[$n] ;
+    }
+    
+    Function CanHaveSetter() { Return !$this->Private; }
+    Function SetGetter($v) { Return $this->Log('Fatal', 'Unsupported')->Ret(); }
+    Function SetSetter($v) { Return $this->Log('Fatal', 'Unsupported')->Ret(); }
+    
+    Function GetManager() { Return $this->Manager->Get(); }
+    
+    Function Deps_Invalidate() {}
+    
+    Function GetRecursive(&$Vars, $Args        ) {}
+    Function SetRecursive(&$Vars, $Args, &$List) {}
+  }
+?>

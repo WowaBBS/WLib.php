@@ -59,5 +59,32 @@
     {
       $this->Deps=Null;
     }
+
+    Function __Recursive($Attr, &$Vars, $Args, &$List=[])
+    {
+      ForEach($this->GetDeps($Attr) As $Name=>$Item)
+      {
+        If(!Array_Key_Exists($Name, $Vars))
+          $Vars[$Name]=$Item->GetRecursive($Vars, Null);
+        UnSet($List[$Name]); //Remove for to aviod duplicate calls for setters with several args like Touch
+      }
+    
+      $Vars['Args']=$Args;
+      Return $this->Call($Attr, $Vars);
+    }
+
+    Function Recursive($Attr, &$Vars, $Args, &$List=[])
+    {
+      ForEach($this->GetDeps($Attr) As $Name=>$Item)
+      {
+        If(!Array_Key_Exists($Name, $Vars))
+          $Vars[$Name]=$Item->GetRecursive($Vars, Null);
+        UnSet($List[$Name]); //Remove for to aviod duplicate calls for setters with several args like Touch
+      }
+    
+      $Vars['Args']=$Args;
+      Return $this->Call($Attr, $Vars);
+    //Return $this->Get($Vars);
+    }
   }
 ?>

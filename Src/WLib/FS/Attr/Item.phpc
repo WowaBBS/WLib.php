@@ -1,15 +1,13 @@
 <?
-  $Loader->Parent_Class('/Object');
+  $Loader->Parent_Class('/FS/Attr/Base');
   $Loader->Load_Type('/FS/Driver/Node');
   $Loader->Load_Type('/Inet/Url');
   $Loader->Load_Type('/FS/Attr/Func');
   
   Use T_FS_Attr_Func As Func;
  
-  Class C_FS_Attr_Item Extends C_Object
+  Class C_FS_Attr_Item Extends C_FS_Attr_Base
   {
-    Var $Manager =Null  ;
-    Var $Name    =''    ;
     Var $Setter  =Null  ;
     Var $Getter  =Null  ;
     Var $Private =False ;
@@ -17,11 +15,8 @@
     
     Function _Init($Args)
     {
-      $this->Manager =$Args['Manager' ]->Object_GetWeak();
-      $this->Name    =$Args['Name'    ];
-
-      $this->Setter  =New Func();
-      $this->Getter  =New Func();
+      $this->Setter=New Func();
+      $this->Getter=New Func();
       
       Parent::_Init($Args);
     }
@@ -32,6 +27,7 @@
       If(Array_Key_Exists($n='Cache'   ,$Args)) $this->Cache    =$Args[$n] ;
       If(Array_Key_Exists($n='Getter'  ,$Args)) $this->SetGetter($Args[$n]);
       If(Array_Key_Exists($n='Setter'  ,$Args)) $this->SetSetter($Args[$n]);
+      Parent::Init($Args);
     }
     
     Function CanHaveSetter() { Return !$this->Private; }
@@ -46,33 +42,7 @@
       $this->Setter->Deps_Invalidate();
     }
     
-    Function GetDeps() { Return $this->Getter->GetDeps($this); }
-    Function SetDeps() { Return $this->Setter->GetDeps($this); }
-    
-    Function Get($Map) { Return $this->Getter->Call($this, $Map); }
-    Function Set($Map) { Return $this->Setter->Call($this, $Map); }
-    
-    Function GetRecursive(&$Vars, $Args)
-    {
-      ForEach($this->GetDeps() As $Name=>$Item)
-        If(!Array_Key_Exists($Name, $Vars))
-          $Vars[$Name]=$Item->GetRecursive($Vars, Null);
-    
-      $Vars['Args']=$Args;
-      Return $this->Get($Vars);
-    }
-    
-    Function SetRecursive(&$Vars, $Args, $List)
-    {
-      ForEach($this->SetDeps() As $Name=>$Item)
-      {
-        If(!Array_Key_Exists($Name, $Vars))
-          $Vars[$Name]=$Item->GetRecursive($Vars, Null);
-        UnSet($List[$Name]); //Remove for to aviod duplicate calls for setters with several args like Touch
-      }
-    
-      $Vars['Args']=$Args;
-      Return $this->Set($Vars);
-    }
+    Function GetRecursive(&$Vars, $Args        ) { Return $this->Getter->Recursive($this, $Vars, $Args       ); }
+    Function SetRecursive(&$Vars, $Args, &$List) { Return $this->Setter->Recursive($this, $Vars, $Args, $List); }
   }
 ?>

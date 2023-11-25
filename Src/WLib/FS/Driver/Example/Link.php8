@@ -17,7 +17,7 @@
   
   $FS->Log('Debug', 'GetCwd()=', GetCwd());
   
-  If(!$FS['a']->IsDir())
+  If(!$FS['a']->Is_Dir())
   {
     $FS['TestFile.txt' ]['Content'  ]='Hello world';
     $FS['a/x'          ]->MkDir();

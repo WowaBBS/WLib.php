@@ -12,8 +12,8 @@
   
   $FS=$Factory->Create('System');
 
-  $FS->Log('Debug', 'Disk/Dir:'     )->Debug($FS[__DIR__   ]->Get(['DiskTotal', 'DiskFree', 'DiskUsed']));
-//TODO:
-# $FS->Log('Debug', 'Disk/File:'    )->Debug($FS[__FILE__  ]->Get(['DiskTotal', 'DiskFree', 'DiskUsed']));
-# $FS->Log('Debug', 'Disk/Unknown:' )->Debug($FS['Unknown' ]->Get(['DiskTotal', 'DiskFree', 'DiskUsed']));
+  $Node=$FS['Test'];
+  $FS->Log('Debug', 'UnknownFunc : ', $Node->Call ('UnknownFunc'            ,['a'=>1, 'b'=>2]));
+  $FS->Log('Debug', 'UnknownGet  : ', $Node->Get  ('Unknown'                ,['a'=>1, 'b'=>2]));
+  $FS->Log('Debug', 'UnknownSet  : ', $Node->Set  ('Unknown' ,'InTestValue' ,['a'=>1, 'b'=>2]));
 ?>

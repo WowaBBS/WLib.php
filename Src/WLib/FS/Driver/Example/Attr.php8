@@ -12,23 +12,9 @@
   
   $FS=$Factory->Create('System');
 
-  $FS->Log('Debug', 'Node:' )->Debug($FS[__FILE__  ]);
-  $FS->Log('Debug', 'Mode: ',        $FS[__FILE__  ]->Get('Mode'));
-  $FS->Log('Debug', 'Attrs:')->Debug($FS[__FILE__  ]->Get(['Path', 'Created', 'Mode', 'DeviceId', 'NodeId', 'Md5', 'Sha1', 'Content']));
-  $FS->Log('Debug', 'Attrs:')->Debug($FS[__DIR__   ]->Get(['Path', 'Created', 'Mode', 'DeviceId', 'NodeId'])); //TODO:, 'Md5', 'Sha1'
-  $FS->Log('Debug', 'Attrs:')->Debug($FS['Unknown' ]->Get(['Path', 'Stat'])); //TODO:'Created', 'Mode', 'Md5', 'Sha1'
-  $List=[];
-  ForEach($FS[RealPath(__DIR__.'/..')]->Call('List')As $Item)
-    $List[]=$Item->Get(['Nick', 'Ext', 'Size', 'DirSize', 'Created', 'Modified', 'DirModified', 'Mode', 'Md5', 'DirMd5']);
-  Table::Cr($List)->ToLog($FS->Log('Debug', 'List:'));
-  
-  $Node=$FS['Test'];
-  $FS->Log('Debug', 'TestFunc    : ', $Node->Call ('TestFunc'               ,['a'=>1, 'b'=>2]));
-  $FS->Log('Debug', 'TestGet     : ', $Node->Get  ('Test'                   ,['a'=>1, 'b'=>2]));
-  $FS->Log('Debug', 'TestSet     : ', $Node->Set  ('Test'    ,'InTestValue' ,['a'=>1, 'b'=>2]));
-  $FS->Log('Debug', 'UnknownFunc : ', $Node->Call ('UnknownFunc'            ,['a'=>1, 'b'=>2]));
-  $FS->Log('Debug', 'UnknownGet  : ', $Node->Get  ('Unknown'                ,['a'=>1, 'b'=>2]));
-  $FS->Log('Debug', 'UnknownSet  : ', $Node->Set  ('Unknown' ,'InTestValue' ,['a'=>1, 'b'=>2]));
-  $FS->Log('Debug', 'TestGet     : ', $Node['Test']);
-  $FS->Log('Debug', 'TestSet     : ', $Node['Test']='InTestValue');
+  $FS->Log('Debug', 'Node:'          )->Debug($FS[__FILE__  ]);
+  $FS->Log('Debug', 'Mode: ',                 $FS[__FILE__  ]->Get('Mode'));
+  $FS->Log('Debug', 'Attrs/File:'    )->Debug($FS[__FILE__  ]->Get(['Path', 'Created', 'Mode', 'DeviceId', 'NodeId', 'Md5', 'Sha1', 'Content']));
+  $FS->Log('Debug', 'Attrs/Dir:'     )->Debug($FS[__DIR__   ]->Get(['Path', 'Created', 'Mode', 'DeviceId', 'NodeId'])); //TODO:, 'Md5', 'Sha1'
+  $FS->Log('Debug', 'Attrs/Unknown:' )->Debug($FS['Unknown' ]->Get(['Path', 'Stat'])); //TODO:'Created', 'Mode', 'Md5', 'Sha1'
 ?>

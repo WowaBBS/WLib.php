@@ -12,8 +12,8 @@
   
   $FS=$Factory->Create('System');
 
-  $FS->Log('Debug', 'Disk/Dir:'     )->Debug($FS[__DIR__   ]->Get(['DiskTotal', 'DiskFree', 'DiskUsed']));
-//TODO:
-# $FS->Log('Debug', 'Disk/File:'    )->Debug($FS[__FILE__  ]->Get(['DiskTotal', 'DiskFree', 'DiskUsed']));
-# $FS->Log('Debug', 'Disk/Unknown:' )->Debug($FS['Unknown' ]->Get(['DiskTotal', 'DiskFree', 'DiskUsed']));
+  $List=[];
+  ForEach($FS[RealPath(__DIR__.'/..')]->Call('List')As $Item)
+    $List[]=$Item->Get(['Nick', 'Ext', 'Size', 'DirSize', 'Created', 'Modified', 'DirModified', 'Mode', 'Md5', 'DirMd5']);
+  Table::Cr($List)->ToLog($FS->Log('Debug', 'List:'));
 ?>

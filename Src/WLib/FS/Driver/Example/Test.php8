@@ -1,0 +1,21 @@
+<?
+  If(!IsSet($Factory))
+  {
+    for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+    $Loader->GetLogger()->Add(SubStr(__FILE__,0,-5).'.log');
+    
+    $Factory=$Loader->Create_Object('/FS/Driver/Factory');
+  }
+  
+  $Loader->Load_Type('/Debug/Table'); Use T_Debug_Table As Table;
+  
+  $FS=$Factory->Create('System');
+
+  $Node=$FS['Test'];
+  $FS->Log('Debug', 'TestFunc    : ', $Node->Call ('TestFunc'               ,['a'=>1, 'b'=>2]));
+  $FS->Log('Debug', 'TestGet     : ', $Node->Get  ('Test'                   ,['a'=>1, 'b'=>2]));
+  $FS->Log('Debug', 'TestSet     : ', $Node->Set  ('Test'    ,'InTestValue' ,['a'=>1, 'b'=>2]));
+  $FS->Log('Debug', 'TestGet     : ', $Node['Test']);
+  $FS->Log('Debug', 'TestSet     : ', $Node['Test']='InTestValue');
+?>

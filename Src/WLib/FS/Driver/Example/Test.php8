@@ -13,9 +13,9 @@
   $FS=$Factory->Create('System');
 
   $Node=$FS['Test'];
-  $FS->Log('Debug', 'TestFunc    : ', $Node->Call ('TestFunc'               ,['a'=>1, 'b'=>2]));
-  $FS->Log('Debug', 'TestGet     : ', $Node->Get  ('Test'                   ,['a'=>1, 'b'=>2]));
-  $FS->Log('Debug', 'TestSet     : ', $Node->Set  ('Test'    ,'InTestValue' ,['a'=>1, 'b'=>2]));
-  $FS->Log('Debug', 'TestGet     : ', $Node['Test']);
-  $FS->Log('Debug', 'TestSet     : ', $Node['Test']='InTestValue');
+  $FS->Log('Debug', 'Test_Func   : ', $Node->Call ('Test_Func'              ,['a'=>1, 'b'=>2]));
+  $FS->Log('Debug', 'Test_Get    : ', $Node->Get  ('Test'                   ,['a'=>1, 'b'=>2]));
+  $FS->Log('Debug', 'Test_Set    : ', $Node->Set  ('Test'    ,'InTestValue' ,['a'=>1, 'b'=>2]));
+  $FS->Log('Debug', 'Test_Get    : ', $Node['Test']);
+  $FS->Log('Debug', 'Test_Set    : ', $Node['Test']='InTestValue');
 ?>

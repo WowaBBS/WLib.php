@@ -12,8 +12,14 @@
   
   $FS=$Factory->Create('System');
 
+  $Attr=[
+    'Nick', 'Ext', 'Size', 'Dir_Size', 
+    'Created', 'Modified', 'Dir_Modified', 
+    'Mode',         'Md5', 'Dir_Md5',
+  ];
   $List=[];
   ForEach($FS[RealPath(__DIR__.'/..')]->Call('List')As $Item)
-    $List[]=$Item->Get(['Nick', 'Ext', 'Size', 'DirSize', 'Created', 'Modified', 'DirModified', 'Mode', 'Md5', 'DirMd5']);
+    $List[]=$Item->Get($Attr);
+  $List[]=$FS['Unexists']->Get($Attr);
   Table::Cr($List)->ToLog($FS->Log('Debug', 'List:'));
 ?>

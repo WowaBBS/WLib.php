@@ -2,12 +2,12 @@
   Class T_FS_Attr_Date
     Implements Stringable 
   {
-    Static Function New(...$Args) { Return New Static(...$Args); }
+  //Static Function New(...$Args) { Return New Static(...$Args); }
     
     Function ToUnixTime() { Return 0; }
     Function FracNanoSecond() { Return 0; }
     
-    Function ToString() { Return GmDate('Y-M-d H:i:s', $this->ToUnixTime()); }
+    Function ToString() { $v=$this->ToUnixTime(); Return Is_Integer($v)? GmDate('Y-m-d H:i:s', $v):'0000-00-00 00:00:00'; }
     Function __ToString() { Return $this->ToString(); }
     
     Function Max(...$Args)

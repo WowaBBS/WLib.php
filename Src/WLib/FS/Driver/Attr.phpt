@@ -28,9 +28,10 @@
   //  Stat
   //
   //Device:
-  //  DeviceId
-  //  FreeSpace
-  //  TotalSpace
+  //  Device_Id
+  //  Disk_Free
+  //  Disk_Total
+  //  Disk_Used
   
   Class T_FS_Driver_Attr
   {
@@ -60,33 +61,36 @@
     Static Function Init_Stat($Attr)
     {
       $Attr->Register([
-      //'Stat'        => fn()=>Static::_EmptyStat(),
-
-        'Is_Dir'      => fn($Type)=>$Type==='Dir' ,
-        'Is_File'     => fn($Type)=>$Type==='File' ,
-        'Is_Link'     => fn($Stat)=>$Stat['Is_Link'],
-        'Exists'      => fn($SysPath)=>(Bool)$Stat,
-
-        'Type'        => fn($Mode)=>$Mode->GetType(),
-        'DeviceId'    => fn($Stat)=>New IntId   ($Stat['dev'     ]), // 0
-        'NodeId'      => fn($Stat)=>New IntId   ($Stat['ino'     ]), // 1
-        'Mode'        => fn($Stat)=>New Mode    ($Stat['mode'    ]), // 2
-        'NumLinks'    => fn($Stat)=>             $Stat['nlink'   ] , // 3
-        'UserId'      => fn($Stat)=>             $Stat['uid'     ] , // 4
-        'GroupId'     => fn($Stat)=>             $Stat['gid'     ] , // 5
-        'DeviceType'  => fn($Stat)=>             $Stat['rdev'    ] , // 6
-        'Size'        => fn($Stat)=>             $Stat['size'    ] , // 7
-        'LastAccess'  => fn($Stat)=>New FileTime($Stat['atime'   ]), // 8
-        'Modified'    => fn($Stat)=>New FileTime($Stat['mtime'   ]), // 9
-        'Created'     => fn($Stat)=>New FileTime($Stat['ctime'   ]), //10
-        'BlockSize'   => fn($Stat)=>             $Stat['blksize' ] , //11
-        'Blocks'      => fn($Stat)=>             $Stat['blocks'  ] , //12
-
-        'DirSize'     => fn($Node)=>$Node->Is_Dir()?     $Node->ForEachRes(0                  ,fn($Res, $n)=>$Res +    $n['DirSize'     ]  ):$Node['Size'     ],
-        'DirModified' => fn($Node)=>$Node->Is_Dir()?     $Node->ForEachRes($Node['Modified' ] ,fn($Res, $n)=>$Res->Max($n['DirModified' ] )):$Node['Modified' ],
-        'DirMd5'      => fn($Node)=>$Node->Is_Dir()? Hash::FromBinary($Node->ForEachRes(''                 ,fn($Res, $n)=>$Res .    $n['_HashMd5Str' ] ), 'Md5'):$Node['Md5'      ],
+      //'Stat'          => fn()=>Static::_EmptyStat(),
+        'Is_Executable' => fn($Mode)=>$Mode->Is_Executable (),
+        'Is_Readable'   => fn($Mode)=>$Mode->Is_Readable   (),
+        'Is_Writable'   => fn($Mode)=>$Mode->Is_Writable   (),
         
-        '_HashMd5Str' => fn($Modified, $Created, $Size, $DirMd5)=>$Modified.'|'.$Created.'|'.$Size.'|'.$DirMd5.';',
+        'Is_Dir'        => fn($Type)=>$Type==='Dir'   ,
+        'Is_File'       => fn($Type)=>$Type==='File'  ,
+        'Is_Link'       => fn($Stat)=>$Stat['Is_Link'],
+        'Exists'        => fn($SysPath)=>(Bool)$Stat,
+
+        'Type'          => fn($Mode)=>$Mode->GetType(),
+        'Device_Id'     => fn($Stat)=>IntId   ::New($Stat['dev'     ]), // 0
+        'Node_Id'       => fn($Stat)=>IntId   ::New($Stat['ino'     ]), // 1
+        'Mode'          => fn($Stat)=>Mode    ::New($Stat['mode'    ]), // 2
+        'NumLinks'      => fn($Stat)=>              $Stat['nlink'   ] , // 3
+        'User_Id'       => fn($Stat)=>              $Stat['uid'     ] , // 4
+        'Group_Id'      => fn($Stat)=>              $Stat['gid'     ] , // 5
+        'Device_Type'   => fn($Stat)=>              $Stat['rdev'    ] , // 6
+        'Size'          => fn($Stat)=>              $Stat['size'    ] , // 7
+        'LastAccess'    => fn($Stat)=>FileTime::New($Stat['atime'   ]), // 8
+        'Modified'      => fn($Stat)=>FileTime::New($Stat['mtime'   ]), // 9
+        'Created'       => fn($Stat)=>FileTime::New($Stat['ctime'   ]), //10
+        'Block_Size'    => fn($Stat)=>              $Stat['blksize' ] , //11
+        'Block_Count'   => fn($Stat)=>              $Stat['blocks'  ] , //12
+
+        'Dir_Size'      => fn($Node)=>$Node->Is_Dir()?     $Node->ForEachRes(0                  ,fn($Res, $n)=>$Res +    $n['Dir_Size'      ]         ):$Node['Size'     ],
+        'Dir_Modified'  => fn($Node)=>$Node->Is_Dir()?     $Node->ForEachRes($Node['Modified' ] ,fn($Res, $n)=>$Res->Max($n['Dir_Modified'  ])        ):$Node['Modified' ],
+        'Dir_Md5'       => fn($Node)=>$Node->Is_Dir()? Hash::FromBinary($Node->ForEachRes(''    ,fn($Res, $n)=>$Res .    $n['_Hash_Md5_Str' ] ), 'Md5'):$Node['Md5'      ],
+        
+        '_Hash_Md5_Str' => fn($Modified, $Created, $Size, $Dir_Md5)=>$Modified.'|'.$Created.'|'.$Size.'|'.$Dir_Md5.';',
       ]);
     }    
 
@@ -103,37 +107,37 @@
         'Exists'        => fn($SysPath)=>FileExists    ($SysPath),
 
         'Type'          => fn($SysPath)=>             FileType  ($SysPath) ,
-        'DeviceId'      => fn($SysPath)=>New IntId   (LinkInfo  ($SysPath)), // 0
-        'NodeId'        => fn($SysPath)=>New IntId   (FileINode ($SysPath)), // 1
+        'Device_Id'     => fn($SysPath)=>New IntId   (LinkInfo  ($SysPath)), // 0
+        'Node_Id'       => fn($SysPath)=>New IntId   (FileINode ($SysPath)), // 1
         'Mode'          => fn($SysPath)=>New Mode    (FilePerms ($SysPath)),
-      //'NumLinks'      => fn($Stat   )=>             $Stat['nlink'   ]     , // 3
-        'UserId'        => fn($SysPath)=>             FileOwner ($SysPath) ,
-        'GroupId'       => fn($SysPath)=>             FileGroup ($SysPath) ,
-      //'DeviceType'    => fn($Stat   )=>             $Stat['rdev'    ]     , // 6
+      //'NumLinks'      => fn($Stat   )=>             $Stat['nlink'   ]    , // 3
+        'User_Id'       => fn($SysPath)=>             FileOwner ($SysPath) ,
+        'Group_Id'      => fn($SysPath)=>             FileGroup ($SysPath) ,
+      //'Device_Type'   => fn($Stat   )=>             $Stat['rdev'    ]    , // 6
         'Size'          => fn($SysPath)=>             FileSize  ($SysPath) ,
         'LastAccess'    => fn($SysPath)=>New FileTime(FileATime ($SysPath)),
         'Modified'      => fn($SysPath)=>New FileTime(FileMTime ($SysPath)),
         'Created'       => fn($SysPath)=>New FileTime(FileCTime ($SysPath)),
-      //'BlockSize'     => fn($Stat   )=>             $Stat['blksize' ] , //11
-      //'Blocks'        => fn($Stat   )=>             $Stat['blocks'  ] , //12
+      //'Block_Size'    => fn($Stat   )=>             $Stat['blksize' ]    , //11
+      //'Block_Count'   => fn($Stat   )=>             $Stat['blocks'  ]    , //12
       ]);
     }
     
     Static Function Init_Test($Attr)
     {
       $Attr->Register([
-        'TestFunc' => fn($Driver,        $Args)=>$Driver->Log('Debug', 'TestFunc ' ,$Args)->Ret('TestResult'),
-        'Test'     =>[fn($Driver,        $Args)=>$Driver->Log('Debug', 'TestGet '  ,$Args)->Ret('TestValue'),
-                      fn($Driver, $Test, $Args)=>$Driver->Log('Debug', 'TestSet '  ,$Test, ' ', $Args)->Ret('TestRes')],
+        'Test_Func' => fn($Driver,        $Args)=>$Driver->Log('Debug', 'Test_Func ' ,$Args)->Ret('TestResult'),
+        'Test'      =>[fn($Driver,        $Args)=>$Driver->Log('Debug', 'Test_Get '  ,$Args)->Ret('TestValue'),
+                       fn($Driver, $Test, $Args)=>$Driver->Log('Debug', 'Test_Set '  ,$Test, ' ', $Args)->Ret('TestRes')],
       ]);
     }
     
     Static Function Init_Disk($Attr)
     {
       $Attr->Register([
-        'DiskTotal' => fn($SysPath)=>Disk_Total_Space ($SysPath),
-        'DiskFree'  => fn($SysPath)=>Disk_Free_Space  ($SysPath),
-        'DiskUsed'  => fn($DiskTotal, $DiskFree)=>$DiskTotal>0? $DiskTotal-$DiskFree:$DiskTotal,
+        'Disk_Total' => fn($SysPath)=>Disk_Total_Space ($SysPath),
+        'Disk_Free'  => fn($SysPath)=>Disk_Free_Space  ($SysPath),
+        'Disk_Used'  => fn($Disk_Total, $Disk_Free)=>$Disk_Total>0? $Disk_Total-$Disk_Free:$Disk_Total,
       ]);
       If(False) //TODO:
       $Attr->Register([

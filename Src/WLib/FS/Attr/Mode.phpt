@@ -19,6 +19,10 @@
     
     Function GetType() { Return Static::$Types[$i=$this->Value>>12][1]?? 'Unknown'.$i; }
     
+    Function Is_Executable () { return $this->ToInt()&1; }
+    Function Is_Readable   () { return $this->ToInt()&4; }
+    Function Is_Writable   () { return $this->ToInt()&2; }
+    
     Function ToInt() { Return $this->Value; }
     Function ToOct() { Return DecOct($this->ToInt()); }
     

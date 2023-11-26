@@ -12,8 +12,8 @@
   
   $FS=$Factory->Create('System');
 
-  $FS->Log('Debug', 'Disk/Dir:'     )->Debug($FS[__DIR__   ]->Get(['DiskTotal', 'DiskFree', 'DiskUsed']));
+  $FS->Log('Debug', 'Disk/Dir:'     )->Debug($FS[__DIR__   ]->Get(['Disk_Total', 'Disk_Free', 'Disk_Used']));
 //TODO:
-# $FS->Log('Debug', 'Disk/File:'    )->Debug($FS[__FILE__  ]->Get(['DiskTotal', 'DiskFree', 'DiskUsed']));
-# $FS->Log('Debug', 'Disk/Unknown:' )->Debug($FS['Unknown' ]->Get(['DiskTotal', 'DiskFree', 'DiskUsed']));
+# $FS->Log('Debug', 'Disk/File:'    )->Debug($FS[__FILE__  ]->Get(['Disk_Total', 'Disk_Free', 'Disk_Used']));
+# $FS->Log('Debug', 'Disk/Unknown:' )->Debug($FS['Unknown' ]->Get(['Disk_Total', 'Disk_Free', 'Disk_Used']));
 ?>

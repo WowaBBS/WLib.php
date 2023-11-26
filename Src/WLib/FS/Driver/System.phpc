@@ -132,7 +132,21 @@
     {
       $Stat=@LStat($SysPath);
       If(!$Stat)
-        Return [];
+        Return [
+         'dev'     =>    0, // 0  'Device_Id'
+         'ino'     =>    0, // 1  'Node_Id'
+         'mode'    =>    0, // 2  'Mode'
+         'nlink'   =>    0, // 3  'NumLinks'
+         'uid'     =>    0, // 4  'User_Id'
+         'gid'     =>    0, // 5  'Group_Id'
+         'rdev'    =>    0, // 6  'Device_Type'
+         'size'    =>    0, // 7  'Size'
+         'atime'   => Null, // 8  'LastAccess'
+         'mtime'   => Null, // 9  'Modified'
+         'ctime'   => Null, //10  'Created'
+         'blksize' =>    0, //11  'Block_Size'
+         'blocks'  =>    0, //12  'Block_Count'
+        ];
       $Type=Mode::_GetType($Stat['mode']);
       $Is_Link=$Type==='Link';
       if($Is_Link)
@@ -178,14 +192,14 @@
     Function Attr_Init_StatSet($Attr)
     {
       $Attr->Register([
-        'UserName'  =>fn($Driver, $UserId  )=>$Driver->_GetUserById  ($UserId  ),
-        'GroupName' =>fn($Driver, $GroupId )=>$Driver->_GetGroupById ($GroupId ),
+        'User_Name'  =>fn($Driver, $User_Id  )=>$Driver->_GetUserById  ($User_Id  ),
+        'Group_Name' =>fn($Driver, $Group_Id )=>$Driver->_GetGroupById ($Group_Id ),
         
         fn($SysPath, $Mode)=>ChMod($SysPath, $Mode->ToInt()),
-        fn($SysPath, $Is_Link, $UserId    )=>$Is_Link? LChGrp($SysPath, $GroupId   ):ChOwn($SysPath, $UserId    ),
-        fn($SysPath, $Is_Link, $UserName  )=>$Is_Link? LChGrp($SysPath, $GroupName ):ChOwn($SysPath, $UserName  ),
-        fn($SysPath, $Is_Link, $GroupId   )=>$Is_Link? LChOwn($SysPath, $UserId    ):ChGrp($SysPath, $GroupId   ),
-        fn($SysPath, $Is_Link, $GroupName )=>$Is_Link? LChOwn($SysPath, $UserName  ):ChGrp($SysPath, $GroupName ),
+        fn($SysPath, $Is_Link, $User_Id    )=>$Is_Link? LChGrp($SysPath, $Group_Id   ):ChOwn($SysPath, $User_Id    ),
+        fn($SysPath, $Is_Link, $User_Name  )=>$Is_Link? LChGrp($SysPath, $Group_Name ):ChOwn($SysPath, $User_Name  ),
+        fn($SysPath, $Is_Link, $Group_Id   )=>$Is_Link? LChOwn($SysPath, $User_Id    ):ChGrp($SysPath, $Group_Id   ),
+        fn($SysPath, $Is_Link, $Group_Name )=>$Is_Link? LChOwn($SysPath, $User_Name  ):ChGrp($SysPath, $Group_Name ),
         fn($SysPath, $Modified, $LastAccess)=>Touch($SysPath, $Modified, $LastAccess),
       ]);
     }

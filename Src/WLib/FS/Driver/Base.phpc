@@ -105,6 +105,55 @@
       Return '/^'.$Mask.'$/iSs';
     }
     
+    Function _Copy($From, $To, $Args, $Remove=False)
+    {
+      //TODO:
+    # If($From ==$To) Return True;
+    # If($From =='' ) Return True;
+    # If($To   =='' ) Return True;
+    
+    //$this->Log('Error', $From->Path->ToString(), ' -> ', $To->Path->ToString());
+      
+      $Res=False;
+      If($From->Is_Link())
+      {
+      //If Skip Link;
+        Return True;
+      }
+      
+      If($From->Is_File())
+      {
+        $StreamFrom =$From ->Stream(['Read'  ]);
+        $StreamTo   =$To   ->Stream(['Write' ,'Create', 'MakePath'=>False]);
+        
+        $Res=$StreamFrom->Copy_To_Stream($StreamTo);
+        
+        $StreamFrom ->Close(); $StreamFrom =Null;
+        $StreamTo   ->Close(); $StreamTo   =Null;
+      }
+      ElseIf($From->Is_Dir())
+      {
+        $To->MkDir();
+        
+        $Res=True;
+        ForEach($From As $Name=>$FromNode)
+          If(!$FromNode->CopyTo($To->Sub($Name), $Args))
+            $Res=False;
+      }
+      Else
+        $this->Log('Error', 'TODO: Unknown Node Type ', $From['Type']);
+
+      If(!$Res)
+        Return False;
+      
+    //If($Args['CopyAttributes']?? True)
+    //  TODO: $From->
+      
+        
+      If($Remove)
+        Return $From->Remove(False);
+    }
+    
   //****************************************************************
   // Cache
   
@@ -125,7 +174,8 @@
 
       $Attr->Register([
         'Remove' =>fn($Node, $Args)=>$Node->_Remove($Args),
-        'ClearCache' =>fn($Driver, $Path, $Args)=>$Driver->_ClearCache($Path, $Args),
+        'Copy'   =>fn($Driver, $Node, $Args)=>$Driver->_Copy($Node, $Args['To'], $Args),
+        'ClearCache' =>fn($Driver, $Path, $Args)=>$Driver->_ClearCache ($Path, $Args),
       ]);
     }
     
@@ -136,6 +186,7 @@
 
         'Md5'  => fn($Content)=>Hash::FromBinary($Content, 'Md5'  ),
         'Sha1' => fn($Content)=>Hash::FromBinary($Content, 'Sha1' ),
+      # 'Hash' => fn($Content, $Args)=>Hash::FromBinary($Content, $Args['Hash']), //TODO: Describe Args Hash
       ]);
     }
     

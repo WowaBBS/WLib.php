@@ -22,7 +22,7 @@
       $Path=New T_FS_Path($APath);
       $File='';
       $H=&$this->Map;
-      While(!$Path->IsNull()&&Is_Array($H))
+      While(!$Path->IsEmpty()&&Is_Array($H))
       {
         $File=$Path->Get(0);
         If(!IsSet($H[$File]))
@@ -30,7 +30,7 @@
         $Path->Del(0);
         $H=&$H[$File];
       }
-      If(!$Path->IsNull())
+      If(!$Path->IsEmpty())
       {
         If(Is_String($H))
           Return $RFalse;

@@ -1,14 +1,7 @@
 <?
-  If(!IsSet($Factory))
-  {
-    for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
-  
-    $Loader->GetLogger()->Add(SubStr(__FILE__,0,-5).'.log');
-    
-    $Factory=$Loader->Create_Object('/FS/Driver/Factory');
-  }
-  
-  $Loader->Load_Type('/Debug/Table'); Use T_Debug_Table As Table;
+  Include '_Using.php';
+
+  $Loader->Load_Type('/Debug/Table'); Use T_Debug_Table As Table;  
   
   $FS=$Factory->Create('System');
 

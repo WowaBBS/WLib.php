@@ -13,16 +13,16 @@
   Uses('MSystem'  );
   Uses('MSysUtil' );
  
-  $Loader->Using_Class  ('Object/TRelease');
-  $Loader->Using_Class  ('INet/Mime/Type/MList' );
-  $Loader->Using_Module ('INet/HTTP/Headers' );
-//$Loader->Using_Class  ('INet/HTTP/MAnswers' );
-//$Loader->Using_Class  ('INet/HTTP/Ranges'  );
-//$Loader->Using_Class  ('Stream/Handle'  );
-//$Loader->Using_Class  ('Stream/File'    );
-//$Loader->Using_Class  ('Stream/Proxy/Ranges');
-//$Loader->Using_Class  ('Stream/Proxy/Shaper');
-//$Loader->Load_Class   ('System/Object'  );
+  $Loader->Using_Class  ('/Object/TRelease'      );
+  $Loader->Using_Class  ('/INet/Mime/Type/MList' );
+  $Loader->Using_Module ('/INet/HTTP/Headers'    );
+//$Loader->Using_Class  ('/INet/HTTP/MAnswers'   );
+//$Loader->Using_Class  ('/INet/HTTP/Ranges'     );
+//$Loader->Using_Class  ('/Stream/Handle'        );
+//$Loader->Using_Class  ('/Stream/File'          );
+//$Loader->Using_Class  ('/Stream/Proxy/Ranges'  );
+//$Loader->Using_Class  ('/Stream/Proxy/Shaper'  );
+//$Loader->Load_Class   ('/System/Object'        );
  
   // ***************************************************************************************
 //Class T_INet_HTTP_UpLoad Extends T_Object

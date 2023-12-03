@@ -1,12 +1,5 @@
 <?
-  If(!IsSet($Factory))
-  {
-    for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
-  
-    $Loader->GetLogger()->Add(SubStr(__FILE__,0,-5).'.log');
-    
-    $Factory=$Loader->Create_Object('/FS/Driver/Factory');
-  }
+  Include '_Using.php';
   
   $Dir='Test';
   @MkDir($Dir);

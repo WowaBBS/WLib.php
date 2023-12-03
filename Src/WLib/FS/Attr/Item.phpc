@@ -1,7 +1,5 @@
 <?
   $Loader->Parent_Class('/FS/Attr/Base');
-  $Loader->Load_Type('/FS/Driver/Node');
-  $Loader->Load_Type('/Inet/Url');
   $Loader->Load_Type('/FS/Attr/Func');
   
   Use T_FS_Attr_Func As Func;
@@ -42,7 +40,7 @@
       $this->Setter->Deps_Invalidate();
     }
     
-    Function GetRecursive(&$Vars, $Args        ) { Return $this->Getter->Recursive($this, $Vars, $Args       ); }
-    Function SetRecursive(&$Vars, $Args, &$List) { Return $this->Setter->Recursive($this, $Vars, $Args, $List); }
+    Function GetRecursive(Array &$Vars, Array $Args              ) { Return $this->Getter->Recursive($this, $Vars, $Args       ); }
+    Function SetRecursive(Array &$Vars, Array $Args, Array &$List) { Return $this->Setter->Recursive($this, $Vars, $Args, $List); }
   }
 ?>

@@ -65,7 +65,7 @@
       $Res=$this->IsIdentical($Expected, $Actual);
       If($Res[0]) Return False;
       $this->Test_SetFailed();
-      $z=IsNull($Res[0]);
+      $z=Is_Null($Res[0]);
       $Debug=[
         'Expected' =>$Expected ,
         'Actual'   =>$Actual   ,

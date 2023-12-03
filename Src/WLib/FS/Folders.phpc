@@ -2,7 +2,7 @@
   $Loader->Parent_Class('/Object');
   
   /**
-   * It class was created for comparing one on more folders
+   * This class was created for comparing one or more folders
    * TODO: Use FS/Search
    */
   class C_FS_Folders extends C_Object

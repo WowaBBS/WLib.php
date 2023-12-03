@@ -1,17 +1,7 @@
 <?
-  If(!IsSet($Factory))
-  {
-    for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
-  
-    $Loader->GetLogger()->Add(SubStr(__FILE__,0,-5).'.log');
-    
-    $Factory=$Loader->Create_Object('/FS/Driver/Factory');
-  }
-  
-  $Loader->Load_Type('/Debug/Table'); Use T_Debug_Table As Table;
-  
-  $FS=$Factory->Create('System');
+  Include '_Using.php';
 
+  $FS=$Factory->Create('System'); //, ['Path'=>$Dir]);
   $FS->Log('Debug', 'Disk/Dir:'     )->Debug($FS[__DIR__   ]->Get(['Disk_Total', 'Disk_Free', 'Disk_Used']));
 //TODO:
 # $FS->Log('Debug', 'Disk/File:'    )->Debug($FS[__FILE__  ]->Get(['Disk_Total', 'Disk_Free', 'Disk_Used']));

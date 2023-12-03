@@ -2,7 +2,6 @@
   $Loader->Parent_Class('/FS/Driver/Base');
   $Loader->Load_Type('/FS/Path'  );
   $Loader->Load_Type('/Inet/Url' );
-  $Loader->Load_Type('/FS/Attr/Hash');
 
 # $Loader->Load_Type('/FS/Attr/Date/UnixTime' ); Use T_FS_Attr_Date_UnixTime As FileTime ;
   $Loader->Load_Type('/FS/Attr/Mode'          ); Use T_FS_Attr_Mode          As Mode     ;
@@ -48,13 +47,15 @@
     {
       Return $this->BasePath->_Clone()->Add(Is_Object($Path)? $Path->Make():$Path)->Make();
     }
- 
+    
     Function _Stream($SysPath, Array $Args=[])
     {
-      $Res=$this->Create_Object('Stream/File');
+      $Res=$this->Create_Object('/Stream/File');
       $Res->Assign($SysPath);
-      If($Mode=$Args['Mode']?? False)
-        $Res->Open($Mode);
+
+      If($Flags=$Args['Mode']?? 0)
+        $Res->Open($Flags);
+      
       Return $Res;
     }
  
@@ -115,7 +116,7 @@
         If(Is_File ($ItemPath) && !$File ) Continue;
         If(Is_Dir  ($ItemPath) && !$Dir  ) Continue;
         If($Filter && !$Filter($File)) Continue;
-        Yield $this->Node($ItemPath);
+        Yield $File=>$this->Node($ItemPath);
       }
       CloseDir($Handle);
     }
@@ -176,9 +177,9 @@
         'SymLink'    =>[fn($SysPath)=>ReadLink($SysPath), fn($SysPath, $SymLink )=>SymLink($SymLink  ,$SysPath)], //Bug checking $SymLink is exists in window
         'HardLink'   =>[Null                            , fn($SysPath, $HardLink)=>   Link($HardLink ,$SysPath)],
         
-        'MkDir'      =>fn($Context, $SysPath, $Args)=>MkDir  ($SysPath, $Args['Mode']?? 0777, $Args['Recursive']?? True, $Context),
-        'UnLink'     =>fn($Context, $SysPath       )=>UnLink ($SysPath, $Context),
-        'RmDir'      =>fn($Context, $SysPath       )=>RmDir  ($SysPath, $Context),
+        'MkDir'      =>fn($Context, $SysPath, $Args)=>@MkDir  ($SysPath, $Args['Mode']?? 0777, $Args['Recursive']?? True, $Context),
+        'UnLink'     =>fn($Context, $SysPath       )=>@UnLink ($SysPath, $Context),
+        'RmDir'      =>fn($Context, $SysPath       )=>@RmDir  ($SysPath, $Context),
         'ClearCache' =>fn($Driver, $SysPath, $Args, $Path)=>$Driver->_ClearCache($Path, $Args+['SysPath'=>$SysPath]),
         'List'       =>fn($Driver, $SysPath, $Args, $Path)=>$Driver->_List($SysPath, $Args, $Path),
       ]);

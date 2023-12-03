@@ -131,12 +131,9 @@
     }
     If($Mask=='')
       Return $Path;
-    If(Preg_Match('/^(\w+)\.(.*?)\*(.*?)$/Ss', $Mask, $Matches))
-      Return $Matches[1].'.'.$Matches[2].ExtractFileExt($Path).$Matches[3];
-    If(Preg_Match('/^(.*?)\*(.*?)\*(.*?)$/Ss', $Mask, $Matches))
-      Return $Matches[1].ExtractFileNick($Path).$Matches[2].ExtractFileExt($Path).$Matches[3];
-    If(Preg_Match('/^(.*?)\*(.*?)$/Ss', $Mask, $Matches))
-      Return $Matches[1].ExtractFileNick($Path).$Matches[2];
+    If(Preg_Match('/^(\w+)\.(.*?)\*(.*?)$/Ss', $Mask, $Matches)) Return $Matches[1].'.'.$Matches[2].ExtractFileExt($Path).$Matches[3];
+    If(Preg_Match('/^(.*?)\*(.*?)\*(.*?)$/Ss', $Mask, $Matches)) Return $Matches[1].ExtractFileNick($Path).$Matches[2].ExtractFileExt($Path).$Matches[3];
+    If(Preg_Match('/^(.*?)\*(.*?)$/Ss'       , $Mask, $Matches)) Return $Matches[1].ExtractFileNick($Path).$Matches[2];
     Return $Mask;
   }
   
@@ -149,31 +146,14 @@
     $End=Count($Path)-1;
     $Res=[];
     ForEach($Path As $k=>$v)
-    {
-    //$v=Trim($v);
-      If($v=='')
+      Switch($v) //$v=Trim($v);
       {
-        if($k!==$Beg && $k!==$End)
-          Continue;
-        ++$Beg;
+      Case ''   : If($k===$Beg || $k===$End) ++$Beg; Break;
+      Case '.'  : $Res=$UseCwd? Explode('/', Str_Replace('\\','/', GetCwd())):['.']; Break;
+      Case '..' : If(Count($Res)>1) Array_Pop($Res); Else $Res[]=$v; Break;
+      Default   : $Res[]=$v;
       }
-      If($v=='.')
-      {
-        If($UseCwd)
-          $Res=Explode('/', Str_Replace('\\','/', GetCwd()));
-        Else
-          $Res=['.'];
-      }
-      ElseIf($v=='..')
-      {
-        If(Count($Res)>1)
-          Array_Pop($Res);
-        Else
-          $Res[]=$v;
-      }
-      Else
-        $Res[]=$v;
-    }
+    
     Return Implode('/', $Res);
   }
   
@@ -192,22 +172,15 @@
     $Tmp=Explode('/', $Path);
     $List=[''];
     ForEach($Tmp As $v)
-    {
-      $v=Trim($v);
-      If($v=='')
-        Continue;
-      If($v=='.')
-        $List=[''];
-      ElseIf($v=='..')
+      Switch($v=Trim($v))
       {
-        If(Count($List)>1)
-          Array_Pop($List);
+      Case ''   : Break;
+      Case '.'  : $List=['']; Break;
+      Case '..' : If(Count($List)>1) Array_Pop($List); Break;
+      Default   : $List[]=$v;
       }
-      Else
-        $List[]=$v;
-    }
     $Path='';
-    For($i=0;$i<Count($List);$i++)
+    For($i=0; $i<Count($List); $i++)
     {
       $Tmp=$Path.$List[$i].'/';
       If($ZTrim)
@@ -238,28 +211,32 @@
         $Res[$k]=ParsePath($Item);
       Return $Res;
     }
-  //$Path=Str_Replace("\\", '/', $Path);
-    $Path=StrTr(Trim($Path), '\\', '/');
-    If($Path&&($Path[StrLen($Path)-1])=='/')
-      $Res=['dirname'=>SubStr($Path, 0, StrLen($Path)-1), 'basename'=>''];
+ 
+    $Path=StrTr(Trim($Path), '\\', '/'); //$Path=Str_Replace("\\", '/', $Path);
+    $PathLen=StrLen($Path);
+    If($PathLen && ($Path[$PathLen-1])=='/')
+    {
+      $Dir  =SubStr($Path, 0, $PathLen-1);
+      $Name ='';
+      $Ext  =Null;
+    }
     Else
+    {
       $Res=PathInfo($Path);
-    Extract($Res);
-    $Drv='';
-    If((StrLen($dirname)>1)&&($dirname[1]==':'))
-      $Drv=$dirname[0];
-    $Nick=$basename;
-    If(!IsSet($extension))
-      $extension='';
-    Else
-      $Nick=SubStr($basename, 0, StrLen($basename)-1-StrLen($extension));
+      $Dir  =$Res['dirname'   ];
+      $Name =$Res['basename'  ];
+      $Ext  =$Res['extension' ]?? Null;
+    //$Nick =$Res['filename'  ];
+    }
+    $Drv=StrLen($Dir)>1 && $Dir[1]===':'? $Dir[0]:'';
+    $Nick=$Ext!==Null? SubStr($Name, 0, StrLen($Name)-1-StrLen($Ext)):$Name;
     Return [
-      'Drive' =>$Drv       ,
-      'Dir'   =>$dirname   ,
-      'Name'  =>$basename  ,
-      'Path'  =>$Path      ,
-      'Nick'  =>$Nick      ,
-      'Ext'   =>$extension ,
+      'Drive' =>$Drv  ,
+      'Dir'   =>$Dir  ,
+      'Name'  =>$Name ,
+      'Path'  =>$Path ,
+      'Nick'  =>$Nick ,
+      'Ext'   =>$Ext  ,
     ];
   }
  
@@ -290,44 +267,19 @@
   }
  
   // Сохраняет бинарный файл
-  Function SaveFile($FileName, $Data)
+  Function SaveFile($FileName, $Data, $Mode='w')
   {
-    If(!($fh=@FOpen($FileName, 'w')))
+    If(!($fh=@FOpen($FileName, $Mode)))
       Return False;
     $Res=FWrite($fh, $Data)==StrLen($Data);
     FClose($fh);
     Return $Res;
   }
  
-  // Сохраняет текстовый файл
-  Function SaveText($FileName, $Data)
-  {
-    If(!($fh=@FOpen($FileName, 'w')))
-      Return False;
-    $Res=FWrite($fh, $Data)==StrLen($Data);
-    FClose($fh);
-    Return $Res;
-  }
  
-  // Добавляет в бинарный файл
-  Function AddFile($FileName, $Data)
-  {
-    If(!($fh=@FOpen($FileName, 'a+')))
-      Return False;
-    $Res=FWrite($fh, $Data)==StrLen($Data);
-    FClose($fh);
-    Return $Res;
-  }
- 
-  // Добавляет в текстовый файл
-  Function AddText($FileName, $Data)
-  {
-    If(!($fh=@FOpen($FileName, 'a+')))
-      Return False;
-    $Res=FWrite($fh, $Data)==StrLen($Data);
-    FClose($fh);
-    Return $Res;
-  }
+  Function SaveText($FileName, $Data) { Return SaveFile($FileName, $Data); } // Сохраняет текстовый файл
+  Function AddFile($FileName, $Data) { Return SaveFile($FileName, $Data, 'a+'); } // Добавляет в бинарный файл
+  Function AddText($FileName, $Data) { Return SaveFile($FileName, $Data, 'a+'); } // Добавляет в текстовый файл
  
   // ***************************************************************************************
  
@@ -438,57 +390,21 @@
         DeleteFile($From);
       Return $Res;
     }
-    If(Is_File($From))
-    {
-      If(@ReName($From, $To))
-        Return True;
-      If(CopyFile($From, $To))
-      {
-        DeleteFile($From);
-        Return True;
-      }
-      Return False;
-    }
-    Return False;
+    If(!Is_File($From)) Return False;
+    
+    If(@ReName($From, $To)) Return True;
+    
+    If(!CopyFile($From, $To)) Return False;
+    
+    DeleteFile($From);
+    Return True;
   }
  
-  // Переименовывает/перемещает файл(ы)
-  // и/или каталог(и) из $From в $To
-  // Плюёт на все ошибки...
-  Function MoveFile($From, $To)
-  {
-    Return RenameFile($From, $To);
-  }
- 
-  // Удаляет файл(ы) и/или каталог(и)
-  // Плюёт на все ошибки...
-  Function DeleteFiles($Files)
-  {
-    Return DeleteFile($Files);
-  }
- 
-  // Копирует файл(ы) и/или каталог(и) из $From в $To
-  // Плюёт на все ошибки...
-  Function CopyFiles($LFrom, $LTo)
-  {
-    Return CopyFile($LFrom, $LTo);
-  }
- 
-  // Переименовывает/перемещает файл(ы)
-  // и/или каталог(и) из $From в $To
-  // Плюёт на все ошибки...
-  Function RenameFiles($LFrom, $LTo)
-  {
-    Return RenameFile($LFrom, $LTo);
-  }
- 
-  // Переименовывает/перемещает файл(ы)
-  // и/или каталог(и) из $From в $To
-  // Плюёт на все ошибки...
-  Function MoveFiles($LFrom, $LTo)
-  {
-    Return RenameFile($LFrom, $LTo);
-  }
+  Function MoveFile    ($From, $To) { Return RenameFile ($From, $To); }
+  Function DeleteFiles ($Files    ) { Return DeleteFile ($Files    ); }
+  Function CopyFiles   ($From, $To) { Return CopyFile   ($From, $To); }
+  Function RenameFiles ($From, $To) { Return RenameFile ($From, $To); }
+  Function MoveFiles   ($From, $To) { Return RenameFile ($From, $To); }
  
   // ***************************************************************************************
  
@@ -504,14 +420,9 @@
     }
   
     ForEach($L As $V)
-  //{
-    //DWriteLn($Path.$V.'->'.Is_File($Path.$V));
       If(Is_File($Path.$V))
-    //{
-    //  $RPath=ExtractFilePath($Path.$V);
         Return $Path.$V;
-    //}
-  //}
+      
     Return False;
   }
  

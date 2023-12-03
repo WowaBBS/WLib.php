@@ -24,11 +24,11 @@
       $Factory->Create('System' );
     }
 
-    Function TestAttr    ($Loader, $Factory) { Include 'Example/Attr.php8'; }
-    Function TestList    ($Loader, $Factory) { Include 'Example/List.php8'; }
-  # Function TestLink    ($Loader, $Factory) { Include 'Example/Link.php8'; }
-    Function TestDisk    ($Loader, $Factory) { Include 'Example/Disk.php8'; }
-    Function TestTest    ($Loader, $Factory) { Include 'Example/Test.php8'; }
-    Function TestUnknown ($Loader, $Factory) { Include 'Example/Unknown.php8'; }
+    Function TestAttr    ($Loader, $Factory) { Include 'Example/Attr.php8'    ; }
+    Function TestList    ($Loader, $Factory) { Include 'Example/List.php8'    ; }
+  # Function TestLink    ($Loader, $Factory) { Include 'Example/Link.php8'    ; }
+    Function TestDisk    ($Loader, $Factory) { Include 'Example/Disk.php8'    ; }
+    Function TestTest    ($Loader, $Factory) { Include 'Example/Test.php8'    ; }
+    Function TestUnknown ($Loader, $Factory) { Include 'Example/Unknown.php8' ; }
   }
 ?>

@@ -67,7 +67,7 @@
       If($URL->Domain   ) $this->Domain   =$URL->Domain   ;
       If($URL->Port     ) $this->Port     =$URL->Port     ;
   
-      If(!$URL->Path->IsNull())
+      If(!$URL->Path->IsEmpty())
         If($URL->Path->IsRoot())
           $this->Path->Assign($URL->Path);
         Else
@@ -285,7 +285,7 @@
         $Res[]=$this->Domain;
         If($this->Port && $this->Port!==$this->DefPort) { $Res[]=':'; $Res[]=$this->Port; }
       }
-      If(!$this->Path->IsNull())
+      If(!$this->Path->IsEmpty())
         $Res[]=$this->Path->ToUrl();
       $Get=$this->Param->ToString();
       If($Get      ) { $Res[]='?'; $Res[]=$Get      ; }

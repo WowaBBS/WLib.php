@@ -25,7 +25,7 @@
     {
       Parent::_Init($Args);
       
-      $Map=$Args['Param'] ?? $Args['Map'] ?? $this->Log('Fatal', 'No map');
+      $Map=$Args['Param']?? $Args['Map']?? $this->Log('Fatal', 'No map')->Ret();
       $this->AssignMap($Map);
     //$this->Debug($this);
     }

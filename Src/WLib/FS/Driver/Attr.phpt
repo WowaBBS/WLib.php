@@ -86,11 +86,11 @@
         'Block_Size'    => fn($Stat)=>              $Stat['blksize' ] , //11
         'Block_Count'   => fn($Stat)=>              $Stat['blocks'  ] , //12
 
-        'Dir_Size'      => fn($Node)=>$Node->Is_Dir()?     $Node->ForEachRes(0                  ,fn($Res, $n)=>$Res +    $n['Dir_Size'      ]         ):$Node['Size'     ],
-        'Dir_Modified'  => fn($Node)=>$Node->Is_Dir()?     $Node->ForEachRes($Node['Modified' ] ,fn($Res, $n)=>$Res->Max($n['Dir_Modified'  ])        ):$Node['Modified' ],
-        'Dir_Md5'       => fn($Node)=>$Node->Is_Dir()? Hash::FromBinary($Node->ForEachRes(''    ,fn($Res, $n)=>$Res .    $n['_Hash_Md5_Str' ] ), 'Md5'):$Node['Md5'      ],
+        'Dir_Size'      => fn($Node)=>$Node->Is_Dir()?     $Node->ForEachRes(0                  ,fn($Res, $n)=>$Res +    $n['Dir_Size'     ]         ):$Node['Size'     ],
+        'Dir_Modified'  => fn($Node)=>$Node->Is_Dir()?     $Node->ForEachRes($Node['Modified' ] ,fn($Res, $n)=>$Res->Max($n['Dir_Modified' ])        ):$Node['Modified' ],
+        'Dir_Md5'       => fn($Node)=>$Node->Is_Dir()? Hash::FromBinary($Node->ForEachRes(''    ,fn($Res, $n)=>$Res .    $n['_Str4Md5'     ] ), 'Md5'):$Node['Md5'      ],
         
-        '_Hash_Md5_Str' => fn($Modified, $Created, $Size, $Dir_Md5)=>$Modified.'|'.$Created.'|'.$Size.'|'.$Dir_Md5.';',
+        '_Str4Md5' => fn($Modified, $Created, $Size, $Dir_Md5)=>$Modified.'|'.$Created.'|'.$Size.'|'.$Dir_Md5.';',
       ]);
     }    
 

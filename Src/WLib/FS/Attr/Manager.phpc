@@ -116,7 +116,7 @@
       Return $Res;
     }
     
-    Function GetSet($List, $Args, $Vars)
+    Function GetSet($List, Array $Args, $Vars)
     {
       If(Is_String($List))
       { //Warning?
@@ -151,7 +151,7 @@
           $Name=$k;
           $Item=$Attrs[$Name]?? Null;
           If(!$Item) { $this->Log('Error', 'Attribute ', $Name, ' is not exists'); $Vars[$Name]=Null; Continue; }
-          $R=$Item->SetRecursive($Vars, $Args[$Name]?? Null, $List);
+          $R=$Item->SetRecursive($Vars, $Args[$Name]?? [], $List);
           $Res[$Name]??=$R;
           Continue;
         }
@@ -163,7 +163,7 @@
         Else
         {
           If($Item=$Attrs[$Name]?? Null)
-            $R=$Item->GetRecursive($Vars, $Args[$Name]?? Null);
+            $R=$Item->GetRecursive($Vars, $Args[$Name]?? []);
           Else
             $R=$this->Log('Error', 'Attribute ', $Name, ' is not exists')->Ret();
           $Vars[$Name]=$R;

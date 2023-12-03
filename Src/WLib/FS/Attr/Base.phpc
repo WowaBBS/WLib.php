@@ -26,14 +26,12 @@
     }
     
     Function CanHaveSetter() { Return !$this->Private; }
-    Function SetGetter($v) { Return $this->Log('Fatal', 'Unsupported')->Ret(); }
-    Function SetSetter($v) { Return $this->Log('Fatal', 'Unsupported')->Ret(); }
     
     Function GetManager() { Return $this->Manager->Get(); }
     
     Function Deps_Invalidate() {}
     
-    Function GetRecursive(&$Vars, $Args        ) {}
-    Function SetRecursive(&$Vars, $Args, &$List) {}
+    Function GetRecursive(Array &$Vars, Array $Args              ) {}
+    Function SetRecursive(Array &$Vars, Array $Args, Array &$List) {}
   }
 ?>

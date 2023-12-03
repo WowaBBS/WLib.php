@@ -6,26 +6,19 @@
   {
     Var $Driver =False;
     Var $Path   =False;
-    Var $Attrs  =[];
 
-    Function __Construct($Driver, $Path, $Attrs=[])
+    Function __Construct($Driver, $Path)
     {
       $this->Driver =$Driver ;
       $this->Path   =T_FS_Path::Create($Path);
-      $this->Attrs  =$Attrs  ;
     }
-
-  //Function Clone() { Return New $this->Create_Object('/FS/Driver/Node', $this->Driver, $this->Path); }
-
-  # Function ChDir($Path)
-  # {
-  #   $Path=T_FS_Path::Create($Path);
-  #   If($Path->Path)
-  #   {
-  #     $Path->Norm($this->Path);
-  #     $this->Path->Assign($Path);
-  #   }
-  # }
+    
+    Function Sub($Path)
+    {
+      $Path=T_FS_Path::Create($Path);
+      $Path->Norm($this->Path);
+      Return $this->Driver->Node($Path);
+    }
 
     Function Node($Path='')
     {
@@ -44,7 +37,7 @@
     Function Is_Dir  (                     ) { Return $this->Get('Is_Dir'  ); }
     Function Is_Link (                     ) { Return $this->Get('Is_Link' ); }
     Function Exists  (                     ) { Return $this->Get('Exists'  ); }
-    Function Stream  ($Mode                ) { Return $this->Call('Stream'  ,['Mode'=>$Mode                    ]); }
+    Function Stream  ($Mode, $Args=[]      ) { Return $this->Call('Stream'  ,$Args+['Mode'=>$Mode]); }
     Function Files   ($Mask=False, $Attr=3 ) { Return $this->Call('Files'   ,['Mask'=>$Mask     ,'Attr'=>$Attr ]); }
     Function Nodes   (                     ) { Return $this->Call('Nodes'   ,[                                 ]); }
     Function Include ($UnPack=[], $Pack=[] ) { Return $this->Call('Include' ,['UnPack'=>$UnPack ,'Pack'=>$Pack ]); }
@@ -55,6 +48,7 @@
     Function Save    ($Data, $Args=[]      ) { Return $this->Driver->Save    ($this->Path, $Data, $Args   ); }
 
     Function MkDir  ($Recursive=True, $Mode=0777) { Return $this->Call('MkDir'  ,['Mode'=>$Mode, 'Recursive'=>$Recursive]); }
+    Function CopyTo ($To, $Args=[]) { Return $this->Call('Copy', [...$Args, 'To'=>$To]); }
     
     Function UnLink (                ) { Return $this->Call('UnLink' ); }
     Function RmDir  ($Recursive=False) { Return $this->Call('RmDir'  ,['Recursive'=>$Recursive]); }

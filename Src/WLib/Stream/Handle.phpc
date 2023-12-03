@@ -19,7 +19,7 @@
       if(!($this->HasNoHandleError?? $NoError))
       {
         $this->HasNoHandleError=True;
-        $this->Log('Error', 'No handle');
+        $this->Log('Error', 'No handle')->BackTrace();
       }
       return False;
     }

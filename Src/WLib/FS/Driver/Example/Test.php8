@@ -1,4 +1,6 @@
 <?
+  Include '_Using.php';
+
   If(!IsSet($Factory))
   {
     for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
@@ -7,8 +9,6 @@
     
     $Factory=$Loader->Create_Object('/FS/Driver/Factory');
   }
-  
-  $Loader->Load_Type('/Debug/Table'); Use T_Debug_Table As Table;
   
   $FS=$Factory->Create('System');
 

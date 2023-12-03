@@ -1,14 +1,12 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+
+  $Loader->GetLogger()->Add(SubStr(__FILE__,0,-5).'.log');
   
   $Loader->Load_Type('/FS/Path');
 
-  $CP=T_FS_Path::Create('dissovet/');
-  Echo $CP->ToString()."\n";
-  $MP=T_FS_Path::Create('Zaschita');
-  Echo $MP->ToString()."\n";
-  $MP->PathFrom($CP);
-  Echo $MP->ToString()."\n";
-  $MP->Add('/index.html');
-  Echo $MP->ToString()."\n";
+  $CP=T_FS_Path::Create('dissovet/' ); $Loader->Log('Debug', $CP);
+  $MP=T_FS_Path::Create('Zaschita'  ); $Loader->Log('Debug', $MP);
+  $MP->PathFrom($CP);                  $Loader->Log('Debug', $MP);
+  $MP->Add('/index.html');             $Loader->Log('Debug', $MP);
 ?>

@@ -4,7 +4,8 @@
  
   Class C_XML_Tag_Base Extends C_XML_Tag
   {
-    Var $EndTag = False ; // Завершение/Начало тега
+    Var $EndTag     =False ; // Завершение/Начало тега
+    Var $Attributes =Null  ;
  
     Var $_f; // Строка в начале тега, в основном для завершающихся тегов равна ,,/'', а для открывающихся - пустая строка, напр </a>
     Var $_e; // Строка в конце тега, в основном для одиночных тегов равна ,,/'', а для остальных - пустая строка, напр <br/>
@@ -209,7 +210,7 @@
  
     Protected Function _Debug_Info(Array &$Res)
     {
-      Parent::_Debug_Info(Array &$Res);
+      Parent::_Debug_Info($Res);
       UnSet($Res['EndTag']);
     }
   //****************************************************************

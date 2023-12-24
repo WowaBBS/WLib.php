@@ -67,8 +67,9 @@
  
     Function TagConv($Str)
     {
-      $T=$this->TagConv;
-      Return $T($Str);
+      If($T=$this->TagConv)
+        Return $T($Str);
+      Return Null; //??
     }
  
     Function AddTagCData($Tags=[])
@@ -84,7 +85,7 @@
       If(!Is_Array($Tags))
         $Tags=[$Tags];
       ForEach($Tags As $Tag)
-        $this->TagsEmply[$this->TagConv($Tag)]=True;
+        $this->TagsEmpty[$this->TagConv($Tag)]=True;
     }
  
     /**
@@ -211,7 +212,7 @@
             ]);
             If($NewTag->_f)
               $this->_VeryEndTag($NewTag);
-            If(!$NewTag->_f && !$NewTag->_e && !IsSet($this->TagsEmply[$tagName]))
+            If(!$NewTag->_f && !$NewTag->_e && !IsSet($this->TagsEmpty[$tagName]))
             {
               If(IsSet($this->TagsCData[$tagName]))
               {

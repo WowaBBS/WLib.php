@@ -6,9 +6,9 @@
   //*************************************************************************\\
  
   // Подключение модулей
-  $Loader->Load_Class('/Object');
-  $Loader->Load_Class('/XML/Parser');
-  $Loader->Load_Class('/XML/Tag/Document');
+  $Loader->Parent_Class('/Object');
+//$Loader->Load_Class('/XML/Parser');
+//$Loader->Load_Class('/XML/Tag/Document');
  
   // ***************************************************************************************
   Class C_XML_Document Extends C_Object
@@ -131,7 +131,7 @@
  
     Protected Function _Debug_Info(Array &$Res)
     {
-      Parent::_Debug_Info(Array &$Res);
+      Parent::_Debug_Info($Res);
       UnSet($Res['FirstTag']);
       UnSet($Res['LastTag' ]);
       

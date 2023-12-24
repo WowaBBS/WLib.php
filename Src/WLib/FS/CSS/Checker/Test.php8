@@ -1,0 +1,111 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+
+  $Loader->GetLogger()->Add(SubStr(__FILE__,0,-5).'.log');
+  $Factory=$Loader->Get_Singleton('/FS/CSS/Checker/Factory');
+  $Node=New($Loader->Load_Type('/FS/CSS/Node'))();
+  $Loader->Load_Type('/FS/CSS/Checker/Map');
+  
+//****************************************************************
+// Test Type
+  
+  $Rules=[
+    'Name'      =>'Name'    ,
+    '*.Ext'     =>'Ext'     ,
+    '*.RegExp*' =>'Mask'    ,
+    '*'         =>'Any'     ,
+    '**'        =>'Rec'     ,
+    '/'         =>'Unknown' ,
+  ];
+  
+  ForEach($Rules As $Rule=>$Name)
+  {
+    $Type=$Factory::GetType($Rule);
+    If($Type===$Name)
+      $Loader->Log('Debug', 'Rule1: ', $Rule, '=>', $Name);
+    Else
+      $Loader->Log('Error', 'Rule1: ', $Rule, '=>', $Name, ' != ', $Type);
+      
+    $Checker=$Factory->Create_Checker($Rule);
+    
+    $Type=$Checker->GetType();
+
+    If($Type===$Name)
+      $Loader->Log('Debug', 'Rule2: ', $Rule, '=>', $Name);
+    Else
+      $Loader->Log('Error', 'Rule2: ', $Rule, '=>', $Name, ' != ', $Type);
+
+    $Arg=$Checker->GetArg();
+
+    If($Arg===$Rule)
+      $Loader->Log('Debug', 'Rule: ', $Rule, ' Ok');
+    Else
+      $Loader->Log('Error', 'Rule: ', $Rule, ' != ', $Arg);
+  }
+  
+//****************************************************************
+// Test Check
+
+  $Rules=[
+    'Name'      =>[['Name'                 ], []],
+    '*.Ext'     =>[['Name.Ext'             ], []],
+    '*.RegExp*' =>[['Name.RegExp.OtherExt' ], []],
+    '*'         =>[['AnyOtherName'         ], []],
+    '/'         =>[[                       ], ['Any']],
+  ];
+  
+  ForEach($Rules As $Rule=>[$Checks, $NoCheck])
+  {
+    $Checker=$Factory->Create_Checker($Rule);
+    ForEach($Checks As $Check)
+      If(!$Checker->Check($Node->Set($Check)))
+        $Loader->Log('Error', '  ', $Check, ' is not checked');
+      Else
+        $Loader->Log('Debug', '  ', $Check, ' is checked');
+    ForEach($NoCheck As $Check)
+      If($Checker->Check($Node->Set($Check)))
+        $Loader->Log('Error', '  ', $Check, ' is checked');
+      Else
+        $Loader->Log('Debug', '  ', $Check, ' is not checked');
+  }
+
+//****************************************************************
+// Test Map
+
+  $Rules=[
+    'Name'      =>'Name'    ,
+    '*.Ext'     =>'Ext'     ,
+    '*.RegExp*' =>'Mask'    ,
+    '*'         =>'Any'     ,
+  //'**'        =>'Rec'     ,
+    '/'         =>'Unknown' ,
+  ];
+  
+  $Checkers=[];
+  ForEach($Rules As $Rule=>$Name)
+  {
+    $Checker=$Factory->Create_Checker($Rule);
+    $Checkers[]=[$Checker, $Name];
+  }
+
+  $Map=New T_FS_CSS_Checker_Map();
+  $Map->SetCheckers($Checkers);
+  
+  $Tests=[
+    'TheName'              =>['Any',        ],
+    'Name'                 =>['Any', 'Name' ],
+    'Name.Ext'             =>['Any', 'Ext'  ],
+    'Name.RegExp.OtherExt' =>['Any', 'Mask' ],
+    'AnyOtherName'         =>['Any',        ],
+  ];
+//$Loader->Log('Debug', 'Rule:')->Debug($Rule);
+  ForEach($Tests As $Test=>$Check)
+  {
+    $Res=$Map->GetRules($Node->Set($Test));
+    If($Check===$Res)
+      $Loader->Log('Debug', $Test, ': ', $Check);
+    Else
+      $Loader->Log('Error', $Test, ': ', $Check, '=', $Res);
+  }
+
+//****************************************************************

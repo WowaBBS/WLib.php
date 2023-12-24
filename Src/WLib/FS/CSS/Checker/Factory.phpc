@@ -1,0 +1,46 @@
+<?
+# $this->Load_Type('/FS/CSS/Checker/Name'    );
+# $this->Load_Type('/FS/CSS/Checker/Any'     );
+# $this->Load_Type('/FS/CSS/Checker/Ext'     );
+# $this->Load_Type('/FS/CSS/Checker/Mask'    );
+# $this->Load_Type('/FS/CSS/Checker/Unknown' );
+ 
+  Class C_FS_CSS_Checker_Factory Extends C_Object
+  {
+    Var $Classes=[];
+    Var $List=[]; //[Type=>[Key=>Rule]]
+    Var $MapDir=[
+      'Any'    =>'Match',
+      'Ext'    =>'Match',
+      'Mask'   =>'Match',
+      'Name'   =>'Match',
+      'RegExp' =>'Match',
+    ];
+  
+    Function Create_Checker($v, $Type=Null)
+    {
+      $Type??=Static::GetType($v);
+      $Class=$this->Classes[$Type]??=
+        $this->Object_GetLoader()->Load_Type(
+          '/FS/CSS/Checker/'.(($Dir=$this->MapDir[$Type]?? '')? $Dir.'/':'').$Type
+        );
+      
+      $Res=Is_String($v)? ($List[$Type][$v]??=New $Class($v)):New $Class($v);
+      Return $Res;
+    }
+    
+    Function Create_Checkers($v)
+    {
+      $v=Explode('/', $v);
+    }
+  
+    Static Function GetType($v)
+    {
+      If($v==='**' ) Return 'Rec';
+      If($v==='*'  ) Return 'Any';
+      If(Preg_Match('/^[\.\w\d]+$/sS'   ,$v)) Return 'Name' ;
+      If(Preg_Match('/^\*\.[\w\d]*$/sS' ,$v)) Return 'Ext'  ; //TODO: Mask+Ext
+      If(Preg_Match('/[\*\?\|]$/sS'     ,$v)) Return 'Mask' ;
+      Return 'Unknown';
+    }
+  }

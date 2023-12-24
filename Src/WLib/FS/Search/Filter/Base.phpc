@@ -7,19 +7,6 @@
     {
     }
   
-    Function __invoke(... $Args) { return $this->Check(... $Args); }
-    
-    Static Function _Mask($v)
-    {
-      if($v==False)
-        return False;
-      
-      $v=Str_Replace('.', '\.', $v);
-      $v=Str_Replace('*', '.*', $v);
-      $v=Str_Replace('?', '.?', $v);
-      $v=Str_Replace(';', '||', $v);
-      $v='/^(?:'.$v.')$/iSs';
-      return $v;
-    }
+    Function __invoke(...$Args) { return $this->Check(...$Args); }
   };
 ?>

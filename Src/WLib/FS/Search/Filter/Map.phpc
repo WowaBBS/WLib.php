@@ -1,5 +1,6 @@
 <?
   $Loader->Parent_Class('/FS/Search/Filter/Base');
+  $Loader->Load_Lib('/FS/Utils'); //FileMask2RegExp()
   
   /*
    /aaa/bbb/ccc  =>true  // Alow process file
@@ -44,7 +45,7 @@
             $Map[$k]=$v;
         }
         else
-          $Masks[Static::_Mask($k)]=$v;
+          $Masks[FileMask2RegExp($k)]=$v;
       }
       $this->Map   =$Map   ;
       $this->Masks =$Masks ;

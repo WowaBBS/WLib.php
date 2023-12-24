@@ -7,6 +7,7 @@
   //*************************************************************************\\
  
   $Loader->Begin_Module('FS/IOFS'); // TODO: Move into Utils.php
+  $Loader->Load_Lib('/FS/Utils');
  
   // ***************************************************************************************
  
@@ -112,11 +113,9 @@
   // Проверяет, соответствует ли строка $File маске $Mask
   Function Wild($File, $Mask)
   {
-    $Mask=Str_Replace('.', '\.', $Mask);
-    $Mask=Str_Replace('*', '.*', $Mask);
-    $Mask=Str_Replace('?', '.?', $Mask);
-    $Mask='/^'.$Mask.'$/Ss';
-    Return Preg_Match($Mask, $File);
+    if($Mask=FileMask2RegExp($Mask))
+      Return Preg_Match($Mask, $File);
+    Return True;
   }
  
   // Изменяет имя файла по маске
@@ -436,13 +435,7 @@
   // соответствующие маске $Mask, с атрибутами $Attr
   Function ListDir($Path, $Mask=False, $Attr=3, $Add='')
   {
-    If($Mask)
-    {
-      $Mask=Str_Replace('.', '\.', $Mask);
-      $Mask=Str_Replace('*', '.*', $Mask);
-      $Mask=Str_Replace('?', '.?', $Mask);
-      $Mask='/^'.$Mask.'$/iSs';
-    }
+    $Mask=FileMask2RegExp($Mask);
     $Dir=@OpenDir($Path);
     If(!$Dir)
       Return NULL;

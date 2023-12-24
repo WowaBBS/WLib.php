@@ -110,22 +110,23 @@
         $Value=(Bool)$Value;
         Switch($Key)
         {
-        Case 'Read'      :$this->Read      =$Value; Break;
-        Case 'Write'     :$this->Write     =$Value; Break;
-                                           
-        Case 'Exclusive' :$this->Exclusive =$Value; Break;
-        Case 'Shareable' :$this->Shareable =$Value; Break;
-        
-        Case 'Create'    :$this->Create    =$Value; Break;
-        Case 'NotExists' :$this->NotExists =$Value; Break;
-        Case 'Exists'    :$this->Exists    =$Value; Break;
-        Case 'Clear'     :$this->Clear     =$Value; Break;
-        Case 'Append'    :$this->Append    =$Value; Break;
-        Case 'MakePath'  :$this->MakePath  =$Value; Break;
+        Case 'Read'      : $this->Read      =$Value; Break;
+        Case 'Write'     : $this->Write     =$Value; Break;
 
-        Case 'Text'      :$this->Text      =$Value; Break;
-        Case 'Binary'    :$this->Binary    =$Value; Break;
-        Default: //<TODO Error
+        Case 'Exclusive' : $this->Exclusive =$Value; Break;
+        Case 'Shareable' : $this->Shareable =$Value; Break;
+
+        Case 'Create'    : $this->Create    =$Value; Break;
+        Case 'NotExists' : $this->NotExists =$Value; Break;
+        Case 'Exists'    : $this->Exists    =$Value; Break;
+        Case 'Clear'     : $this->Clear     =$Value; Break;
+        Case 'Append'    : $this->Append    =$Value; Break;
+        Case 'MakePath'  : $this->MakePath  =$Value; Break;
+
+        Case 'Text'      : $this->Text      =$Value; Break;
+        Case 'Binary'    : $this->Binary    =$Value; Break;
+        Case 'None'      :                           Break;
+        Default: ($Logger?? $GLOBALS['Loader'])->Log('Error', 'Unknown Stream Mode: ', $Key, ' Mode: ' ,$List);
         }
       }
     }

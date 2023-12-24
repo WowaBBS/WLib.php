@@ -49,19 +49,11 @@
 
     Function MkDir  ($Recursive=True, $Mode=0777) { Return $this->Call('MkDir'  ,['Mode'=>$Mode, 'Recursive'=>$Recursive]); }
     Function CopyTo ($To, $Args=[]) { Return $this->Call('Copy', [...$Args, 'To'=>$To]); }
+    Function MoveTo ($To, $Args=[]) { Return $this->Call('Copy', [...$Args, 'To'=>$To, 'Remove'=>True]); }
     
-    Function UnLink (                ) { Return $this->Call('UnLink' ); }
-    Function RmDir  ($Recursive=False) { Return $this->Call('RmDir'  ,['Recursive'=>$Recursive]); }
-    Function Remove ($Recursive=False) { Return $this->Call('Remove' ,['Recursive'=>$Recursive]); }
-    
-    Function _Remove($Args)
-    {
-      If($this->Is_File())
-        Return $this->UnLink();
-      If(!$this->Is_Dir()) Return;
-    //If(!$this->Is_Link())
-      Return $this->RmDir($Args['Recursive']?? Null);
-    }
+    Function UnLink (                  $Args=[]) { Return $this->Call('UnLink' ,$Args); }
+    Function RmDir  ($Recursive=False, $Args=[]) { Return $this->Call('RmDir'  ,[...$Args, 'Recursive'=>$Recursive]); }
+    Function Remove ($Recursive=False, $Args=[]) { Return $this->Call('Remove' ,[...$Args, 'Recursive'=>$Recursive]); }
     
     Function ForEach($Func, ...$Args)
     {

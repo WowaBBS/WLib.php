@@ -120,7 +120,7 @@
         {
         //If($Verify) $Verify();
           $TypeName=$Prefix.Str_Replace('/', '_', $Name);
-          $this->_Check_Finish($Type, $TypeName);
+          $this->_Check_Finish($Type, $TypeName, $_Path);
           $Res=$TypeName;
         }
       }
@@ -218,7 +218,7 @@
     //****************************************************************
     // Check
     
-    Function _Check_Finish($Type, $TypeName)
+    Function _Check_Finish($Type, $TypeName, $Path)
     {
       Switch($Type)
       {
@@ -233,7 +233,7 @@
       Default: Return $this->Log('Fatal', 'Unreachable place '.$Type)->Ret();
       }
       
-      If(!$z) Return $this->Log('Error', $Type, ' ', $TypeName, ' not found')->Ret();
+      If(!$z) Return $this->Log('Error', 'Check Finish ', $Type, ' ', $TypeName, ' not found in ', $Path)->Ret();
       
       $Class=New ReflectionClass($TypeName);
       $RealName=$Class->GetName();
@@ -289,7 +289,7 @@
           $this->Log('Error', $Type, ' name error: ', $TypeName, ' in not same ', $List[$i]);
           return true;
         }
-      $this->Log('Error', $Type, ' ', $TypeName, ' not found');
+      $this->Log('Error', 'Verify: ', $Type, ' ', $TypeName, ' not found');
     }
 
     //****************************************************************

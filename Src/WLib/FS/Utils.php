@@ -133,4 +133,15 @@
       MkDir($Path, $Attr);
     Return Is_Dir($Path);
   }
+  
+  Function FileMask2RegExp($Mask)
+  { // *.c*;*.h*;*.i*|*.dll;*.lib;*.obj;*.jar
+    If(!$Mask) Return '';
+  
+    $Mask=Str_Replace('.', '\.', $Mask);
+    $Mask=Str_Replace('*', '.*', $Mask);
+    $Mask=Str_Replace('?', '.?', $Mask);
+    $Mask=Str_Replace(';', '||', $Mask);
+    Return '/^'.$Mask.'$/iSs';
+  }
 ?>

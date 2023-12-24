@@ -1,5 +1,6 @@
 <?
   $Loader->Parent_Class('/Object');
+  $Loader->Load_Lib('/FS/Utils'); //FileMask2RegExp
   $Loader->Load_Type('/FS/Driver/Node');
   $Loader->Load_Type('/Inet/Url');
   
@@ -28,10 +29,10 @@
       $Lock   =$Args['Lock'   ]?? True  ;
       $Text   =$Args['Text'   ]?? False ;
         
-      $Flags=omReadOnly
-        |($Lock? omShareable:0)
-        |($Text? omText:omBinary)
-      ;
+      $Flags=['ReadOnly',
+        ($Lock ?'Shareable' :'None'   ),
+        ($Text ?'Text'      :'Binary' ),
+      ];
         
       $f=$this->Stream($Path, $Flags);
       If(!$f)
@@ -48,11 +49,11 @@
       $Lock   =$Args['Lock'   ]?? False;
       $Text   =$Args['Text'   ]?? False;
         
-      $Flags=omWriteOnly|omCreate
-        |($Append? omAppEnd:omClear)
-        |($Lock? omExclusive:0)
-        |($Text? omText:omBinary)
-      ;
+      $Flags=['WriteOnly', 'Create', 
+        ($Append ?'AppEnd'    :'Clear'  ),
+        ($Lock   ?'Exclusive' :'None'   ),
+        ($Text   ?'Text'      :'Binary' ),
+      ];
         
       $f=$this->Stream($Flags);
       If(!$f)
@@ -95,24 +96,15 @@
       Return New T_FS_Driver_Node($this, $Path);
     }
     
-    Static Function MaskToRegex($Mask)
-    {
-      If(!$Mask) Return '';
-    
-      $Mask=Str_Replace('.', '\.', $Mask);
-      $Mask=Str_Replace('*', '.*', $Mask);
-      $Mask=Str_Replace('?', '.?', $Mask);
-      Return '/^'.$Mask.'$/iSs';
-    }
-    
-    Function _Copy($From, $To, $Args, $Remove=False)
+    Function _Copy($From, $To, $Args)
     {
       //TODO:
     # If($From ==$To) Return True;
     # If($From =='' ) Return True;
     # If($To   =='' ) Return True;
     
-    //$this->Log('Error', $From->Path->ToString(), ' -> ', $To->Path->ToString());
+      If($Args['Debug']?? False)
+        $this->Log('Debug', 'Copy ', $From->Path->ToString(), ' -> ', $To->Path->ToString());
       
       $Res=False;
       If($From->Is_Link())
@@ -146,12 +138,26 @@
       If(!$Res)
         Return False;
       
-    //If($Args['CopyAttributes']?? True)
-    //  TODO: $From->
-      
+      If($Args['CopyAttributes']?? True)
+        $To->GetSet($From->GetSet($To['Attributes']));
         
-      If($Remove)
+      If($Args['Remove']?? False)
         Return $From->Remove(False);
+    }
+    
+    Function _Remove($Node, $Args)
+    {
+      If($Node->Is_File())
+        Return $Node->UnLink();
+      If(!$Node->Is_Dir()) Return False;
+    //TODO: If(!$this->Is_Link())
+      If(!($Args['Recursive']?? Null))
+        Return $Node->RmDir();
+      $Res=True;
+      ForEach($Node As $SubNode)
+        If(!$SubNode->Remove($Args))
+          $Res=False;
+      Return $Res && $Node->RmDir();
     }
     
   //****************************************************************
@@ -173,9 +179,10 @@
       $this->Attr_Init_Content ($Attr);
 
       $Attr->Register([
-        'Remove' =>fn($Node, $Args)=>$Node->_Remove($Args),
+        'Remove' =>fn($Driver, $Node, $Args)=>$Driver->_Remove($Node, $Args),
         'Copy'   =>fn($Driver, $Node, $Args)=>$Driver->_Copy($Node, $Args['To'], $Args),
         'ClearCache' =>fn($Driver, $Path, $Args)=>$Driver->_ClearCache ($Path, $Args),
+        'Attributes' =>fn()=>[],
       ]);
     }
     

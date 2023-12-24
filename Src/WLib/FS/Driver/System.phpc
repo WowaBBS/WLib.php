@@ -1,9 +1,10 @@
 <?
   $Loader->Parent_Class('/FS/Driver/Base');
+  $Loader->Load_Lib('/FS/Utils'); //FileMask2RegExp
   $Loader->Load_Type('/FS/Path'  );
   $Loader->Load_Type('/Inet/Url' );
 
-# $Loader->Load_Type('/FS/Attr/Date/UnixTime' ); Use T_FS_Attr_Date_UnixTime As FileTime ;
+  $Loader->Load_Type('/FS/Attr/Date/UnixTime' ); Use T_FS_Attr_Date_UnixTime As FileTime ;
   $Loader->Load_Type('/FS/Attr/Mode'          ); Use T_FS_Attr_Mode          As Mode     ;
   $Loader->Load_Type('/FS/Attr/Hash'          ); Use T_FS_Attr_Hash          As Hash     ;
 # $Loader->Load_Type('/FS/Attr/IntId'         ); Use T_FS_Attr_IntId         As IntId    ;
@@ -92,7 +93,7 @@
     Function _List($SysPath, $Args, $Path)
     {
       $Mask   =$Args['Mask'   ]?? False;
-      $RegExp =$Args['RegExp' ]?? Static::MaskToRegex($Mask);
+      $RegExp =$Args['RegExp' ]?? FileMask2RegExp($Mask);
       $Attr   =$Args['Attr'   ]?? 3;
       $File   =$Args['File'   ]?? ($Attr&1)? ['Stat']:[];
       $Dir    =$Args['Dir'    ]?? ($Attr&2)? ['Stat']:[];
@@ -119,6 +120,20 @@
         Yield $File=>$this->Node($ItemPath);
       }
       CloseDir($Handle);
+    }
+   
+    Function _Copy($From, $To, $Args)
+    {
+      If(($Args['Remove']?? False) && $To['Driver'] InstanceOf Self)
+      {
+        If($Args['Debug']?? False)
+          $this->Log('Debug', 'Rename ', $From->Path->ToString(), ' -> ', $To->Path->ToString());
+      
+        $Res=ReName($From['SysPath'], $To['SysPath'], $this->Context);
+        If($Res)
+          Return True;
+      }
+      Parent::_Copy($From, $To, $Args);
     }
   //****************************************************************
   // User&Group
@@ -182,6 +197,11 @@
         'RmDir'      =>fn($Context, $SysPath       )=>@RmDir  ($SysPath, $Context),
         'ClearCache' =>fn($Driver, $SysPath, $Args, $Path)=>$Driver->_ClearCache($Path, $Args+['SysPath'=>$SysPath]),
         'List'       =>fn($Driver, $SysPath, $Args, $Path)=>$Driver->_List($SysPath, $Args, $Path),
+
+        'Attributes' =>fn()=>[
+          'LastAccess', 'Modified', //'Created',
+          'Mode', 'User_Id', 'Group_Id', //'User_Name', 'Group_Name',
+        ],
       ]);
       
       If(False)
@@ -201,7 +221,7 @@
         fn($SysPath, $Is_Link, $User_Name  )=>$Is_Link? LChGrp($SysPath, $Group_Name ):ChOwn($SysPath, $User_Name  ),
         fn($SysPath, $Is_Link, $Group_Id   )=>$Is_Link? LChOwn($SysPath, $User_Id    ):ChGrp($SysPath, $Group_Id   ),
         fn($SysPath, $Is_Link, $Group_Name )=>$Is_Link? LChOwn($SysPath, $User_Name  ):ChGrp($SysPath, $Group_Name ),
-        fn($SysPath, $Modified, $LastAccess)=>Touch($SysPath, $Modified, $LastAccess),
+        fn($SysPath, $Modified, $LastAccess)=>Touch($SysPath, FileTime::New($Modified)->ToUnixTime(), FileTime::New($LastAccess)->ToUnixTime()),
       ]);
     }
   //****************************************************************

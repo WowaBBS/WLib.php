@@ -1,10 +1,11 @@
 <?
+  Echo 'Hello';
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
 
   $Loader->GetLogger()->Add(SubStr(__FILE__,0,-5).'.log');
   $Factory=$Loader->Get_Singleton('/FS/CSS/Checker/Factory');
   $Node=New($Loader->Load_Type('/FS/CSS/Node'))();
-  $Loader->Load_Type('/FS/CSS/Checker/Map');
+  $Loader->Load_Type('/FS/CSS/Map/Dir');
   
 //****************************************************************
 // Test Type
@@ -21,26 +22,17 @@
   ForEach($Rules As $Rule=>$Name)
   {
     $Type=$Factory::GetType($Rule);
-    If($Type===$Name)
-      $Loader->Log('Debug', 'Rule1: ', $Rule, '=>', $Name);
-    Else
-      $Loader->Log('Error', 'Rule1: ', $Rule, '=>', $Name, ' != ', $Type);
+    $Checked=$Type===$Name;
+    $Loader->Log($Checked? 'Debug':'Error', 'Rule.Type: ', $Rule, '=>', $Name, ...($Checked? []:[' != ', $Type]));
       
     $Checker=$Factory->Create_Checker($Rule);
-    
     $Type=$Checker->GetType();
+    $Checked=$Type===$Name;
+    $Loader->Log($Checked? 'Debug':'Error', 'Checker.Type: ', $Rule, '=>', $Name, ...($Checked? []:[' != ', $Type]));
 
-    If($Type===$Name)
-      $Loader->Log('Debug', 'Rule2: ', $Rule, '=>', $Name);
-    Else
-      $Loader->Log('Error', 'Rule2: ', $Rule, '=>', $Name, ' != ', $Type);
-
-    $Arg=$Checker->GetArg();
-
-    If($Arg===$Rule)
-      $Loader->Log('Debug', 'Rule: ', $Rule, ' Ok');
-    Else
-      $Loader->Log('Error', 'Rule: ', $Rule, ' != ', $Arg);
+    $Arg=$Checker->GetCheckArg();
+    $Checked=$Arg===$Rule;
+    $Loader->Log($Checked? 'Debug':'Error', 'Rule.Arg: ', $Rule, ...($Checked? [' Ok']:[' != ', $Arg]));
   }
   
 //****************************************************************
@@ -57,16 +49,15 @@
   ForEach($Rules As $Rule=>[$Checks, $NoCheck])
   {
     $Checker=$Factory->Create_Checker($Rule);
-    ForEach($Checks As $Check)
-      If(!$Checker->Check($Node->Set($Check)))
-        $Loader->Log('Error', '  ', $Check, ' is not checked');
-      Else
-        $Loader->Log('Debug', '  ', $Check, ' is checked');
-    ForEach($NoCheck As $Check)
-      If($Checker->Check($Node->Set($Check)))
-        $Loader->Log('Error', '  ', $Check, ' is checked');
-      Else
-        $Loader->Log('Debug', '  ', $Check, ' is not checked');
+    $Loader->Log('Debug', 'Check rule ', $Rule);
+
+    ForEach([True=>$Checks, False=>$NoCheck] As $CheckType=>$CheckList)
+      ForEach($CheckList As $Check)
+      {
+        $Checked=$Checker->Check($Node->Set($Check));
+        $Ok=$Checked==$CheckType; //CheckType is int
+        $Loader->Log($Ok? 'Debug':'Error', '  Checker.Check', $CheckType?'+':'-',': ', $Check, ' is ', $Checked? '':'not ', 'checked');
+      }
   }
 
 //****************************************************************
@@ -88,8 +79,8 @@
     $Checkers[]=[$Checker, $Name];
   }
 
-  $Map=New T_FS_CSS_Checker_Map();
-  $Map->SetCheckers($Checkers);
+  $Map=New T_FS_CSS_Map_Dir();
+  $Map->AddCheckers($Checkers);
   
   $Tests=[
     'TheName'              =>['Any',        ],
@@ -101,11 +92,61 @@
 //$Loader->Log('Debug', 'Rule:')->Debug($Rule);
   ForEach($Tests As $Test=>$Check)
   {
-    $Res=$Map->GetRules($Node->Set($Test));
-    If($Check===$Res)
-      $Loader->Log('Debug', $Test, ': ', $Check);
-    Else
-      $Loader->Log('Error', $Test, ': ', $Check, '=', $Res);
+    $Res=$Map->CheckNode($Node->Set($Test));
+    $Checked=$Check===$Res;
+    $Loader->Log($Checked? 'Debug':'Error', 'Map.CheckNode: ', $Test, ': ', $Check, ...($Checked? []:['=', $Res]));
+  }
+
+//****************************************************************
+// Checkers
+
+  $Rules=[
+    '/RootDir/'        =>['Name:RootDir,Dir'                  ,['RootDir/'          ,],['Any/AnyDir/'           ,'OtherDir/'           ,'RootDir'                                        ,],],
+    '/RootDir/SubDir/' =>['Name:RootDir,Name:SubDir,Dir'      ,['RootDir/SubDir/'   ,],['Any/AnyDir/SubDir/'    ,'OtherDir/SubDir/'    ,'RootDir/SubDir'                                 ,],],
+    '/*.RootExt/'      =>['Ext:*.RootExt,Dir'                 ,['Name.RootExt/'     ,],['Any/Name.RootExt/'     ,'Name.OtherExt/'      ,'Name.RootExt'                                   ,],],
+    '/*.RootMask*/'    =>['Mask:*.RootMask*,Dir'              ,['Name.RootMaskBla/' ,],['Any/Name.RootMaskBla/' ,'Name.OtherMaskBla/'  ,'Name.RootMaskBla'                               ,],],
+    '/*/'              =>['Any,Dir'                           ,['SomeDir/'          ,],[                                                'SomeDir'                                        ,],],
+
+    '/RootDir/SubFile' =>['Name:RootDir,File:Name:SubFile'    ,['RootDir/SubFile'   ,],['Any/AnyDir/SubFile'    ,'OtherDir/SubFile'    ,'RootDir/SubFile/'                               ,],],
+    '/RootFile'        =>['File:Name:RootFile'                ,['RootFile'          ,],['Any/AnyFile'           ,'OtherFile'           ,'RootFile/'                                      ,],],
+    '/*.RootExt'       =>['File:Ext:*.RootExt'                ,['Name.RootExt'      ,],['Any/Name.AnyExt'       ,'Name.OtherExt'       ,'Name.RootExt/'                                  ,],],
+    '/*.RootMask*'     =>['File:Mask:*.RootMask*'             ,['Name.RootMaskBla'  ,],['Any/Name.AnyMaskBla'   ,'Name.OtherMaskBla'   ,'Name.RootMaskBla/'                              ,],],
+    '/*'               =>['File:Any'                          ,['SomeFile'          ,],['Any/SomeFile'          ,                       'SomeFile/'                                      ,],],
+
+    'AnyDir/'          =>['Rec,Name:AnyDir,Dir'               ,['AnyDir/'           ,'Any/AnyDir/'           ,],['OtherDir/'           ,'AnyDir'           ,'Any/AnyDir'                 ,],],
+    'AnyDir/SubDir/'   =>['Rec,Name:AnyDir,Name:SubDir,Dir'   ,['AnyDir/SubDir/'    ,'Any/AnyDir/SubDir/'    ,],['OtherDir/SubDir/'    ,'AnyDir/SubDir'    ,'Any/AnyDir/SubDir'          ,],],
+    '*.AnyExt/'        =>['Rec,Ext:*.AnyExt,Dir'              ,['Name.AnyExt/'      ,'Any/Name.AnyExt/'      ,],['Name.OtherExt/'      ,'Name.AnyExt'      ,'Any/Name.AnyExt'            ,],],
+    '*.AnyMask*/'      =>['Rec,Mask:*.AnyMask*,Dir'           ,['Name.AnyMaskBla/'  ,'Any/Name.AnyMaskBla/'  ,],['Name.OtherMaskBla/'  ,'Name.AnyMaskBla'  ,'Any/Name.AnyMaskBla'        ,],],
+    '*/'               =>['Rec,Any,Dir'                       ,['SomeDir/'          ,'Any/SomeDir/'          ,],[                       'SomeDir'          ,'Any/SomeDir'                ,],],
+
+    'AnyDir/SubFile'   =>['Rec,Name:AnyDir,File:Name:SubFile' ,['AnyDir/SubFile'    ,'Any/AnyDir/SubFile'    ,],['OtherDir/SubFile'    ,'OtherDir/SubFile/'    ,'Any/AnyDir/SubFile/'    ,],],
+    'AnyFile'          =>['Rec,File:Name:AnyFile'             ,['AnyFile'           ,'Any/AnyFile'           ,],['OtherFile'           ,'OtherFile/'           ,'Any/AnyFile/'           ,],],
+    '*.AnyExt'         =>['Rec,File:Ext:*.AnyExt'             ,['Name.AnyExt'       ,'Any/Name.AnyExt'       ,],['Name.OtherExt'       ,'Name.OtherExt/'       ,'Any/Name.AnyExt/'       ,],],
+    '*.AnyMask*'       =>['Rec,File:Mask:*.AnyMask*'          ,['Name.AnyMaskBla'   ,'Any/Name.AnyMaskBla'   ,],['Name.OtherMaskBla'   ,'Name.OtherMaskBla/'   ,'Any/Name.AnyMaskBla/'   ,],],
+    '*'                =>['Rec,File:Any'                      ,['SomeFile'          ,'Any/SomeFile'          ,],[                       'Any/SomeFile/'        ,'Any/SomeFile/'          ,],],
+  ];
+
+  $Loader->Load_Type('/FS/CSS/Rule');
+  
+  ForEach($Rules As $RuleStr=>[$DebugPath, $Checks, $NoCheck])
+  {
+    $Checkers=$Factory->Create_Checkers($RuleStr);
+
+    $Res=[];
+    ForEach($Checkers As $Checker)
+      $Res[]=$Checker->ToDebug();
+    $Res=Implode(',', $Res);
+    $Ok=$Res===$DebugPath;
+    $Loader->Log($Ok? 'Debug':'Error', 'Checkers: ', Str_Pad($RuleStr, 20),': ', $Res, ...($Ok? []:['!=', $DebugPath]));
+    
+    $Rule=New T_FS_CSS_Rule($Checkers, []);
+    ForEach([True=>$Checks, False=>$NoCheck] As $CheckType=>$CheckList)
+      ForEach($CheckList As $Check)
+      {
+        $Checked=$Rule->CheckPath($Check);
+        $Ok=$Checked==$CheckType; //CheckType is int
+        $Loader->Log($Ok? 'Debug':'Error', '  CheckPath', $CheckType?'+':'-',': ', $Check, ' is ', $Checked? '':'not ', 'checked');
+      }
   }
 
 //****************************************************************

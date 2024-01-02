@@ -7,7 +7,10 @@
   {
     Function Check($Node) { Return True; }
 
-    Function AddTo($List, $k, $v) {} //? $List->Add_Manual($k, $v, $this); }
+    Function AddToMap($Map, $k, $v) { $Map->Add_Any($k, $v); }
+  //Function AddToMap($Map, $k, $v) {} //? $Map->Add_Manual($k, $v, $this); }
     Function GetType() { Return 'Rec'; }
-    Function GetArg() { Return '**'; } //Null; }
+    Function GetArg() { Return Null; }
+    Function GetCheckArg() { Return '**'; }
+    Function IsRec() { Return True; }
   }

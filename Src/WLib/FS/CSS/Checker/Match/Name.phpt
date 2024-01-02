@@ -7,7 +7,7 @@
 
     Function __Construct($v) { $this->Name=$v; }
     
-    Function AddTo($List, $k, $v) { $List->Add_Name($k, $v, $this->Name); }
+    Function AddToMap($Map, $k, $v) { $Map->Add_Name($k, $v, $this->Name); }
     Function Check($Node) { return $Node->Name===$this->Name; }
     Function GetType() { Return 'Name'; }
     Function GetArg() { Return $this->Name; }

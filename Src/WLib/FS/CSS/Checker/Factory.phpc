@@ -1,37 +1,70 @@
 <?
-# $this->Load_Type('/FS/CSS/Checker/Name'    );
-# $this->Load_Type('/FS/CSS/Checker/Any'     );
-# $this->Load_Type('/FS/CSS/Checker/Ext'     );
-# $this->Load_Type('/FS/CSS/Checker/Mask'    );
-# $this->Load_Type('/FS/CSS/Checker/Unknown' );
- 
   Class C_FS_CSS_Checker_Factory Extends C_Object
   {
-    Var $Classes=[];
-    Var $List=[]; //[Type=>[Key=>Rule]]
-    Var $MapDir=[
-      'Any'    =>'Match',
-      'Ext'    =>'Match',
-      'Mask'   =>'Match',
-      'Name'   =>'Match',
-      'RegExp' =>'Match',
+    Var $Classes =[];
+    Var $List    =[]; //[Key=>Rule]
+    Var $DirMap  =[
+      'Match'=>[
+        'Any'    ,
+        'Ext'    ,
+        'Mask'   ,
+        'Name'   ,
+        'RegExp' ,
+      ],
+      'End'=>[
+        'Dir'  ,
+        'File' ,
+      ],
     ];
+    Var $TypeMap=[];
+    
+    Function _Init($Args)
+    {
+      Parent::_Init($Args);
+      $TypeMap=$this->TypeMap;
+      ForEach($this->DirMap As $Dir=>$Names)
+        ForEach($Names As $Name)
+          If(IsSet($TypeMap[$Name]))
+            $this->Log('Error', 'Checker name ', $Name, ' has already exist');
+          Else
+            $TypeMap[$Name]=$Dir.'/'.$Name;
+      $this->TypeMap=$TypeMap;
+    }
   
     Function Create_Checker($v, $Type=Null)
     {
       $Type??=Static::GetType($v);
       $Class=$this->Classes[$Type]??=
         $this->Object_GetLoader()->Load_Type(
-          '/FS/CSS/Checker/'.(($Dir=$this->MapDir[$Type]?? '')? $Dir.'/':'').$Type
+          '/FS/CSS/Checker/'.($this->TypeMap[$Type]??=$Type) //TODO: Remove??=$Type, use Error
         );
       
-      $Res=Is_String($v)? ($List[$Type][$v]??=New $Class($v)):New $Class($v);
+      $Res=New $Class($v);
+      $Res=$List[$Res->GetId()]??=$Res;
       Return $Res;
     }
     
     Function Create_Checkers($v)
     {
       $v=Explode('/', $v);
+      if($v[0]==='')
+        Array_Shift($v);
+      Else
+        Array_UnShift($v, '**');
+      $IsDir=StrLen($v[Count($v)-1])===0;
+      If($IsDir)
+        Array_Pop($v);
+      $Res=[];
+      ForEach($v As $i)
+        $Res[]=$this->Create_Checker($i);
+      If($IsDir)
+        $Res[]=$this->Create_Checker('', 'Dir');
+      Else
+      {
+        $File=Array_Pop($Res);
+        $Res[]=$this->Create_Checker($File, 'File');
+      }
+      Return $Res;
     }
   
     Static Function GetType($v)
@@ -43,4 +76,6 @@
       If(Preg_Match('/[\*\?\|]$/sS'     ,$v)) Return 'Mask' ;
       Return 'Unknown';
     }
+    
+    Function Log(...$Args) { Return $GLOBALS['Loader']->Log(...$Args); }
   }

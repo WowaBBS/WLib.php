@@ -7,7 +7,7 @@
 
     Function __Construct($v) { $this->Arg=$v; }
   
-    Function AddTo($List, $k, $v) {}
+    Function AddToMap($Map, $k, $v) {}
     Function Check($Node) { return false; }
 
     Function GetType() { Return 'Unknown'; }

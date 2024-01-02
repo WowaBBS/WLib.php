@@ -6,6 +6,9 @@
     Var $List=[];
 
     Function __Construct(Array $v) { $this->List=$v; }
+    
+    Function GetType() { Return 'And'; }
+    Function GetArg() { Return $this->List; }
   
     Function Check($Node)
     {
@@ -14,5 +17,12 @@
           Return False;
       Return True;
     }
-  //Function AddTo($List, $k, $v) { $List->Add_Any($k, $v); }
+    
+    Function AddToMap($Map, $k, $v)
+    {
+      If(!False)
+        Return $Map->Add_Manual($k, $v, $this);
+      ForEach($this->List As $Checker)
+        Return $Checker->AddToMap($Map, $k, $v);
+    }
   }

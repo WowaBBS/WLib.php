@@ -8,7 +8,7 @@
     Function __Construct($v) { $this->Ext=Explode('.', $v)[1]; }
 
     Function Check($Node) { Return $Node->Ext===$this->Ext; }
-    Function AddTo($List, $k, $v) { $List->Add_Ext($k, $v, $this->Ext); }
+    Function AddToMap($List, $k, $v) { $List->Add_Ext($k, $v, $this->Ext); }
     Function GetType() { Return 'Ext'; }
     Function GetArg() { Return '*.'.$this->Ext; }
   }

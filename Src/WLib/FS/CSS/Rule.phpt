@@ -17,31 +17,18 @@
     Function CheckPath(String $Path)
     {
       $Map=New T_FS_CSS_Map_Dir();
-      $Path=Explode('/', $Path);
-      $Last=Count($Path)-1;
 
       $Ok=False;
       $Event=Function() Use(&$Ok) { $Ok=True; };
       
-      $Item=New T_FS_CSS_Checker_Item($this->Checkers, $Event);
+      $Item=New T_FS_CSS_Checker_Item();
+      $Item->CreateSub($this->Checkers, $Event);
+      $Item->AddToMapSub($Map);
       
-      $Items=[$Item];
-      ForEach($Items As $Item)
-        $Item->AddToMap($Map);
-        
-      $Node=New T_FS_CSS_Node();
-      
-      ForEach($Path As $i=>$PathItem)
+      ForEach(T_FS_CSS_Node::IteratePath($Path) As $Node)
       {
-        $IsFile=$i===$Last;
-        If($IsFile && $PathItem==='') Break;
         $Ok=False;
-        $Node->Set($PathItem, $IsFile);
-        $Items=$Map->CheckNode($Node);
-      # $this->Log('Debug', 'Process ', $Node->IsFile()? 'file  ':'' , $Node->Name, ' in ', $Map->ToDebugCheckers(), ' checks: ', Count($Items));
-        $Map->Clear();
-        ForEach($Items As $Item)
-          $Item->Process($Map, $Node);
+        $Map->InlineProcessNode($Node);
       }
       
       Return $Ok;

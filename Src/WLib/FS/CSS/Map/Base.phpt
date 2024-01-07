@@ -25,6 +25,16 @@
 
     Function CheckNode($Node) { $Res=[]; $this->CollectRules($Res, $Node); Return $Res; }
     
+    Function InlineProcessNode($Node)
+    {
+      $Items=$this->CheckNode($Node);
+    //$this->Log('Debug', 'Process ', $Node->IsFile()? 'file  ':'' , $Node->Name, ' in ', $this->ToDebugCheckers(), ' checks: ', Count($Items));
+      $this->Clear();
+      ForEach($Items As $Item)
+        $Item->Process($this, $Node);
+      Return $this;
+    }
+    
     Function AddCheckers($Checkers, $k=Null)
     {
       ForEach($Checkers As [$Checker, $v])

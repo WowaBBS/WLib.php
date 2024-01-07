@@ -101,29 +101,29 @@
 // Checkers
 
   $Rules=[
-    '/RootDir/'        =>['Name:RootDir,Dir'                  ,['RootDir/'          ,],['Any/AnyDir/'           ,'OtherDir/'           ,'RootDir'                                        ,],],
-    '/RootDir/SubDir/' =>['Name:RootDir,Name:SubDir,Dir'      ,['RootDir/SubDir/'   ,],['Any/AnyDir/SubDir/'    ,'OtherDir/SubDir/'    ,'RootDir/SubDir'                                 ,],],
-    '/*.RootExt/'      =>['Ext:*.RootExt,Dir'                 ,['Name.RootExt/'     ,],['Any/Name.RootExt/'     ,'Name.OtherExt/'      ,'Name.RootExt'                                   ,],],
-    '/*.RootMask*/'    =>['Mask:*.RootMask*,Dir'              ,['Name.RootMaskBla/' ,],['Any/Name.RootMaskBla/' ,'Name.OtherMaskBla/'  ,'Name.RootMaskBla'                               ,],],
-    '/*/'              =>['Any,Dir'                           ,['SomeDir/'          ,],[                                                'SomeDir'                                        ,],],
+    '/RootDir/'        =>['Name:RootDir,Dir'                  ,['RootDir/'          ,],['Any/AnyDir/'           ,'OtherDir/'           ,'RootDir'                ,],],
+    '/RootDir/SubDir/' =>['Name:RootDir,Name:SubDir,Dir'      ,['RootDir/SubDir/'   ,],['Any/AnyDir/SubDir/'    ,'OtherDir/SubDir/'    ,'RootDir/SubDir'         ,],],
+    '/*.RootExt/'      =>['Ext:*.RootExt,Dir'                 ,['Name.RootExt/'     ,],['Any/Name.RootExt/'     ,'Name.OtherExt/'      ,'Name.RootExt'           ,],],
+    '/*.RootMask*/'    =>['Mask:*.RootMask*,Dir'              ,['Name.RootMaskBla/' ,],['Any/Name.RootMaskBla/' ,'Name.OtherMaskBla/'  ,'Name.RootMaskBla'       ,],],
+    '/*/'              =>['Any,Dir'                           ,['SomeDir/'          ,],[                                                'SomeDir'                ,],],
 
-    '/RootDir/SubFile' =>['Name:RootDir,File:Name:SubFile'    ,['RootDir/SubFile'   ,],['Any/AnyDir/SubFile'    ,'OtherDir/SubFile'    ,'RootDir/SubFile/'                               ,],],
-    '/RootFile'        =>['File:Name:RootFile'                ,['RootFile'          ,],['Any/AnyFile'           ,'OtherFile'           ,'RootFile/'                                      ,],],
-    '/*.RootExt'       =>['File:Ext:*.RootExt'                ,['Name.RootExt'      ,],['Any/Name.AnyExt'       ,'Name.OtherExt'       ,'Name.RootExt/'                                  ,],],
-    '/*.RootMask*'     =>['File:Mask:*.RootMask*'             ,['Name.RootMaskBla'  ,],['Any/Name.AnyMaskBla'   ,'Name.OtherMaskBla'   ,'Name.RootMaskBla/'                              ,],],
-    '/*'               =>['File:Any'                          ,['SomeFile'          ,],['Any/SomeFile'          ,                       'SomeFile/'                                      ,],],
+    '/RootDir/SubFile' =>['Name:RootDir,File:Name:SubFile'    ,['RootDir/SubFile'   ,],['Any/AnyDir/SubFile'    ,'OtherDir/SubFile'    ,'RootDir/SubFile/'       ,],],
+    '/RootFile'        =>['File:Name:RootFile'                ,['RootFile'          ,],['Any/AnyFile'           ,'OtherFile'           ,'RootFile/'              ,],],
+    '/*.RootExt'       =>['File:Ext:*.RootExt'                ,['Name.RootExt'      ,],['Any/Name.AnyExt'       ,'Name.OtherExt'       ,'Name.RootExt/'          ,],],
+    '/*.RootMask*'     =>['File:Mask:*.RootMask*'             ,['Name.RootMaskBla'  ,],['Any/Name.AnyMaskBla'   ,'Name.OtherMaskBla'   ,'Name.RootMaskBla/'      ,],],
+    '/*'               =>['File:Any'                          ,['SomeFile'          ,],['Any/SomeFile'          ,                       'SomeFile/'              ,],],
 
-    'AnyDir/'          =>['Rec,Name:AnyDir,Dir'               ,['AnyDir/'           ,'Any/AnyDir/'           ,],['OtherDir/'           ,'AnyDir'           ,'Any/AnyDir'                 ,],],
-    'AnyDir/SubDir/'   =>['Rec,Name:AnyDir,Name:SubDir,Dir'   ,['AnyDir/SubDir/'    ,'Any/AnyDir/SubDir/'    ,],['OtherDir/SubDir/'    ,'AnyDir/SubDir'    ,'Any/AnyDir/SubDir'          ,],],
-    '*.AnyExt/'        =>['Rec,Ext:*.AnyExt,Dir'              ,['Name.AnyExt/'      ,'Any/Name.AnyExt/'      ,],['Name.OtherExt/'      ,'Name.AnyExt'      ,'Any/Name.AnyExt'            ,],],
-    '*.AnyMask*/'      =>['Rec,Mask:*.AnyMask*,Dir'           ,['Name.AnyMaskBla/'  ,'Any/Name.AnyMaskBla/'  ,],['Name.OtherMaskBla/'  ,'Name.AnyMaskBla'  ,'Any/Name.AnyMaskBla'        ,],],
-    '*/'               =>['Rec,Any,Dir'                       ,['SomeDir/'          ,'Any/SomeDir/'          ,],[                       'SomeDir'          ,'Any/SomeDir'                ,],],
+    'AnyDir/'          =>['Rec,Name:AnyDir,Dir'               ,['AnyDir/'           ,],['OtherDir/'           ,'AnyDir'                ,'Any/AnyDir'             ,],],
+    'AnyDir/SubDir/'   =>['Rec,Name:AnyDir,Name:SubDir,Dir'   ,['AnyDir/SubDir/'    ,],['OtherDir/SubDir/'    ,'AnyDir/SubDir'         ,'Any/AnyDir/SubDir'      ,],],
+    '*.AnyExt/'        =>['Rec,Ext:*.AnyExt,Dir'              ,['Name.AnyExt/'      ,],['Name.OtherExt/'      ,'Name.AnyExt'           ,'Any/Name.AnyExt'        ,],],
+    '*.AnyMask*/'      =>['Rec,Mask:*.AnyMask*,Dir'           ,['Name.AnyMaskBla/'  ,],['Name.OtherMaskBla/'  ,'Name.AnyMaskBla'       ,'Any/Name.AnyMaskBla'    ,],],
+    '*/'               =>['Rec,Any,Dir'                       ,['SomeDir/'          ,],[                       'SomeDir'               ,'Any/SomeDir'            ,],],
 
-    'AnyDir/SubFile'   =>['Rec,Name:AnyDir,File:Name:SubFile' ,['AnyDir/SubFile'    ,'Any/AnyDir/SubFile'    ,],['OtherDir/SubFile'    ,'OtherDir/SubFile/'    ,'Any/AnyDir/SubFile/'    ,],],
-    'AnyFile'          =>['Rec,File:Name:AnyFile'             ,['AnyFile'           ,'Any/AnyFile'           ,],['OtherFile'           ,'OtherFile/'           ,'Any/AnyFile/'           ,],],
-    '*.AnyExt'         =>['Rec,File:Ext:*.AnyExt'             ,['Name.AnyExt'       ,'Any/Name.AnyExt'       ,],['Name.OtherExt'       ,'Name.OtherExt/'       ,'Any/Name.AnyExt/'       ,],],
-    '*.AnyMask*'       =>['Rec,File:Mask:*.AnyMask*'          ,['Name.AnyMaskBla'   ,'Any/Name.AnyMaskBla'   ,],['Name.OtherMaskBla'   ,'Name.OtherMaskBla/'   ,'Any/Name.AnyMaskBla/'   ,],],
-    '*'                =>['Rec,File:Any'                      ,['SomeFile'          ,'Any/SomeFile'          ,],[                       'Any/SomeFile/'        ,'Any/SomeFile/'          ,],],
+    'AnyDir/SubFile'   =>['Rec,Name:AnyDir,File:Name:SubFile' ,['AnyDir/SubFile'    ,],['OtherDir/SubFile'    ,'OtherDir/SubFile/'     ,'Any/AnyDir/SubFile/'    ,],],
+    'AnyFile'          =>['Rec,File:Name:AnyFile'             ,['AnyFile'           ,],['OtherFile'           ,'OtherFile/'            ,'Any/AnyFile/'           ,],],
+    '*.AnyExt'         =>['Rec,File:Ext:*.AnyExt'             ,['Name.AnyExt'       ,],['Name.OtherExt'       ,'Name.OtherExt/'        ,'Any/Name.AnyExt/'       ,],],
+    '*.AnyMask*'       =>['Rec,File:Mask:*.AnyMask*'          ,['Name.AnyMaskBla'   ,],['Name.OtherMaskBla'   ,'Name.OtherMaskBla/'    ,'Any/Name.AnyMaskBla/'   ,],],
+    '*'                =>['Rec,File:Any'                      ,['SomeFile'          ,],[                       'Any/SomeFile/'         ,'Any/SomeFile/'          ,],],
   ];
 
   $Loader->Load_Type('/FS/CSS/Rule');
@@ -141,6 +141,85 @@
     
     $Rule=New T_FS_CSS_Rule($Checkers, []);
     ForEach([True=>$Checks, False=>$NoCheck] As $CheckType=>$CheckList)
+      ForEach($CheckList As $Check)
+      {
+        $Checked=$Rule->CheckPath($Check);
+        $Ok=$Checked==$CheckType; //CheckType is int
+        $Loader->Log($Ok? 'Debug':'Error', '  CheckPath', $CheckType?'+':'-',': ', $Check, ' is ', $Checked? '':'not ', 'checked');
+      }
+  }
+
+//****************************************************************
+// Any first
+
+  $Rules=[
+    'AnyDir/'          =>'AnyDir/'           ,
+    'AnyDir/SubDir/'   =>'AnyDir/SubDir/'    ,
+    '*.AnyExt/'        =>'Name.AnyExt/'      ,
+    '*.AnyMask*/'      =>'Name.AnyMaskBla/'  ,
+    '*/'               =>'SomeDir/'          ,
+
+    'AnyDir/SubFile'   =>'AnyDir/SubFile'    ,
+    'AnyFile'          =>'AnyFile'           ,
+    '*.AnyExt'         =>'Name.AnyExt'       ,
+    '*.AnyMask*'       =>'Name.AnyMaskBla'   ,
+    '*'                =>'SomeFile'          ,
+  ];
+
+  $Loader->Load_Type('/FS/CSS/Rule');
+  
+  $Loader->Log('Debug', 'Any first:');
+  
+  ForEach($Rules As $RuleStr=>$Checks)
+  {
+    $Loader->Log('Debug', ' For ', Str_Pad($RuleStr, 20));
+    $Checks=[$Checks, 'Any/'.$Checks, 'Any/Any/'.$Checks];
+    $Checkers=$Factory->Create_Checkers($RuleStr);
+
+    $Rule=New T_FS_CSS_Rule($Checkers, []);
+    ForEach([True=>$Checks, False=>[]] As $CheckType=>$CheckList)
+      ForEach($CheckList As $Check)
+      {
+        $Checked=$Rule->CheckPath($Check);
+        $Ok=$Checked==$CheckType; //CheckType is int
+        $Loader->Log($Ok? 'Debug':'Error', '  CheckPath', $CheckType?'+':'-',': ', $Check, ' is ', $Checked? '':'not ', 'checked');
+      }
+  }
+
+//****************************************************************
+// Any last
+
+  $Rules=[
+    '/RootDir/'        =>'RootDir/'          ,
+    '/RootDir/SubDir/' =>'RootDir/SubDir/'   ,
+    '/*.RootExt/'      =>'Name.RootExt/'     ,
+    '/*.RootMask*/'    =>'Name.RootMaskBla/' ,
+    '/*/'              =>'SomeDir/'          ,
+
+    'AnyDir/'          =>'AnyDir/'           ,
+    'AnyDir/SubDir/'   =>'AnyDir/SubDir/'    ,
+    '*.AnyExt/'        =>'Name.AnyExt/'      ,
+    '*.AnyMask*/'      =>'Name.AnyMaskBla/'  ,
+    '*/'               =>'SomeDir/'          ,
+
+  ];
+
+  $Loader->Load_Type('/FS/CSS/Rule');
+  
+  $Loader->Log('Debug', 'Any last:');
+  
+  ForEach($Rules As $RuleStr=>$Checks)
+  {
+    $Checks=[$Checks, $Checks.'Bla/', $Checks.'Bla/Bla/'];
+    $Checkers=$Factory->Create_Checkers($RuleStr);
+    $Res=[];
+    ForEach($Checkers As $Checker)
+      $Res[]=$Checker->ToDebug();
+    $Res=Implode(',', $Res);
+    $Loader->Log('Debug', ' For ', Str_Pad($RuleStr, 20),': ', $Res);
+
+    $Rule=New T_FS_CSS_Rule($Checkers, []);
+    ForEach([True=>$Checks, False=>[]] As $CheckType=>$CheckList)
       ForEach($CheckList As $Check)
       {
         $Checked=$Rule->CheckPath($Check);

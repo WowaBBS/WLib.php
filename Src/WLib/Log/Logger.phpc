@@ -6,10 +6,14 @@
   {
     Var $Disabled=false;
     Var $ShowLogLevel=[];
+    Var $Tags=[];
+    
+    Static $Tags_Default=['Default'=>True];
     
     Function _Init(Array $Args)
     {
-      $this->SetLogLevel($Args['LogLevel']?? 'Debug');
+      $this->SetLogLevel ($Args['LogLevel' ]?? 'Debug');
+      $this->Tags        ($Args['Tags'     ]?? Static::$Tags_Default);
       parent::_Init($Args);
     }
     
@@ -37,6 +41,21 @@
       else
         return $this->Object_GetLoader()->Log('Fatal', 'unsuported level type ', GetType($Level));
       $this->ShowLogLevel=$Res;
+      return $this;
+    }
+    
+    Function Tags($Tags)
+    {
+      $Res=$this->Tags; //[];
+      ForEach($Tags As $k=>$v)
+        If(Is_Integer($k))
+          $Res[$v]=True;
+        ElseIf($v===Null)
+          UnSet($Res[$k]);
+        Else
+          $Res[$k]=$v;
+      $this->Tags=$Res;
+      Return $this;
     }
     
     Function GetLogger() { return $this; }
@@ -45,12 +64,14 @@
     
     Final Function LogItem($LogItem)
     {
-      if($this->IsDisabled())
-        return;
-      if(!$this->ShowLogLevel[$LogItem->Level->Name])
-        return;
-      if($LogItem->Exclude[$this->Object_GetId()]?? False)
-        return;
+      If($this->IsDisabled())
+        Return;
+      If(!$this->ShowLogLevel[$LogItem->Level->Name])
+        Return;
+      If($LogItem->Exclude[$this->Object_GetId()]?? False)
+        Return;
+      If(!$LogItem->CheckTags($this->Tags))
+        Return;
       $this->_LogItem($LogItem);
     }
     

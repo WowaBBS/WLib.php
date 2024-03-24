@@ -1,0 +1,32 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $MainLogger=$Loader->GetLogger();
+  
+  $MainLogger->Add('Res/Default.log');
+
+  $MainLogger->Add('Res/All.log'  ,['Tags'=>[          ]]);// 'Default'=>Null  ]]);
+  $MainLogger->Add('Res/Tag1.log' ,['Tags'=>['Tag1'          ,'Default'=>True  ]]);
+  $MainLogger->Add('Res/Tag2.log' ,['Tags'=>['Tag2'          ,'Default'=>False ]]);
+  $MainLogger->Add('Res/Tag3.log' ,['Tags'=>['Tag3'    ]]);//,'Default'=>Null  ]]);
+  $MainLogger->Add('Res/TagA.log' ,['Tags'=>['Tag'=>'A'      ,'Default'=>True  ]]);
+  $MainLogger->Add('Res/TagB.log' ,['Tags'=>['Tag'=>'B'      ,'Default'=>False ]]);
+  $MainLogger->Add('Res/TagC.log' ,['Tags'=>['Tag'=>'C']]);//,'Default'=>Null  ]]);
+  
+  $Loader->Log('Log' ,'Defaul only' );
+  $Loader->Log('Log' ,'Defaul+Tag1' )->Tags(['Tag1'    ]);
+  $Loader->Log('Log' ,'Defaul+Tag2' )->Tags(['Tag2'    ]);
+  $Loader->Log('Log' ,'Defaul+Tag3' )->Tags(['Tag3'    ]);
+  $Loader->Log('Log' ,'Defaul+TagA' )->Tags(['Tag'=>'A']);
+  $Loader->Log('Log' ,'Defaul+TagB' )->Tags(['Tag'=>'B']);
+  $Loader->Log('Log' ,'Defaul+TagC' )->Tags(['Tag'=>'C']);
+  
+  $Loader->Log('Log' ,'Tag1 only'   )->Tags(['Tag1'     ,'Default'=>Null]);
+  $Loader->Log('Log' ,'Tag2 only'   )->Tags(['Tag2'     ,'Default'=>Null]);
+  $Loader->Log('Log' ,'Tag3 only'   )->Tags(['Tag3'     ,'Default'=>Null]);
+  $Loader->Log('Log' ,'TagA only'   )->Tags(['Tag'=>'A' ,'Default'=>Null]);
+  $Loader->Log('Log' ,'TagB only'   )->Tags(['Tag'=>'B' ,'Default'=>Null]);
+  $Loader->Log('Log' ,'TagC only'   )->Tags(['Tag'=>'C' ,'Default'=>Null]);
+
+  $Loader->Done();
+?>

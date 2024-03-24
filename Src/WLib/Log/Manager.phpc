@@ -5,6 +5,7 @@
   {
     Function _Init(Array $Args)
     {
+      $Args['Tags']??=['Default'=>Null];
       parent::_Init($Args);
       if($Console=$Args['Console']?? True)
       {

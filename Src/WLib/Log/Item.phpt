@@ -20,6 +20,7 @@
     Var $Col       = false ;
     Var $Exclude   = []    ;
     Var $Time      = 0     ;
+    Var $Tags      = ['Default'=>True];
     
     Function __Construct($Outer, $Logger, $Level, $List)
     {
@@ -35,10 +36,34 @@
       }
       $this->Level     =$Level;
       $this->ShowLevel =$Level->Show;
-      $this->Time      =$Logger->GetTime();
+      $this->Time      =$Logger?->GetTime()?? 0;
       $this->AddArr($List);
       $this->Fatal     =$Level->Fatal;
       //Example: $this->Log('Fatal', 'Unreachable place');
+    }
+    
+    // For using in filter
+    Function Tags($Tags)
+    {
+      $Res=$this->Tags; //[];
+      ForEach($Tags As $k=>$v)
+        If(Is_Integer($k))
+          $Res[$v]=True;
+        ElseIf($v===Null)
+          UnSet($Res[$k]);
+        Else
+          $Res[$k]=$v;
+      $this->Tags=$Res;
+      Return $this;
+    }
+    
+    Function CheckTags($Tags)
+    {
+      $Check=$this->Tags; //[];
+      ForEach($Tags As $k=>$v)
+        If(($Check[$k]?? False)!==$v)
+          Return False;
+      Return True;
     }
     
     Function Exclude($Arg)

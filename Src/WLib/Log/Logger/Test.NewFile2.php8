@@ -1,0 +1,19 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+
+  $Logger=$Loader->GetLogger();
+  $Logger->Add('Test.NewFile2.log');
+  
+  $c=20;
+  $l=[];
+  $Time=MicroTime(True);
+  for($i=0; $i<$c; $i++)
+    $l[$i]=$Logger->CreateNewFile('./Log/', ['Time'=>$Time]);
+  
+  for($i=0; $i<$c; $i++)
+    $l[$i]->Log('Log', 'Hello ', $i);
+  for($i=0; $i<$c; $i++)
+    $l[$i]->Close();
+
+//  UnLink('Test.lock');
+?>

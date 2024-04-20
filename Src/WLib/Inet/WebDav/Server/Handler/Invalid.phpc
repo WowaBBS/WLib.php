@@ -1,0 +1,12 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Server/Handler/Base');
+
+  Class C_Inet_WebDav_Server_Handler_Invalid Extends C_Inet_WebDav_Server_Handler_Base
+  {
+    Function Process(String $Uri, $InHeaders)
+    {
+      Header('Allow: '.Implode(', ', Array_Keys($this->GetManager()->GetMethodMap())));
+      $this->Exception(405, 'Invalid request method');
+    }
+  }
+?>

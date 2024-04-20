@@ -1,0 +1,7 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Server/Base');
+
+  Class C_Inet_WebDav_Server_Main Extends C_Inet_WebDav_Server_Base
+  {
+  }
+?>

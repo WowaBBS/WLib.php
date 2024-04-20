@@ -1,0 +1,8 @@
+<?
+  $this->Parent_Class('/Object');
+  
+  Class C_Inet_WebDav_Server_Request Extends C_Object
+  {
+  
+  }
+?>

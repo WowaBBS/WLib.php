@@ -1,0 +1,302 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Storage/Base');
+
+  Class C_Inet_WebDav_Storage_Main Extends C_Inet_WebDav_Storage_Base
+  {
+    Var $Exclude=[
+    ];    
+  
+    // These file names will be ignored when doing a PUT
+    // as they are garbage, coming from some OS
+    // TODO: Use FS/Driver
+    Var $Put_Ignore_Pattern='!^~(?:lock\.|^\._)|^(?:\.DS_Store|Thumbs\.db|desktop\.ini)$!';
+  
+    Protected String $Path;
+    Public C_Inet_WebDav_Server_Auth $Auth;
+  
+    Function _Init(Array $Args)
+    {
+      $this->Path=$Args['Path'].'/';
+      Parent::_Init($Args);
+    }
+    
+    Static Protected Function Glob(String $Path, String $Pattern='', Int $Flags=0): Array
+    {
+      $Path=Preg_Replace('/[\*\?\[\]]/', '\\\\$0', $Path);
+      Return Glob($Path.$Pattern, $Flags);
+    }
+  
+    Function CanRead(String $Uri): Bool
+    {
+      If(In_Array($Uri, $this->Exclude)) Return False;
+      If(Preg_Match('/\.(?:php\d?|phtml|phps)$|^\./i', $Uri)) Return False;
+      Return $this->Auth->CanRead($Uri);
+    }
+  
+    Function CanWrite(String $Uri): Bool
+    {
+      If(!$this->CanRead($Uri)) Return False;
+      Return $this->Auth->CanWrite($Uri);
+    }
+  
+    Function CanOnlyCreate(String $Uri): Bool { Return $this->Auth->CanOnlyCreate($Uri); }
+  
+    Function List(String $Uri, ?Array $Properties): Iterable
+    {
+      If(!$this->CanRead($Uri.'/')) {} //$this->Exception(403, 'Access forbidden');
+      
+      $Prefix=LTrim($Uri);
+      If(StrLen($Prefix))
+        $Prefix.='/';
+  
+      $Dirs=Self::Glob($this->Path.$Uri, '/*', \GLOB_ONLYDIR);
+      $Dirs=Array_Map(BaseName(...), $Dirs);
+      $Dirs=Array_Filter($Dirs, fn($a)=>$this->CanRead($Prefix.$a.'/'));
+      NatCaseSort($Dirs);
+  
+      $Files=Self::Glob($this->Path.$Uri, '/*');
+      $Files=Array_Map(BaseName(...), $Files);
+      $Files=Array_Diff($Files, $Dirs);
+  
+      // Remove PHP files and dot-files from listings
+      $Files=Array_Filter($Files, fn($a)=>$this->CanRead($Prefix.$a.'/'));
+  
+      NatCaseSort($Files);
+  
+      $Files=Array_Flip(Array_Merge($Dirs, $Files));
+      $Files=Array_Map(fn($a)=>Null, $Files);
+  
+      Return $Files;
+    }
+  
+    Function Get(String $Uri):?Array
+    {
+      if(!$this->CanRead($Uri)) $this->Exception(403, 'Access forbidden');
+  
+      $Path=$this->Path.$Uri;
+  
+      If(!File_Exists($Path)) Return Null;
+  
+      Return ['path'=>$Path];
+    }
+  
+    Function Exists(String $Uri):Bool { Return File_Exists($this->Path.$Uri); }
+  
+    Function Get_File_Property(String $Uri, String $Name, Int $Depth)
+    {
+      $Target=$this->Path.$Uri;
+  
+      Switch($Name)
+      {
+      Case 'DAV::displayname'      : Return BaseName($Uri);
+      Case 'DAV::getcontentlength' : Return Is_Dir($Target)? Null:FileSize($Target);
+      Case 'DAV::getcontenttype'   : Return Is_Dir($Target)? Null:$this->Get_Singleton('/Inet/Mime/Types')->GetByRealFile($Target); // ownCloud app crashes if mimetype is provided for a directory // https://github.com/owncloud/android/issues/3768
+      Case 'DAV::resourcetype'     : Return Is_Dir($Target)? 'collection':'';
+      Case 'DAV::getlastmodified'  :
+        If(!$Uri && $Depth===0 && Is_Dir($Target))
+          $MTime=Self::GetDirectoryMTime($Target);
+        Else
+          $MTime=FileMTime($Target);
+  
+        If(!$MTime) Return Null;
+  
+        Return New \DateTime('@'.$MTime);
+      Case 'DAV::ishidden' : Return BaseName($Target)[0]==='.';
+      Case 'DAV::getetag'  : Return Md5(FileMTime($Target).FileSize($Target).$Target);
+      Case 'DAV::lastaccessed': Return New \DateTime('@'.FileATime($Target));
+      Case 'DAV::creationdate': Return New \DateTime('@'.FileCTime($Target));
+      Case 'http://owncloud.org/ns:permissions':
+        $Permissions='G';
+  
+        If(Is_Dir($Target))
+          $Uri.='/';
+  
+        If(Is_Writeable($Target) && $this->CanWrite($Uri))
+        {
+          // If the directory is one of the restricted paths,
+          // then we can only do stuff INSIDE, and not delete/rename the directory itself
+          $Permissions.=$this->CanOnlyCreate($Uri)? 'CK':'DNVWCK';
+        }
+  
+        Return $Permissions;
+      Case 'urn:karadav:digest_md5':
+        If(!Is_File($Target) || Is_Dir($Target) || !Is_Readable($Target))
+          Return Null;
+  
+        Return Md5_File($Target);
+      Default:
+        Break;
+      }
+  
+      Return Null;
+    }
+  
+    Function Properties($Manager, String $Uri, ?Array $Properties, Int $Depth): ?Array
+    {
+      $Target=$this->Path.$Uri;
+  
+      If(!File_Exists($Target)) Return Null;
+  
+      $Properties??=$Manager->Basic_Properties;
+  
+      $Res=[];
+      ForEach($Properties As $Name)
+        If(Null!==($v=$this->Get_File_Property($Uri, $Name, $Depth)))
+          $Res[$Name]=$v;
+      Return $Res;
+    }
+  
+    Function Put(String $Uri, $Pointer, ?String $Hash_Algo, ?String $Hash, ?Int $MTime):Bool
+    {
+      If(Preg_Match($this->Put_Ignore_Pattern, BaseName($Uri))) Return False;
+      If(!$this->CanWrite($Uri)) $this->Exception(403, 'Access forbidden');
+  
+      $Target = $this->Path.$Uri;
+      $Parent = DirName($Target);
+  
+      If(Is_Dir($Target)) $this->Exception(409, 'Target is a directory');
+  
+      If(!File_Exists($Parent)) 
+        MkDir($Parent, 0770, True);
+  
+      $New    = !File_Exists($Target);
+      $Delete = False;
+      $Size   = 0;
+      $Quota  = Disk_Free_Space($this->Path);
+  
+      $Tmp_File = $this->Path.'.tmp.'.Sha1($Target);
+      $Out = FOpen($Tmp_File, 'w');
+  
+      While(!FEof($Pointer))
+      {
+        $Bytes = FRead($Pointer, 8192);
+        $this->Log('Debug', 'ReadBytes: ', $Bytes);
+        $Size += StrLen($Bytes);
+  
+        If($Size>$Quota)
+        {
+          $Delete=True;
+          Break;
+        }
+  
+        FWrite($Out, $Bytes);
+      }
+  
+      FClose($Out     );
+      FClose($Pointer );
+  
+      If($Delete                                                     ) { @UnLink($Tmp_File); $this->Exception(507, 'Your quota is exhausted'); } Else
+      If($Hash && $Hash_Algo==='MD5'  && Md5_File  ($Tmp_File)!=$Hash) { @UnLink($Tmp_File); $this->Exception(400, 'The data sent does not match the supplied MD5 hash'); } Else
+      If($Hash && $Hash_Algo==='SHA1' && Sha1_File ($Tmp_File)!=$Hash) { @UnLink($Tmp_File); $this->Exception(400, 'The data sent does not match the supplied SHA1 hash'); } Else
+        ReName($Tmp_File, $Target);
+  
+      If($MTime)
+        @Touch($Target, $MTime);
+  
+      Return $New;
+    }
+  
+    Function Delete(String $Uri):Void
+    {
+      If(!$this->CanWrite      ($Uri)) $this->Exception(403, 'Access forbidden');
+      If( $this->CanOnlyCreate ($Uri)) $this->Exception(403, 'Access forbidden');
+  
+      $Target = $this->Path.$Uri;
+  
+      If(!File_Exists  ($Target)) $this->Exception(404, 'Target does not exist');
+      If(!Is_Writeable ($Target)) $this->Exception(403, 'File permissions says that you cannot delete this, sorry.');
+  
+      If(Is_Dir($Target))
+      {
+        ForEach(self::Glob($Target, '/*')As $File)
+          $this->Delete(SubStr($File, StrLen($this->Path)));
+  
+        RmDir($Target);
+      }
+      Else
+        UnLink($Target);
+    }
+  
+    Function CopyMove(String $Uri, String $Dst, Bool $Move):Bool
+    {
+      If(!$this->CanWrite($Uri)
+       ||!$this->CanWrite($Dst)
+       || $this->CanOnlyCreate($Uri))
+      {
+        $this->Exception(403, 'Access forbidden');
+      }
+  
+      $Source = $this->Path.$Uri;
+      $Target = $this->Path.$Dst;
+      $Parent = DirName($Target);
+  
+      If(!File_Exists($Source)) $this->Exception(404, 'File not found');
+  
+      $OverWritten=File_Exists($Target);
+  
+      If(!Is_Dir($Parent)) $this->Exception(409, 'Target parent directory does not exist');
+  
+      If(!$Move)
+      {
+        $Quota=Disk_Free_Space($this->Path);
+  
+        If(FileSize($Source)>$Quota) $this->Exception(507, 'Your quota is exhausted');
+      }
+  
+      If($OverWritten)
+        $this->Delete($Dst);
+  
+      If(!$Move && Is_Dir($Source))
+      {
+        @MkDir($Target, 0770, True);
+  
+        ForEach($Iterator=New \RecursiveIteratorIterator(
+            New \RecursiveDirectoryIterator($Source), 
+            \RecursiveIteratorIterator::SELF_FIRST)As $Item)
+          If($Item->IsDir())
+            @MkDir($Target.'/'.$Iterator->GetSubPathName());
+          Else
+            Copy($Item, $Target.'/'.$Iterator->GetSubPathName());
+      }
+      Else
+      {
+        If($Move)
+          ReName($Source, $Target);
+        Else
+          Copy($Source, $Target);
+      }
+  
+      Return $OverWritten;
+    }
+  
+    Function Copy(String $Uri, String $Dst):Bool { Return $this->CopyMove($Uri, $Dst, False); }
+    Function Move(String $Uri, String $Dst):Bool { Return $this->CopyMove($Uri, $Dst, True ); }
+  
+    Function MkCol(String $Uri):Void
+    {
+      If(!$this->CanWrite($Uri)) $this->Exception(403, 'Access forbidden');
+      If(!Disk_Free_Space($this->Path)) $this->Exception(507, 'Your quota is exhausted');
+  
+      $Target=$this->Path.$Uri;
+      $Parent=DirName($Target);
+  
+      If( File_Exists($Target)) $this->Exception(405, 'There is already a file with that name');
+      If(!File_Exists($Parent)) $this->Exception(409, 'The parent directory does not exist');
+  
+      MkDir($Target, 0770);
+      $this->Log('Debug', 'MkDir ', $Target);
+    }
+  
+    Static Function GetDirectoryMTime(String $Path):Int
+    {
+      $Path=RTrim($Path, '/');
+  
+      $Last=0;
+      ForEach(Self::Glob($Path, '/*', GLOB_NOSORT)As $f)
+        If($Last<($m=Is_Dir($f)? Self::GetDirectoryMTime($f):FileMTime($f)))
+          $Last=$m;
+  
+      Return $Last;
+    }
+  }
+?>

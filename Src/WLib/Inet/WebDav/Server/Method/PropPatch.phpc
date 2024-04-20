@@ -1,0 +1,97 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Server/Handler/Base');
+  
+  Class C_Inet_WebDav_Server_Method_PropPatch Extends C_Inet_WebDav_Server_Handler_Base
+  {
+    Function Process(String $Uri, $InHeaders)
+    {
+      $Storage=$this->GetStorage();
+      $this->CheckLock($InHeaders, $Uri);
+  
+      $Body=File_Get_Contents('php://input');
+      
+      if($Body!=='')
+        $this->Log('Debug', 'Input:')(Static::PrettyXml($Body));
+      
+      $Storage->SetProperties($Uri, $Body);
+  
+      // http_response_code doesn't know the 207 status code
+      Header('HTTP/1.1 207 Multi-Status', True);
+      Header('Content-Type: application/xml; charset=utf-8');
+  
+      $Out='<?xml version="1.0" encoding="utf-8"?>'."\n";
+      $Out.='<d:multistatus xmlns:d="DAV:">';
+      $Out.='</d:multistatus>';
+  
+      return $Out;
+    }
+
+    //TODO: Remove because unused
+    Static Function ParsePropPatch(String $Body): Array
+    {
+      If(False!==StrPos($Body, '<!DOCTYPE '))
+        $this->Exception(400, 'Invalid XML');
+  
+      $Xml=@SimpleXml_Load_String($Body);
+  
+      If(False===$Xml)
+        $this->Exception(400, 'Invalid XML');
+  
+      $_Ns=Null;
+  
+      // Select correct namespace if required
+      if(!Empty(Key($Xml->GetDocNameSpaces())))
+        $_Ns='DAV:';
+  
+      $Out=[];
+  
+      // Process set/remove instructions in order (important)
+      ForEach($Xml->Children($_Ns) As $Child)
+      {
+        ForEach($Child->Children($_Ns) As $Prop)
+        {
+          $Prop = $Prop->Children();
+          If($Child->GetName()==='set')
+          {
+            $Ns   = $Prop->GetNameSpaces(True);
+            $Ns   = Array_Flip($Ns);
+            $Name = Key($Ns).':'.$Prop->GetName();
+  
+            $Attributes = $Prop->Attributes();
+            $Attributes = $Attributes===Null? Null:Iterator_To_Array($Attributes);
+  
+            ForEach($Ns As $XmlNs=>$Alias)
+              ForEach(Iterator_To_Array($Prop->Attributes($Alias)) As $Key=>$Value)
+                $Attributes[$XmlNs.':'.$Key]=$Value;
+  
+            If($Prop->Count()>1)
+            {
+              $Text='';
+  
+              ForEach($Prop->Children()As $c)
+                $Text.=$c->AsXml();
+            }
+            Else
+              $Text=(String)$Prop;
+  
+            $Out[$Name]=[
+              'action'     =>'set',
+              'attributes' =>$Attributes ?: Null,
+              'content'    =>$Text       ?: Null,
+            ];
+          }
+          Else
+          {
+            $Ns = $Prop->GetNamespaces();
+            $Name = Current($Ns).':'.$Prop->GetName();
+            $Out[$Name]=['action'=>'remove'];
+          }
+        }
+      }
+  
+      Return $Out;
+    }
+  
+  
+  }
+?>

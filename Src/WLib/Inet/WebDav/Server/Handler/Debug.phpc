@@ -1,0 +1,46 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Server/Handler/Base');
+
+  Class C_Inet_WebDav_Server_Handler_Debug Extends C_Inet_WebDav_Server_Handler_Base
+  {
+    Var $Handle ;
+    Var $Type   ;
+  
+    Function _Init($Args)
+    {
+      $this->Handle =$Args['Handle' ];
+      $this->Type   =$Args['Type'   ];
+      Parent::_Init($Args);
+    }
+    
+    Function Process(String $Uri, $InHeaders)
+    {
+    //$z=Ob_Start($this->Handler_File(...), 8192); /// PHP_OUTPUT_HANDLER_STDFLAGS PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_FLUSHABLE | PHP_OUTPUT_HANDLER_REMOVABLE.
+      
+      Try
+      {
+        $Res=$this->Handle->Process($Uri, $InHeaders);
+        If(!Is_String($Res))
+        {
+          $this->Log('Debug', 'Output: ', $Res); 
+        }
+        Else
+          Switch($this->Type)
+          {
+          Case 'Text' : $this->Log('Debug', 'Output:')($Res); Break;
+          Case 'Xml'  : $this->Log('Debug', 'Output:')(Self::PrettyXml($Res)); Break;
+          Default:
+            $this->Log('Error', 'UnknownOutputDebugType: ', $this->Type);
+            $this->Log('Debug', 'Output:')($Res);
+          }
+      }
+      Catch(Throwable $Exception)
+      {
+        $this->Log('Debug', 'Output: ', $Exception); 
+        Throw $Exception;
+      }
+      
+      Return $Res;
+    }
+  }
+?>

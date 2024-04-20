@@ -1,0 +1,25 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Server/Handler/Base');
+  
+  Class C_Inet_WebDav_Server_Method_Delete Extends C_Inet_WebDav_Server_Handler_Base
+  {
+    Function Process(String $Uri, $InHeaders)
+    {
+      $Storage=$this->GetStorage();
+      
+      // check RFC 2518 Section 9.2, last paragraph
+      If(!Is_Null($v=$InHeaders['Depth']?? Null) && $v!=='infinity')
+        $this->Exception(400, 'We can only delete to infinity');
+  
+      $this->CheckLock($InHeaders, $Uri);
+  
+      $Storage->Delete($Uri);
+  
+      If($Token=$this->GetLockToken($InHeaders))
+        $Storage->UnLock($Uri, $Token);
+  
+      Http_Response_Code(204);
+      Header('Content-Length: 0', True);
+    }
+  }
+?>

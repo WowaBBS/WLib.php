@@ -1,0 +1,229 @@
+<?
+  $this->Parent_Class('/Object');
+  $this->Load_Type('/Inet/Mime/Header');
+    
+  Class E_Inet_WebDav_Server_Exception Extends \RuntimeException {}
+
+  Class C_Inet_WebDav_Server_Base Extends C_Object
+  {
+    // List of basic DAV properties that you should return if $requested_properties is NULL
+    Var $Basic_Properties = [
+      'DAV::resourcetype'     , // should be empty for files, and 'collection' for directories
+      'DAV::getcontenttype'   , // MIME type
+      'DAV::getlastmodified'  , // File modification date (must be \DateTimeInterface)
+      'DAV::getcontentlength' , // file size
+      'DAV::displayname'      , // File name for display
+    ];
+  
+    Var $Extended_Properties=[ //TODO: Don't used  
+      'DAV::getetag'               ,
+      'DAV::creationdate'          ,
+      'DAV::lastaccessed'          ,
+      'DAV::ishidden'              , // Microsoft thingy
+      'DAV::quota-used-bytes'      ,
+      'DAV::quota-available-bytes' ,
+    ];
+  
+    Var Bool   $Enable_GZip  = True;
+    Var String $Base_Uri     ;
+  
+    Protected C_Inet_WebDav_Storage_Base $Storage;
+    
+    Function _Init($Args)
+    {
+      If($v=$Args['Storage'  ]?? Null) $this->SetStorage($v);
+      If($v=$Args['Base_Uri' ]?? Null) $this->SetBaseUri($v);
+      Parent::_Init($Args);
+    }
+  
+    Function SetStorage(C_Inet_WebDav_Storage_Base $v) { $this->Storage=$v; }
+    Function GetStorage(): C_Inet_WebDav_Storage_Base { Return $this->Storage; }
+  
+    Function SetBaseUri(String $Uri): Void { $this->Base_Uri=RTrim($Uri, '/').'/'; }
+  
+    Function ExtendExecutionTime(Int $Time=3600): Void
+    {
+      If(False===StrPos(@Ini_Get('disable_functions'), 'set_time_limit'))
+        @Set_Time_Limit($Time);
+  
+      @Ini_Set('max_execution_time' ,''.$Time);
+      @Ini_Set('max_input_time'     ,''.$Time);
+    }
+  
+    Function Exception(Int $Code, String ...$Message):Never
+    {
+      Throw New E_Inet_WebDav_Server_Exception(Implode($Message), $Code);
+    }
+    
+    Var $Methods=[
+      'Options'   =>Null,
+      'Get'       =>Null,
+      'Head'      =>Null,
+      'Put'       =>Null,
+      'Delete'    =>Null,
+      'Copy'      =>['Class'=>'CopyMove', 'Move'=>False ],
+      'Move'      =>['Class'=>'CopyMove', 'Move'=>True  ],
+      'PropFind'  =>Null,
+      'PropPatch' =>Null,
+      'MkCol'     =>Null,
+      'Lock'      =>Null,
+      'UnLock'    =>Null,
+    ];
+    
+    Var $MethodMap;
+    
+    Function GetMethodMap()
+    {
+      If($Res=$this->MethodMap) Return $Res;
+      
+      $Res=[];
+      ForEach($this->Methods As $Name=>$Args)
+        $Res[StrToUpper($Name)]=$Name;
+        
+      Return $this->MethodMap=$Res;
+    }
+    
+    Function CreateMethod($Name, $Args=[])
+    {
+      $Name=$this->GetMethodMap()[StrToUpper($Name)]?? $Name;
+      $Args+=($this->Methods[$Name]?? ['Class'=>$Name]);
+      $Args+=['Manager'=>$this];
+      $Class=$Args['Class']?? '';
+      If(!$Class) Return Null;
+      If($Class[0]!=='/') $Class='/Inet/WebDav/Server/Method/'.$Class;
+      $Args['Class']=$Class;
+      Return $this->CreateHandler($Class, $Args);
+    }
+  
+    Function CreateHandler($Name, $Args=[])
+    {
+      $Args+=['Class'=>$Name];
+      $Args+=['Manager'=>$this];
+      $Class=$Args['Class']?? '';
+      If(!$Class) Return Null;
+      If($Class[0]!=='/') $Class='/Inet/WebDav/Server/Handler/'.$Class;
+      $Res=$this->Create_Object($Class, $Args);
+      If(!$Res)
+      {
+        $Class='/Inet/WebDav/Server/Handler/Invalid';
+        $Res=$this->Create_Object($Class, $Args);
+      }
+      Return $Res;
+    }
+  
+    Function Route(String $Uri): Bool
+    {
+      If(!$this->Storage->Auth->CheckRoute($Uri))
+        Return True;
+      $Method=$_SERVER['REQUEST_METHOD']?? Null;
+      $InHeaders=New T_Inet_Mime_Header();
+      $InHeaders->LoadCurrentRequest();
+      
+      $this->Log('Debug', '', $Method, ' ', $Uri);
+      $this->Log('Debug', 'InHeader:');
+      ForEach($InHeaders As $k=>$v)
+        $this->Log('Debug', '  ',$k,': ', $v);
+      
+      // Add some extra-logging for Litmus tests
+      If($v=$InHeaders['X-Litmus'        ]) $this->Log('Debug', 'X-Litmus: ', $v);
+      If($v=$InHeaders['X-Litmus-Second' ]) $this->Log('Debug', 'X-Litmus-Second: ', $v);
+  
+      Header_Remove('Expires'       );
+      Header_Remove('Pragma'        );
+      Header_Remove('Cache-Control' );
+      Header('X-Server: WLib', True);
+      
+      $Handle=$this->CreateMethod($Method, $Args=[]);
+  
+      Try
+      {
+        $Handle=$this->CreateHandler('Debug', ['Handle'=>$Handle, 'Type'=>$Method!=='GET'? 'Xml':'Text']);
+          
+        If(False!==StrPos($Uri, '..'))
+          $this->Exception(403, 'Invalid URI: "', $Uri, '"');
+          
+        If($this->Enable_GZip)
+        {
+          $Handle_Pack=$this->CreateHandler('Pack', ['Handle'=>$Handle]);
+          If($Handle_Pack->Check($Uri, $InHeaders))
+            $Handle=$Handle_Pack;
+          UnSet($Handle_Pack);
+        }
+  
+        $Out=$Handle->Process($Uri, $InHeaders);
+        
+        $this->Log('Debug', 'Response ', Http_Response_Code());
+      }
+      Catch(E_Inet_WebDav_Server_Exception $e)
+      {
+        $Out=$this->Error($e);
+      }
+
+      If(Is_String($Out))
+      {
+        Header('Content-Length: '.StrLen($Out), True);
+        Echo $Out;
+      }
+
+      $OutHeaders=New T_Inet_Mime_Header();
+      $OutHeaders->LoadCurrentResponse();
+      $this->Log('Debug', 'OutHeader:');
+      ForEach($OutHeaders As $k=>$v)
+        $this->Log('Debug', '  ',$k,': ', $v);
+        
+      Return True;
+    }
+  
+    Function Dav_Header()
+    {
+      Header('DAV: 1, 2, 3');
+    }
+  
+    Function GetUri(String $Source):String
+    {
+      $Uri=Parse_Url($Source, PHP_URL_PATH);
+      $Uri=RawUrlDeCode($Uri);
+      $Uri=RTrim($Uri, '/');
+  
+      If($Uri.'/'===$this->Base_Uri)
+        $Uri.='/';
+  
+      If(StrPos($Uri, $this->Base_Uri)!==0)
+        $this->Exception(400, 'Invalid URI, "', $Uri, '" is outside of scope "', $this->Base_Uri, '"');
+  
+      $Uri=Preg_Replace('!/{2,}!', '/', $Uri);
+  
+      If(False!==StrPos($Uri, '..'))
+        $this->Exception(403, 'Invalid URI: "'.$Uri.'"');
+  
+      $Uri=SubStr($Uri, StrLen($this->Base_Uri));
+      Return $Uri;
+    }
+  
+    Function Error(E_Inet_WebDav_Server_Exception $e)
+    {
+      If($e->GetCode()===403 && !$this->Storage->Auth->CheckAuth())
+        Return;
+      $this->Log('Debug', '=> ', $e->GetCode(), ' - ', $e->GetMessage());
+  
+      If($e->GetCode()===423)
+        Header('HTTP/1.1 423 Locked'); // http_response_code doesn't know about 423 Locked
+      Else
+        Http_Response_Code($e->GetCode());
+  
+      Header('Content-Type: application/xml; charset=utf-8', True);
+  
+      Return '<?xml version="1.0" encoding="utf-8"?><d:error xmlns:d="DAV:" xmlns:s="http://sabredav.org/ns"><s:message>'.HtmlSpecialChars($e->GetMessage(), ENT_XML1).'</s:message></d:error>';
+    }
+  
+    //TODO: Unused
+    Static Function HMac(Array $Data, String $Key='')
+    {
+      // Protect against length attacks by pre-hashing data
+      $Data=Array_Map(Sha1(...), $Data);
+      $Data=Implode(':', $Data);
+  
+      Return Hash_HMac('sha1', $Data, Sha1($Key));
+    }
+  }
+?>

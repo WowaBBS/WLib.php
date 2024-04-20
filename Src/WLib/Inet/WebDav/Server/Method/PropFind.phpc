@@ -1,0 +1,278 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Server/Handler/Base');
+  
+  Class C_Inet_WebDav_Server_Method_PropFind Extends C_Inet_WebDav_Server_Handler_Base
+  {
+    Protected Function ExtractRequestedProperties(String $Body): ?Array
+    {
+      // We only care about properties if the client asked for it
+      // If not, we consider that the client just requested to get everything
+      If(!Preg_Match('!<(?:\w+:)?propfind!', $Body))
+        Return Null;
+  
+      $Ns         = [];
+      $Dav_Ns     = Null;
+      $Default_Ns = Null;
+  
+      If(Preg_Match('/<propfind[^>]+xmlns="DAV:"/', $Body))
+        $Default_Ns = 'DAV:';
+  
+      Preg_Match_All('!xmlns:(\w+)\s*=\s*"([^"]+)"!', $Body, $Match, PREG_SET_ORDER);
+  
+      // Find all aliased xmlns
+      ForEach($Match As $Found)
+        $Ns[$Found[2]]=$Found[1];
+  
+      If(IsSet($Ns['DAV:']))
+        $Dav_Ns=$Ns['DAV:'].':';
+  
+      $RegExp='/<('.$Dav_Ns.'prop(?!find))[^>]*?>(.*?)<\/\1\s*>/s';
+      If(!Preg_Match($RegExp, $Body, $Match))
+        Return Null;
+  
+      // Find all properties
+      // Allow for empty namespace, see Litmus FAQ for propnullns
+      // https://github.com/tolsen/litmus/blob/master/FAQ
+      Preg_Match_All('!<([\w-]+)[^>]*xmlns="([^"]*)"|<(?:([\w-]+):)?([\w-]+)!', $Match[2], $Match, PREG_SET_ORDER);
+  
+      $Properties=[];
+  
+      ForEach($Match As $Found)
+      {
+        If(IsSet($Found[4]))
+        {
+          $Url  = Array_Search($Found[3], $Ns)?: $Default_Ns;
+          $Name = $Found[4];
+        }
+        Else
+        {
+          $Url  = $Found[2];
+          $Name = $Found[1];
+        }
+  
+        $Properties[$Url.':'.$Name]=[
+          'name'     =>$Name,
+          'ns_alias' =>$Found[3]?? Null,
+          'ns_url'   =>$Url,
+        ];
+      }
+  
+      return $Properties;
+    }
+  
+    Function Process(String $Uri, $InHeaders)
+    {
+      $Storage=$this->GetStorage();
+      // We only support depth of 0 and 1
+      $Depth = (Empty($InHeaders['Depth'])?? '')? 0:1;
+  
+      $Body = File_Get_Contents('php://input');
+  
+      if($Body!=='')
+        $this->Log('Debug', 'Input:')(Static::PrettyXml($Body));
+      
+      If(False!==StrPos($Body, '<!DOCTYPE '))
+        $this->Exception(400, 'Invalid XML');
+  
+      $this->Log('Debug', 'Requested depth: ', $Depth);
+  
+      // We don't really care about having a correct XML string,
+      // but we can get better WebDAV compliance if we do
+      If(IsSet($InHeaders['X-Litmus']))
+      {
+        If(False!==StrPos($Body, '<!DOCTYPE '))
+          $this->Exception(400, 'Invalid XML');
+  
+        $Xml=@SimpleXml_Load_String($Body);
+  
+        If($e=LibXml_Get_Last_Error())
+          $this->Exception(400, 'Invalid XML');
+      }
+  
+      $Requested = $this->ExtractRequestedProperties($Body);
+      $Requested_Keys = $Requested? Array_Keys($Requested):Null;
+  
+      // Find root element properties
+      $Properties = $Storage->Properties($this->GetManager(), $Uri, $Requested_Keys, $Depth);
+  
+      If(Null===$Properties)
+        $this->Exception(404, 'This does not exist');
+  
+      $Items = [$Uri=>$Properties];
+  
+      If($Depth)
+      {
+        ForEach($Storage->List($Uri, $Requested)As $File=>$Properties)
+        {
+          $Path = Trim($Uri.'/'.$File, '/');
+          $Properties = $Properties?? $Storage->Properties($this->GetManager(), $Path, $Requested_Keys, 0);
+  
+          If(!$Properties)
+          {
+            $this->Log('Debug', '!!! Cannot find "', $Path, '"');
+            Continue;
+          }
+  
+          $Items[$Path]=$Properties;
+        }
+      }
+  
+      // http_response_code doesn't know the 207 status code
+      Header('HTTP/1.1 207 Multi-Status', True);
+      $this->GetManager()->Dav_Header();
+      Header('Content-Type: application/xml; charset=utf-8');
+  
+      $Root_NameSpaces=[
+        'DAV:' => 'd',
+        // Microsoft Clients need this special namespace for date and time values (from PEAR/WebDAV)
+        'urn:uuid:c2f41010-65b3-11d1-a29f-00aa00c14882/' => 'ns0',
+      ];
+  
+      $i = 0;
+      $Requested??=[];
+  
+      ForEach($Requested As $Prop)
+      {
+        If($Prop['ns_url']==='DAV:' || !$Prop['ns_url'])
+          Continue;
+  
+        If(!Array_Key_Exists($Prop['ns_url'], $Root_NameSpaces))
+          $Root_NameSpaces[$Prop['ns_url']]=$Prop['ns_alias']?: 'rns'.$i++;
+      }
+  
+      ForEach($Items As $Properties)
+      {
+        ForEach($Properties As $Name=>$Value)
+        {
+          $Pos = StrRPos($Name, ':');
+          $Ns  = SubStr($Name, 0, StrRPos($Name, ':'));
+  
+          // NULL namespace, see Litmus FAQ for propnullns
+          If(!$Ns)
+            Continue;
+  
+          If(!Array_Key_Exists($Ns, $Root_NameSpaces))
+            $Root_NameSpaces[$Ns]='rns'.$i++;
+        }
+      }
+  
+      $Out='<?xml version="1.0" encoding="utf-8"?>';
+      $Out.='<d:multistatus';
+  
+      ForEach($Root_NameSpaces As $Url=>$Alias)
+        $Out.=' xmlns:'.$Alias.'="'.$Url.'"';
+  
+      $Out.='>';
+  
+      ForEach($Items As $Uri=>$Item)
+      {
+        $e='<d:response>';
+  
+        $Uri  = Trim(RTrim($this->GetManager()->Base_Uri, '/').'/'.LTrim($Uri, '/'), '/');
+        $Path = '/'.Str_Replace('%2F', '/', RawUrlEnCode($Uri));
+  
+        If(($Item['DAV::resourcetype']?? Null)==='collection' && $Path!=='/')
+          $Path.='/';
+  
+        $e.='<d:href>'.HtmlSpecialChars($Path, ENT_XML1).'</d:href>';
+        $e.='<d:propstat><d:prop>';
+  
+        ForEach($Item As $Name=>$Value)
+        {
+          If(Null===$Value)
+            Continue;
+  
+          $Pos      = StrRPos($Name, ':');
+          $Ns       = SubStr($Name, 0, $Pos);
+          $Tag_Name = SubStr($Name, $Pos+1);
+  
+          $Alias = $Root_NameSpaces[$Ns]?? Null;
+          $Attributes = '';
+  
+          // The ownCloud Android app doesn't like formatted dates, it makes it crash.
+          // so force it to have a timestamp
+          If($Name==='DAV::creationdate'
+            && ($Value InstanceOf \DateTimeInterface)
+            && False!==StrIPos($InHeaders['User-Agent']?? '', 'owncloud'))
+          {
+            $Value=$Value->GetTimeStamp();
+          }
+          // ownCloud app crashes if mimetype is provided for a directory
+          // https://github.com/owncloud/android/issues/3768
+          ElseIf($Name==='DAV::getcontenttype'
+            && ($Item['DAV::resourcetype']?? Null)==='collection')
+          {
+            $Value = null;
+          }
+  
+          If($Name==='DAV::resourcetype' && $Value==='collection')
+            $Value='<d:collection />';
+          ElseIf($Name==='DAV::getetag' && StrLen($Value) && $Value[0]!=='"')
+            $Value='"'.$Value.'"';
+          ElseIf($Value InstanceOf \DateTimeInterface)
+          {
+            // Change value to GMT
+            $Value = Clone $Value;
+            $Value->SetTimeZone(New \DateTimeZone('GMT'));
+            $Value = $Value->Format(DATE_RFC7231);
+          }
+          ElseIf(Is_Array($Value))
+          {
+            $Attributes = $Value['attributes' ]?? '';
+            $Value      = $Value['xml'        ]?? Null;
+          }
+          Else
+            $Value = HtmlSpecialChars($Value, ENT_XML1);
+  
+          // NULL namespace, see Litmus FAQ for propnullns
+          If(!$Ns)
+            $Attributes.=' xmlns=""';
+          Else
+            $Tag_Name=$Alias.':'.$Tag_Name;
+  
+          If(Null===$Value || 'DAV::empty'===$Value)
+            $e.=SPrintF('<%s%s />', $Tag_Name, $Attributes? ' '.$Attributes:'');
+          Else
+            $e.=SPrintF('<%s%s>%s</%1$s>', $Tag_Name, $Attributes? ' '.$Attributes:'', $Value);
+        }
+  
+        $e.='</d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat>'."\n";
+  
+        // Append missing properties
+        If(!Empty($Requested))
+        {
+          $Missing_Properties=Array_Diff($Requested_Keys, Array_Keys($Item));
+  
+          If(Count($Missing_Properties))
+          {
+            $e.='<d:propstat><d:prop>';
+  
+            ForEach($Missing_Properties As $Name)
+            {
+              $Pos   = StrRPos($Name, ':');
+              $Ns    = SubStr($Name, 0, StrRPos($Name, ':'));
+              $Name  = SubStr($Name, StrRPos($Name, ':')+1);
+              $Alias = $Root_NameSpaces[$Ns]?? Null;
+  
+              // NULL namespace, see Litmus FAQ for propnullns
+              If(!$Alias)
+                $e.='<'.$Name.' xmlns="" />';
+              Else
+                $e.='<'.$Alias.':'.$Name.' />';
+            }
+  
+            $e.='</d:prop><d:status>HTTP/1.1 404 Not Found</d:status></d:propstat>';
+          }
+        }
+  
+        $e.='</d:response>'."\n";
+        $Out.=$e;
+      }
+  
+      $Out.='</d:multistatus>';
+  
+      Return $Out;
+    }
+  
+  }
+?>

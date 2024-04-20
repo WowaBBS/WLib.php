@@ -1,0 +1,166 @@
+<?
+  $this->Parent_Class('/Object');
+    
+  Class C_Inet_WebDav_Server_Auth Extends C_Object
+  {
+    Var $Users   =[];
+    Var $Default =[];
+    Var $Anonymous=[
+      'Read'  =>True  ,
+      'Write' =>False ,
+    ];
+    Var $Config=[];
+    Var ?String $User=Null;
+  
+    Function LoadIniFile($Config_File)
+    {
+      $Config=[];
+      
+      If(File_Exists($Config_File))
+      {
+        $Config = Parse_Ini_File($Config_File, True);
+        $Users  = Array_Filter($Config, Is_Array(...));
+        $Config = Array_Diff_Key($Config, $Users);
+        $Config = Array_Change_Key_Case($Config, \CASE_UPPER);
+        $Replace = [];
+      
+        // Encrypt plaintext passwords
+        ForEach($Users As $Name=>$Properties)
+          If(SubStr($Properties['password']?? '', 0, 1)!=='$')
+            $Users[$Name]['password']=$Replace[$Name]=Password_Hash($Properties['Password'], Null);
+      
+        If(Count($Replace))
+        {
+          $Lines   = File($Config_File);
+          $Current = Null;
+      
+          ForEach($Lines As &$Line)
+          {
+            If(Preg_Match('/^\s*\[(\w+)\]\s*$/', $Line, $Match))
+            {
+              $Current=$Match[1];
+              Continue;
+            }
+      
+            If($Current && IsSet($Replace[$Current]) && Preg_Match('/^\s*password\s*=/', $Line))
+              $Line='password = '.Var_Export($Replace[$Current], True)."\n";
+          }
+      
+          UnSet($Line, $Current);
+      
+          File_Put_Contents($Config_File, Implode('', $Lines));
+        }
+        
+        $this->Users = $Users;
+      }
+      
+      $Default=$this->Default;
+      ForEach($Default as $Key=>$Value)
+      {
+        If(Array_Key_Exists($Key, $Config))
+          $Value=$Config[$Key];
+      
+        if(Is_Bool($Default[$Key]))
+          $Value=BoolVal($Value);
+      
+        $this->Config[$Key]=$Value;
+      }
+    }
+  
+    Public Function Auth(): Bool
+    {
+      If($this->Anonymous['Write'] && $this->Anonymous['Read']) Return True;
+  
+      If($this->User) return true;
+  
+      $User     = $_SERVER['PHP_AUTH_USER' ]?? Null;
+      $Password = $_SERVER['PHP_AUTH_PW'   ]?? Null;
+  
+      If(!Array_Key_Exists($User, $this->Users)) Return False;
+  
+      $Hash = $this->Users[$User]['password'] ?? null;
+  
+      // If no password is set, we accept any password as we consider that a .htaccess/.htpasswd
+      // access has been granted
+      If(Null!==$Hash && !Password_Verify($Password, $Hash)) Return False;
+  
+      $this->User=$User;
+      Return True;
+    }
+    
+    Protected Function RequireAuth(): void
+    {
+      Http_Response_Code(401);
+      Header('WWW-Authenticate: Basic realm="Please login"');
+      Echo '<h2>Error 401</h2><h1>You need to login to access this.</h1>';
+    }
+  
+    Function GetUserInfo()
+    {
+      $Info=$this->Users[$this->User]?? [];
+      Return $Info;
+    }
+  
+    Function CheckRoute(String $Uri): Bool
+    {
+      If($this->Anonymous['Write' ]) Return True;
+      If($this->Anonymous['Read'  ]) Return True;
+      If($this->Auth()) Return True;
+      
+      $this->RequireAuth();
+      return False;
+    }
+    
+    Function CheckAuth()
+    {
+      If(!Count($this->Users)) Return False;
+      Return $this->Auth();
+    }
+    
+    Function CanRead(String $Uri): Bool
+    {
+      If($this->Anonymous['Read']) return true;
+      if(!$this->Auth()) return false;
+  
+      $Restrict = $this->GetUserInfo()['Restrict'] ?? [];
+  
+      If(!Is_Array($Restrict) || Empty($Restrict)) Return True;
+  
+      ForEach($Restrict As $Match)
+        If(0===StrPos($Uri, $Match))
+          Return True;
+  
+      Return False;
+    }
+  
+    Function CanWrite(String $Uri): Bool
+    {
+      If(!$this->Auth() && !$this->Anonymous['Write' ]) Return False;
+      If($this->Anonymous['Write' ]) Return True;
+      If(!$this->Auth() || Empty($this->GetUserInfo()['Write'])) Return False;
+  
+      $Restrict = $this->GetUserInfo()['Restrict']['Write']?? [];
+  
+      If(!Is_Array($Restrict) || Empty($Restrict)) Return True;
+  
+      Foreach($Restrict As $Match)
+        If(0===StrPos($Uri, $Match))
+          Return True;
+  
+      Return False;
+    }
+  
+    Function CanOnlyCreate(String $Uri): Bool
+    {
+      $Restrict = $this->GetUserInfo()['Restrict']['Write']?? [];
+  
+      If(In_Array($Uri, $Restrict, True)) Return True;
+  
+      $Restrict=$this->GetUserInfo()['Restrict']?? [];
+  
+      If(In_Array($Uri, $Restrict, True)) Return True;
+  
+      Return False;
+    }
+  }  
+?>

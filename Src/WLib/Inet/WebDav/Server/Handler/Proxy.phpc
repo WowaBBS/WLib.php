@@ -1,0 +1,19 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Server/Handler/Base');
+
+  Class C_Inet_WebDav_Server_Handler_Proxy Extends C_Inet_WebDav_Server_Handler_Base
+  {
+    Var $Handle;
+  
+    Function _Init($Args)
+    {
+      $this->Handle=$Args['Handle'];
+      Parent::_Init($Args);
+    }
+    
+    Function Process(String $Uri, $InHeaders)
+    {
+      Return $this->Handle->Process($Uri, $InHeaders);
+    }
+  }
+?>

@@ -1,0 +1,70 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Server/Handler/Base');
+  
+  Class C_Inet_WebDav_Server_Method_CopyMove Extends C_Inet_WebDav_Server_Handler_Base
+  {
+    Var Bool $IsMove=False;
+  
+    Function _Init($Args)
+    {
+      $this->IsMove=$Args['Move'];
+    
+      Parent::_Init($Args);
+    }
+    
+    Function IsMove(): Bool { Return $this->IsMove; }
+  
+    Function Process(String $Uri, $InHeaders)
+    {
+      $Storage=$this->GetStorage();
+      
+      $Move=$this->IsMove();
+  
+      $Destination =$InHeaders['Destination' ]?? Null;
+      $Depth       =$InHeaders['Depth'       ]??    1;
+  
+      If(!$Destination) $this->Exception(400, 'Destination not supplied');
+  
+      $Destination = $this->GetManager()->GetUri($Destination);
+  
+      If(Trim($Destination, '/')===Trim($Uri, '/'))
+        $this->Exception(403, 'Cannot move file to itself');
+  
+      $OverWrite = ($InHeaders['Overwrite']?? Null)==='T';
+  
+      // Dolphin is removing the file name when moving to root directory
+      If(Empty($Destination))
+        $Destination=BaseName($Uri);
+  
+      $this->Log('Debug', '<= Destination: ', $Destination);
+      $this->Log('Debug', '<= Overwrite: ', $OverWrite? 'Yes':'No', ' (', $InHeaders['Overwrite']?? Null, ')');
+  
+      If(!$OverWrite && $Storage->Exists($Destination))
+        $this->Exception(412, 'File already exists and overwriting is disabled');
+  
+      If($Move)
+        $this->CheckLock($InHeaders, $Uri);
+  
+      $this->CheckLock($InHeaders, $Destination);
+  
+      // Moving/copy of directory to an existing destination and depth=0
+      // should do just nothing, see 'depth_zero_copy' test in litmus
+      If($Depth===0
+        && $Storage->Exists($Destination)
+        && Current($Storage->Properties($this->GetManager(), $Destination, ['DAV::resourcetype'], 0))==='collection')
+        $OverWritten=$Storage->Exists($Uri);
+      else
+      {
+        If($Move)
+          $OverWritten=$Storage->Move($Uri, $Destination);
+        Else
+          $OverWritten=$Storage->Copy($Uri, $Destination);
+      }
+  
+      If($Move && ($Token=$This->GetLockToken($InHeaders)))
+        $Storage->UnLock($Uri, $Token);
+  
+      Http_Response_Code($OverWritten? 204:201);
+    }
+  }
+?>

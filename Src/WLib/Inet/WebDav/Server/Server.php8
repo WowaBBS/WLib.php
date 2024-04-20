@@ -1,0 +1,38 @@
+<?
+  For($F=__FILE__; $F;) If(@Include($F=DirName($F)).'/Using.php') Break;
+  $LogDir=RealPath('.').'/Log/';
+  $TimedLog=$Loader->GetLogger()->AddNewFile($LogDir, ['RemoveUnimportant'=>True]);
+  $Loader->GetLogger()->Get('Console')->Disable();
+  
+  $Request=$Loader->Get_Singleton('/Inet/Web/Request');
+  $Uri='/'.$Request->CurPath->ToString().$Request->ReqFile;
+  $Loader->Log('Debug', 'Uri=', $Uri);
+
+  $Self_Dir = DirName($_SERVER['SCRIPT_FILENAME']?? __FILE__);
+  $Base_Uri=$Request->BasePath->ToString();
+  
+  If(False!==StrPos($Uri, '..'))
+  {
+    Http_Response_Code(404);
+    Die('Invalid URL');
+  }
+  
+  $Config_File=$Self_Dir.'/.picodav.ini';
+  
+  $Storage=$Loader->Create_Object('/Inet/WebDav/Storage/Main', ['Path'=>$Self_Dir]);
+  $Auth=$Loader->Create_Object('/Inet/WebDav/Server/Auth', []);
+  $Auth->LoadIniFile($Config_File);
+  $Storage->Auth=$Auth;
+  
+  $WebDav=$Loader->Create_Object('/Inet/WebDav/Server/Main', ['Storage'=>$Storage, 'Base_Uri'=>$Base_Uri]);
+  
+  If(!$WebDav->Route($Uri))
+  {
+    Http_Response_Code(404);
+    Die('Unknown URL, sorry.');
+  }
+
+  If(In_Array($Request->ReqFile, ['descript.ion', 'files.bbs', 'index.txt'], True))
+    $TimedLog->ResetImportance();
+
+?>

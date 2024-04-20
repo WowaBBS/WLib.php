@@ -1,0 +1,98 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Server/Handler/Base');
+  
+  Class C_Inet_WebDav_Server_Method_Put Extends C_Inet_WebDav_Server_Handler_Base
+  {
+    Function Process(String $Uri, $InHeaders)
+    {
+      $Storage=$this->GetStorage();
+  
+      If(!StrNCmp($InHeaders['Content_Type']?? '', 'multipart/', 10))
+        $this->Exception(501, 'Multipart PUT requests are not supported');
+  
+      If($v=$InHeaders['Content-Encoding']?? Null)
+        If(False!==StrPos($v, 'gzip'))
+          $this->Exception(501, 'Content Encoding is not supported'); // Might be supported later?
+        Else
+          $this->Exception(501, 'Content Encoding is not supported');
+  
+      If(!Empty($InHeaders['Content-Range']))
+        $this->Exception(501, 'Content Range is not supported');
+  
+      // See SabreDAV CorePlugin for reason why OS/X Finder is buggy
+      If(IsSet($InHeaders['X-Expected-Entity-Length']))
+        $this->Exception(403, 'This server is not compatible with OS/X finder. Consider using a different WebDAV client or webserver.');
+  
+      $Hash      =Null;
+      $Hash_Algo =Null;
+  
+      // Support for checksum matching
+      // https://dcache.org/old/manuals/UserGuide-6.0/webdav.shtml#checksums
+      If($v=$InHeaders['Content-MD5']?? Null)
+      {
+        $Hash=Bin2Hex(Base64_DeCode($v));
+        $Hash_Algo='MD5';
+      }
+      // Support for ownCloud/NextCloud checksum
+      // https://github.com/owncloud-archive/documentation/issues/2964
+      ElseIf($v=$InHeaders['OC-Checksum']?? Null) // Preg_Match('/MD5:[a-f0-9]{32}|SHA1:[a-f0-9]{40}/', $v, $Match)
+      {
+        $v=StrTok($v, ':');
+        $Hash_Algo = $v[0];
+        $Hash      = $v[1];
+      }
+  
+      $this->CheckLock($InHeaders, $Uri);
+  
+      If($ETag=$InHeaders['If-Match'])
+      {
+        $ETag=Trim($ETag, '" ');
+        $Prop=$Storage->Properties($this->GetManager(), $Uri, ['DAV::getetag'], 0);
+  
+        If(!Empty($Prop['DAV::getetag']) && $Prop['DAV::getetag']!=$ETag)
+          $this->Exception(412, 'ETag did not match condition');
+      }
+  
+      // Specific to NextCloud/ownCloud, to allow setting file mtime
+      // This expects a UNIX timestamp
+      $MTime = (Int)($InHeaders['X-OC-MTime']?? 0)?: Null;
+  
+      If($MTime)
+        Header('X-OC-MTime: accepted');
+  
+      $this->ExtendExecutionTime();
+  
+      $Stream=FOpen('php://input', 'r');
+  
+      // mod_fcgid <= 2.3.9 doesn't handle chunked transfer encoding for PUT requests
+      // see https://github.com/kd2org/picodav/issues/6
+      If(StrStr($InHeaders['Transfer-Encoding']?? '', 'chunked') && PHP_SAPI==='fpm-fcgi')
+      {
+        // We can't seek here
+        // see https://github.com/php/php-src/issues/9441
+        $l=StrLen(FRead($Stream, 1));
+  
+        If($l===0)
+          $this->Exception(500, 'This server cannot accept "Transfer-Encoding: chunked" uploads (please upgrade to mod_fcgid >= 2.3.10).');
+  
+        // reset stream
+        FSeek($Stream, 0, SEEK_SET);
+      }
+  
+      $Created = $Storage->Put($Uri, $Stream, $Hash_Algo, $Hash, $MTime);
+      $Prop = $Storage->Properties($this->GetManager(), $Uri, ['DAV::getetag'], 0);
+  
+      If(!Empty($Prop['DAV::getetag']))
+      {
+        $Value=$Prop['DAV::getetag'];
+  
+        If(SubStr($Value, 0, 1)!=='"')
+          $Value='"'.$Value.'"';
+  
+        Header('ETag: '.$Value);
+      }
+  
+      Http_Response_Code($Created? 201:204);
+    }
+  }
+?>

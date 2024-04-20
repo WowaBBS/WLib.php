@@ -1,0 +1,19 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Server/Handler/Base');
+
+  Class C_Inet_WebDav_Server_Method_Options Extends C_Inet_WebDav_Server_Handler_Base
+  {
+    Function Process(String $Uri, $InHeaders)
+    {
+      Http_Response_Code(200);
+  
+      $this->GetManager()->Dav_Header();
+  
+      Header('Allow: '.Implode(', ', Array_Keys($this->GetManager()->GetMethodMap())));
+      Header('Content-length: 0'    );
+      Header('Accept-Ranges: bytes' );
+      Header('MS-Author-Via: DAV'   );
+    }
+  
+  }
+?>

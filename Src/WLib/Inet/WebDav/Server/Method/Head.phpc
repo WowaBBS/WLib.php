@@ -1,0 +1,55 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Server/Handler/Base');
+  
+  Class C_Inet_WebDav_Server_Method_Head Extends C_Inet_WebDav_Server_Handler_Base
+  {
+    Function Process(String $Uri, $InHeaders, Array &$Props=[])
+    {
+      $Storage=$this->GetStorage();
+    
+      $Requested_Props=$this->GetManager()->Basic_Properties;
+      $Requested_Props[]='DAV::getetag';
+  
+      // RFC 3230 https://www.rfc-editor.org/rfc/rfc3230.html
+      If(!Empty($InHeaders['Want-Digest']?? Null)) // TODO: Check types
+        $Requested_Props[]='urn:karadav:digest_md5';
+  
+      $Props=$Storage->Properties($this->GetManager(), $Uri, $Requested_Props, 0);
+  
+      If(!$Props)
+        $this->Exception(404, 'Resource Not Found');
+  
+      Http_Response_Code(200);
+  
+      If(IsSet($Props['DAV::getlastmodified'])
+        && $Props['DAV::getlastmodified']InstanceOf \DateTimeInterface)
+        Header('Last-Modified: '.$Props['DAV::getlastmodified']->Format(\DATE_RFC7231));
+  
+      If(!Empty($Props['DAV::getetag']))
+      {
+        $Value=$Props['DAV::getetag'];
+  
+        If(SubStr($Value, 0, 1)!='"')
+          $Value='"'.$Value.'"';
+  
+        Header('ETag: '.$Value);
+      }
+  
+      If(Empty($Props['DAV::resourcetype']) || $Props['DAV::resourcetype']!=='collection')
+      {
+        If(!Empty($Props['DAV::getcontenttype']))
+          Header('Content-Type: '.$Props['DAV::getcontenttype']);
+  
+        If(!Empty($Props['DAV::getcontentlength']))
+        {
+          Header('Content-Length: '.$Props['DAV::getcontentlength']);
+          Header('Accept-Ranges: bytes'); 
+        }
+      }
+  
+      If($v=$Props['urn:karadav:digest_md5']?? Null)
+        Header('Digest: md5='.Base64_EnCode(Hex2Bin($v)));
+    }
+  
+  }
+?>

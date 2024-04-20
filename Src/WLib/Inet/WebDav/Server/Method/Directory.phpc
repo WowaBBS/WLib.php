@@ -1,0 +1,94 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Server/Handler/Base');
+  
+  Class C_Inet_WebDav_Server_Method_Directory Extends C_Inet_WebDav_Server_Handler_Base
+  {
+    Function Process(String $Uri, $InHeaders)
+    {
+      $Storage=$this->GetStorage();
+      $Base_Uri=$this->GetManager()->Base_Uri;
+      
+      Header('Content-Type: text/html; charset=utf-8', true);
+      $List=$Storage->List($Uri, $this->GetManager()->Basic_Properties);
+      // Not a file: let's serve a directory listing if you are browsing with a web browser
+      If($Uri!=='' && SubStr($Uri, -1)!=='/')
+      {
+        $this->Log('Debug', 'Redirect: ')->Debug([
+          'Uri'=>$Uri,
+        ]);
+        Http_Response_Code(301);
+        Header('Location: /'.Trim($Base_Uri.$Uri, '/').'/', True);
+        Return;
+      }
+      
+      $WebDavUrl='/'.LTrim($Base_Uri, '/');
+      $Title=HtmlSpecialChars($Uri? Str_Replace('/', ' / ', $Uri).' - Files':'Files');
+  
+      //TODO: Customize, now use microdown webdav.js
+      $Out=<<<HereDoc
+        <!DOCTYPE html>
+        <html data-webdav-url="$WebDavUrl">
+         <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, target-densitydpi=device-dpi" />
+          <style>
+            body { font-size: 1.1em; font-family: Arial, Helvetica, sans-serif; }
+            table { border-collapse: collapse; }
+            th, td { padding: .5em; text-align: left; border: 2px solid #ccc; }
+            span { font-size: 40px; line-height: 40px; }
+          </style>
+          <title>$Title</title>
+         </head>
+         <body>
+          <script type="text/javascript" src="$Base_Uri/.webdav/webdav.js"></script>
+          <h1>$Title</h1>
+          <table>
+        HereDoc;
+      
+      If(Trim($Uri))
+        $Out.='<tr><th colspan=3><a href="../"><b>Back</b></a></th></tr>';
+  
+      $Props=Null;
+  
+      ForEach($List As $File=>$Props)
+      {
+        If(Null===$Props)
+          $Props=$Storage->Properties($this->GetManager(), Trim($Uri.'/'.$File, '/'), $this->GetManager()->Basic_Properties, 0);
+  
+        $Collection = !Empty($Props['DAV::resourcetype']) && $Props['DAV::resourcetype']==='collection';
+  
+        If($Collection)
+          $Out.='<tr><td>[DIR]</td><th><a href="'.RawUrlEnCode($File).'/"><b>'.HtmlSpecialChars($File).'</b></a></th></tr>';
+        Else
+        {
+          $Size=$Props['DAV::getcontentlength'];
+  
+          If($Size>1024*1024)
+            $Size=($Size/1024/1024).' MB';
+          ElseIf($Size)
+            $Size=($Size/1024).' KB';
+  
+          $Date=$Props['DAV::getlastmodified'];
+  
+          If($Date InstanceOf \DateTimeInterface)
+            $Date=$Date->Format('d/m/Y H:i');
+  
+          $Out.=SPrintF('<tr><td></td><th><a href="%s">%s</a></th><td>%s</td><td>%s</td></tr>',
+            RawUrlEnCode($File),
+            HtmlSpecialChars($File),
+            $Size,
+            $Date
+          );
+        }
+      }
+  
+      $Out.='</table>';
+  
+      If(Null===$Props)
+        $Out.='<p>This directory is empty.</p>';
+  
+      $Out.='</body></html>';
+  
+      Return $Out;
+    }
+  }
+?>

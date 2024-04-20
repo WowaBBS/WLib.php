@@ -1,0 +1,70 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Server/Handler/Proxy');
+
+  Class C_Inet_WebDav_Server_Handler_Pack Extends C_Inet_WebDav_Server_Handler_Proxy
+  {
+    Function Check(String $Uri, $InHeaders)
+    {
+      If(!IsSet($InHeaders['Accept-Encoding'])) Return False;
+      If(False===StrPos($InHeaders['Accept-Encoding'], 'gzip')) Return False;
+     //&& IsSet($Props['DAV::getcontentlength'])
+    //&& $Props['DAV::getcontentlength']<8*1024*1024 // Don't compress if size is larger than 8 MiB
+      If(Preg_Match('/\.(?:cbz|cbr|cb7|mp4|m4a|zip|docx|xlsx|pptx|ods|odt|odp|7z|gz|bz2|lzma|lz|xz|apk|dmg|jar|rar|webm|ogg|mp3|ogm|flac|ogv|mkv|avi)$/i', $Uri)) Return False; // Don't compress already compressed content
+      Return True;
+    }
+  
+    Function Process(String $Uri, $InHeaders)
+    {
+      $z=Ob_Start($this->Handler(...), 8192); /// PHP_OUTPUT_HANDLER_STDFLAGS PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_FLUSHABLE | PHP_OUTPUT_HANDLER_REMOVABLE.
+      
+      Try
+      {
+        $Res=Parent::Process($Uri, $InHeaders);
+      }
+      Catch(Throwable $Exception)
+      {
+        Ob_End_Clean();
+        Throw $Exception;
+      }
+      
+      If(!$z)
+        Return $Res;
+        
+      Echo $Res;
+      Ob_End_Flush();
+    }
+    
+    Var $GZip;
+    
+    Function Handler(String $Buffer, Int $Phase): String
+    {
+      $Start=(Bool)($Phase & PHP_OUTPUT_HANDLER_START);
+      $Final=(Bool)($Phase & PHP_OUTPUT_HANDLER_FINAL);
+      
+      If($Start)
+      {
+        If($Final && $Buffer==='') Return '';
+        
+        If(Function_Exists('Apache_SetEnv'))
+          @Apache_SetEnv('no-gzip', 1);
+    
+        @Ini_Set('zlib.output_compression', 'Off');
+  
+        $this->Log('Debug', 'Using gzip output compression');
+        $this->GZip=Deflate_Init(ZLIB_ENCODING_GZIP);
+        Header('Content-Encoding: gzip', True);
+        Header('Vary: Accept-Encoding');
+        Header_Remove('Content-Length');
+      }
+      
+      $Res=Deflate_Add($this->GZip, $Buffer, $Final? ZLIB_FINISH:ZLIB_NO_FLUSH);
+      If($Start && $Final)
+        Header('Content-Length: '.StrLen($Res), True);
+      
+      if($Final)
+        $this->GZip=Null;
+      
+      Return $Res;
+    }
+  }
+?>

@@ -1,0 +1,164 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Server/Handler/Base');
+
+  Class C_Inet_WebDav_Server_Method_Get Extends C_Inet_WebDav_Server_Handler_Base
+  {
+    Function Process(String $Uri, $InHeaders)
+    {
+      $Storage=$this->GetStorage();
+      $Props = [];
+      $this->GetManager()->CreateMethod('Head')->Process($Uri, $InHeaders, $Props);
+      
+    //$this->Log('Debug');
+  
+      $Is_Collection=($Props['DAV::resourcetype']?? '')==='collection';
+      $Out='';
+  
+      If($Is_Collection)
+      {
+        If(False===StrPos($InHeaders['Accept']?? '', 'html'))
+        {
+          $List=$Storage->List($Uri, $this->GetManager()->Basic_Properties);
+          $List=Is_Array($List)? $List:Iterator_To_Array($List);
+  
+          If(!Count($List))
+            Return "Nothing in this collection\n";
+  
+          Return Implode("\n", Array_Keys($List));
+        }
+  
+        Return $this->GetManager()->CreateMethod('Directory')->Process($Uri, $InHeaders);
+      }
+  
+      $File=$Storage->Get($Uri);
+  
+      If(!$File)
+        $this->Exception(404, 'File Not Found');
+  
+      // If the file was returned to the client by the storage backend, stop here
+      If(!Empty($File['stop'])) Return Null;
+  
+      If(!IsSet($File['content']) && !IsSet($File['resource']) && !IsSet($File['path']))
+        Throw New \RuntimeException('Invalid file array returned by ::get()');
+  
+      $this->ExtendExecutionTime();
+  
+      $Length=$Start=$End=Null;
+  
+      If(($v=$InHeaders['Range']?? Null)
+        && Preg_Match('/^bytes=(\d*)-(\d*)$/i', $v, $Match)
+        && $Match[1].$Match[2]!=='')
+      {
+        $Start =$Match[1]===''? Null:(Int)$Match[1];
+        $End   =$Match[2]===''? Null:(Int)$Match[2];
+  
+        If(Null!==$Start && $Start<0)
+          $this->Exception(416, 'Start range cannot be satisfied');
+  
+        If(IsSet($Props['DAV::getcontentlength']) && $Start>$Props['DAV::getcontentlength'])
+          $this->Exception(416, 'End range cannot be satisfied');
+  
+        $this->Log('Debug', 'HTTP Range requested: ', $Start, '-', $End);
+      }
+  
+      If(@Ob_Get_Length())
+        @Ob_Clean();
+  
+      If(IsSet($File['content']))
+      {
+        $Length=StrLen($File['content']);
+  
+        If($Start || $End)
+        {
+          If(Null!==$End && $End>$Length)
+          {
+            Header('Content-Range: bytes */'.$Length, True);
+            $this->Exception(416, 'End range cannot be satisfied');
+          }
+  
+          If($Start===Null)
+          {
+            $Start = $Length -$End;
+            $End   = $Start  +$End;
+          }
+          ElseIf($End===Null)
+          {
+            $End=$Length;
+          }
+  
+          Http_Response_Code(206);
+          Header('Content-Range: bytes '.$Start.'-'.($End-1).'/'.$Length);
+          $File['content']=SubStr($File['content'], $Start, $End-$Start);
+          $Length=$End-$Start;
+        }
+  
+        Header('Content-Length: '.$Length, True);
+        Echo $File['content'];
+        Return;
+      }
+  
+      If(IsSet($File['path']))
+        $File['resource']=FOpen($File['path'], 'rb');
+  
+      $Seek=FSeek($File['resource'], 0, SEEK_END);
+  
+      If($Seek===0)
+      {
+        $Length=FTell($File['resource']);
+        FSeek($File['resource'], 0, SEEK_SET);
+      }
+  
+      If(($Start || $End) && $Seek===0)
+      {
+        If(Null!==$End && $End>$Length)
+        {
+          Header('Content-Range: bytes */'.$Length, True);
+          $this->Exception(416, 'End range cannot be satisfied');
+        }
+  
+        If($Start===Null)
+        {
+          $Start = $Length -$End;
+          $End   = $Start  +$End;
+        }
+        ElseIf($End===Null)
+        {
+          $End = $Length;
+        }
+  
+        FSeek($File['resource'], $Start, SEEK_SET);
+  
+        Http_Response_Code(206);
+        Header('Content-Range: bytes '.$Start.'-'.($End-1).'/'.$Length, True);
+  
+        $Length = $End-$Start;
+        $End -= $Start;
+      }
+      ElseIf(Null===$Length && IsSet($File['path']))
+      {
+        $End = $Length = FileSize($File['path']);
+      }
+
+      If(Null!==$Length)
+      {
+        $this->Log('Debug', 'Length: ', $Length);
+        Header('Content-Length: '.$Length, True);
+      }
+  
+      $Block_Size = 8192*4;
+  
+      While(!FEof($File['resource']) && ($End===Null || $End>0))
+      {
+        $l = $End!==Null? Min($Block_Size, $End):$Block_Size;
+  
+        Echo FRead($File['resource'], $l);
+        Flush();
+  
+        If(Null!==$End)
+          $End-=$Block_Size;
+      }
+  
+      FClose($File['resource']);
+    }
+  }
+?>

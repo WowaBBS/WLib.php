@@ -1,0 +1,78 @@
+<?
+  $this->Parent_Class('/Object');
+  
+  Class C_Inet_WebDav_Server_Handler_Base Extends C_Object
+  {
+    Var $Storage;
+    Var $Manager;
+    
+    Function _Init($Args)
+    {
+      $this->Manager=$Args['Manager'];
+      Parent::_Init($Args);
+    }
+    
+    Static Function PrettyXml($v)
+    {
+      $Dom=New DOMDocument('1.0');
+      $Dom->preserveWhiteSpace = False ;
+      $Dom->formatOutput       = True  ;
+      $Dom->LoadXml($v);
+      $Res=$Dom->SaveXml();
+      Return $Res?: $v;
+    }
+    
+    Function GetManager() { Return $this->Manager; }
+    Function GetStorage() { Return $this->GetManager()->GetStorage(); }
+  
+    Function Exception(Int $Code, String ...$Message):Never { $this->GetManager()->Exception($Code, ...$Message); }
+    Function ExtendExecutionTime() { $this->GetManager()->ExtendExecutionTime(); }
+
+    Protected Function GetLockToken($InHeaders):?String
+    {
+      If(!Is_Null($v=$InHeaders['Lock-Token' ]?? Null) && Preg_Match('/<(.*?)>/'     ,Trim($v), $Match)) Return $Match[1];
+      If(!Is_Null($v=$InHeaders['If'         ]?? Null) && Preg_Match('/\(<(.*?)>\)/' ,Trim($v), $Match)) Return $Match[1];
+      Return Null;
+    }
+  
+    Protected Function CheckLock($InHeaders, String $Uri, ?String $Token=Null): Void
+    {
+      $Storage=$this->GetStorage();
+      $Token??=$this->GetLockToken($InHeaders);
+  
+      // Trying to access using a parent directory
+      If($If=$InHeaders['If']?? '')
+      {
+        If(Preg_Match('/<([^>]+)>\s*\(<[^>]*>\)/', $If, $Match))
+        {
+          $Root=$this->GetUri($Match[1]);
+    
+          If(0!==StrPos($Uri, $Root))
+            $this->Exception(400, 'Invalid "If" header path: ', $Root);
+    
+          $Uri=$Root;
+        }
+        // Try to validate token
+        ElseIf(Preg_Match('/\(<([^>]*)>\s+\["([^""]+)"\]\)/', $If, $Match))
+        {
+          $Token        = $Match[1];
+          $Request_ETag = $Match[2];
+          $ETag = Current($Storage->Properties($this->GetManager(), $Uri, ['DAV::getetag'], 0));
+    
+          If($Request_ETag!=$ETag)
+            $this->Exception(412, 'Resource is locked and etag does not match');
+        }
+      }
+  
+      If($Token==='DAV:no-lock')
+        $this->Exception(412, 'Resource is locked');
+  
+      // Token is valid
+      If($Token && $Storage->GetLock($Uri, $Token)) Return;
+      If($Token) $this->Exception(400, 'Invalid token');
+      // Resource is locked
+      If($Storage->GetLock($Uri))
+        $this->Exception(423, 'Resource is locked');
+    }
+  }
+?>

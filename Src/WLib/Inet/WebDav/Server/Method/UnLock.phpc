@@ -1,0 +1,23 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Server/Handler/Base');
+  
+  Class C_Inet_WebDav_Server_Method_UnLock Extends C_Inet_WebDav_Server_Handler_Base
+  {
+    Function Process(String $Uri, $InHeaders)
+    {
+      $Storage =$this->GetStorage();
+      $Token   =$this->GetLockToken($InHeaders);
+  
+      If(!$Token)
+        $this->Exception(400, 'Invalid Lock-Token header');
+  
+      $this->Log('Debug', '<= Lock Token: ', $Token);
+  
+      $this->CheckLock($InHeaders, $Uri, $Token);
+  
+      $Storage->UnLock($Uri, $Token);
+  
+      Http_Response_Code(204);
+    }
+  }
+?>

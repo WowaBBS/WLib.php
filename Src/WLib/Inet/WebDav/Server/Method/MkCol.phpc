@@ -1,0 +1,19 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Server/Handler/Base');
+
+  Class C_Inet_WebDav_Server_Method_MkCol Extends C_Inet_WebDav_Server_Handler_Base
+  {
+    Function Process(String $Uri, $InHeaders)
+    {
+      $Storage=$this->GetStorage();
+      
+      If(!Empty($InHeaders['Content-Length']))
+        $this->Exception(415, 'Unsupported body for MKCOL');
+  
+      $Storage->MkCol($Uri);
+  
+      Http_Response_Code(201);
+    }
+  
+  }
+?>

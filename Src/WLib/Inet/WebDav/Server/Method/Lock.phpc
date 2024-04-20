@@ -1,0 +1,102 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Server/Handler/Base');
+  
+  Class C_Inet_WebDav_Server_Method_Lock Extends C_Inet_WebDav_Server_Handler_Base
+  {
+    Function Process(String $Uri, $InHeaders)
+    {
+      $Storage=$this->GetStorage();
+      
+      // We don't use this currently, but maybe later?
+    //$Depth = !Empty($InHeaders['Depth'])? 1:0;
+    //$TimeOut = IsSet($InHeaders['Timeout'])? Explode(',', $InHeaders['Timeout']):[];
+    //$TimeOut = Array_Map(Trim(...), $TimeOut);
+  
+      If(Empty($InHeaders['Content-Length']) && !Empty($InHeaders['If']))
+      {
+        $Token=$this->GetLockToken($InHeaders);
+  
+        If(!$Token)
+          $this->Exception(400, 'Invalid If header');
+  
+        $Info  = Null;
+        $Ns    = 'D';
+        $Scope = 'exclusive';
+  
+        $this->CheckLock($InHeaders, $Uri, $Token);
+        $this->Log('Debug', 'Requesting LOCK refresh: ', $Uri, ' = ', $Scope);
+      }
+      Else
+      {
+        $Locked_Scope = $Storage->GetLock($Uri);
+  
+        If($Locked_Scope=='exclusive')
+          $this->Exception(423, 'Cannot acquire another lock, resource is locked for exclusive use');
+  
+        If($Locked_Scope)
+        {
+          $Token=$this->GetLockToken($InHeaders);
+  
+          If($Token)
+            $this->CheckLock($InHeaders, $Uri, $Token);
+          Else
+            $this->Exception(423, 'Missing lock token');  
+        }
+  
+        $Xml=File_Get_Contents('php://input');
+  
+        if($Xml!=='')
+          $this->Log('Debug', 'Input:')(Static::PrettyXml($Xml));
+  
+        If(!Preg_Match('!<((?:(\w+):)?lockinfo)[^>]*>(.*?)</\1>!is', $Xml, $Match))
+          $this->Exception(400, 'Invalid XML');
+  
+        $Ns   = $Match[2];
+        $Info = $Match[3];
+  
+        // Quick and dirty UUID
+        $UuId = Random_Bytes(16);
+        $UuId[6] = Chr(Ord($uuid[6]) & 0x0f | 0x40); // set version to 0100
+        $UuId[8] = Chr(Ord($uuid[8]) & 0x3f | 0x80); // set bits 6-7 to 10
+        $UuId = VsPrintF('%s%s-%s-%s-%s-%s%s%s', Str_Split(Bin2Hex($UuId), 4));
+  
+        $Token = 'opaquelocktoken:'.$UuId;
+        $Scope = False!==StrIPos($Info, '<'.($Ns? $Ns.':':'').'exclusive')? 'exclusive':'shared';
+  
+        $this->Log('Debug', 'Requesting LOCK: ', $Uri, ' = ', $Scope);
+      }
+  
+      $Storage->Lock($Uri, $Token, $Scope);
+  
+      $TimeOut = 60*5;
+      $Info = SPrintF('
+        <d:lockscope><d:%s /></d:lockscope>
+        <d:locktype><d:write /></d:locktype>
+        <d:owner>unknown</d:owner>
+        <d:depth>%d</d:depth>
+        <d:timeout>Second-%d</d:timeout>
+        <d:locktoken><d:href>%s</d:href></d:locktoken>
+      ', $Scope, 1, $TimeOut, $Token);
+  
+      Http_Response_Code(200);
+      Header('Content-Type: application/xml; charset=utf-8');
+      Header('Lock-Token: <'.$Token.'>');
+  
+      $Out='<?xml version="1.0" encoding="utf-8"?>' . "\n";
+      $Out.='<d:prop xmlns:d="DAV:">';
+      $Out.='<d:lockdiscovery><d:activelock>';
+  
+      $Out.=$Info;
+  
+      $Out.='</d:activelock></d:lockdiscovery></d:prop>';
+  
+      If($Ns!=='D')
+      {
+        $Out=Str_Replace('D:', $Ns? $Ns.':':'', $Out);
+        $Out=Str_Replace('xmlns:D', $Ns? 'xmlns:'.$ns:'xmlns', $Out);
+      }
+  
+      Return $Out;
+    }
+  }
+?>

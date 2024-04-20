@@ -1,0 +1,26 @@
+<?
+  $this->Parent_Class('/Object');
+  
+  Class C_Inet_WebDav_Storage_Base Extends C_Object
+  {
+    Function Exception(Int $Code, String ...$Message):Never
+    {
+      Throw New E_Inet_WebDav_Server_Exception(Implode($Message), $Code);
+    }
+  
+    Function Get(String $Uri): ?Array { $this->Exception(403, 'Access forbidden'); }
+    Function Exists(String $Uri): Bool { Return False; }
+    Function Properties($Manager, String $Uri, ?Array $Requested_Properties, Int $Depth): ?Array { Return Null; }
+    Function SetProperties(String $Uri, String $Body): Void {} // By default, properties are not saved
+    Function Put(String $Uri, $Pointer, ?String $Hash_Algo, ?String $Hash, ?Int $MTime): Bool { $this->Exception(403, 'Access forbidden'); }
+    Function Delete(String $Uri): Void { $this->Exception(403, 'Access forbidden'); }
+    Function Copy(String $Uri, String $Destination): Bool { $this->Exception(403, 'Access forbidden'); }
+    Function Move(String $Uri, String $Destination): Bool { $this->Exception(403, 'Access forbidden'); }
+    Function MkCol(String $Uri): Void { $this->Exception(403, 'Access forbidden'); }
+    Function List(String $Uri, Array $Properties): Iterable { $this->Exception(403, 'Access forbidden'); }
+    
+    Function Lock(String $Uri, String $Token, String $Scope): Void {} // By default locking is not implemented
+    Function UnLock(String $Uri, String $Token): Void {} // By default locking is not implemented
+    Function GetLock(String $Uri, ?String $Token=Null): ?String { Return Null; } // By default locking is not implemented, so NULL is always returned
+  }
+?>

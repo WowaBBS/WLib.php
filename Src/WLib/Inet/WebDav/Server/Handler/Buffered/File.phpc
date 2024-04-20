@@ -1,0 +1,126 @@
+<?
+  $this->Parent_Class('/Inet/WebDav/Server/Method/Base');
+
+  Class C_Inet_WebDav_Server_Method_Buffered_File Extends C_Inet_WebDav_Server_Method_Base
+  {
+    Function Process(String $Uri, $InHeaders)
+    {
+      $z=Ob_Start($this->Handler_File(...), 8192); /// PHP_OUTPUT_HANDLER_STDFLAGS PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_FLUSHABLE | PHP_OUTPUT_HANDLER_REMOVABLE.
+      
+      Try
+      {
+        $File =Null;
+        $Res=Parent::Process($Uri, $InHeaders);
+        $File =$this->File;
+      }
+      Catch(Throwable $Exception)
+      {
+        Ob_End_Clean();
+        Throw $Exception;
+      }
+      
+      if(!$z)
+        Return $Res;
+        
+      If($GZip)
+      {
+        If(Is_String($Res) && StrLen($Res))
+        {
+          $this->Log('Error', 'Has File and Res');
+          Echo $Res;
+          $Res=Null;
+        }
+        
+        Ob_End_Flush();
+      }
+      Else
+      {
+        $Ob=Ob_Get_Contents();
+        Ob_End_Clean();
+        If(StrLen($Ob))
+        {
+          If(Is_String($Res))
+          {
+            $this->Log('Error', 'Progess makes two results')->Debug([
+              'Res' =>$Res ,
+              'Ob'  =>$Ob  ,
+            ]);
+            $Res.=$Ob;
+          }
+          Else
+            $Res=$Ob;
+        }
+      }
+      $this->File=Null;
+      $this->GZip=Null;
+
+      If(Is_String($Res) && StrLen($Res))
+      {
+        $this->Log('Debug', 'GzEnCode: ', StrLen($Res));
+        $Res=GzEnCode($Res, 9);
+        $Length=StrLen($Res);
+  
+        $this->Begin();
+        Header('Content-Length: '.$Length, True);
+        Return $Res;
+      }
+      
+      If($File)
+      {
+        $this->Begin();
+        
+        $this->Log('Debug', 'Deflate_Add');
+        FWrite($File, Deflate_Add($GZip, '', ZLIB_FINISH));
+        $Length=FTell($File);
+        ReWind($File);
+        If(Null!==$Length)
+        {
+          $this->Log('Debug', 'Length: ', $Length);
+          Header('Content-Length: '.$Length, True);
+        }
+        
+        $Block_Size=8192*4;
+    
+        While(!FEof($File))
+        {
+          Echo FRead($File, $Block_Size);
+          Flush();
+        }
+    
+        FClose($File);
+        Return Null;
+      }
+      
+    //Echo Deflate_Add($GZip, '', ZLIB_FINISH);
+      Return Null;
+    }
+    
+    Var $File;
+    
+    Function Begin()
+    {
+      Header_Remove('Content-Length');
+    }
+    
+    Function Handler_File(String $Buffer, Int $Phase): String
+    {
+      If($Phase & PHP_OUTPUT_HANDLER_START || $Phase & PHP_OUTPUT_HANDLER_CLEAN && $this->File)
+      {
+        $this->Log('Debug', 'Using gzip output compression');
+      //$this->File=FOpen('php://temp', 'wb');
+        $this->GZip=Deflate_Init(ZLIB_ENCODING_GZIP);
+        $this->Begin();
+      }
+      
+      $Final=Bool($Phase & PHP_OUTPUT_HANDLER_FINAL);
+      
+      $Res=Deflate_Add($this->GZip, $Buffer, $Final? ZLIB_FINISH:ZLIB_NO_FLUSH);
+      
+      if($File=$this->File)
+        FWrite($File, $Res);
+      Else
+        Return $Res;
+      Return '';
+    }
+  }
+?>

@@ -1,6 +1,8 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
+  $Loader->GetLogger()->Add(SubStr(__FILE__,0,-5).'.log');
+  
   Function MyAssert($v, ...$Title)
   {
     Global $Loader;
@@ -13,9 +15,16 @@
   
   Class Test
   {
-    Var $a;
-    Var $b;
-    Var $c;
+    Var       $a;
+    Protected $b;
+    Private   $c;
+    Static    $e;
+    ReadOnly  String $f;
+    
+    Function __Construct()
+    {
+      $this->f='Hello';
+    }
   }
 
   $Object_Factory=$Loader->Get_Singleton('/Serialize/Object/Factory');
@@ -42,7 +51,7 @@
     else
       $Loader->Log('Log', $k, '=>', 'Other');
       
-  $Vars=$Object_Factory->CreateVarsCI(['a'=>'a', 'b'=>'b', 'e'=>'e',]);
+  $Vars=$Object_Factory->CreateVarsCI(['a'=>'a', 'b'=>'b', 'e'=>'e', 'f'=>'f']);
   $Vars->CopyToObj(New Test());
   // Was Bug:
   $Vars=$Object_Factory->CreateVarsCI(['a'=>'a', 'b'=>null]);

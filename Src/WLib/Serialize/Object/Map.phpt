@@ -63,6 +63,8 @@
       );
       ForEach($Properties As $Property)
       {
+        If($Property->IsStatic   ()) Continue;
+        If($Property->IsReadOnly ()) Continue;
         $Name=$Property->getName();
         $DClass=$Property->getDeclaringClass()->getName();
         if($DClass!=$ClassName)

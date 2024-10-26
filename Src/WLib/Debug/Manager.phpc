@@ -80,11 +80,8 @@
     Function GetClass($Class)
     {
       if($Class===false) return false;
-      if(IsSet($this->Classes[$Class]))
-        return $this->Classes[$Class];
-      $Res=$this->GetClass(Get_Parent_Class($Class));
-      $this->Classes[$Class]=$Res;
-      return $Res;
+      return $this->Classes[$Class]??=
+        $this->GetClass(Get_Parent_Class($Class));
     }
  
     Function ProcessClass($Ctx, $Class, $Value)

@@ -1,0 +1,6 @@
+<?
+  Interface I_Debug_Custom
+  {
+    Function Debug_Write(C_Log_Format $To);
+  };
+?>

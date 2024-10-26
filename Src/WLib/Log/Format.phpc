@@ -1,5 +1,6 @@
 <?
-  $this->Parent_Class('/Object');
+  $Loader->Parent_Class('/Object');
+  $Loader->Load_Interface('/Debug/Custom');
   
   class C_Log_Format extends C_Object
   {
@@ -272,9 +273,16 @@
       Case 'NULL'          : $this->WriteNull  (  ); break;
       Case 'float'         : $this->WriteFloat ($v); break;
       Default              :
-        $this->Inline_Begin();
-        $this->Debug($v, 3);
-        $this->Inline_End();
+        if($v InstanceOf I_Debug_Custom)
+        {
+          $v->Debug_Write($this);
+        }
+        Else
+        {
+          $this->Inline_Begin();
+          $this->Debug($v, 3);
+          $this->Inline_End();
+        }
       }
     }
     

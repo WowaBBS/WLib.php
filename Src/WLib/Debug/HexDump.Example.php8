@@ -1,0 +1,35 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  $Loader->GetLogger()->Add(SubStr(__FILE__,0,-5).'.log');
+  $Loader->Load_Type('/Debug/HexDump');
+  
+  $Full=Str_Repeat(' ', 256);
+  For($i=0; $i<256; $i++)
+    $Full[$i]=Chr($i);
+  $Full=Bin2Hex($Full);
+  $List=[
+    [$Full],
+    [$Full, 'Addr'=>1],
+    [$Full, 'Chunk'=>18, 'Split2'=>3, 'Split'=>[3=>'  ', 6=>' : ', 9=>'  ']],
+    ['0123456789abcdef'],
+    ['0123456789abcdef', 'Addr'=>1],
+    ['0123456789abcdef', 'Addr'=>15],
+    ['0123456789abcdef0123456789abcdef'],
+    ['0123456789abcdef0123456789abcdef', 'Addr'=>1],
+    ['0123456789abcdef0123456789abcdef', 'Addr'=>15],
+    ['0123456789abcdef0123456789abcdef00'],
+    ['0123456789abcdef0123456789abcdef00', 'Addr'=>1],
+    ['0123456789abcdef0123456789abcdef00', 'Addr'=>15],
+  ];
+  
+  $Dump=HexDump('123');
+  $Loader->Log('Log', 'Debug: ', $Dump)->Debug($Dump);
+  $Loader->Log('Log', 'ToString: ', $Dump->ToString());
+  
+  ForEach($List As $Item)
+  {
+    $Data=Hex2Bin($Item[0]);
+  //$Loader->Log('Log', 'Hex: ', HexDump($Data, $Item)->ToString());
+    $Loader->Log('Log', 'Hex: ', HexDump($Data, $Item));
+  }
+  

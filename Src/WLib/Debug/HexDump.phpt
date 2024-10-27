@@ -143,7 +143,7 @@
     Function Debug_Write(C_Log_Format $To)
     {
     //ForEach($this->Get() As [$Value, $Type]) $To($Value, $TokenTypes[$Type]);
-      ForEach($this->Get() As $Item) $To($Item->Value, $TokenTypes[$Item->Type]);
+      ForEach($this->Get() As $Item) $To($Item->Value, $Item->Type);
     }
     
     Function ToString()

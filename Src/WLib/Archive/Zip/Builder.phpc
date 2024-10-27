@@ -1,9 +1,9 @@
 <?php
-  $Loader->Load_Class('/Object');
+  $Loader->Load_Class('/Object/Base');
   // See https://habr.com/ru/post/472966/
   // https://github.com/maennchen/ZipStream-PHP
 
-  Class C_Archive_Zip_Builder extends C_Object
+  Class C_Archive_Zip_Builder extends C_Object_Base
   {
     Var $Files   =[];
     Var $Written =0;

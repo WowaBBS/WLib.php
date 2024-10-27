@@ -1,4 +1,34 @@
 <?
+/*
+appversion_id         appversion         .id
+bug_change_id         bug_change         .id
+bug_id                bug                .id
+comment_id            bug_comment        .id
+crashgroup_id         crashgroup         .id
+crashreport_id        crashreport        .id
+cur_appversion_id     appversion         .id
+cur_project_id        project            .id
+exception_thread_id   thread             .id
+groupid               crashgroup         .id
+loaded_debug_info_id  debuginfo          .id
+module_id             module             .id
+project_id            project            .id
+status_change_id      bug_status_change  .id
+thread_id             thread             .id
+usergroup_id          usergroup          .id
+
+srcid
+
+processingerror 
+  .type=TYPE_CRASH_REPORT_ERROR  .srcid=crashreport .id
+  .type=TYPE_DEBUG_INFO_ERROR    .srcid=debuginfo   .id
+  
+operation
+  .optype=OPTYPE_IMPORTPDB             .srcid=debuginfo   .id
+  .optype=OPTYPE_PROCESS_CRASH_REPORT  .srcid=crashreport .id
+  .optype=OPTYPE_DELETE_DEBUG_INFO     .srcid=debuginfo   .id
+*/
+
   return [
   //****************************************************************
   // m120515_122132_initial.php
@@ -313,7 +343,7 @@
         'crashreport_id'       =>[ 'Integer'       ],
         'name'                 =>[['VarChar' , 512]],
         'sym_load_status'      =>[ 'Integer'       ],
-        'loaded_debug_info_id' =>[ 'Integer', null ],
+        'loaded_debug_info_id' =>[ 'Integer', null ], //debuginfo.id
         'file_version'         =>[['VarChar' ,  32]],
         'timestamp'            =>[ 'Integer', null ],
       ],

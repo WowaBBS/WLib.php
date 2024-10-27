@@ -260,6 +260,7 @@
         'exitcode' =>  -1  ,
         'termsig'  =>   0  ,
         'stopsig'  =>   0  ,
+        'cached'   =>False ,
       ];
     }
   
@@ -322,11 +323,11 @@
         UnSet($S['exitcode' ]); //if($S['exitcode' ]===0     ) 
         if($S['termsig'  ]===0     ) UnSet($S['termsig'  ]);
         if($S['stopsig'  ]===0     ) UnSet($S['stopsig'  ]);
+        UnSet($S['cached'  ]);
         if($S)
         {
           $Log=$this->Log('Error', 'Exec::Close ', $this->Command);
-          ForEach($S As $k=>$v)
-            $Log('    ', $k, '="', $v, '"');
+          $Log('  ', $S);
           $Log->Done();
         }
       }

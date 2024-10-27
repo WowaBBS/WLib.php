@@ -1,5 +1,6 @@
 <?
   $Loader->Load_Interface('/Debug/Custom');
+  $Loader->Load_Type('/Debug/Item');
   
   Function HexDump($Data, $Args=[]) { Return New T_Debug_HexDump($Data, $Args); }
 
@@ -44,9 +45,14 @@
       $Hide  .=$Args['Hide80' ]; //\x80-\xFF
       $Repl   =$Args['Repl'   ];
       $Split2 =$Args['Split2' ]??    2 ;
-      $Split  =$Args['Split'  ]?? [4=>'  ', 8=>' : ', 12=>'  '];
+    //$Split  =$Args['Split'  ]?? [4=>'  ', 8=>' : ', 12=>'  '];
+      $Split  =$Args['Split'  ]?? [4=>'  ', 8=>'  ', 12=>'  '];
       $Addr_Align =2;
       $Addr_Min   =4;
+      
+      $Type_Addr ='Num'   ; //'Resvd'
+      $Type_Hex  ='Debug' ; //'Num'
+      $Type_Ansi ='Str'   ;
       
       Switch($EnCode)
       {
@@ -57,7 +63,7 @@
       
       if($IsInline)
       {
-        $Chunk=StrLen($Data);
+        $Chunk=Max(StrLen($Data),1);
         
         $Addr_Len=StrLen(DecHex($Addr));
         if($Addr_Len<$Addr_Min)
@@ -79,48 +85,56 @@
       }
       
       $Data_Len=StrLen($Data);
-    //if(!$IsInline)
-    //  $Res[]=["\n", 'NewLine'];
-      For($i=-$Addr_Ofs; $i<$Data_Len; $i+=$Chunk)
+      
       {
-        $Line=$i<0
-          ?SubStr($Data, 0, $Chunk+$i) //The first time
-          :SubStr($Data, $i, $Chunk);
-        
-        $Addr_Str=DecHex($Addr);
-        $Addr_Str=StrLen($Addr_Str)>$Addr_Len
-          ?SubStr($Addr_Str, 0, $Addr_Len)
-          :Str_Pad(DecHex($Addr), $Addr_Len, '0', STR_PAD_LEFT);
-        
-        $Hex=Bin2Hex($Line);
-        $Ansi=StrTr($Line, $Hide, $Repl);
-        If($EnCode)
-          $Ansi=IConv($EnCode, 'UTF-8', $Ansi);
-        If($i<0) // The first time
+      //if(!$IsInline)
+      //  $Res[]=["\n", 'NewLine'];
+        For($i=-$Addr_Ofs; $i<$Data_Len; $i+=$Chunk)
         {
-          $Ansi =Str_Repeat(' ', - $i    ).$Ansi ;
-          $Hex  =Str_Repeat('.', -($i<<1)).$Hex  ;
+          $Line=$i<0
+            ?SubStr($Data, 0, $Chunk+$i) //The first time
+            :SubStr($Data, $i, $Chunk);
+          
+          $Addr_Str=DecHex($Addr);
+          $Addr_Str=StrLen($Addr_Str)>$Addr_Len
+            ?SubStr($Addr_Str, 0, $Addr_Len)
+            :Str_Pad(DecHex($Addr), $Addr_Len, '0', STR_PAD_LEFT);
+          
+          $Hex=Bin2Hex($Line);
+          $Ansi=StrTr($Line, $Hide, $Repl);
+          If($EnCode)
+            $Ansi=IConv($EnCode, 'UTF-8', $Ansi);
+          If($i<0) // The first time
+          {
+            $Ansi =Str_Repeat(' ', - $i    ).$Ansi ;
+            $Hex  =Str_Repeat('.', -($i<<1)).$Hex  ;
+          }
+          ElseIf(StrLen($Line)<$Chunk) // The last time
+          {
+            $Hex.=Str_Repeat('.', ($Chunk-StrLen($Line))<<1);
+          }
+          
+          if(!$IsInline)
+          {
+            $Res[]=DebugItem("\n".$Tab ,'NewLine');
+          //$Res[]=DebugItem($Tab ,'Op'); //'Tab'
+          }
+          $Res[]=DebugItem($Addr_Str.':', $Type_Addr);
+        //$Res[]=DebugItem(':', 'Op');
+          $ResHex=[];
+          ForEach(Str_Split($Hex, $Split2)As $HexIdx=>$HexValue)
+          {
+          //$Res[]=DebugItem($Split[$HexIdx]?? ' ', 'Op');
+          //$Res[]=DebugItem($HexValue, $Type_Hex);
+            $ResHex[]=$Split[$HexIdx]?? ' ';
+            $ResHex[]=$HexValue;
+          }
+          $ResHex[]=' | ';
+          $Res[]=DebugItem(Implode($ResHex), $Type_Hex);
+        //$Res[]=DebugItem(' | ', 'Op');
+          $Res[]=DebugItem($Ansi, $Type_Ansi);
+          $Addr+=$Chunk;
         }
-        ElseIf(StrLen($Line)<$Chunk) // The last time
-        {
-          $Hex.=Str_Repeat('.', ($Chunk-StrLen($Line))<<1);
-        }
-        
-        if(!$IsInline)
-        {
-          $Res[]=["\n" ,'NewLine'];
-          $Res[]=[$Tab ,'Tab'];
-        }
-        $Res[]=[$Addr_Str, 'Addr'];
-        $Res[]=[':', 'Op'];
-        ForEach(Str_Split($Hex, $Split2)As $HexIdx=>$HexValue)
-        {
-          $Res[]=[$Split[$HexIdx]?? ' ', 'Op'];
-          $Res[]=[$HexValue, 'Hex'];
-        }
-        $Res[]=[' | ', 'Op'];
-        $Res[]=[$Ansi, 'Ansi', ];
-        $Addr+=$Chunk;
       }
       return $Res;
     }
@@ -128,26 +142,13 @@
     // Interface I_Debug_Custom
     Function Debug_Write(C_Log_Format $To)
     {
-      Static $TokenTypes=[ //TODO
-        'Tab'     =>'Def'     ,
-        'Op'      =>'Op'      ,
-      //'Addr'    =>'Resvd'   ,
-        'Addr'    =>'Num'     ,
-      //'Hex'     =>'Num'     ,
-        'Hex'     =>'Debug'   ,
-        'Ansi'    =>'Str'     ,
-        'NewLine' =>'NewLine' ,
-      ];
-      ForEach($this->Get() As [$Str, $Type])
-        $To($Str, $TokenTypes[$Type]);
+    //ForEach($this->Get() As [$Value, $Type]) $To($Value, $TokenTypes[$Type]);
+      ForEach($this->Get() As $Item) $To($Item->Value, $TokenTypes[$Item->Type]);
     }
     
     Function ToString()
     {
-      $Res=[];
-      ForEach($this->Get() As [$Str, $Type])
-        $Res[]=$Str;
-      Return Implode($Res);
+      Return Implode($this->Get());
     }
     
     Function __ToString() { Return $this->ToString(); }

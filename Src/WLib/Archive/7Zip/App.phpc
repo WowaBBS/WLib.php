@@ -22,7 +22,7 @@
       If(Is_Dir($WorkDir))
         $WorkDir=RealPath($WorkDir);
       Else
-        $this->Log('Error', 'Work directory not founded: ', $WorkDir);
+        $this->Log('Error', 'Work directory not found: ', $WorkDir);
       
       $ArgsFiles=[];
       if(!Is_Array($Files))

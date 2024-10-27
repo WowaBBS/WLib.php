@@ -83,7 +83,7 @@
       If(!Is_File($FileName))
       {
         $_CurPath=_vars_getf(' CurPath', $Vars);
-        $this->Log('Error', 'Template file not founded: "', $TmplName, '" from "', $_CurPath?->ToString(), '"');
+        $this->Log('Error', 'Template file not found: "', $TmplName, '" from "', $_CurPath?->ToString(), '"');
         $Res=$this->Create_Object('/Tmpl/Base/Template');
       }
       Else

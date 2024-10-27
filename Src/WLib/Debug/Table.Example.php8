@@ -20,10 +20,11 @@
   # ['1234567890123'  ,2=> 1234567890123  ],
   # [ 1234567890123   ,2=>'1234567890123' ],
     ['Item.phpc'      , 1980 ,   -1       ],
+    [True             , False,   Null     ],
   ]);
 
   If(False)
     $Loader->Log('Debug', 'ToMap:')->Debug($Table);
-  Table::Cr($Table)->ToLog($Loader->Log('Debug', 'Table:'));
+  $Loader->Log('Debug', 'Table:', Table::Cr($Table));
 //$Loader->Log('Debug', 'ToMap:')->Debug();
 ?>

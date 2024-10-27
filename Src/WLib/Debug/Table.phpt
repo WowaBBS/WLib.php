@@ -1,14 +1,16 @@
 <?
+  $Loader->Load_Interface('/Debug/Custom');
+  
   Use T_Debug_Column As Column ;
   Use T_Debug_Table  As Table  ;
 
-  Class T_Debug_Table
+  Class T_Debug_Table Implements I_Debug_Custom
   {
     Var $Columns =[];
   //Var $Fields  =[];
     Var $List    =[];
     
-    Static Function Cr(Array $List)
+    Static Function Cr(Array $List) //TODO: Add $Columns and $Args
     {
       Return New Static($List);
     }
@@ -45,7 +47,7 @@
       Return $Res;
     }
     
-    Function __Construct($List)
+    Function __Construct($List) //TODO: Add $Columns and $Args
     {
       // Create columns
       $ColumnKey=New Column('#');
@@ -87,27 +89,29 @@
       Return $Columns;
     }
     
-    Function ToLog_Columns($Log)
+  //****************************************************************
+  // Interface I_Debug_Custom
+  
+    Function Debug_Write_Columns(C_Log_Format $To)
     {
-      $Res=[];
       ForEach($this->Columns As $Column)
-        $Column->ToLog_Header($Res);
-      $Log(...$Res);
+        $Column->Debug_Write_Header($To);
     }
     
-    Function ToLog($Log)
+    Function Debug_Write(C_Log_Format $To)
     {
-      $this->ToLog_Columns($Log);
+      $To("\n", 'NewLine');
+      $this->Debug_Write_Columns($To);
       
       $Columns=$this->Columns;
       ForEach($this->List As $Rec)
       {
-        $Res=[];
+        $To("\n", 'NewLine');
         ForEach($this->Columns As $Column)
-          $Column->ToLog_Rec($Res, $Rec);
-        $Log(...$Res);
+          $Column->Debug_Write_Rec($To, $Rec);
       }
     }
+  //****************************************************************
   }
 
   Class T_Debug_Column
@@ -134,6 +138,7 @@
       Switch($Type)
       {
       Case 'boolean': $Value=$Value? 'True':'False'; Break;
+    //Case 'null'   : $Value='Null'; Break;
       Default: $Value=(string)$Value;
       }
       
@@ -155,39 +160,46 @@
     
     Static Function Tab($Len) { Return Static::$Tabs[$Len]??=Str_Repeat(' ', $Len); }
     
-    Function ToLog_Value(&$Res, $Value, $Type)
+  //****************************************************************
+  // Interface I_Debug_Custom
+  
+    Function Debug_Write_Value(C_Log_Format $To, $Value, $Type, $Class=Null)
     {
       $Add=$this->Size-StrLen($Value);
 
       Switch($Type)
       {
-      Case 'integer' : $Align=1; Break;
-      Case 'double'  : $Align=1; Break;
-      Default        : $Align=0; Break;
+      Case 'integer' : $Align=1; $Class??='Num'   ; Break;
+      Case 'double'  : $Align=1; $Class??='Num'   ; Break;
+      Case 'boolean' : $Align=0; $Class??='Resvd' ; Break;
+    //Case 'null'    : $Align=0; $Class??='Resvd' ; $Value='Null'; Break;
+      Default        : $Align=0; $Class??='Str'   ; Break;
       }
       
       $LAdd=Round($Add*$Align);
       $RAdd=$Add-$LAdd;
       
-      If($LAdd>0) $Res[]=Static::Tab($LAdd);
-      $Res[]=$Value;
-      If($RAdd>0) $Res[]=Static::Tab($RAdd);
-      $Res[]=$this->Split;
+      If($LAdd>0) $To(Static::Tab($LAdd), 'Def');
+      $To($Value, $Class);
+      If($RAdd>0) $To(Static::Tab($RAdd), 'Def');
+      $To($this->Split, 'Def');
     }
     
-    Function ToLog_Header(&$Res)
+    Function Debug_Write_Header(C_Log_Format $To)
     {
-      $this->ToLog_Value($Res, $this->Name, 'string');
+      $this->Debug_Write_Value($To, $this->Name, 'string', 'Resvd');
     }
     
-    Function ToLog_Rec(&$Res, $Rec)
+    Function Debug_Write_Rec(C_Log_Format $To, $Rec)
     {
       $Idx=$this->Idx;
       $Value =$Rec[$Idx  ]?? '';
       $Type  =$Rec[$Idx+1]?? '';
 
-      $this->ToLog_Value($Res, $Value, $Type);
+      $this->Debug_Write_Value($To, $Value, $Type);
     }
+  
+  //****************************************************************
   }
   
 ?>

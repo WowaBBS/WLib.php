@@ -124,6 +124,14 @@
     Function EndNoInline($SaveInline) { $this->IsInline=$SaveInline; }
     
     //****************************************************************
+    // Magic call
+    
+    Function __Invoke($Value, $Type=Null)
+    {
+      $Type? $this->_WriteToken($Type, $Value):$this->WriteItem($Value);
+    }
+    
+    //****************************************************************
     // Debug
     
     Var $Path      =[];

@@ -7,14 +7,6 @@
   {
     Var $Data   = '';
     Var $Args   = [];
-    
-    Var $Addr   = 0;
-    Var $Tab    = '  ';
-    Var $Chunk  = 16;
-    
-    Var $Addr_Split =' ';
-    Var $Splits =[' ', ' ', ' ', ' '];
-    
     Var $Cached =Null;
     
     Function __Construct($Data, $Args=[])
@@ -46,15 +38,20 @@
       $Addr   =$Args['Addr'   ]??    0 ;
       $Tab    =$Args['Tab'    ]?? '  ' ;
       $Chunk  =$Args['Chunk'  ]??   16 ;
-      $Hide   =$Args['Hide'   ]?? "\r\n\t\v\0\010\7\x98"; //x98 is in not in cp1251
+      $Hide   =$Args['Hide'   ]?? "\r\n\t\v\0\010\7";
+      $EnCode =$Args['EnCode' ]?? 'cp1251';
       if(false) //TODO?
       $Hide  .=$Args['Hide80' ]; //\x80-\xFF
       $Repl   =$Args['Repl'   ];
       $Split2 =$Args['Split2' ]??    2 ;
       $Split  =$Args['Split'  ]?? [4=>'  ', 8=>' : ', 12=>'  '];
-      $EnCode =$Args['EnCode' ]?? 'cp1251';
       $Addr_Align =2;
       $Addr_Min   =4;
+      
+      Switch($EnCode)
+      {
+      Case 'cp1251': $Hide.="\x98"; Break; //x98 is in not in cp1251
+      }
       
       $IsInline=StrLen($Data)<=$Chunk;
       
@@ -83,7 +80,7 @@
       
       $Data_Len=StrLen($Data);
     //if(!$IsInline)
-    //  $Res[]=['NewLine', "\n"];
+    //  $Res[]=["\n", 'NewLine'];
       For($i=-$Addr_Ofs; $i<$Data_Len; $i+=$Chunk)
       {
         $Line=$i<0
@@ -111,18 +108,18 @@
         
         if(!$IsInline)
         {
-          $Res[]=['NewLine', "\n"];
-          $Res[]=['Tab', $Tab];
+          $Res[]=["\n" ,'NewLine'];
+          $Res[]=[$Tab ,'Tab'];
         }
-        $Res[]=['Addr', $Addr_Str];
-        $Res[]=['Op', ':'];
+        $Res[]=[$Addr_Str, 'Addr'];
+        $Res[]=[':', 'Op'];
         ForEach(Str_Split($Hex, $Split2)As $HexIdx=>$HexValue)
         {
-          $Res[]=['Op', $Split[$HexIdx]?? ' '];
-          $Res[]=['Hex', $HexValue];
+          $Res[]=[$Split[$HexIdx]?? ' ', 'Op'];
+          $Res[]=[$HexValue, 'Hex'];
         }
-        $Res[]=['Op', ' | '];
-        $Res[]=['Ansi', $Ansi];
+        $Res[]=[' | ', 'Op'];
+        $Res[]=[$Ansi, 'Ansi', ];
         $Addr+=$Chunk;
       }
       return $Res;
@@ -141,18 +138,23 @@
         'Ansi'    =>'Str'     ,
         'NewLine' =>'NewLine' ,
       ];
-      ForEach($this->Get() As [$Type, $Str])
-        $To->_WriteToken($TokenTypes[$Type], $Str);
+      ForEach($this->Get() As [$Str, $Type])
+        $To($Str, $TokenTypes[$Type]);
     }
     
     Function ToString()
     {
       $Res=[];
-      ForEach($this->Get() As [$Type, $Str])
+      ForEach($this->Get() As [$Str, $Type])
         $Res[]=$Str;
       Return Implode($Res);
     }
     
     Function __ToString() { Return $this->ToString(); }
+
+    Function _Debug_Serialize(Array &$Res)
+    {
+      UnSet($Res['Cached']);
+    }
   };
 ?>

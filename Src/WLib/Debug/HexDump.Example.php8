@@ -9,6 +9,7 @@
   $Full=Bin2Hex($Full);
   $List=[
     [$Full],
+    [$Full, 'EnCode'=>False],
     [$Full, 'Addr'=>1],
     [$Full, 'Chunk'=>18, 'Split2'=>3, 'Split'=>[3=>'  ', 6=>' : ', 9=>'  ']],
     ['0123456789abcdef'],

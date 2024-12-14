@@ -1,0 +1,29 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $MyLogger=$Loader->GetLogger()->Add('Test.Speed.log');
+  
+  $Loader->GetLogger()->Get('Console')->Disable();
+  
+  $v=Null;
+//For($i=16; $i; $i--)
+  For($i=19; $i; $i--)
+    $v=['a'=>$v, 'b'=>$v];
+  
+  $StartTime=HrTime(True);
+  $Loader->Log('Log'     ,Json_EnCode($v, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+  $Duration1=(HrTime(True)-$StartTime)*1e-9;
+
+  $Loader->GetLogger()->Get('Console')->Enable();
+  $MyLogger->Disable();
+
+  $StartTime=HrTime(True);
+  $Loader->Log('Log'     ,Json_EnCode($v, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+  $Duration2=(HrTime(True)-$StartTime)*1e-9;
+  
+  $MyLogger->Enable();
+  $Loader->Log('Log' ,'File.Time: ', $Duration1);
+  $Loader->Log('Log' ,'Console.Time: ', $Duration2);
+
+  $Loader->Done();
+?>

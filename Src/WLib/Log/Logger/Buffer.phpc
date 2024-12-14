@@ -1,0 +1,62 @@
+<?
+  $Loader->Parent_Class('/Object');
+ 
+  Class C_Log_Logger_Buffer extends C_Object //C_Log_Logger
+  {
+    Var $Stream;
+  
+    Function _Init(Array $Args)
+    {
+      $Stream=$Args['Stream']?? Null;
+      Parent::_Init($Args);
+      if($Stream)
+        $this->Stream_Set($Stream);
+    }
+
+    Function Stream_Set($v)
+    {
+      $Old=$this->Stream;
+      $this->Stream=$v;
+      Return $Old;
+    }
+
+    Var $Data =[];
+    Var $Len  =0;
+    Var $Size =64*1024; //1024*1024;
+
+    Function Clear()
+    {
+      $this->Data =[];
+      $this->Len  =0;
+    }
+    
+    Function Begin()
+    {
+      $this->Clear();
+    }
+    
+    Function End()
+    {
+      $this->Flush();
+    }
+    
+    Function Write($Str)
+    {
+      $Len=StrLen($Str);
+      if(!$Len)
+         Return;
+      $this->Data[] =$Str;
+      $this->Len   +=$Len;
+      if($this->Len>=$this->Size)
+        $this->Flush();
+    }
+
+    Function Flush()
+    {
+      $Data=Implode($this->Data);
+      $Res=$this->Stream->Write($Data);
+      $this->Clear();
+      $this->Stream->Flush();
+    }
+  };
+?>

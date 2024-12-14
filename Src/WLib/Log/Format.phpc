@@ -4,16 +4,26 @@
   
   class C_Log_Format extends C_Object
   {
-    Var $Stream  ;
-    Var $WriteLn =false;
-    Var $Manager ;
+    Var $Stream    ;
+    Var $WriteLn   =false;
+    Var $Manager   ;
+    Var $UseBuffer =True;
     
     Function _Init(Array $Args)
     {
       parent::_Init($Args);
       
       $Manager =$Args['Manager' ]?? $this->Get_Singleton('/Debug/Manager');
-      $Stream  =$Args['Stream'  ]?? null;
+      $Stream  =$Args['Stream'  ]?? Null;
+      $Buffer  =$Args['Buffer'  ]?? True;
+      $this->UseBuffer=!Is_Array($Buffer) && $Buffer;
+      
+      if($this->UseBuffer)
+      {
+        If(!Is_Array($Buffer))
+          $Buffer=[];
+        $Stream  =$this->Create_Object('/Log/Logger/Buffer', ['Stream'=>$Stream]+$Buffer);
+      }
     
       $this->Manager  =$Manager  ;
       $this->Stream   =$Stream   ;
@@ -27,6 +37,8 @@
     
     Function SetStream($Stream)
     {
+      if($this->UseBuffer)
+        return $this->Stream->Stream_Set($Stream);
       $Res=$this->Stream;
       $this->Stream=$Stream;
       return $Res;
@@ -440,7 +452,9 @@
     
     Function LogItem(T_Log_Item $Item)
     {
+      $this->Stream->Begin();
       $Item->ToFormat($this);
+      $this->Stream->End();
     }
   }
 ?>

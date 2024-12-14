@@ -55,5 +55,8 @@
     {
       UnUsed();
     }
+
+    Function Begin() {}
+    Function End() {}
   };
 ?>

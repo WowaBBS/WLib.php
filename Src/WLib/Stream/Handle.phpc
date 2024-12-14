@@ -9,7 +9,18 @@
     Function _Init(Array $Args)
     {
       Parent::_Init($Args);
-      $this->FHandle=$Args['Handle']?? False;
+      $this->SetHandle($Args['Handle']?? False);
+    }
+    
+    Function SetHandle($v)
+    {
+      $this->FHandle=$v;
+      if(!$v) return;      
+    //Stream_Set_Blocking($v, False);
+    //Stream_Set_Chunk_Size($v, 64*1024);
+    //Stream_Set_Read_Buffer($v, 1024*1024);
+    //Stream_Set_Write_Buffer($v, 1024*1024);
+    //Stream_Set_TimeOut($v. 1. 1);
     }
     
     Function CheckHandle($NoError=False)
@@ -29,7 +40,7 @@
       If($this->FHandle)
       {
         FClose($this->FHandle);
-        $this->FHandle=Null;
+        $this->SetHandle(Null);
       }
     }
   

@@ -1,0 +1,61 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $Loader->GetLogger()->Add(__FILE__.'.log');
+  
+  $Factory  =$Loader->Create_Object('/Archive/Lz4/DeCoder/Factory' ,['Debug'=>!True]);
+
+  $MaxLenName=0;
+  ForEach($Factory->GetListNames() As $Name)
+    $MaxLenName=Max($MaxLenName, StrLen($Name));
+  
+  $Tests=[];
+  ForEach($Factory->GetListNames() As $Name)
+  {
+    $DeCoder=$Factory->Create($Name);
+    $Tests[Str_Pad($Name, $MaxLenName)]=$DeCoder->DeCode(...);
+  }
+
+  $FileName='D:\Data\Programs\Internet\Browser\FireCat\data\crashes\store.json.mozlz4';
+  $Data=File_Get_Contents($FileName);
+  
+  // mozLz40\0
+  $Offset=8+4;
+  if(SubStr($Data, 0, 8)!=="mozLz40\0")
+    Return $Loader->Log('Error', 'UnPackSign');
+
+  $Len=UnPack('V', SubStr($Data, 8, 4))[1];
+  
+  $Durations=[];
+  $Desired='';
+  
+  ForEach($Tests As $TestName=>$TestFunc)
+  {
+    $StartTime=HrTime(True);
+    $UnPacked=$TestFunc($Data, $Offset, $Len);
+    $Duration[$TestName.'.First  ']=(HrTime(True)-$StartTime)*1e-9;
+    
+    if(!$Desired)
+      $Desired=$UnPacked;
+    Else
+    {
+      If($UnPacked!==$Desired)
+        $Loader->Log('Error', $TestName, '.UnPacked.Check')
+          ('  Actual  :', $UnPacked )
+          ('  Desired :', $Desired  );
+    }
+    $Loader->Log('Debug', $TestName, '.DeCode Ok');
+  }
+  
+  ForEach($Tests As $TestName=>$TestFunc)
+  {
+    $StartTime=HrTime(True);
+    $UnPacked=$TestFunc($Data, $Offset, $Len);
+    $Duration[$TestName.'.Second ']=(HrTime(True)-$StartTime)*1e-9;
+  }
+
+  $Loader->Log('Debug', 'Result: ', $UnPacked)->Exclude('Console');
+
+  ForEach($Duration As $TestName=>$Time)
+    $Loader->Log('Log' , $TestName, '.Time: ', $Time);
+?>

@@ -1,0 +1,43 @@
+<?
+  $this->Parent_Class('/Archive/Lz4/DeCoder/Base');
+
+  Class C_Archive_Lz4_DeCoder_FromHeap extends C_Archive_Lz4_DeCoder_Base
+  {
+    // https://heap.ch/blog/2019/05/18/lz4-decompression/
+    function lz4decode($in, $offset = 0) {
+      $len = strlen($in);
+      $out = '';
+      $i = $offset;
+      $take = function() use ($in, &$i) {
+        return ord($in[$i++]);
+      };
+      $addOverflow = function(&$sum) use ($take) {
+        do {
+          $sum += $summand = $take();
+        } while ($summand === 0xFF);
+      };
+      while ($i < $len) {
+        $token = $take();
+        $nLiterals = $token >> 4;
+        if ($nLiterals === 0xF) $addOverflow($nLiterals);
+        $out .= substr($in, $i, $nLiterals);
+        $i += $nLiterals;
+        if ($i === $len) break;
+        $offset = $take() | $take() << 8;
+        $matchlength = $token & 0xF;
+        if ($matchlength === 0xF) $addOverflow($matchlength);
+        $matchlength += 4;
+        $j = strlen($out) - $offset;
+        while ($matchlength--) {
+          $out .= $out[$j++];
+        }
+      }
+      return $out;
+    }
+    
+    Function DeCode($In, $Offset=0, $ResSize=0)
+    {
+      Return Static::lz4decode($In, $Offset);
+    }
+  }
+?>

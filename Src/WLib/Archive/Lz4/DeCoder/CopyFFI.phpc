@@ -1,0 +1,136 @@
+<?
+  $this->Parent_Class('/Archive/Lz4/DeCoder/Concate');
+
+  Class C_Archive_Lz4_DeCoder_CopyFFI extends C_Archive_Lz4_DeCoder_Concate
+  {
+    Var $InputFFI  ;
+    Var $OutputFFI ;
+    Var $WritePos=0;
+    
+  //****************************************************************
+
+    Function Read_To($Len)
+    {
+    //If(!$Len) Return True;
+      If($this->ReadPos+$Len>$this->InputLen)
+        Return $this->Log('Error', 'Lz4.Read: There is no read data')->Ret(False);
+      If($this->WritePos+$Len>$this->OutputLen)
+        Return $this->Log('Error', 'Lz4.Read: There is no write buffer')->Ret(False);
+      FFI::MemCpy(
+        $this->OutputFFI +$this->WritePos ,
+        $this->InputFFI  +$this->ReadPos  , 
+        $Len
+      );
+      
+      If($this->Debug)
+        $this->Log('Debug', 'Read', ' ', [FFI::String($this->OutputFFI+$this->WritePos, $Len)]);
+      
+
+      $this->ReadPos  +=$Len;
+      $this->WritePos +=$Len;
+      Return True;
+    }
+    
+    Function CopyPart($Ofs, $Len, $Type)
+    {
+      FFI::MemCpy(
+        $this->OutputFFI +$this->WritePos,
+        $this->OutputFFI +($this->WritePos-$Ofs),
+        $Len
+      );
+      
+      If($this->Debug)
+        $this->Log('Debug', 'Copy.',$Type, ' ', [FFI::String($this->OutputFFI+$this->WritePos, $Len)]);
+        
+      $this->WritePos+=$Len;
+      Return True;
+    }
+    
+    Function Copy($Ofs, $Len)
+    {
+    //If(!$Len) Return True;
+      If($this->WritePos<$Ofs)
+        Return $this->Log('Error', 'Lz4: Offset out of data')->Ret(False);
+      If($this->WritePos-$Ofs+$Len>FFI::SizeOf($this->OutputFFI))
+        Return $this->Log('Error', 'Lz4: Length is too big')->Ret(False);
+
+      $L=Min($Ofs, $Len);
+      $this->CopyPart($Ofs, $L, 'First');
+      $Len-=$L;
+      
+      For(;$Len>=$L;$Len-=$L)
+        $this->CopyPart($L, $L, 'Repeat');
+        
+      If($Len>0)
+        $this->CopyPart($L, $Len, 'Rest');
+      Return True;
+    }
+  
+    Function CopyBad($Ofs, $Len)
+    {
+      $Error=Static::StrCpy(
+        $this->OutputFFI ,$this->WritePos-$Ofs, 
+        $this->OutputFFI ,$this->WritePos ,$Len
+      );
+      
+      If($this->Debug)
+        $this->Log('Debug', 'Copy', ' ', [FFI::String($this->OutputFFI+$this->WritePos, $Len)]);
+        
+      If($Error) Return $this->Log('Error', 'Lz4.Copy: ', ...$Error)->Ret(False);
+      
+      $this->WritePos+=$Len;
+      Return True;
+    }
+  
+    
+    Function DeCode($In, $Offset=0, $ResSize=0)
+    {
+      if(!Extension_Loaded('ffi'))
+        if(!Function_Exists('dl') || !@dl('ffi'))
+          $this->Log('Error', 'Cant load FFI')->Ret(False);
+        
+      $FFI=FFI::CDef('');
+      $this->InputFFI  =$FFI->New('char['.StrLen($In).']');
+      
+    //$this->Input     =$In;
+      $this->Input     =$this->InputFFI;
+      
+      $this->InputLen  =StrLen($In);
+      FFI::MemCpy($this->InputFFI, $In, $this->InputLen);
+      $this->ReadPos   =$Offset ;
+      $this->OutputFFI =$FFI->New('char['.$ResSize.']');
+      if($this->Debug)
+        FFI::MemSet($this->OutputFFI, Ord('.'), $ResSize); //<TODO: Remove
+      $this->OutputLen =$ResSize;
+      $this->WritePos =0;
+      
+      While(!$this->Read_IsEnd())
+      {
+        $Token     = $this->Read_Byte();
+        $nLiterals = $Token>>4;
+        
+        if($nLiterals===0xF)
+          $nLiterals+=$this->Read_Len();
+        
+        If(!$this->Read_To($nLiterals)) Return False;
+        
+        If($this->Read_IsEnd())
+          Break;
+        
+        $Offset      = $this->Read_Offset();
+        $MatchLength = $Token & 0xF;
+        
+        If($MatchLength===0xF)
+          $MatchLength+=$this->Read_Len();
+          
+        $MatchLength += 4;
+        
+        If(!$this->Copy($Offset, $MatchLength))
+          Return False;
+      }
+      Return FFI::String($this->OutputFFI, $ResSize);
+    }
+
+  //****************************************************************
+  }
+?>

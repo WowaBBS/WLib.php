@@ -1,0 +1,17 @@
+<?
+  $this->Parent_Class('/Object');
+
+  Class C_Archive_Lz4_DeCoder_Base extends C_Object
+  {
+    Var $Debug   =False;
+    
+    Function _Init(Array $Args)
+    {
+      $this->Debug=$Args['Debug']?? $this->Debug;
+      Parent::_Init($Args);
+    }
+    
+    Function DeCode($In, $Offset=0, $ResSize=0) {}
+    
+  }
+?>

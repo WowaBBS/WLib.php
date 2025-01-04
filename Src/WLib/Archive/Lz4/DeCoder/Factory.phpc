@@ -1,0 +1,44 @@
+<?
+  $this->Parent_Class('/Object');
+
+  Class C_Archive_Lz4_DeCoder_Factory extends C_Object
+  {
+    Var $List =[
+      'FromHeap' =>'/Archive/Lz4/DeCoder/FromHeap' ,
+      'Concate'  =>'/Archive/Lz4/DeCoder/Concate'  ,
+      'CopyJit'  =>'/Archive/Lz4/DeCoder/CopyJit'  ,
+      'CopyFFI'  =>'/Archive/Lz4/DeCoder/CopyFFI'  , 
+    ];
+    Var $Defaults=[
+      'Concate',
+    ];
+    
+    Function _Init(Array $Args)
+    {
+    //$this->Debug=$Args['Debug']?? $this->Debug;
+      Parent::_Init($Args);
+    }
+    
+    Function GetDefaultName()
+    {
+      Return $Defaults[0]; //TODO: Check list
+    }
+    
+    Function GetListNames() { Return Array_Keys($this->List); }
+    
+    Function GetClass($Name='')
+    {
+      $Class=$this->List[$Name]?? Null;
+      If($Class)
+        Return $Class;
+      If($Name!=='')
+        $this->Log('Error', 'Unknown Lz4 Decoder ', $Name);
+      Return $this->GetDefault();
+    }
+    
+    Function Create($Name='', $Args=[])
+    {
+      return $this->Create_Object($this->GetClass($Name), $Args);
+    }
+  }
+?>

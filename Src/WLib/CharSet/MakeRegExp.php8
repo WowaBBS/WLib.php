@@ -43,7 +43,7 @@
     "\xFF\xFE\x00\x00" ,"\xFF\xFE\x00" ,
   ];
   
-  $RegExpBuilder=$Loader->Get_Singleton('/RegExp/Builder');
+  $RegExpBuilder=$Loader->Get_Singleton('/RegExp/Char/Builder');
   $Funcs=[
     'FromListWords' =>$RegExpBuilder->FromListWords(...),
   ];

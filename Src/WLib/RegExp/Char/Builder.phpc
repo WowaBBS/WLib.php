@@ -1,28 +1,29 @@
 <?
   $this->Parent_Class('/Object');
-  $this->Load_Type('/RegExp/CharMap');
+  $this->Load_Type('/RegExp/Char/Map');
 
-  Class C_RegExp_Builder Extends C_Object
+  Class C_RegExp_Char_Builder Extends C_Object
   {
     Function _Init($Args)
     {
-      $this->CharCodes=$this->Get_Singleton('/RegExp/CharCodes');
+      $Code=$Args['ClassCode']?? '/RegExp/Char/Code'; //'Hex'
+      $this->CharCodes=$this->Get_Singleton($Code, $Args['CharCodes']?? []);
       Parent::_Init($Args);
     }
-  
+    
     Var $CharCodes=Null;
     
     Function CharCode           ($Char) { Return $this->CharCodes->CharCode           ($Char); }
     Function CharCodesToRegexp  ($List) { Return $this->CharCodes->CharCodesToRegexp  ($List); }
     Function _CharCodesToRegexp ($List) { Return $this->CharCodes->_CharCodesToRegexp ($List); }
     
-    Var $CharMap=[];
-    Var $CharMapEnd=null;
+    Var $CharMap    =[];
+    Var $CharMapEnd =null;
 
     Function CharMap_ToStatic($v) { Return ($this->CharMap[$v->GetKey()]??=$v->_ToStatic())->Get(); }
     Function CharMap_Remove($k) { UnSet($this->CharMap[$k]); }
     Function CharMap_Get($k) { Return $this->CharMap[$k]?->Get(); }
-    Function CharMap_Create() { Return New T_RegExp_CharMap($this); }
+    Function CharMap_Create() { Return New T_RegExp_Char_Map($this); }
     Function _CharMap_CreateEnd() //<TODO: Remove
     {
     //$this->Log('Debug')->Debug($this);
@@ -50,7 +51,7 @@
       Return $Res->ToStatic();
     }
 
-    Function FromListWords($L)
+    Function FromListWords($L, $Ends=Null, $Debug=False)
     {
       Sort($L, SORT_STRING);
     
@@ -80,8 +81,13 @@
         $Prev=$s;
       }
       $M=$this->_Analyze($M);
+      If($Debug)
+        $this->Log('Debug')->Debug($M);
       
-      Return $M->GetRegExp($this);
+      $Res=$M->GetRegExp($Ends);
+      If($Ends===False)
+        $Res.='$';
+      Return $Res;
     }
 
   //****************************************************************

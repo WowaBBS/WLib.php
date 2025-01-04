@@ -33,7 +33,7 @@
       }
       UnSet($m);
       
-      $Builder=$this->Get_Singleton('/RegExp/Builder');
+      $Builder=$this->Get_Singleton('/RegExp/Char/Builder');
       $RegExp=$Builder->FromListWords(Array_Keys($Match));
       $RegExp='/^'.$RegExp.'/sS';
       

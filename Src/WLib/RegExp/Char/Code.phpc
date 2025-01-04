@@ -1,0 +1,125 @@
+<?
+  $this->Parent_Class('/Object');
+
+  Class C_RegExp_Char_Code Extends C_Object
+  {
+    Var $List=[];
+  
+    Static Function _GetDefQouteCharsMap()
+    {
+      $Res=[];
+      For($i=0; $i<256; $i++)
+        If(($r=Preg_Quote($c=Chr($i)))!==$c)
+          $Res[$c]=$r;
+      Return $Res;
+    }
+    
+    Static Function GetDefQouteCharsMap() { Static $Res=Static::_GetDefQouteCharsMap(); Return $Res;  }
+    Static Function GetDefQouteChars() { Static $Res=Implode(Array_Keys(Static::GetDefQouteCharsMap())); Return $Res; }
+    Static Function GetAsIs()
+    {
+      Return 
+        'abcdefghijklmnopqrstuvwxyz'.
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.
+        '0123456789|&*+-/\\%<=>^~'.
+        ',.:;!?()`"\''.
+        '_#$@[]{}'.
+        ' ';
+    }
+  
+    Function _Init($Args)
+    {
+      $Delimiter =$Args['Delimiter' ]?? '/';
+      $Quote     =$Args['Quote'     ]?? Static::GetDefQouteChars();
+      $Exclude   =$Args['Exclude'   ]?? '';
+      $AsIs      =$Args['AsIs'      ]?? Static::GetAsIs();
+      $Override  =$Args['Override'  ]??[
+        "\0"=>'\000', //TODO: \0??
+        "\t"=>'\t',
+        "\v"=>'\v',
+        "\r"=>'\r',
+        "\n"=>'\n',
+      ];
+      
+      $Delimiter =Array_Flip(Str_Split($Delimiter ));
+      $Quote     =Array_Flip(Str_Split($Quote     ));
+      $Exclude   =Array_Flip(Str_Split($Exclude   ));
+      $AsIs      =Array_Flip(Str_Split($AsIs      ));
+      
+      $List=[];
+      For($i=0; $i<256; $i++)
+      {
+        $c=Chr($i);
+        Switch(True)
+        {
+        Case !Is_Null($v=$Override[$c]?? Null):
+          Break;
+        Case IsSet($Quote[$c])&&!IsSet($Exclude[$c]):
+          $v=Preg_Quote($c);
+          Break;
+        Case IsSet($AsIs[$c]):
+          $v=$c;
+          Break;
+        Default:
+          $v=Static::Hex($i);
+        }
+        $List[$i]=$v;
+      }
+      
+      ForEach($Delimiter As $c)
+        $List[Ord($c)]=Preg_Quote($c, $c);
+      
+      $this->List=$List;
+      Parent::_Init($Args);
+    }
+  
+    Static Function Hex($Char) { Return '\\x'.StrToUpper(Bin2Hex(Chr($Char))); }
+    Function CharCode($Char) { Return $this->List[$Char]??=Static::Hex($Char); }
+    
+    Function Range_Simple($From, $To)
+    {
+      If($From===0 && $To===255) Return '.';
+      If($From===$To) Return $this->CharCode($From);
+      Return False;
+    }
+    
+    Function Range($From, $To)
+    {
+      If($Res=$this->Range_Simple($From, $To))
+        Return $Res;
+      If($From+1===$To)
+        Return $this->CharCode($From).$this->CharCode($To);
+      Return $this->CharCode($From).'-'.$this->CharCode($To);
+    }
+    
+    Function CharCodesToRegexp($List)
+    {
+      Sort($List);
+      $this->_CharCodesToRegexp($List);
+    }
+    
+    Function _CharCodesToRegexp($List)
+    {
+      $Left=-1;
+      $Res=[];
+      $Pos=-1;
+      ForEach($List As $Char)
+      {
+        If($Left<0 || $Left+1!==$Char)
+          $Pos=$Char;
+        $Left=$Res[$Pos]=$Char;
+      }
+      If(Count($Res)===1)
+        ForEach($Res As $From=>$To)
+          If($Simple=$this->Range_Simple($From, $To))
+            Return $Simple;
+      $List=$Res;
+      $Res=[];
+      ForEach($List As $From=>$To)
+        $Res[]=$this->Range($From, $To);
+      $Res=Implode('', $Res);
+      Return '['.$Res.']';
+    }
+  }
+  
+?>

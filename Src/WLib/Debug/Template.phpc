@@ -40,9 +40,9 @@
       Case 'NULL'              : $this->Null           ($Ctx, $Value); break;
       Case 'resource'          : $this->Resource       ($Ctx, $Value); break;
       Case 'resource (closed)' : $this->ClosedResource ($Ctx, $Value); break;
-      Case 'float'             : $this->Float          ($Ctx, $Value); break;
+    //Case 'float'             : $this->Float          ($Ctx, $Value); break; //TODO: Remove?
       Case 'unknown type'      : $this->UnKnown        ($Ctx, $Value); break;
-      Case 'user function'     : $this->Function       ($Ctx, $Value); break;
+    //Case 'user function'     : $this->Function       ($Ctx, $Value); break; //TODO: Remove?
       Default                  : $this->UnKnownType    ($Ctx, $Value); break;
       }
     }
@@ -151,23 +151,27 @@
       $PathIdx=Count($Ctx->Path);
       $Idx=0;
       $Separator=$Ctx->IsInline()? ' ':'';
+      $z=True;
       ForEach($Value As $k=>$V)
       {
         $Ctx->Path[$PathIdx]=$k;
 
-        if($Idx!==0)
+        if($z)
+          $z=False;
+        Else //if($Idx!==0)
         {
           $Ctx->WriteOp(',');
           $Ctx->WriteLn($Separator);
         }
-        if($Idx===$k)
-          $Idx++;
-        else
+        if($Idx!==$k)
         {
-          $Idx=null;
+        //$Idx=null;
           $this->Value($Ctx, $k);
           $Ctx->WriteOp('=>');
         }
+        If(Is_Integer($k) && $k>=$Idx)
+          $Idx=$k+1;
+           
         $Ctx->Level_Inc();
         $this->Value($Ctx, $V);
         $Ctx->Level_Dec();
@@ -185,6 +189,7 @@
         $k=Explode("\0", $k);
         $Res[End($k)]=$v;
       }
+      if(!($Value InstanceOf FFI\CData))
       if(Method_Exists($Value, '_Debug_Serialize'))
         $Value->_Debug_Serialize($Res);
       return $Res;

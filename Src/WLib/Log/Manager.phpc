@@ -1,19 +1,19 @@
 <?
   $Loader->Parent_Class('/Log/Logger/List');
  
-  Class C_Log_Manager extends C_Log_Logger_List
+  Class C_Log_Manager Extends C_Log_Logger_List
   {
     Function _Init(Array $Args)
     {
       $Args['Tags']??=['Default'=>Null];
-      parent::_Init($Args);
-      if($Console=$Args['Console']?? True)
+      Parent::_Init($Args);
+      If($Console=$Args['Console']?? True)
       {
         If(!Is_Object($Console))
           $Console=$this->Create_Object('/Log/Logger/Echo', Is_Array($Console)? $Console:[]);
         $this->Add($Console, ['Name'=>'Console']);
       }
-      if($Args['Set_Error_Handler']?? True)
+      If($Args['Set_Error_Handler']?? True)
         $this->SetHandler();
     }
     

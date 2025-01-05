@@ -1,0 +1,26 @@
+<?
+  $this->Parent_Class('/Serialize/Base');
+
+  class C_Serialize_Json_Core extends C_Serialize_Base
+  {
+    static $DefaultExt='json';
+    
+    Var $Flags=JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES;
+  
+    Function _Init(Array $Args)
+    {
+      $this->Flags=$Args['Flags']?? $this->Flags;
+      Parent::_Init($Args);
+    }
+    
+    Function Serialize($Vars)
+    {
+      return Json_Encode($Vars, $this->Flags);
+    }
+
+    Function Deserialize($Data)
+    {
+      return Json_Decode($Data, True);
+    }
+  }
+?>

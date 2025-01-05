@@ -26,7 +26,7 @@
     {
       $Loggers=$this->Loggers;
       if($Exclude=$LogItem->Exclude)
-        ForEach($ByName As $Name->$Logger)
+        ForEach($this->ByName As $Name=>$Logger)
           If($Exclude[$Name]?? False)
             UnSet($Loggers[$Logger->Object_GetId()]);
       ForEach($Loggers As $Logger)

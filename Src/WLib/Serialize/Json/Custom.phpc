@@ -1,0 +1,71 @@
+<?
+  $this->Parent_Class('/Serialize/Base');
+
+  class C_Serialize_Json_Custom extends C_Serialize_Base
+  {
+    static $DefaultExt='json';
+    
+    Var $Boolean =['false', 'true'];
+    Var $Null    =['null'];
+    
+    Var $Flags=JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES;
+  
+    Function _Init(Array $Args)
+    {
+      $this->Flags=$Args['Flags']?? $this->Flags;
+      Parent::_Init($Args);
+    }
+    
+    Function Serialize($Value)
+    {
+      Switch(Get_Type($Value))
+      {
+      Case 'boolean'           : $this->Boolean        ($Value); break;
+      Case 'integer'           : $this->Integer        ($Value); break;
+      Case 'double'            : $this->Double         ($Value); break;
+      Case 'string'            : $this->String         ($Value); break;
+      Case 'object'            : $this->Object         ($Value); break;
+      Case 'array'             : $this->Array          ($Value); break;
+      Case 'NULL'              : $this->Null           ($Value); break;
+      Case 'resource'          : $this->Resource       ($Value); break;
+      Case 'resource (closed)' : $this->ClosedResource ($Value); break;
+      Case 'unknown type'      : $this->UnKnown        ($Value); break;
+      Default                  : $this->UnKnownType    ($Value); break;
+      }
+      return Json_Encode($Vars, $this->Flags);
+    }
+    
+    Function Default($Value, $Type) { $this->Write(Json_Encode($Vars, $this->Flags), $Type); }
+    
+    Function Boolean        ($Value) { $this->Write($this->Boolean[$Value], 'Boolean'); }
+    Function Numeric        ($Value) { $this->Default($Value, 'Numeric'); }
+    Function Integer        ($Value) { $this->Default($Value, 'Numeric'); }
+    Function Double         ($Value) { $this->Default($Value, 'Numeric'); }
+    Function String         ($Value) { $this->Default($Value, 'Numeric'); }
+    Function Null           ($Value) { $this->Write($this->Null, 'Null'); }
+  //Function Null           ($Value) { $this->Write($this->Null, 'Null'); }
+
+    Function Object($Value)
+    {
+    }
+    
+    Function Array($Value)
+    {
+      If(!Array_Is_List($Value)) //TODO: Fast_Array_Is_List
+      {
+      }
+    }
+    
+    Var $Res=[];
+  
+    Function Write($Str, $Type)
+    {
+      $this->Res[]=$Str;
+    }
+
+    Function Deserialize($Data)
+    {
+      return Json_Decode($Data, True);
+    }
+  }
+?>

@@ -109,7 +109,7 @@
         ];
         Return [False, 'Float/StrEquals', 'Debug'=>$Debug];
       }
-      Return [$z? Null:False];
+      Return [$z? Null:False, 'UnKnown'];
     }
 
   }

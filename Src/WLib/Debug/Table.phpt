@@ -10,9 +10,9 @@
   //Var $Fields  =[];
     Var $List    =[];
     
-    Static Function Cr(Array $List) //TODO: Add $Columns and $Args
+    Static Function Cr(Array $List, Array $Args=[]) //TODO: Add $Columns and $Args
     {
-      Return New Static($List);
+      Return New Static($List, $Args);
     }
     
     Static Function ToMap(Array $List)
@@ -47,11 +47,11 @@
       Return $Res;
     }
     
-    Function __Construct($List) //TODO: Add $Columns and $Args
+    Function __Construct($List, $Args) //TODO: Add $Columns and $Args
     {
       // Create columns
-      $ColumnKey=New Column('#');
-      $Columns=$this->GetColumns($List, $ColumnKey);
+      $ColumnKey=New Column('#', Null, $Args['Columns']['#']?? []);
+      $Columns=$this->GetColumns($List, $ColumnKey, $Args['Columns']?? []);
 
       $Res=[];
       ForEach($List As $Key=>$Item)
@@ -60,6 +60,9 @@
         $ColumnKey->Rec_Pack($Rec, $Key);
         ForEach($Columns As $Column)
           $Column->Rec_Pack_Row($Rec, $Item);
+        For($i=Count($Columns)-1; $i>=0; $i--)
+          If(!$Columns[$i]->CheckEnd($Rec))
+            Break;
         $Res[]=$Rec;
       }
       
@@ -75,7 +78,7 @@
       $this->List    = $Res     ;
     }
     
-    Function GetColumns($List, $Prev)
+    Function GetColumns($List, $Prev, $Args)
     {
       $Map=[];
       ForEach($List As $Key=>$Item)
@@ -84,7 +87,7 @@
 
       $Columns=[];
       ForEach($Map As $Name=>$Tmp)
-        $Columns[]=$Prev=New Column($Name, $Prev);
+        $Columns[]=$Prev=New Column($Name, $Prev, $Args[$Name]?? []);
       
       Return $Columns;
     }
@@ -108,7 +111,8 @@
       {
         $To("\n", 'NewLine');
         ForEach($this->Columns As $Column)
-          $Column->Debug_Write_Rec($To, $Rec);
+          If($Column->Debug_Write_Rec($To, $Rec))
+            Break;
       }
     }
   //****************************************************************
@@ -120,15 +124,26 @@
     Var $Key   =   '';
     Var $Name  =   '';
     Var $Align = Null; // 0.1
+    Var $Class = Null; // 0.1
     Var $Size  =    0;
     Var $Split =  ' ';
     
-    Function __Construct($Key, $Prev=Null)
+    Function __Construct($Key, $Prev=Null, Array $Args=[])
     {
-      $this->Idx  =$Prev? $Prev->Idx+2:0;
-      $this->Key  =$Key  ;
-      $this->Name =$Key  ;
-      $this->Size =StrLen($Key);
+      $this->Idx   =$Prev? $Prev->Idx+2:0;
+      $this->Key   =$Key  ;
+      $this->Name  =$Key  ;
+      $this->Size  =StrLen($Key);
+      $this->Align =$Args['Align']?? $this->Align;
+      $this->Class =$Args['Class']?? $this->Class;
+    }
+    
+    Function CheckEnd(&$Rec)
+    {
+      $Idx=$this->Idx;
+      If($Rec[$Idx]!=='') Return False;
+      $Rec[$Idx+1]='End';
+      Return True;
     }
     
     Function Rec_Pack(&$Rec, $Value)
@@ -139,7 +154,7 @@
       {
       Case 'boolean': $Value=$Value? 'True':'False'; Break;
     //Case 'null'   : $Value='Null'; Break;
-      Default: $Value=(string)$Value;
+      Default: $Value=(String)$Value;
       }
       
       $Rec[$Idx  ]=$Value ;
@@ -163,17 +178,21 @@
   //****************************************************************
   // Interface I_Debug_Custom
   
-    Function Debug_Write_Value(C_Log_Format $To, $Value, $Type, $Class=Null)
+    Function Debug_Write_Value(C_Log_Format $To, $Value, $Type, $Class=Null, $IsEnd=False)
     {
-      $Add=$this->Size-StrLen($Value);
+      $Len=StrLen($Value);
+      $Add=$this->Size-$Len;
+      $Class??=$this->Class;
+      $Align  =$this->Align;
 
       Switch($Type)
       {
-      Case 'integer' : $Align=1; $Class??='Num'   ; Break;
-      Case 'double'  : $Align=1; $Class??='Num'   ; Break;
-      Case 'boolean' : $Align=0; $Class??='Resvd' ; Break;
-    //Case 'null'    : $Align=0; $Class??='Resvd' ; $Value='Null'; Break;
-      Default        : $Align=0; $Class??='Str'   ; Break;
+      Case 'integer' : $Align??=1; $Class??='Num'   ; Break;
+      Case 'double'  : $Align??=1; $Class??='Num'   ; Break;
+      Case 'boolean' : $Align??=0; $Class??='Resvd' ; Break;
+    //Case 'null'    : $Align??=0; $Class??='Resvd' ; $Value='Null'; Break;
+      Case 'End'     : Return;
+      Default        : $Align??=0; $Class??='Str'   ; Break;
       }
       
       $LAdd=Round($Add*$Align);
@@ -181,8 +200,10 @@
       
       If($LAdd>0) $To(Static::Tab($LAdd), 'Def');
       $To($Value, $Class);
+      If($IsEnd) Return True;
       If($RAdd>0) $To(Static::Tab($RAdd), 'Def');
       $To($this->Split, 'Def');
+      Return False;
     }
     
     Function Debug_Write_Header(C_Log_Format $To)
@@ -195,8 +216,9 @@
       $Idx=$this->Idx;
       $Value =$Rec[$Idx  ]?? '';
       $Type  =$Rec[$Idx+1]?? '';
+      $End   =$Rec[$Idx+3]?? 'End';
 
-      $this->Debug_Write_Value($To, $Value, $Type);
+      Return $this->Debug_Write_Value($To, $Value, $Type, Null, $End==='End');
     }
   
   //****************************************************************

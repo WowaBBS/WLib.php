@@ -144,9 +144,9 @@
       return $this;
     }
 
-    Function BackTrace($Skip=0)
+    Function BackTrace($Skip=0, $Limit=0, $Options=DEBUG_BACKTRACE_PROVIDE_OBJECT)
     {
-      return $this->SetStack(Debug_BackTrace(), $Skip+1);
+      Return $this->SetStack(Debug_BackTrace($Options, $Limit), $Skip+1);
     }
 
     Function SetStackFromException($Exception)

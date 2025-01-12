@@ -69,7 +69,6 @@
     {
       $Builder=$this->Builder;
       $Keys=[];
-      $Prev=[];
       $Subs=[];
       ForEach($this->Map As $Char=>$Sub)
       {
@@ -78,20 +77,18 @@
         $Subs[$Key]??=$Sub;
       }
       
-      $Key='';
       $Res=[];
       If($Ends!==False)
       {
+        $End=$this->End;
         ForEach($Keys As $Key=>$Chars)
-          $Res[]=$Builder->_CharCodesToRegexp($Chars).$Subs[$Key]->GetRegExp($Ends);
-        If($this->End)
         {
-          If(Count($Res)===1 && $Key==='')
-            Return $Res[0].'?';
-          $Res[]='';
+          $Sub=$Subs[$Key];
+          $R2=$Sub->GetRegExp($Ends);
+          If(StrLen($R2))
+            $End=False;
+          $Res[]=$Builder->_CharCodesToRegexp($Chars).$R2;
         }
-        ElseIf($Ends===True)
-          $Res[]='$';  
       }
       Else
       {
@@ -105,19 +102,25 @@
           If(StrLen($R2))
             $End=False;
           $Res[]=$Builder->_CharCodesToRegexp($Chars).$R2;
-        //If(!$Sub->End) $End=False;
-        }
-        If(!$Res) Return '';  //$this->End || 
-        
-        {
-          If($End && Count($Res)===1) // && $Key==='')
-            Return $Res[0].'?';
-          $Res[]='';
         }
       }
       
-      // TODO: If($Res[Count($Res)-1]==='')  Add ?
-      Return Count($Res)>1? '(?:'.Implode('|', $Res).')': $Res[0];
+      if($this->End)
+        $Ends=False;
+      
+      Switch(Count($Res))
+      {
+      Case 0: Return '';
+      Case 1:
+        If($Ends===Null)
+          Return $Res[0];
+        If($Ends===False && $End)
+          Return $Res[0].'?';
+        Break;
+      }
+      If($Ends!==Null)
+        $Res[]=$Ends? '$':'';
+      Return '(?:'.Implode('|', $Res).')';
     }
     
     Private Function _Invalidate() { $this->Key=Null; Return $this; }
@@ -148,11 +151,6 @@
 
   //****************************************************************
   // Debug
-  
-    Protected Function _Debug_Info(Array &$Res)
-    {
-      if(IsSet($Res['Back_Memory' ])) unset($Res['Back_Memory' ]);
-    }
     
     Function _Debug_Serialize(Array &$Res)
     {

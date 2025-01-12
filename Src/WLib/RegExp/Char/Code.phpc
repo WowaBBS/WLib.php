@@ -34,7 +34,7 @@
       $Exclude   =$Args['Exclude'   ]?? '';
       $AsIs      =$Args['AsIs'      ]?? Static::GetAsIs();
       $Override  =$Args['Override'  ]??[
-        "\0"=>'\000', //TODO: \0??
+        "\0"=>'\000', //TODO: \0 or \x00 ??
         "\t"=>'\t',
         "\v"=>'\v',
         "\r"=>'\r',

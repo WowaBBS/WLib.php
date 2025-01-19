@@ -1,0 +1,28 @@
+<?
+  $this->Parent_Class('/Object');
+
+  Use T_RegExp_Node_Base_Base As Node;
+  
+  Class C_RegExp_Node_Validator Extends C_Object
+  {
+    Function Node(Node $Node)
+    {
+      Return $Node->Validate($this);
+    }
+
+    Function NodeStr(String|Node $Node)
+    {
+      Switch(GetType($Node))
+      {
+      Case 'string': Return True; //TODO:
+      Case 'object': Return $this->Node($Node);
+      }
+      $this->Error('Unsupported node type: ', GetType($Node))->Debug($Node);
+      Return False;
+    }
+    
+    Function Error( ...$Args)
+    {
+      Return $this->Log('Error', ...$Args);
+    }
+  }

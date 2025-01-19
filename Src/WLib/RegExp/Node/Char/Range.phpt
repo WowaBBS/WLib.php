@@ -1,7 +1,7 @@
 <?
-  $this->Load_Type('/RegExp/Node/Base');
+  $this->Load_Type('/RegExp/Node/Base/Base');
   
-  Class T_RegExp_Node_Char_Range Extends T_RegExp_Node_Base
+  Class T_RegExp_Node_Char_Range Extends T_RegExp_Node_Base_Base
   {
     Var $From ='0';
     Var $To   ='9';

@@ -1,7 +1,7 @@
 <?
-  $this->Load_Type('/RegExp/Node/Base');
+  $this->Load_Type('/RegExp/Node/Base/Base');
   
-  Class T_RegExp_Node_Char_Hex Extends T_RegExp_Node_Base
+  Class T_RegExp_Node_Char_Hex Extends T_RegExp_Node_Base_Base
   {
     Var $Char =0;
     

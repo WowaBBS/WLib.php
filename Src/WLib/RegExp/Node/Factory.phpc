@@ -1,0 +1,80 @@
+<?
+  $this->Parent_Class('/Object');
+  
+  $this->Load_Type('/RegExp/Node/Base/Base'       ); Use T_RegExp_Node_Base_Base        As Node          ;
+
+  $this->Load_Type('/RegExp/Node/Base/Or'         ); Use T_RegExp_Node_Base_Or          As NodeOr        ;
+  $this->Load_Type('/RegExp/Node/Base/Repeat'     ); Use T_RegExp_Node_Base_Repeat      As NodeRepeat    ;
+  $this->Load_Type('/RegExp/Node/Base/Sequence'   ); Use T_RegExp_Node_Base_Sequence    As NodeSequence  ;
+
+  $this->Load_Type('/RegExp/Node/Char/Class'      ); Use T_RegExp_Node_Char_Class       As NodeClass     ;
+  $this->Load_Type('/RegExp/Node/Char/Hex'        ); Use T_RegExp_Node_Char_Hex         As NodeHex       ;
+  $this->Load_Type('/RegExp/Node/Char/Oct'        ); Use T_RegExp_Node_Char_Oct         As NodeOct       ;
+  $this->Load_Type('/RegExp/Node/Char/One'        ); Use T_RegExp_Node_Char_One         As NodeOne       ;
+  $this->Load_Type('/RegExp/Node/Char/Range'      ); Use T_RegExp_Node_Char_Range       As NodeRange     ;
+  $this->Load_Type('/RegExp/Node/Char/Set'        ); Use T_RegExp_Node_Char_Set         As NodeSet       ;
+
+  $this->Load_Type('/RegExp/Node/Group/Back'      ); Use T_RegExp_Node_Group_Back       As NodeBack      ;
+  $this->Load_Type('/RegExp/Node/Group/Check'     ); Use T_RegExp_Node_Group_Check      As NodeCheck     ;
+  $this->Load_Type('/RegExp/Node/Group/Comment'   ); Use T_RegExp_Node_Group_Comment    As NodeComment   ;
+  $this->Load_Type('/RegExp/Node/Group/Group'     ); Use T_RegExp_Node_Group_Group      As NodeGroup     ;
+  $this->Load_Type('/RegExp/Node/Group/If'        ); Use T_RegExp_Node_Group_If         As NodeIf        ;
+  $this->Load_Type('/RegExp/Node/Group/Recursive' ); Use T_RegExp_Node_Group_Recursive  As NodeRecursive ;
+  
+  Class C_RegExp_Node_Factory Extends C_Object
+  {
+    Var $Types=[
+      'Class'     =>NodeClass     ::class,
+      'Hex'       =>NodeHex       ::class,
+      'Oct'       =>NodeOct       ::class,
+      'One'       =>NodeOne       ::class,
+      'Range'     =>NodeRange     ::class,
+      'Set'       =>NodeSet       ::class,
+
+      'Back'      =>NodeBack      ::class,
+      'Check'     =>NodeCheck     ::class,
+      'Comment'   =>NodeComment   ::class,
+      'Group'     =>NodeGroup     ::class,
+      'If'        =>NodeIf        ::class,
+      'Or'        =>NodeOr        ::class,
+      'Recursive' =>NodeRecursive ::class,
+      'Repeat'    =>NodeRepeat    ::class,
+      'Sequence'  =>NodeSequence  ::class,
+    ];
+    
+    Var $Validator=Null;
+    
+    Function _Init(Array $Args)
+    {
+      $this->Validator=$this->Create_Object('/RegExp/Node/Validator');
+      Parent::_Init($Args);
+    }
+    
+    Function Create($Type, $Args)
+    {
+      $Class=$this->Types[$Type]?? Null;
+      If(!$Class) Return $this->Log('Error', 'Unknown RegExp node type')->Ret(Null);
+      $Res=New $Class(...$Args);
+      If($this->Validator->Node($Res))
+        Return $Res;
+      //TODO: Error
+      Return Null;
+    }
+  
+    Function Class     (String     $Name                                                 ):NodeClass     { Return $this->Create('Class'     ,[$Name                   ]); }
+    Function Hex       (String|Int $Code                                                 ):NodeHex       { Return $this->Create('Hex'       ,[$Code                   ]); }
+    Function Oct       (String|Int $Code                                                 ):NodeOct       { Return $this->Create('Oct'       ,[$Code                   ]); }
+    Function One       (String     $Char                                                 ):NodeOne       { Return $this->Create('One'       ,[$Char                   ]); }
+    Function Range     (String|Int $From, String|Int $To                                 ):NodeRange     { Return $this->Create('Range'     ,[$From, $To              ]); }
+    Function Set       (Array      $Chars                                                ):NodeSet       { Return $this->Create('Set'       ,[$Chars                  ]); }
+
+    Function Back      (String|Int  $Id   ,String $Type=Null                             ):NodeBack      { Return $this->Create('Back'      ,[$Id, $Type              ]); }
+    Function Check     (String|Node $Node ,String $Type                                  ):NodeCheck     { Return $this->Create('Check'     ,[$Node, $Type            ]); }
+    Function Comment   (String      $Comment                                             ):NodeComment   { Return $this->Create('Comment'   ,[$Comment                ]); }
+    Function Group     (String|Node $Node      ,String|Bool $Id=Null, String $Type=Null  ):NodeGroup     { Return $this->Create('Group'     ,[$Node, $Id, $Type       ]); }
+    Function If        (String|Node $Condition ,String|Node $Then, String|Node $Else=Null):NodeIf        { Return $this->Create('If'        ,[$Condition, $Then, $Else]); }
+    Function Or        (Array       $List                                                ):NodeOr        { Return $this->Create('Or'        ,[$List                   ]); }
+    Function Recursive (String|Int  $Id=0 ,String $Type=Null                             ):NodeRecursive { Return $this->Create('Recursive' ,[$Id, $Type              ]); }
+    Function Repeat    (String|Node $Node, Int $Min=0, Int $Max=-1, String $Type=''      ):NodeRepeat    { Return $this->Create('Repeat'    ,[$Node, $Min, $Max, $Type]); }
+    Function Sequence  (Array $List                                                      ):NodeSequence  { Return $this->Create('Sequence'  ,[$List                   ]); }
+  }

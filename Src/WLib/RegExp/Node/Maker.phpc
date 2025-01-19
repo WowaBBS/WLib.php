@@ -1,0 +1,76 @@
+<?
+  $this->Parent_Class('/Object');
+  
+  Use T_RegExp_Node_Base_Base As Node;
+
+  Class C_RegExp_Node_Maker Extends C_Object Implements ArrayAccess, Stringable
+  {
+  //****************************************************************
+  // List
+  
+    Var Array $List=[];
+  
+    Function Add_Node(Node $Arg)
+    {
+      $Arg->Make($this);
+    }
+     
+    Function Add_Item($Arg)
+    {
+      Switch(GetType($Arg))
+      {
+      Case 'string'  :
+      Case 'integer' :
+      Case 'double'  : $this->List[]=$Arg; Return;
+      Case 'array'   : Return $this->Add(...$Arg);
+      Case 'object'  : 
+        If($v InstanceOf Node)
+          Return $this->AddNode($Arg);
+      }
+      $this->Error('Unknown type ', GetType($Arg), ': ', $Arg);
+    }
+    
+    Function Add(...$Args)
+    {
+      ForEach($Args As $Arg)
+        $this->Add_Item($Arg);
+    }
+
+  //****************************************************************
+  // Inline
+  
+    Var Array $Inlines=[];   //TODO:
+    Var Bool  $Inline=False; //TODO:
+    
+    Function Inline_Add(...$Args) { $this->Inline_Begin(); $this->Add(...$Args); $this->Inline_End(); }
+    Function Inline_Begin () {} //TODO:
+    Function Inline_End   () {} //TODO:
+    
+  //****************************************************************
+  // Level
+  
+    Var $Level=0;
+    
+    Function Begin (...$Args) {                     $this->Inline_Add(...$Args); $this->Level_Add(); }
+    Function Next  (...$Args) { $this->Level_Dec(); $this->Inline_Add(...$Args); $this->Level_Add(); }
+    Function End   (...$Args) { $this->Level_Dec(); $this->Inline_Add(...$Args); }
+
+    Function Level_Add($v=1) { $this->Level+=$v; }
+    Function Level_Dec($v=1) { $this->Level-=$v; }
+  
+  //****************************************************************
+  // ArrayAccess interface
+
+    Public Function OffsetExists ($k    ):Bool  { return $this->Log('Error', 'Unsupported'); }
+    Public Function OffsetGet    ($k    ):Mixed { return $this->Log('Error', 'Unsupported'); }
+    Public Function OffsetSet    ($k ,$v):Void  { if(Is_Null($k)) $this->Add($v); else $this->Log('Error', 'Unsupported'); }
+    Public Function OffsetUnset  ($k    ):Void  {        $this->Log('Error', 'Unsupported'); }
+    
+  //****************************************************************
+  // Stringable interface
+ 
+    Function ToString() { Return Implode($this->List); }
+    Function __toString() { return $this->ToString(); }
+
+ //****************************************************************
+  }

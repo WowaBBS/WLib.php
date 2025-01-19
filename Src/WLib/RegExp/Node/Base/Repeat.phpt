@@ -1,14 +1,14 @@
 <?
-  $this->Load_Type('/RegExp/Node/Base');
+  $this->Load_Type('/RegExp/Node/Base/Base');
   
-  Class T_RegExp_Node_Repeat Extends T_RegExp_Node_Base
+  Class T_RegExp_Node_Base_Repeat Extends T_RegExp_Node_Base_Base
   {
     Var $Node ;
     Var $Min=1;
     Var $Max=1;
     Var $Type=''; // '', '+', '?'
  
-    Function __Construct($Node, $Min=0, $Max=$Min, $Type='')
+    Function __Construct($Node, $Min=0, $Max=-1, $Type='')
     {
       $this->Node =$Node ;
       $this->Min  =$Min  ;

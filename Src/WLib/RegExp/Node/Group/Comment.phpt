@@ -1,7 +1,7 @@
 <?
-  $this->Load_Type('/RegExp/Node/Base');
+  $this->Load_Type('/RegExp/Node/Base/Base');
   
-  Class T_RegExp_Node_Comment Extends T_RegExp_Node_Base
+  Class T_RegExp_Node_Group_Comment Extends T_RegExp_Node_Base_Base
   {
     Var $Comment='';
     

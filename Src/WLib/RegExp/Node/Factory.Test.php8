@@ -1,0 +1,14 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+
+  $Loader->GetLogger()->Add('Factory.Test.log');
+  $Factory=$Loader->Create_Object('/RegExp/Node/Factory');
+  
+  $Desired ='123';
+  $Actual  =$Factory->Sequence(['1','2','3'])->ToString();
+  If($Desired!==$Actual)
+    $Loader->Log('Error')
+      ('Desired :', $Desired )
+      ('Actual  :', $Actual  );
+  Else
+    $Loader->Log('Debug', 'Ok: ', $Actual);

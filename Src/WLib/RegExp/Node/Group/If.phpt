@@ -1,7 +1,7 @@
 <?
-  $this->Load_Type('/RegExp/Node/Base');
+  $this->Load_Type('/RegExp/Node/Base/Base');
   
-  Class T_RegExp_Node_If Extends T_RegExp_Node_Base
+  Class T_RegExp_Node_Group_If Extends T_RegExp_Node_Base_Base
   {
     Var $Condition ;
     Var $Then      ;
@@ -10,11 +10,11 @@
   //(?(condition)yes-pattern)
   //(?(condition)yes-pattern|no-pattern)
     
-    Function __Construct($Condition, $Then, $Else=Null) { $this->Condition=$Condition; $this->Then=$Then, $this->Else=$Else}
+    Function __Construct($Condition, $Then, $Else=Null) { $this->Condition=$Condition; $this->Then=$Then; $this->Else=$Else; }
     
     Function Make($Res)
     {
-      $Res->Begin('(?(';
+      $Res->Begin('(?(');
       $Res[]=$this->Condition;
       $Res->Next(')');
       $Res[]=$this->Then;

@@ -1,7 +1,7 @@
 <?
   $this->Load_Type('/BD/Expr/Array');
   
-  Class T_BD_Expr_Func extends T_BD_Expr_Array
+  Class T_BD_Expr_Func extends T_BD_Expr_Array Implements Stringable
   {
     Var $Func=''; // Callable
     Var $ArgsNum=0;

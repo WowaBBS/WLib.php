@@ -4,7 +4,7 @@
   Use E_URI_UUID_Family  As Family  ;
   Use C_URI_UUID_Factory As Factory ;
 
-  Class T_URI_UUID_UUID
+  Class T_URI_UUID_UUID Implements Stringable
   {
     Function _GetActulVersion (): Int    { Return Family::GetVersion ($this->_ToBinary()); }
     Function _GetActulFamily  (): Family { Return Family::Get        ($this->_ToBinary()); }

@@ -1,7 +1,7 @@
 <?
   $this->Load_Type('/BD/Expr/Base');
   
-  Class T_BD_Expr_Value extends T_BD_Expr_Base
+  Class T_BD_Expr_Value Extends T_BD_Expr_Base Implements Stringable
   {
     Var $Value='';
     

@@ -3,7 +3,7 @@
 
   Use \Deprecated As Deprecated;
   
-  Class T_FS_Path //Extends T_Property
+  Class T_FS_Path Implements Stringable //Extends T_Property
   {
     Var $Path=[];
     

@@ -1,5 +1,5 @@
 <?
-  Class T_Inet_Addr_Mac_V6
+  Class T_Inet_Addr_Mac_V6 Implements Stringable
   {
     Protected $Addr='\0\0\0\0\0\0';
     

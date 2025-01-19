@@ -3,7 +3,7 @@
   $Loader->Load_Struct('/Inet/Protocols');
   $Loader->Load_Struct('/FS/Path');
  
-  Class T_Inet_Url
+  Class T_Inet_Url Implements Stringable
   {
     Var $URL      ; // Full address URL Protocol://User:Password@Domain:Port/Path?Param#ID
   // Parsed

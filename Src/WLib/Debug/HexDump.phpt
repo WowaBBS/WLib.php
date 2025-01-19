@@ -4,7 +4,7 @@
   
   Function HexDump($Data, $Args=[]) { Return New T_Debug_HexDump($Data, $Args); }
 
-  Class T_Debug_HexDump Implements I_Debug_Custom
+  Class T_Debug_HexDump Implements I_Debug_Custom, Stringable
   {
     Var $Data   = '';
     Var $Args   = [];

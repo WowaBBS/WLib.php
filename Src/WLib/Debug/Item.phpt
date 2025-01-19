@@ -6,7 +6,7 @@
   Function DebugItem($Value, $Type=Null) { Return New T_Debug_Item($Value, $Type); }
 //Function DebugItem($Value, $Type=Null) { Return [$Value, $Type]; }
 
-  Class T_Debug_Item Implements I_Debug_Custom
+  Class T_Debug_Item Implements I_Debug_Custom, Stringable
   {
     Var $Value = ''    ;
     Var $Type  = 'Def' ;

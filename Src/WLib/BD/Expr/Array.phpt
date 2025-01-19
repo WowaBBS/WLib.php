@@ -1,7 +1,7 @@
 <?
   $this->Load_Type('/BD/Expr/Base');
   
-  Class T_BD_Expr_Array extends T_BD_Expr_Base
+  Class T_BD_Expr_Array extends T_BD_Expr_Base Implements Stringable
   {
     Var $List=[]; // Array of T_BD_Expr_Base
     

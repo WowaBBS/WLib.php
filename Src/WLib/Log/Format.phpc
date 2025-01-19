@@ -291,7 +291,7 @@
       Case 'double'        : $this->WriteFloat ($v); break;
       Case 'string'        : $this->WriteText  ($v); break;
       Case 'NULL'          : $this->WriteNull  (  ); break;
-      Case 'float'         : $this->WriteFloat ($v); break;
+    //Case 'float'         : $this->WriteFloat ($v); break;
       Default              :
         if($v InstanceOf I_Debug_Custom)
         {
@@ -428,7 +428,7 @@
           Case 'double'        : $this->WriteFloat ($Arg                    ); break;
           Case 'string'        : $this->WriteStr   ("'".$Arg."'"            ); break;
           Case 'NULL'          : $this->WriteNull  (                        ); break;
-          Case 'float'         : $this->WriteFloat ($Arg                    ); break;
+        //Case 'float'         : $this->WriteFloat ($Arg                    ); break;
           Case 'unknown type'  : $this->WriteDef   ($Arg                    ); break;
           Case 'user function' : $this->WriteDef   ($Arg                    ); break;
           Case 'object'        :

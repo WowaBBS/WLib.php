@@ -215,7 +215,7 @@
       Case 'resource'      : return $this->_SetStream($i,          $v               );
       Case 'integer'       : break;
       Case 'double'        : break;
-      Case 'float'         : break;
+    //Case 'float'         : break;
       Case 'unknown type'  : break;
       Case 'user function' : break;
       Default              : break;

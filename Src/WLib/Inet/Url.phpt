@@ -1,7 +1,7 @@
 <?
-  $Loader->Load_Struct('/Inet/HTTP/GetRequest');
-  $Loader->Load_Struct('/Inet/Protocols');
-  $Loader->Load_Struct('/FS/Path');
+  $Loader->Load_Type('/Inet/HTTP/GetRequest');
+  $Loader->Load_Type('/Inet/Protocols');
+  $Loader->Load_Type('/FS/Path');
  
   Class T_Inet_Url Implements Stringable
   {

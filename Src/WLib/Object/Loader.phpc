@@ -69,7 +69,7 @@
       'Module'    =>['.Module.php'    ,''         ,'Lib'       ,'.phpm'  ],
       'Trait'     =>['.Trait.php'     ,'Trait'    ,'Trait'     ,'.phpt'  ],
       'Type'      =>['.Type.php'      ,'T'        ,'Type'      ,'.phpt'  ],
-      'Struct'    =>['.Struct.php'    ,''         ,'Lib'       ,'.phpt'  ],
+      'Struct'    =>['.Struct.php'    ,'S'        ,'Struct'    ,'.phpt'  ], //TODO: Type???
     ];
     
     Function _Include($Include_Path, $Include_Vars=[], $Include_Type='Include')
@@ -98,8 +98,8 @@
         $Name='/'.$Name;
       }
 
-    //$LibState=&$this->_Libs[$Type][$Name];//<Remove?
-      $LibState=&$this->_Libs[$Name];
+      $LibState=&$this->_Libs[$Type][$Name];
+    //$LibState=&$this->_Libs[$Name]; //<Remove?
       If(!Is_Null($LibState))
       {
         If($LibState!==True)

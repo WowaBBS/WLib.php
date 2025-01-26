@@ -10,14 +10,22 @@
     Function Make($Res)
     {
       $z=False;
-      ForEach($List As $Item)
+      ForEach($this->List As $Item)
       {
         If($z)
           $Res->Next('|');
         Else
           $z=True;
-        $Res[]=$this->Item;
+        $Res[]=$Item;
       }
+    }
+
+    Function Validate($Res)
+    {
+      ForEach($this->List As $Node)
+        If(!$Res->NodeStr($Node))
+          Return False;
+      Return True;
     }
   }
   

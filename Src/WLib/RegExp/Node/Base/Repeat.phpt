@@ -19,8 +19,8 @@
     Function Make($Res)
     {
       $Res[]=$this->Node;
-      $Min=$Min;
-      $Max=$Max;
+      $Min=$this->Min;
+      $Max=$this->Max;
       If($Min===0 && $Max=== 1) $Res[]='?'; Else
       If($Min===0 && $Max===-1) $Res[]='*'; Else
       If($Min===1 && $Max===-1) $Res[]='+'; Else
@@ -28,14 +28,23 @@
         $Res[]='{';
         $Res[]=$Min;
         If($Min!==$Max)
-        If($Max>0)
         {
           $Res[]=',';
-          $Res[]=$Max;
+          If($Max>0)
+            $Res[]=$Max;
         }
         $Res[]='}';
       }
       $Res[]=$this->Type;
+    }
+
+    Function Validate($Res)
+    {
+      If(!$Res->NodeStr($this->Node)) Return False;
+      // TODO: $Type In '', '+', '?';
+      // TODO: $Min In [0..$Max]
+      // TODO: $Max In [<0, 1..]
+      Return True;
     }
   }
   

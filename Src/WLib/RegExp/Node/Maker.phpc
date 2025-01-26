@@ -9,7 +9,7 @@
   // List
   
     Var Array $List=[];
-  
+    
     Function Add_Node(Node $Arg)
     {
       $Arg->Make($this);
@@ -24,10 +24,14 @@
       Case 'double'  : $this->List[]=$Arg; Return;
       Case 'array'   : Return $this->Add(...$Arg);
       Case 'object'  : 
-        If($v InstanceOf Node)
+        If($Arg InstanceOf Node)
           Return $this->AddNode($Arg);
+        $this->Error('Unknown class ', Get_Class($Arg));
+        $this->Log('Error', 'Unknown class ', Get_Class($Arg), ': ', $Arg)->BackTrace();
+        Return;
       }
-      $this->Error('Unknown type ', GetType($Arg), ': ', $Arg);
+      $this->Error('Unknown type ', GetType($Arg));
+      $this->Log('Error', 'Unknown type ', GetType($Arg), ': ', $Arg)->BackTrace();
     }
     
     Function Add(...$Args)
@@ -72,5 +76,19 @@
     Function ToString() { Return Implode($this->List); }
     Function __toString() { return $this->ToString(); }
 
+ //****************************************************************
+    Var $Errors=[];
+ 
+    Function Error_Clear()
+    {
+      $this->Errors=[];
+    }
+    
+    Function Error(...$Args)
+    {
+      $this->Errors[]=Implode($Args);
+      $this->Log('Error', ...$Args);
+      Return False;
+    }
  //****************************************************************
   }

@@ -1,8 +1,5 @@
 <?
   $this->Load_Class('/UnitTest/Case');
-  $this->Load_Type('/FS/Attr/Mode');
-  
-  Use T_FS_Attr_Mode As Mode;
   
   Class Test_RegExp_Char_Build Extends C_UnitTest_Case
   {

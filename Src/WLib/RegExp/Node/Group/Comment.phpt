@@ -13,5 +13,10 @@
       $Res[]=$this->Comment;
       $Res->End(')');
     }
+    
+    Function Validate($Res)
+    {
+      Return True; //TODO: Check
+    }
   }
   

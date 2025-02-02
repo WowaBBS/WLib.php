@@ -70,18 +70,48 @@
     Function TestBack($f)
     {
       $this->CheckFunc($f->Back(...), [
-        [Null   ,'\n'  ,'\n'         ],
+        [ Null  ,'\n'  ,'\n'         ],
         ['Name' ,'P='  ,'(?P=Name)'  ],
-        [123    ,'kn'  ,'\k123'      ],
+        [ 123   ,'kn'  ,'\k123'      ],
         ['Name' ,'k<'  ,'\k<Name>'   ],
         ['Name' ,'k\'' ,'\k\'Name\'' ],
         ['Name' ,'k{'  ,'\k{Name}'   ],
-        [123    ,'gn'  ,'\g123'      ],
+        [ 123   ,'gn'  ,'\g123'      ],
         ['Name' ,'g{'  ,'\g{Name}'   ],
         ['Name' ,'g<'  ,'\g<Name>'   ],
         ['Name' ,'g\'' ,'\g\'Name\'' ],
-      ]);     
-    }         
+      ]);
+    }
+    
+    Function TestCheck($f)
+    {
+      $this->CheckFunc($f->Check(...), [
+        ['aaa'  ,'!'   ,'(?'.'!' .'aaa)'],
+        ['aaa'  ,'='   ,'(?'.'=' .'aaa)'],
+        ['aaa'  ,'<!'  ,'(?'.'<!'.'aaa)'],
+        ['aaa'  ,'<='  ,'(?'.'<='.'aaa)'],
+      ]);
+    }
+    
+    Function TestComment($f)
+    {
+      $this->CheckFunc($f->Comment(...), [
+        ['aaa'  ,'(?#aaa)'],
+      //['a)a'  ,'(?#a\)a)'], TODO:
+      ]);
+    }
+    
+    Function TestGroup($f)
+    {
+      $this->CheckFunc($f->Group(...), [
+        ['Node',  True  ,''   ,'('            .''   .'Node' .')'],
+        ['Node',  Null  ,'|'  ,'(?|'          .''   .'Node' .')'],
+        ['Node', 'Name' ,'<'  ,'(?<'  .'Name' .'>'  .'Node' .')'],
+        ['Node', 'Name' ,'\'' ,'(?\'' .'Name' .'\'' .'Node' .')'],
+        ['Node',  False ,':'  ,'(?:'          .''   .'Node' .')'],
+        ['Node',  False ,'>'  ,'(?\>'         .''   .'Node' .')'],
+      ]);
+    }
     
     
   }

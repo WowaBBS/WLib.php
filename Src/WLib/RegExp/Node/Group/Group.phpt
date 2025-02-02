@@ -38,11 +38,11 @@
       [$Begin, $Mid, $End, $TypeId]=Self::$Types[$Type]?? Self::$Types[''];
       Switch($TypeId)
       {
-      Case 'True' : if($Id!==True    ) Return $Res->Error('Should be True'); Break;
-      Case 'Null' : if($Id!==Null    ) Return $Res->Error('Should be Null'); Break;
-      Case 'Str'  : if(Is_String($Id)) Return $Res->Error('Should be Null'); Break;
-      Case 'No'   : if($Id!==False   ) Return $Res->Error('Should be Null'); Break;
-      Default     :                    Return $Res->Error('Unknown TypeId ', $TypId);
+      Case 'True' : if($Id!==True     ) Return $Res->Error('Should be True'  ,': ', $Id); Break;
+      Case 'Null' : if($Id!==Null     ) Return $Res->Error('Should be Null'  ,': ', $Id); Break;
+      Case 'Str'  : if(!Is_String($Id)) Return $Res->Error('Should be Str'   ,': ', $Id); Break;
+      Case 'No'   : if($Id!==False    ) Return $Res->Error('Should be False' ,': ', $Id); Break;
+      Default     :                     Return $Res->Error('Unknown TypeId ', $TypId);
       }
       If($TypeId==='Str')
         $Res->Begin($Begin, $this->Id, $Mid);
@@ -50,6 +50,14 @@
         $Res->Begin($Begin);
       $Res[]=$this->Node;
       $Res->End($End);
+    }
+
+    Function Validate($Res)
+    {
+      $Info=Self::$Types[$this->Type]?? Null;
+      If(!$Info)
+        Return $Res->Error('Unknown Type: ', $this->Type);
+      Return True; //TODO: Check
     }
   }
   

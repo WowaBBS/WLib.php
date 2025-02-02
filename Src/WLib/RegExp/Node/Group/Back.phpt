@@ -7,7 +7,7 @@
     Var $Type =Null;
     
     Static $Types=[
-      '\n'  =>['\\'   ,''   ,'None' ],//\n
+      '\n'  =>['\\n'  ,''   ,'None' ],//\n
       'P='  =>['(?P=' ,')'  ,'Str'  ],//(?P=name)
       'kn'  =>['\k'   ,''   ,'Num'  ],//\kNum   ??
       'k<'  =>['\k<'  ,'>'  ,'Str'  ],//\k<name>
@@ -45,9 +45,9 @@
       if(!$Info) return False;
       
       [$Begin, $End, $TypeId]=$Info;
+      $Res[]=$Begin;
       If($TypeId!=='None')
-        $Res[]=$Begin ;
-      $Res[]=$this->Id;
+        $Res[]=$this->Id;
       If($End) $Res[]=$End;
     }
 

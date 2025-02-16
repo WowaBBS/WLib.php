@@ -8,7 +8,7 @@
     
     Static $Types=[
       'R'  =>['(?R'  ,')'  ,'None' ],//(?R)
-      '?'  =>['(?'   ,')'  ,'Int'  ],//(?1)
+      '?'  =>['(?'   ,')'  ,'Num'  ],//(?1)
       '>'  =>['(?P>' ,')'  ,'Str'  ],//(?P>name)
       '&'  =>['(?&'  ,')'  ,'Str'  ],//(?&name)
     ];
@@ -23,19 +23,47 @@
       Return Null;
     }
     
+    Function Init($Res)
+    {
+      Parent::Init($Res);
+    
+      If(Is_Null($this->Type??=Self::DetectType($this->Id)))
+        Return $Res->Error('Unknown Id');
+    }
+    
     Function Make($Res)
     {
       $Id   =$this->Id   ;
       $Type =$this->Type ;
       
-      If(Is_Null($Type??=Self::DetectType($Id)))
-        Return $Res->Error('Unknown Id');
-      
-      [$Begin, $End]=Self::$Types[$Type]?? Self::$Types[''];
+      [$Begin, $End, $TypeId]=Self::$Types[$Type];
       $Res[]=$Begin ;
-      $Res[]=$this->Id;
+      If($TypeId!=='None')
+        $Res[]=$this->Id;
       $Res[]=$End;
     }
+
+    Function Validate($Res)
+    {
+      $Id   =$this->Id   ;
+      $Type =$this->Type ;
+      
+      $Info=Self::$Types[$Type]?? Null;
+      If(!$Info)
+        Return $Res->Error('Unknown Type: ', $Type);
+      
+      Switch($TypeId=$Info[2])
+      {
+      Case 'None' : If($Id!==0          ) Return $Res->Error('Id should be Zero' ); Break;
+      Case 'Num'  : If(!Is_Integer ($Id)) Return $Res->Error('Id should be Int'  ); Break;
+      Case 'Str'  : If(!Is_String  ($Id)) Return $Res->Error('Id should be Str'  ); Break;
+      Default     : Return $Res->Error('Unknown TypeId: ', $TypeId);
+      }
+      
+      Return True;
+    }
+    
+
     
     Static Function Test()
     {

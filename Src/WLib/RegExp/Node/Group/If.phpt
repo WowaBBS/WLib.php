@@ -25,5 +25,13 @@
       }
       $Res->End(')');
     }
+    
+    Function Validate($Res)
+    {
+      If(!$Res->NodeStr($this->Condition )) Return False;
+      If(!$Res->NodeStr($this->Then      )) Return False;
+      If($this->Else!==Null && !$Res->NodeStr($this->Else      )) Return False;
+      Return True;
+    }
   }
   

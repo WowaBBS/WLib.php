@@ -37,8 +37,8 @@
       }
     }
   
-    //****************************************************************
-    // Base
+  //****************************************************************
+  // Base
     
     Function TestSequence($f)
     {
@@ -64,8 +64,8 @@
       ]);
     }
     
-    //****************************************************************
-    // Group
+  //****************************************************************
+  // Group
     
     Function TestBack($f)
     {
@@ -113,6 +113,76 @@
       ]);
     }
     
+    Function TestIf($f)
+    {
+      $this->CheckFunc($f->If(...), [
+        ['Cond',  'Then'  ,'Else' ,'(?(Cond)Then|Else)' ],
+        ['Cond',  'Then'          ,'(?(Cond)Then)'      ],
+      ]);
+    }
     
+    Function TestRecursive($f)
+    {
+      $this->CheckFunc($f->Recursive(...), [
+        [0      ,'R'  ,'(?R)'      ],//(?R)
+        [1      ,'?'  ,'(?1)'      ],//(?1)
+        ['Name' ,'>'  ,'(?P>Name)' ],//(?P>name)
+        ['Name' ,'&'  ,'(?&Name)'  ],//(?&name)
+      ]);
+    }
+    
+  //****************************************************************
+  // Char
+  
+    Function TestClass($f)
+    {
+      $this->CheckFunc($f->Class(...), [
+        ['\w' ,'\w' ],
+        ['\s' ,'\s' ],
+      ]);
+    }
+  
+    Function TestHex($f)
+    {
+      $this->CheckFunc($f->Hex(...), [
+      //[0      ,'R'  ,'(?R)'      ],//(?R)
+      //['Name' ,'&'  ,'(?&Name)'  ],//(?&name)
+      ]);
+    }
+  
+    Function TestOct($f)
+    {
+      $this->CheckFunc($f->Oct(...), [
+      //[0      ,'R'  ,'(?R)'      ],//(?R)
+      //['Name' ,'&'  ,'(?&Name)'  ],//(?&name)
+      ]);
+    }
+  
+    Function TestOne($f)
+    {
+      $this->CheckFunc($f->One(...), [
+      //[0      ,'R'  ,'(?R)'      ],//(?R)
+      //['Name' ,'&'  ,'(?&Name)'  ],//(?&name)
+      ]);
+    }
+    
+    Function TestRange($f)
+    {
+      $this->CheckFunc($f->Range(...), [
+      //[0      ,'R'  ,'(?R)'      ],//(?R)
+      //['Name' ,'&'  ,'(?&Name)'  ],//(?&name)
+      ]);
+    }
+    
+    Function TestSet($f)
+    {
+      $this->CheckFunc($f->Set(...), [
+      //[0      ,'R'  ,'(?R)'      ],//(?R)
+      //['Name' ,'&'  ,'(?&Name)'  ],//(?&name)
+      ]);
+    }
+    
+    
+  //****************************************************************
   }
 ?>

@@ -15,7 +15,7 @@
       $Res->StrNode($this->Str);
     }
 
-    Function Validate($Res) { Return $Res->StrNode($Res); }
+    Function Validate($Res) { Return $Res->StrNode($this->Str); } //??
     
     Function IsValid() { Return False; }
   }

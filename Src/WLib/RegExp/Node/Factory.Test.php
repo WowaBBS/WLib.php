@@ -145,40 +145,47 @@
     Function TestHex($f)
     {
       $this->CheckFunc($f->Hex(...), [
-      //[0      ,'R'  ,'(?R)'      ],//(?R)
-      //['Name' ,'&'  ,'(?&Name)'  ],//(?&name)
+        [0x00 ,'\x00' ],
+        [0x01 ,'\x01' ],
+        [0x10 ,'\x10' ],
+        [0xFF ,'\xff' ],
+        ['a'  ,'\x61' ],
       ]);
     }
   
     Function TestOct($f)
     {
       $this->CheckFunc($f->Oct(...), [
-      //[0      ,'R'  ,'(?R)'      ],//(?R)
-      //['Name' ,'&'  ,'(?&Name)'  ],//(?&name)
+        [0x00 ,'\000' ],
+        [0x01 ,'\001' ],
+        [0x10 ,'\020' ],
+        [0377 ,'\377' ],
+        ['a'  ,'\141' ],
       ]);
     }
   
     Function TestOne($f)
     {
       $this->CheckFunc($f->One(...), [
-      //[0      ,'R'  ,'(?R)'      ],//(?R)
-      //['Name' ,'&'  ,'(?&Name)'  ],//(?&name)
+        ['a' ,'a' ],
+        ['z' ,'z' ],
       ]);
     }
     
     Function TestRange($f)
     {
       $this->CheckFunc($f->Range(...), [
-      //[0      ,'R'  ,'(?R)'      ],//(?R)
-      //['Name' ,'&'  ,'(?&Name)'  ],//(?&name)
+        ['a' ,'z' ,'a-z' ],
+        ['a' ,'a' ,'a-a' ],
+        ['0' ,'9' ,'0-9' ],
       ]);
     }
     
     Function TestSet($f)
     {
       $this->CheckFunc($f->Set(...), [
-      //[0      ,'R'  ,'(?R)'      ],//(?R)
-      //['Name' ,'&'  ,'(?&Name)'  ],//(?&name)
+        [['a', 'b', 'c']  ,'[abc]'],
+        [['a', 'b', ['c', 'f']] ,'[abc-f]'],
       ]);
     }
     

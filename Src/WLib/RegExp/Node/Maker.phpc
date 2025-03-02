@@ -25,7 +25,7 @@
       Case 'array'   : Return $this->Add(...$Arg);
       Case 'object'  : 
         If($Arg InstanceOf Node)
-          Return $this->AddNode($Arg);
+          Return $this->Add_Node($Arg);
         $this->Error('Unknown class ', Get_Class($Arg));
         $this->Log('Error', 'Unknown class ', Get_Class($Arg), ': ', $Arg)->BackTrace();
         Return;
@@ -91,4 +91,25 @@
       Return False;
     }
  //****************************************************************
+ // Char
+ 
+    Function CharToInt8($v)
+    {
+      Switch(GetType($v))
+      {
+      Case 'string'  : Return Ord($v);
+      Case 'integer' : Return $v;
+      Default: Return 0;
+      }
+    }
+
+    Function Char($v)
+    {
+      Switch(GetType($v))
+      {
+      Case 'string'  : Return $v;
+      Case 'integer' : Return Chr($v);
+      Default: Return 0;
+      }
+    }
   }

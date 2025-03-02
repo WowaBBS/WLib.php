@@ -1,7 +1,7 @@
 <?
-  $this->Load_Type('/RegExp/Node/Base/Base');
+  $this->Load_Type('/RegExp/Node/Char/Base');
   
-  Class T_RegExp_Node_Char_Class Extends T_RegExp_Node_Base_Base
+  Class T_RegExp_Node_Char_Class Extends T_RegExp_Node_Char_Base
   {
     Var $Name ='\w';
     

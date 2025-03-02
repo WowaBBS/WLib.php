@@ -60,7 +60,7 @@
       $Class=$this->Types[$Type]?? Null;
       If(!$Class) Return $this->Log('Error', 'Unknown RegExp node type')->Ret(Null);
       $Res=New $Class(...$Args);
-      $Res->Init($this);
+      $Res->Init($this); //TODO: ,$this->Validator ?
       If($this->Validator->Node($Res))
         Return $Res;
       //TODO: Error
@@ -81,7 +81,7 @@
     Function Class     (String     $Name                                                 ):NodeClass     { Return $this->Create('Class'     ,[$Name                   ]); }
     Function Hex       (String|Int $Code                                                 ):NodeHex       { Return $this->Create('Hex'       ,[$Code                   ]); }
     Function Oct       (String|Int $Code                                                 ):NodeOct       { Return $this->Create('Oct'       ,[$Code                   ]); }
-    Function One       (String     $Char                                                 ):NodeOne       { Return $this->Create('One'       ,[$Char                   ]); }
+    Function One       (String|Int $Char                                                 ):NodeOne       { Return $this->Create('One'       ,[$Char                   ]); }
     Function Range     (String|Int $From, String|Int $To                                 ):NodeRange     { Return $this->Create('Range'     ,[$From, $To              ]); }
     Function Set       (Array      $Chars                                                ):NodeSet       { Return $this->Create('Set'       ,[$Chars                  ]); }
   }

@@ -1,15 +1,20 @@
 <?
-  $this->Load_Type('/RegExp/Node/Base/Base');
+  $this->Load_Type('/RegExp/Node/Char/Base');
   
-  Class T_RegExp_Node_Char_One Extends T_RegExp_Node_Base_Base
+  Class T_RegExp_Node_Char_One Extends T_RegExp_Node_Char_Base
   {
     Var $Char ='';
     
-    Function __Construct($Char=' ') { $this->Char=$Char; }
+    Function __Construct(Int|String $Char=' ') { $this->Char=$Char; }
 
     Function Make($Res)
     {
-      $Res[]=$Char;
+      $Res[]=$Res->Char($this->Char);
+    }
+
+    Function Validate($Res)
+    {
+      Return $Res->Char($this->Char);
     }
   }
   

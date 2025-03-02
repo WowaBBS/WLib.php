@@ -1,7 +1,7 @@
 <?
-  $this->Load_Type('/RegExp/Node/Base/Base');
+  $this->Load_Type('/RegExp/Node/Char/Base');
   
-  Class T_RegExp_Node_Char_Hex Extends T_RegExp_Node_Base_Base
+  Class T_RegExp_Node_Char_Hex Extends T_RegExp_Node_Char_Base
   {
     Var $Char =0;
     
@@ -9,16 +9,21 @@
 
     Function Make($Res)
     {
-      $R=DecHex($this->Char);
+      $R=DecHex($Res->CharToInt8($this->Char));
       Switch($l=StrLen($R))
       {
-      Case 1: $Res[]='\0x0' ; $Res[]=$R; Break;
-      Case 2: $Res[]='\0x'  ; $Res[]=$R; Break;
+      Case 1: $Res[]='\x0' ; $Res[]=$R; Break;
+      Case 2: $Res[]='\x'  ; $Res[]=$R; Break;
       Default:
         $Res->Error();
-        $Res[]='\0x';
+        $Res[]='\x';
         $Res[]=SubStr($R, -2);
       }
+    }
+
+    Function Validate($Res)
+    {
+      Return $Res->Char8($this->Char);
     }
   }
   

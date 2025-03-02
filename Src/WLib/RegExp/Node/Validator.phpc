@@ -21,6 +21,52 @@
       Return False;
     }
     
+  //****************************************************************
+  // Char
+    
+    Function Char8(String|Int $v)
+    {
+      Switch(GetType($v))
+      {
+      Case 'string'  : Return StrLen($v)===1;
+      Case 'integer' : Return $v>=0 && $v<0x100;
+      Default: Return False;
+      }
+    }
+    
+    Function Char(String|Int $v)
+    {
+      Switch(GetType($v))
+      { //TODO: Utf8
+      Case 'string'  : Return StrLen($v)===1;
+      Case 'integer' : Return $v>=0 && $v<0x100;
+      Default: Return False;
+      }
+    }
+    
+    Function Chars(Object|String|Int $v)
+    {
+      Switch(GetType($v))
+      { //TODO: Utf8
+      Case 'object'  : Return $v InstanceOf T_RegExp_Node_Char_Base;
+      Case 'string'  : Return StrLen($v)===1;
+      Case 'integer' : Return $v>=0 && $v<0x100;
+      Default: Return False;
+      }
+    }
+    
+    Function CharToInt(String|Int $v)
+    {
+      Switch(GetType($v))
+      { //TODO: Utf8
+      Case 'string'  : Return Ord($v);
+      Case 'integer' : Return $v;
+      Default: Return 0;
+      }
+    }
+    
+  //****************************************************************
+  
     Function Error( ...$Args)
     {
       Return $this->Log('Error', ...$Args);

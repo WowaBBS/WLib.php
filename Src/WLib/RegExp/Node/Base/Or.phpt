@@ -1,12 +1,12 @@
 <?
-  $this->Load_Type('/RegExp/Node/Base/Base');
-  
-  Class T_RegExp_Node_Base_Or Extends T_RegExp_Node_Base_Base
-  {
-    Var $List=[];
-    
-    Function __Construct($List=[]) { $this->List=$List; }
+  $this->Load_Type('/RegExp/Node/Base/List');
 
+  $this->Load_Type('/RegExp/Node/Base/Repeat'     ); Use T_RegExp_Node_Base_Repeat      As NodeRepeat    ;
+  
+  Class T_RegExp_Node_Base_Or Extends T_RegExp_Node_Base_List
+  {
+    Function IsOr    () { Return True; } //Count($this->List)>1
+    
     Function Make($Res)
     {
       $z=False;
@@ -20,12 +20,23 @@
       }
     }
 
-    Function Validate($Res)
+    Function Optimize($Own)
     {
-      ForEach($this->List As $Node)
-        If(!$Res->NodeStr($Node))
-          Return False;
-      Return True;
+      $Res=Parent::Optimize($Own);
+      If($Res!==$this)
+        Return $Res;
+        
+      $l=$this->List;
+      If(Count($l)!==2)
+        Return $this;
+      
+      $GLOBALS['Loader']->Log('Debug', 'Or:')->Debug($l);
+      
+      If($l[0]->IsSolid() && $l[1]->IsEmpty()) Return New NodeRepeat($l[0], 0, 1); //TODO: Check scudge
+      If($l[1]->IsSolid() && $l[0]->IsEmpty()) Return New NodeRepeat($l[0], 0, 1, '?');
+      
+      Return $this;
     }
+
   }
   

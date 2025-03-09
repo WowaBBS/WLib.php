@@ -10,14 +10,14 @@
       Return $Node->Validate($this);
     }
 
-    Function NodeStr(String|Node $Node)
+    Function NodeStr($Node) //String|Node
     {
       Switch(GetType($Node))
       {
       Case 'string': Return True; //TODO:
       Case 'object': Return $this->Node($Node);
       }
-      $this->Error('Unsupported node type: ', GetType($Node))->Debug($Node);
+      $this->Error('Unsupported node type: ', GetType($Node))->Debug($Node)->BackTrace();
       Return False;
     }
     

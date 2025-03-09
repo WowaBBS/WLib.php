@@ -6,9 +6,26 @@
   Class T_RegExp_Node_Base_Base Implements Stringable
   {
     Function __Construct() {}
+
+    Static Function ArgsToArgs($Args) { Return $Args; }
+    
+    Function IsOr     () { Return False; }
+    Function IsRepeat () { Return False; }
+    Function IsSolid  () { Return False; }
+    Function IsEmpty  () { Return False; }
     
     Function Init(Factory $Res)
     {
+    }
+    
+    Function Optimize($Own) { Return $this; }
+
+    //TODO: Move into an oprimizer?
+    Function Optimize_Object($v)
+    {
+      if(!Is_Object($v)) Return $v;
+      $v=$v->Optimize($this);
+      Return $v;
     }
     
     Function Make(Maker $Res) { $Res->Error(); }

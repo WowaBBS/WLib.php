@@ -3,7 +3,8 @@
 
   Class C_RegExp_Char_Code Extends C_Object
   {
-    Var $List=[];
+    Var $List    =[];
+    Var $ListStr =[];
   
     Static Function _GetDefQouteCharsMap()
     {
@@ -46,59 +47,90 @@
       $Exclude   =Array_Flip(Str_Split($Exclude   ));
       $AsIs      =Array_Flip(Str_Split($AsIs      ));
       
-      $List=[];
+      $ListStr =[];
+      $List    =[];
       For($i=0; $i<256; $i++)
       {
         $c=Chr($i);
         Switch(True)
         {
         Case !Is_Null($v=$Override[$c]?? Null):
+          $a=['One', $v];
           Break;
         Case IsSet($Quote[$c])&&!IsSet($Exclude[$c]):
           $v=Preg_Quote($c);
+          $a=['One', $v];
           Break;
         Case IsSet($AsIs[$c]):
           $v=$c;
+          $a=['One', $c];
           Break;
         Default:
-          $v=Static::Hex($i);
+          $v=Static::HexStr($i);
+          $a=Static::HexArr($i);
         }
-        $List[$i]=$v;
+        $List    [$i]=$a;
+        $ListStr [$i]=$v;
       }
       
       ForEach($Delimiter As $c)
         $List[Ord($c)]=Preg_Quote($c, $c);
       
-      $this->List=$List;
+      $this->List    =$List;
+      $this->ListStr =$ListStr;
       Parent::_Init($Args);
     }
   
-    Static Function Hex($Char) { Return '\\x'.StrToUpper(Bin2Hex(Chr($Char))); }
-    Function CharCode($Char) { Return $this->List[$Char]??=Static::Hex($Char); }
+    Static Function HexStr($Char) { Return '\\x'.StrToUpper(Bin2Hex(Chr($Char))); }
+    Static Function HexArr($Char) { Return ['Hex', $Char]; }
+    Function CharCodeStr($Char) { Return $this->ListStr[$Char]??=Static::HexStr($Char); }
+    Function CharCodeArr($Char) { Return $this->List   [$Char]??=Static::HexArr($Char); }
     
-    Function Range_Simple($From, $To)
+    Function Range_SimpleArr($From, $To)
     {
-      If($From===0 && $To===255) Return '.';
-      If($From===$To) Return $this->CharCode($From);
+      If($From===0 && $To===255) Return ['Class', '.'];
+      If($From===$To) Return $this->CharCodeArr($From);
       Return False;
     }
     
-    Function Range($From, $To)
+    //TODO: Remove
+    Function Range_SimpleStr($From, $To)
     {
-      If($Res=$this->Range_Simple($From, $To))
+      If($From===0 && $To===255) Return '.';
+      If($From===$To) Return $this->CharCodeStr($From);
+      Return False;
+    }
+    
+    Function RangeArr(Array &$Res, $From, $To)
+    {
+      If($R=$this->Range_SimpleArr($From, $To))
+        $Res[]=$R;
+      ElseIf($From+1===$To)
+      {
+        $Res[]=$this->CharCodeArr($From);
+        $Res[]=$this->CharCodeArr($To);
+      }
+      Else
+        $Res[]=[$this->CharCodeArr($From), $this->CharCodeArr($To)];
+    }
+    
+    //TODO: Remove
+    Function RangeStr($From, $To)
+    {
+      If($Res=$this->Range_SimpleStr($From, $To))
         Return $Res;
       If($From+1===$To)
-        Return $this->CharCode($From).$this->CharCode($To);
-      Return $this->CharCode($From).'-'.$this->CharCode($To);
+        Return $this->CharCodeStr($From).$this->CharCodeStr($To);
+      Return $this->CharCodeStr($From).'-'.$this->CharCodeStr($To);
     }
     
-    Function CharCodesToRegexp($List)
+    Function CharCodesToRegExpArr($List)
     {
       Sort($List);
-      $this->_CharCodesToRegexp($List);
+      $this->_CharCodesToRegExpArr($List);
     }
     
-    Function _CharCodesToRegexp($List)
+    Function _CharCodesToRegexpArr($List)
     {
       $Left=-1;
       $Res=[];
@@ -111,12 +143,42 @@
       }
       If(Count($Res)===1)
         ForEach($Res As $From=>$To)
-          If($Simple=$this->Range_Simple($From, $To))
+          If($Simple=$this->Range_SimpleArr($From, $To))
+            Return $Simple;
+      $List=$Res;
+      $Res=['Set'];
+      ForEach($List As $From=>$To)
+        $this->RangeArr($Res, $From, $To);
+      Return $Res;
+    }
+    
+    //TODO: Remove
+    Function CharCodesToRegExpStr($List)
+    {
+      Sort($List);
+      $this->_CharCodesToRegExpStr($List);
+    }
+    
+    //TODO: Remove
+    Function _CharCodesToRegExpStr($List)
+    {
+      $Left=-1;
+      $Res=[];
+      $Pos=-1;
+      ForEach($List As $Char)
+      {
+        If($Left<0 || $Left+1!==$Char)
+          $Pos=$Char;
+        $Left=$Res[$Pos]=$Char;
+      }
+      If(Count($Res)===1)
+        ForEach($Res As $From=>$To)
+          If($Simple=$this->Range_SimpleStr($From, $To))
             Return $Simple;
       $List=$Res;
       $Res=[];
       ForEach($List As $From=>$To)
-        $Res[]=$this->Range($From, $To);
+        $Res[]=$this->RangeStr($From, $To);
       $Res=Implode('', $Res);
       Return '['.$Res.']';
     }

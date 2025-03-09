@@ -5,8 +5,25 @@
   {
     Var $Chars=[];
     
+    Function IsSolid  () { Return True; }
+    
     Function __Construct($Chars=[]) { $this->Chars=$Chars; }
 
+    Static Function ArgsToArgs($Args)
+    {
+      Switch(Count($Args))
+      {
+      Case 0: $Args=[[]]; Break;
+      Case 1:
+        If(//Is_Array($Args[0]?? 0) && Is_String($Args[0][0]?? 0) || 
+           Is_String($Args[0]?? 0))
+          $Args=[$Args];
+        Break;
+      Default: $Args=[$Args];
+      }
+      Return $Args;
+    }
+    
     Function Init($Res)
     {
       Parent::Init($Res);
@@ -14,10 +31,19 @@
       $Chars=$this->Chars;
       ForEach($Chars As $k=>$Char)
       {
-        if(Is_Array($Char))
+        If(Is_Array($Char))
         {
-          If(Count($Char)===2) //TODO: Validate chars
-            $this->Chars[$k]=$Res->Range($Char[0], $Char[1]);
+          If(Count($Char)===2)
+          {
+            [$a, $b]=$Char;
+            if(Is_String($a) && $Res->GetType($a))
+            {
+              $this->Chars[$k]=$Res->Node($Char);
+            //$GLOBALS['Loader']->Log('Debug', 'Set.Char: ', $this->Chars[$k]);
+            }
+            Else //TODO: Validate chars
+              $this->Chars[$k]=$Res->Range($a, $b);
+          }
         }
       }
     }

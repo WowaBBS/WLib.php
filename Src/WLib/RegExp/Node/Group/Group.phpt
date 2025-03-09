@@ -16,24 +16,50 @@
       '>'  =>['(?\>' ,''   ,')' ,'No'   ], //(? >     -- Only Once
     ];
     
-    Function __Construct($Node, $Id=Null, $Type=Null) { $this->Node=$Node; $this->Id=$Id; $this->Type=$Type; }
+    Function IsSolid  () { Return True; }
     
+    Function __Construct($Node, $Id=Null, $Type=Null) { $this->Node=$Node; $this->Id=$Id; $this->Type=$Type; }
+
     Static Function DetectType($Id)
     {
       If($Id===True  ) Return ''  ;
-      If($Id===Null  ) Return ':' ;
-      If($Id===False ) Return '|' ;
+      If($Id===Null  ) Return '|' ;
+      If($Id===False ) Return ':' ;
       If(Is_String($Id)) Return True? '<':'\'';
       Return Null;
     }
     
+    Function Init($Res)
+    {
+      Parent::Init($Res);
+      
+      $this->Node=$Res->Node($this->Node);
+      
+      If(Is_Null($this->Type??=Self::DetectType($this->Id)))
+        Return $Res->Error('Unknown Id');
+    }
+    
+    Function Optimize($Own)
+    {
+      If(!Parent::Optimize($Own))
+        Return Null;
+        
+      $Node=$this->Optimize_Object($this->Node);
+      If(!$Node)
+        Return Null;
+      
+      $this->Node=$Node; //Check Or
+      
+      If($this->Type!==':') Return $this;
+    //If(!Is_Object($Node)) Return $Node;
+      If($Node->IsOr    ()) Return $this;
+      If($Own?->IsRepeat()) Return $this;
+      Return $Node;
+    }
     Function Make($Res)
     {
       $Id   =$this->Id   ;
       $Type =$this->Type ;
-      
-      If(Is_Null($Type??=Self::DetectType($Id)))
-        Return $Res->Error('Unknown Id');
       
       [$Begin, $Mid, $End, $TypeId]=Self::$Types[$Type]?? Self::$Types[''];
       Switch($TypeId)

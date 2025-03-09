@@ -13,9 +13,10 @@
     
     Var $CharCodes=Null;
     
-    Function CharCode           ($Char) { Return $this->CharCodes->CharCode           ($Char); }
-    Function CharCodesToRegexp  ($List) { Return $this->CharCodes->CharCodesToRegexp  ($List); }
-    Function _CharCodesToRegexp ($List) { Return $this->CharCodes->_CharCodesToRegexp ($List); }
+    Function CharCode              ($Char) { Return $this->CharCodes->CharCode              ($Char); }
+    Function CharCodesToRegExp     ($List) { Return $this->CharCodes->CharCodesToRegexp     ($List); }
+    Function _CharCodesToRegExpArr ($List) { Return $this->CharCodes->_CharCodesToRegexpArr ($List); }
+    Function _CharCodesToRegExpStr ($List) { Return $this->CharCodes->_CharCodesToRegexpStr ($List); }
     
     Var $CharMap    =[];
     Var $CharMapEnd =null;
@@ -51,16 +52,16 @@
       Return $Res->ToStatic();
     }
 
-    Function FromListWords($L, $Ends=Null, $Debug=False)
+    Function FromListWords($L, $Debug=False)
     {
       Sort($L, SORT_STRING);
     
-      $M=[];
+      $Res=[];
       $Prev='';
       ForEach($L As $s)
       {
         $Diff=StrSpn($Prev^$s ,"\0");
-        $m=&$M;
+        $m=&$Res;
         For($i=0, $l=StrLen($Prev); $i<$l; $i++)
           if($i<=$Diff)
             $m=&$m[Ord($Prev[$i])];
@@ -70,7 +71,7 @@
             Break;
           }
         
-        $m=&$M;
+        $m=&$Res;
         For($i=0, $l=StrLen($s); $i<$l; $i++)
         {
           $m=&$m[Ord($s[$i])];
@@ -80,13 +81,36 @@
 
         $Prev=$s;
       }
-      $M=$this->_Analyze($M);
+      $Res=$this->_Analyze($Res);
       If($Debug)
-        $this->Log('Debug')->Debug($M);
-      
-      $Res=$M->GetRegExp($Ends);
-      If($Ends===False)
-        $Res.='$';
+        $this->Log('Debug')->Debug($Res);
+     
+      Return $Res;
+    }
+
+    Function FromListWordsStr($L, $Ends=Null, $Debug=False)
+    {
+      $Res=$this->FromListWords($L, $Debug);
+      If(True)
+      {
+        $Res=$Res->GetRegExpArr($Ends);
+        If($Ends===False)
+          $Res=['Sequence', $Res, '$'];
+        
+        $Factory=$this->Create_Object('/RegExp/Node/Factory');
+      //$this->Log('Debug', 'Arr:')->Debug($Res);
+        $Node=$Factory->Node($Res);
+        $Node=$Node->Optimize(Null);
+        $Res=$Node->ToString();
+      //$this->Log('Debug', 'Str:')->Debug($Res);
+      }
+      Else
+      {
+        $Res=$Res->GetRegExpStr($Ends);
+        If($Ends===False)
+          $Res.='$';
+      }
+
       Return $Res;
     }
 

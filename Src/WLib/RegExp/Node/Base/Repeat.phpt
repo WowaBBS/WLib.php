@@ -8,6 +8,8 @@
     Var $Max=1;
     Var $Type=''; // '', '+', '?'
  
+    Function IsRepeat() { Return $this->Min!==1 || $this->Max!==1; } //TODO: Validate
+    
     Function __Construct($Node, $Min=0, $Max=-1, $Type='')
     {
       $this->Node =$Node ;
@@ -16,6 +18,13 @@
       $this->Type =$Type ;
     }
 
+    Function Init($Res)
+    {
+      Parent::Init($Res);
+      
+      $this->Node=$Res->Node($this->Node);
+    }
+    
     Function Make($Res)
     {
       $Res[]=$this->Node;

@@ -12,6 +12,15 @@
     
     Function __Construct($Condition, $Then, $Else=Null) { $this->Condition=$Condition; $this->Then=$Then; $this->Else=$Else; }
     
+    Function Init($Res)
+    {
+      Parent::Init($Res);
+      
+      $this->Condition =$Res->Node($this->Condition );
+      $this->Then      =$Res->Node($this->Then      );
+      $this->Else      =$Res->Node($this->Else      );
+    }
+    
     Function Make($Res)
     {
       $Res->Begin('(?(');

@@ -65,7 +65,60 @@
       Return $Res;
     }
     
-    Function GetRegExp($Ends=Null)
+    Function GetRegExpArr($Ends=Null)
+    {
+      $Builder=$this->Builder;
+      $Keys=[];
+      $Subs=[];
+      ForEach($this->Map As $Char=>$Sub)
+      {
+        $Key=$Sub->GetKey();
+        $Keys[$Key][]=$Char;
+        $Subs[$Key]??=$Sub;
+      }
+      
+      $Res=['Or'];
+      $End=$Ends===False || $this->End;
+      ForEach($Keys As $Key=>$Chars)
+      {
+        $Sub=$Subs[$Key];
+        
+        If(!$Sub->Map && $Ends===False) Continue;
+        
+        $Res2=['Sequence'];
+        $Res2[]=$Builder->_CharCodesToRegexpArr($Chars);
+        
+        If($R2=$Sub->GetRegExpArr($Ends))
+        {        
+          $End=False;
+          $Res2[]=$R2;
+        }
+        
+        If(Count($Res2)>1)
+          $Res[]=$Res2;
+      }
+      
+      If($this->End)
+        $Ends=False;
+      
+      If(False) // TODO: Remove this branch after optimization
+      Switch(Count($Res)) //TODO: Node.Optimize?
+      {
+      Case 1: Return '';
+      Case 2:
+        If($Ends===Null)
+          Return $Res[1];
+        If($Ends===False && $End)
+          Return ['Repeat', $Res[1], 0, 1];
+        Break;
+      }
+      If($Ends!==Null)
+        $Res[]=$Ends? '$':'';
+      Return ['Group', $Res, False];
+    }
+    
+    //TODO: Remove
+    Function GetRegExpStr($Ends=Null)
     {
       $Builder=$this->Builder;
       $Keys=[];
@@ -78,31 +131,16 @@
       }
       
       $Res=[];
-      If($Ends!==False)
+      $End=$Ends===False || $this->End;
+      ForEach($Keys As $Key=>$Chars)
       {
-        $End=$this->End;
-        ForEach($Keys As $Key=>$Chars)
-        {
-          $Sub=$Subs[$Key];
-          $R2=$Sub->GetRegExp($Ends);
-          If(StrLen($R2))
-            $End=False;
-          $Res[]=$Builder->_CharCodesToRegexp($Chars).$R2;
-        }
-      }
-      Else
-      {
-        $End=True;
-        ForEach($Keys As $Key=>$Chars)
-        {
-          $Sub=$Subs[$Key];
-          If(!$Sub->Map) Continue;
-          
-          $R2=$Sub->GetRegExp($Ends);
-          If(StrLen($R2))
-            $End=False;
-          $Res[]=$Builder->_CharCodesToRegexp($Chars).$R2;
-        }
+        $Sub=$Subs[$Key];
+        If(!$Sub->Map && $Ends===False) Continue;
+
+        $R2=$Sub->GetRegExpStr($Ends);
+        If(StrLen($R2))
+          $End=False;
+        $Res[]=$Builder->_CharCodesToRegexpStr($Chars).$R2;
       }
       
       if($this->End)

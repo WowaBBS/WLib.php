@@ -5,6 +5,8 @@
   {
     Var $Name ='\w';
     
+    Function IsSolid  () { Return True; }
+    
     Function __Construct($Name='\w') { $this->Name=$Name; }
 
     Function Make($Res)

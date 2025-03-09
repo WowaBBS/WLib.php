@@ -5,6 +5,8 @@
   {
     Var $Char =0;
     
+    Function IsSolid  () { Return True; }
+    
     Function __Construct($Char=0) { $this->Char=$Char; }
 
     Function Make($Res)

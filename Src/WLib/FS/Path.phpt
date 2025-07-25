@@ -189,6 +189,6 @@
     }
   }
 
-  #[Deprecated("Use T_FS_Path As TPath;")]
+  //Doesn't work in PHP8.4 #[Deprecated("Use T_FS_Path As TPath;")]
   Class TPath Extends T_FS_Path {}
 ?>

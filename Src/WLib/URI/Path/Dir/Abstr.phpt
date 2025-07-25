@@ -38,7 +38,7 @@
     }
   }
   
-  #[Deprecated("Use T_URI_Path_Dir_Abstr As TAbsDir;")]
+  //Doesn't work in PHP8.4 #[Deprecated("Use T_URI_Path_Dir_Abstr As TAbsDir;")]
   Class TAbsDir Extends T_URI_Path_Dir_Abstr {};
  
   $Loader->End_Type('/URI/Path/Dir/Abstr');

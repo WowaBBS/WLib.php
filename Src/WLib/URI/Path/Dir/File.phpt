@@ -44,7 +44,7 @@
     }
   }
  
-  #[Deprecated("Use T_URI_Path_Dir_File As TFileDir;")]
+  //Doesn't work in PHP8.4 #[Deprecated("Use T_URI_Path_Dir_File As TFileDir;")]
   Class TFileDir Extends T_URI_Path_Dir_File {};
  
   $Loader->End_Type('/URI/Path/Dir/File');

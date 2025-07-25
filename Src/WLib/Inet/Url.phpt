@@ -109,7 +109,7 @@
         $this->Protocol=$Matches[1];
         If(!$this->DefPort)
         {
-          $Protocols=T_Uri_Url_Protocols::Get();
+          $Protocols=T_Inet_Protocols::Get();
           $this->DefPort=$Protocols->Prot2Port($this->Protocol);
         }
         $URL=$Matches[2];
@@ -317,6 +317,6 @@
     }
   }
 
-  #[Deprecated("Use T_Inet_Url As TUrl;")]
+  //Doesn't work in PHP8.4 #[Deprecated("Use T_Inet_Url As TUrl;")]
   Class TUrl Extends T_Inet_Url {}
 ?>

@@ -8,7 +8,7 @@
   // fido   : 2:5057/21.69 & 2:5057/21.777                                   \\
   //*************************************************************************\\
  
-  Class T_Uri_Url_Protocols
+  Class T_Inet_Protocols //T_Uri_Url_Protocols
   {
     Var $Prot2Port = [];
     Var $Port2Prot = [];

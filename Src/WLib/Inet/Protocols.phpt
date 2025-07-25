@@ -20,7 +20,7 @@
       Static $Instance=null;
       if($Instance)
         return $Instance;
-      return $Instance=new T_Uri_Url_Protocols();
+      return $Instance=new Self();
     }
   
     Function __Construct()

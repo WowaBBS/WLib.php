@@ -423,16 +423,18 @@
           // TODO: $this->DebugL($Arg,3);
           Switch(GetType($Arg))
           {
-          Case 'boolean'       : $this->WriteBool  ($Arg                    ); break;
-          Case 'integer'       : $this->WriteNum   ($Arg                    ); break;
-          Case 'double'        : $this->WriteFloat ($Arg                    ); break;
-          Case 'string'        : $this->WriteStr   ("'".$Arg."'"            ); break;
-          Case 'NULL'          : $this->WriteNull  (                        ); break;
-        //Case 'float'         : $this->WriteFloat ($Arg                    ); break;
-          Case 'unknown type'  : $this->WriteDef   ($Arg                    ); break;
-          Case 'user function' : $this->WriteDef   ($Arg                    ); break;
+          Case 'boolean'       : $this->WriteBool  ($Arg         ); break;
+          Case 'integer'       : $this->WriteNum   ($Arg         ); break;
+          Case 'double'        : $this->WriteFloat ($Arg         ); break;
+          Case 'string'        : $this->WriteStr   ("'".$Arg."'" ); break;
+          Case 'NULL'          : $this->WriteNull  (             ); break;
+        //Case 'float'         : $this->WriteFloat ($Arg         ); break;
+          Case 'unknown type'  : $this->WriteDef   ($Arg         ); break;
+          Case 'user function' : $this->WriteDef   ($Arg         ); break;
           Case 'object'        :
           Case 'array'         :
+            $this->Debug($Arg, 3);
+            Break;
           Case 'resource'      :
           Default              :
             $this->Debug($Arg, 1);

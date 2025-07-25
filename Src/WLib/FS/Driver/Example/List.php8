@@ -14,5 +14,5 @@
   ForEach($FS[RealPath(__DIR__.'/..')]->Call('List')As $Item)
     $List[]=$Item->Get($Attr);
   $List[]=$FS['Unexists']->Get($Attr);
-  Table::Cr($List)->ToLog($FS->Log('Debug', 'List:'));
+  $FS->Log('Debug', 'List:', Table::Cr($List));
 ?>

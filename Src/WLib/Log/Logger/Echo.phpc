@@ -19,7 +19,7 @@
   
     Function _Init(Array $Args)
     {
-      if(!IsSet($Args['Format'])) $Args['Format']=self::_DetectFormat(); // TODO: ??=
+      $Args['Format']??=Self::_DetectFormat();
       parent::_Init($Args);
     }
     

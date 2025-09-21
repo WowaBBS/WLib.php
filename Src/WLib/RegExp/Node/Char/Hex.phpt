@@ -11,7 +11,7 @@
 
     Function Make($Res)
     {
-      $R=DecHex($Res->CharToInt8($this->Char));
+      $R=StrToUpper(DecHex($Res->CharToInt8($this->Char))); // TODO: Optional StrToUpper
       Switch($l=StrLen($R))
       {
       Case 1: $Res[]='\x0' ; $Res[]=$R; Break;

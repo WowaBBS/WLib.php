@@ -1,19 +1,21 @@
 <?
   $this->Load_Type('/RegExp/Node/Base/Base');
   
-  Class T_RegExp_Node_Base_List Extends T_RegExp_Node_Base_Base
+  Class T_RegExp_Node_Base_List Extends T_RegExp_Node_Base_Base //Or and Sequence
   {
     Var $List=[];
     
-    Function __Construct(Array $List=[]) { $this->List=$List; }
+  //Function __Construct(Array $List=[]) { $this->List=$List; }
+    Function __Construct(...$List) { $this->List=$List; }
     
-    Static Function ArgsToArgs($Args)
+  //Static Function ArgsToArgs($Args)
+    Static Function _ArgsToArgs($Args) //TODO: Was ArgsToArgs, Remove
     {
       Switch(Count($Args))
       {
       Case 0: $Args=[[]]; Break;
       Case 1:
-        If(Is_Array($Args[0]?? 0) && Is_String($Args[0][0]?? 0) || 
+        If(//Is_Array($Args[0]?? 0) && Is_String($Args[0][0]?? 0) || 
            Is_String($Args[0]?? 0))
           $Args=[$Args];
         Break;
@@ -23,14 +25,14 @@
       Return $Args;
     }
     
-    Function Optimize($Own)
+    Function Optimize($Optimizer, $Own)
     {
-      If(!Parent::Optimize($Own))
-        Return Null;
+      If(($Res=Parent::Optimize($Optimizer, $Own))!==$this)
+        Return $Res;
         
       $List=[];
       ForEach($this->List As $Item)
-        If($Item=$this->Optimize_Object($Item))
+        If($Item=$this->Optimize_Object($Optimizer, $Item))
           $List[]=$Item;
       $this->List=$List;
       
@@ -46,8 +48,10 @@
       
       $List=[];
       ForEach($this->List As $Node)
-        If($Node)
+        If($Node || $Node==='')
           $List[]=$Res->Node($Node);
+        Else
+          $this->Log('Erorr', 'Unknown node ', $Node)->BackTrace(); // TODO: Error $this->Log
       $this->List=$List;
     }
     

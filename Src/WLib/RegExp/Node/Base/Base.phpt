@@ -7,7 +7,7 @@
   {
     Function __Construct() {}
 
-    Static Function ArgsToArgs($Args) { Return $Args; }
+    Static Function ArgsToArgs($Args) { Return $Args; } //TODO: Remove
     
     Function IsOr     () { Return False; }
     Function IsRepeat () { Return False; }
@@ -18,13 +18,13 @@
     {
     }
     
-    Function Optimize($Own) { Return $this; }
+    Function Optimize($Optimizer, $Own) { Return $this; }
 
     //TODO: Move into an oprimizer?
-    Function Optimize_Object($v)
+    Function Optimize_Object($Optimizer, $v)
     {
       if(!Is_Object($v)) Return $v;
-      $v=$v->Optimize($this);
+      $v=$v->Optimize($Optimizer, $this);
       Return $v;
     }
     
@@ -38,7 +38,7 @@
       Return $Loader->Create_Object('/RegExp/Node/Maker');
     }
     
-    Function ToString(Maker $Maker=Null)
+    Function ToString(?Maker $Maker=Null)
     {
       $Maker??=Self::_GetMaker();
       $this->Make($Maker);

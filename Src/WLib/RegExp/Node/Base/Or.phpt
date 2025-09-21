@@ -20,17 +20,16 @@
       }
     }
 
-    Function Optimize($Own)
+    Function Optimize($Optimizer, $Own)
     {
-      $Res=Parent::Optimize($Own);
-      If($Res!==$this)
+      If(($Res=Parent::Optimize($Optimizer, $Own))!==$this)
         Return $Res;
         
       $l=$this->List;
       If(Count($l)!==2)
         Return $this;
       
-      $GLOBALS['Loader']->Log('Debug', 'Or:')->Debug($l);
+    //$GLOBALS['Loader']->Log('Debug', 'Or:')->Debug($l);
       
       If($l[0]->IsSolid() && $l[1]->IsEmpty()) Return New NodeRepeat($l[0], 0, 1); //TODO: Check scudge
       If($l[1]->IsSolid() && $l[0]->IsEmpty()) Return New NodeRepeat($l[0], 0, 1, '?');

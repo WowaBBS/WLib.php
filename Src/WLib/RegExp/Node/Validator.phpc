@@ -5,9 +5,18 @@
   
   Class C_RegExp_Node_Validator Extends C_Object
   {
+    Var $Stack=[];
+  
     Function Node(Node $Node)
     {
-      Return $Node->Validate($this);
+      $this->Stack[]=$Node;
+      $Res=$Node->Validate($this);
+      $Check=Array_Pop($this->Stack);
+      If($Check!==$Node)
+        $this->Log('Error', 'Node stack was rused')->BackTrace();
+      If(!$Res)
+        $this->Log('Error', 'Node is not valid')->Debug($Node);
+      Return $Res;
     }
 
     Function NodeStr($Node) //String|Node
@@ -17,7 +26,9 @@
       Case 'string': Return True; //TODO:
       Case 'object': Return $this->Node($Node);
       }
-      $this->Error('Unsupported node type: ', GetType($Node))->Debug($Node)->BackTrace();
+      $this->Error('Unsupported node type: ', GetType($Node))
+        ->Debug(['Node'=>$Node, 'Stack'=>Array_Reverse($this->Stack)])
+        ->BackTrace();
       Return False;
     }
     
@@ -38,7 +49,12 @@
     {
       Switch(GetType($v))
       { //TODO: Utf8
-      Case 'string'  : Return StrLen($v)===1;
+      Case 'string'  :
+        //TODO: Workaround
+        If(StrLen($v)===1 && $v!=='\\') Return True;
+        If(StrLen($v)===2 && $v[1]!=='\\' && Str_Starts_With($v, '\\')) Return True;
+        If(True) Return True;
+        Return False;
       Case 'integer' : Return $v>=0 && $v<0x100;
       Default: Return False;
       }

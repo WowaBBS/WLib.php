@@ -41,7 +41,7 @@
         "\r"=>'\r',
         "\n"=>'\n',
       ];
-      
+      // TODO: Move into RegExp/C_Maker
       $Delimiter =Array_Flip(Str_Split($Delimiter ));
       $Quote     =Array_Flip(Str_Split($Quote     ));
       $Exclude   =Array_Flip(Str_Split($Exclude   ));
@@ -55,15 +55,15 @@
         Switch(True)
         {
         Case !Is_Null($v=$Override[$c]?? Null):
-          $a=['One', $v];
+          $a=['Char', $v];
           Break;
         Case IsSet($Quote[$c])&&!IsSet($Exclude[$c]):
           $v=Preg_Quote($c);
-          $a=['One', $v];
+          $a=['Char', $v];
           Break;
         Case IsSet($AsIs[$c]):
           $v=$c;
-          $a=['One', $c];
+          $a=['Char', $c];
           Break;
         Default:
           $v=Static::HexStr($i);

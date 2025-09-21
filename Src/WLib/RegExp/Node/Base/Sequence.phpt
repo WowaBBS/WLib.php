@@ -9,9 +9,9 @@
         $Res[]=$Item;
     }
     
-    Function Optimize_Object($Item)
+    Function Optimize_Object($Optimizer, $Item)
     {
-      $Item=Parent::Optimize_Object($Item);
+      $Item=Parent::Optimize_Object($Optimizer, $Item);
       Return $Item?->IsEmpty()? Null:$Item;
     }
   }

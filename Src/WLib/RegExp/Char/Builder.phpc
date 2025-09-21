@@ -91,18 +91,20 @@
     Function FromListWordsStr($L, $Ends=Null, $Debug=False)
     {
       $Res=$this->FromListWords($L, $Debug);
-      If(True)
+      If(True) //New/Old
       {
         $Res=$Res->GetRegExpArr($Ends);
         If($Ends===False)
           $Res=['Sequence', $Res, '$'];
         
-        $Factory=$this->Create_Object('/RegExp/Node/Factory');
+        $Factory   =$this->Create_Object('/RegExp/Node/Factory'   );
+        $Optimizer =$this->Create_Object('/RegExp/Node/Optimizer' );
       //$this->Log('Debug', 'Arr:')->Debug($Res);
+      //$this->Log('Debug', 'Res:',$Ends,' ')->Debug($Res);
         $Node=$Factory->Node($Res);
-        $Node=$Node->Optimize(Null);
+        $Node=$Node->Optimize($Optimizer, Null);
         $Res=$Node->ToString();
-      //$this->Log('Debug', 'Str:')->Debug($Res);
+      //$this->Log('Debug', 'Str:',$Ends,' ', $Res); //->Debug($Node);
       }
       Else
       {

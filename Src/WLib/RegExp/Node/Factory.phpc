@@ -43,7 +43,7 @@
       'Class'     =>NodeClass     ::class,
       'Hex'       =>NodeHex       ::class,
       'Oct'       =>NodeOct       ::class,
-      'One'       =>NodeOne       ::class,
+      'Char'      =>NodeOne       ::class,
       'Range'     =>NodeRange     ::class,
       'Set'       =>NodeSet       ::class,
     ];
@@ -60,17 +60,19 @@
     {
       Switch(GetType($Node))
       {
-      Case 'string': return $this->CreateNode('Str', [$Node]);
-      Case 'object': return $Node;
+      Case 'string': Return $this->CreateNode('Str', [$Node]);
+      Case 'object': Return $Node;
       Case 'array':
         If(Array_Is_List($Node) && Count($Node)>0)
         {
           $Type=Array_Shift($Node);
           $Res=$this->CreateNode($Type, $Node);
+          If(!$Res)
+            $this->Log('Error', 'Wrong Node ', $Type, ': ', $Node);
           Return $Res;
         }
       Default:
-        $this->Log('Error', 'Unknown Node', $Node);
+        $this->Log('Error', 'Unknown Node ', $Node);
       }
     }
     
@@ -80,8 +82,12 @@
     {
       $Class=$this->GetType($Type);
       If(!$Class) Return $this->Log('Error', 'Unknown RegExp node type')->Ret(Null);
-      $Args=$Class::ArgsToArgs($Args);
+    //$this->Log('Debug', 'Args1: ', $Args);
+    //$this->Log('Debug', 'Class: ', $Class);
+      $Args=$Class::ArgsToArgs($Args); // Only where only one arg is list
+    //$this->Log('Debug', 'Args2: ', $Args);
       $Res=New $Class(...$Args);
+    //$this->Log('Debug', 'Res: ', $Res);
       $Res->Init($this); //TODO: ,$this->Validator ?
       If($this->Validator->Node($Res))
         Return $Res;
@@ -89,21 +95,21 @@
       Return Null;
     }
     
-    Function Or        (Array       $List                                                ):NodeOr        { Return $this->CreateNode('Or'        ,[$List                   ]); }
-    Function Repeat    (String|Node $Node, Int $Min=0, Int $Max=-1, String $Type=''      ):NodeRepeat    { Return $this->CreateNode('Repeat'    ,[$Node, $Min, $Max, $Type]); }
-    Function Sequence  (Array $List                                                      ):NodeSequence  { Return $this->CreateNode('Sequence'  ,[$List                   ]); }
+    Function Or        (Array       $List                                                      ):NodeOr        { Return $this->CreateNode('Or'        , $List                    ); }
+    Function Repeat    (String|Node $Node, Int $Min=0, Int $Max=-1, String $Type=''            ):NodeRepeat    { Return $this->CreateNode('Repeat'    ,[$Node, $Min, $Max, $Type]); }
+    Function Sequence  (Array $List                                                            ):NodeSequence  { Return $this->CreateNode('Sequence'  , $List                    ); }
 
-    Function Back      (String|Int|Null  $Id   ,String $Type=Null                        ):NodeBack      { Return $this->CreateNode('Back'      ,[$Id, $Type              ]); }
-    Function Check     (String|Node $Node ,String $Type                                  ):NodeCheck     { Return $this->CreateNode('Check'     ,[$Node, $Type            ]); }
-    Function Comment   (String      $Comment                                             ):NodeComment   { Return $this->CreateNode('Comment'   ,[$Comment                ]); }
-    Function Group     (String|Node $Node      ,String|Bool $Id=Null, String $Type=Null  ):NodeGroup     { Return $this->CreateNode('Group'     ,[$Node, $Id, $Type       ]); }
-    Function If        (String|Node $Condition ,String|Node $Then, String|Node $Else=Null):NodeIf        { Return $this->CreateNode('If'        ,[$Condition, $Then, $Else]); }
-    Function Recursive (String|Int  $Id=0 ,String $Type=Null                             ):NodeRecursive { Return $this->CreateNode('Recursive' ,[$Id, $Type              ]); }
+    Function Back      (String|Int|Null  $Id   ,?String $Type=Null                             ):NodeBack      { Return $this->CreateNode('Back'      ,[$Id, $Type              ]); }
+    Function Check     (String|Node $Node ,String $Type                                        ):NodeCheck     { Return $this->CreateNode('Check'     ,[$Node, $Type            ]); }
+    Function Comment   (String      $Comment                                                   ):NodeComment   { Return $this->CreateNode('Comment'   ,[$Comment                ]); }
+    Function Group     (String|Node $Node      ,String|Bool|Null $Id=Null, ?String $Type=Null  ):NodeGroup     { Return $this->CreateNode('Group'     ,[$Node, $Id, $Type       ]); }
+    Function If        (String|Node $Condition ,String|Node $Then, String|Node|Null $Else=Null ):NodeIf        { Return $this->CreateNode('If'        ,[$Condition, $Then, $Else]); }
+    Function Recursive (String|Int  $Id=0 ,?String $Type=Null                                  ):NodeRecursive { Return $this->CreateNode('Recursive' ,[$Id, $Type              ]); }
     
     Function Class     (String     $Name                                                 ):NodeClass     { Return $this->CreateNode('Class'     ,[$Name                   ]); }
     Function Hex       (String|Int $Code                                                 ):NodeHex       { Return $this->CreateNode('Hex'       ,[$Code                   ]); }
     Function Oct       (String|Int $Code                                                 ):NodeOct       { Return $this->CreateNode('Oct'       ,[$Code                   ]); }
-    Function One       (String|Int $Char                                                 ):NodeOne       { Return $this->CreateNode('One'       ,[$Char                   ]); }
+    Function One       (String|Int $Char                                                 ):NodeOne       { Return $this->CreateNode('Char'      ,[$Char                   ]); }
     Function Range     (String|Int $From, String|Int $To                                 ):NodeRange     { Return $this->CreateNode('Range'     ,[$From, $To              ]); }
-    Function Set       (Array      $Chars                                                ):NodeSet       { Return $this->CreateNode('Set'       ,[$Chars                  ]); }
+    Function Set       (Array      $Chars                                                ):NodeSet       { Return $this->CreateNode('Set'       , $Chars                   ); }
   }

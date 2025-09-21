@@ -39,12 +39,12 @@
         Return $Res->Error('Unknown Id');
     }
     
-    Function Optimize($Own)
+    Function Optimize($Optimizer, $Own)
     {
-      If(!Parent::Optimize($Own))
-        Return Null;
+      If(($Res=Parent::Optimize($Optimizer, $Own))!==$this)
+        Return $Res;
         
-      $Node=$this->Optimize_Object($this->Node);
+      $Node=$this->Optimize_Object($Optimizer, $this->Node);
       If(!$Node)
         Return Null;
       
@@ -56,6 +56,7 @@
       If($Own?->IsRepeat()) Return $this;
       Return $Node;
     }
+    
     Function Make($Res)
     {
       $Id   =$this->Id   ;

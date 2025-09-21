@@ -7,9 +7,10 @@
     
     Function IsSolid  () { Return True; }
     
-    Function __Construct($Chars=[]) { $this->Chars=$Chars; }
+    Function __Construct(...$Chars) { $this->Chars=$Chars; }
 
-    Static Function ArgsToArgs($Args)
+  //Static Function ArgsToArgs($Args)
+    Static Function _ArgsToArgs($Args) //TODO: Was ArgsToArgs, Remove
     {
       Switch(Count($Args))
       {

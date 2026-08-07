@@ -1,0 +1,47 @@
+<?
+  $this->Parent_Class('/Parser/Bin/Reader');
+  
+  Class C_Parser_Text_Reader Extends C_Parser_Bin_Reader
+  {
+  //Var $Bin_Reader      =Null    ;
+    
+  //Var $Read_CharSet    ='UTF-8' ;
+    Var $Default_NewLine ="\n"    ;
+  //Var $Detect_Bom      =True    ;
+    
+    // Format
+    Var $File_CharSet    ='UTF-8' ;
+    Var $NewLine         =''      ;
+    
+    // State
+  //Var $Offset          = 0      ; //?
+  # Var $Column          = 0      ;
+  # Var $Row             = 0      ;
+    
+    Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+    }
+    
+    Function Read_Tokens($Chunks=null)
+    {
+    //$Detect_Bom=$this->Detect_Bom;
+      
+      $ReCoder=$this->Create_Object('/CharSet/ReCoder');
+      
+      ForEach($Chunks?? $this->Read_Chunks()As $Chunk)
+      {
+        $Data=$ReCoder->Write($Chunk);
+        If(StrLen($Data))
+          Yield $Data;
+        While($ReCoder->NeedRead())
+        {
+          $Data=$ReCoder->Read();
+          Yield $Data;
+          If($Data==='')
+            Return;
+        }
+      }
+    }
+  }
+?>

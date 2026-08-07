@@ -1,0 +1,82 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+
+  $FilePath=__FILE__;
+  $Loader->GetLogger()->Add('Tokenizer.Test.log');
+  $Factory=$Loader->Get_Singleton('/CharSet/Factory');
+
+  $Content=File_Get_Contents($FilePath);
+  
+  $Rules=[
+    '/Content'=>['First', '>To'=>'/Start'],
+    '/Start'=>['Union',
+      '/Short'  =>['Str', '<?'    ,'>To'=>'/Code', '>Condition'=>'ShortTags'],
+      '/Assign' =>['Str', '<?='   ,'>To'=>'/Code'],
+      '/PHP'    =>['Str', '<?php' ,'>To'=>'/Code', '>End'=>'\W|$'],
+    ],
+    '/Code'=>['Union',
+    /* */
+      '/Spaces'=>['RegExp' ,'\s+'], //, '>Prefix'=>True
+      '/Word'=>['RegExp' ,'[a-zA-Z_][\\w_]*', '>End'=>'[^\w_]|$',],
+      '/Rem'=>['Union',
+        '/Sharp'    =>['Str' ,'#'  ], //TODO: Attribute
+        '/Inline'   =>['Str' ,'//' ],
+        '/MutiLine' =>['Str' ,'/*' ],
+      ],
+      '/Numeric'=>['RegExp' ,'\d'],
+      '/String'=>['Union',
+        '/Single'  =>['Str' ,"'"   ], //'>To'=>'/String/Single'
+        '/Double'  =>['Str' ,'"'   ], //'>To'=>'/String/Double'
+        '/HereDoc' =>['Str' ,'<<<' ], //'>To'=>'/String/HereDoc'
+      ],
+      '/Execute'  =>['Str' ,'`'  ],
+      '/Operator' =>['Union',
+        '/Brackets' =>['Str', '[', ']', '(', ')', '{', '}'],
+        '/Unary'    =>['Str', '++', '--', '~', '@', '$', '-', '+'], // -, +
+        '/Arrow'    =>['Str', '->', '?->', '.'],
+        '/Compare'  =>['Str', '<=>'. '=='. '==='. '!='. '!==', '<', '<=', '>', '>='],
+        '/Binary'   =>['Str', '+', '-', '*', '/',  '%',  '|', '&',  '^'],
+        '/Binary2'  =>['Str', '||','&&', '<<', '>>',],
+        '/Control'  =>['Str', '?', '??', '?:', ',', ':', ';', '...'],
+        '/Assign'   =>['Str', '=', '??=', '?:=', '+=', '-=', '*=', '/=', '.=', '%=', '|=', '&=', '^=', '||=', '&&=', '<<=', '>>=',],
+      ],
+      '/Attribute' =>['Str' ,"#[", '>To'=>'/TODO'],
+      '/End'       =>['Str' ,'?>', '>To'=>'/Content'],
+      '/TODO'      =>['TODO'],
+    /* */
+    ],
+    
+  //'string_single'  =>[['RegExp'  ,"'[^'\\\\]*(?:[\\\\.][^'\\\\]*)*'"],],
+  //'string_double'  =>[['RegExp'  ,'"[^"\\\\]*(?:[\\\\.][^"\\\\]*)*"'],],
+  //'string_heredoc' =>[
+  //  ['RegExp'  ,'<<<'],
+  //  ['RegExp'  ,'([\\w_][\\w_\\d]*)', 'class'=>'string_heredoc_id'],
+  //  ['AnyChars', 'class'=>'string_heredoc_value'],
+  //  ['RegExp'  ,'\\n'],
+  //  ['BackValue' ,-1],
+  //  ['RegExp'  ,';\\n'],
+  //],
+  //'rem1'     =>['RegExp' ,'\\#[^\\n]*[\\n]?'                          ],
+  //'rem2'     =>['RegExp' ,'\\/\\/[^\\n]*[\\n]?'                       ],
+  //'rem3'     =>['RegExp' ,'\\/\\*.*?\\*\\/'                           ],
+  //'execute'  =>['RegExp' ,'`"[^`]*`'                                  ],
+  //'float'    =>['RegExp' ,'\\d+(?:\\.\\d+(?:e[+-]?\\d+)?|e[+-]?\\d+)' ],
+  //'integer'  =>['RegExp' ,'\\d+'                                      ],
+  //'word'     =>['RegExp' ,'[\\w_][\\w_\\d]*'                          ],
+  ];
+
+  $Reader=$Loader->Create_Object('/Parser/Text/Tokenizer', [
+    'Chunk_Size' =>64        ,
+    'FilePath'   =>$FilePath ,
+    'Content'    =>$Content  ,
+    'Rules'      =>$Rules    ,
+    'Start'      =>'/Content',
+  ]);
+
+  ForEach($Reader->Read_Tokens() As $Type=>$Token)
+  {
+    $Loader->Log('Log', 'Token ',$Reader->Offset,': ', $Type, ': ', [$Token]);//->Debug($Token);
+  }
+  
+//$Loader->Log('Debug')->Debug($Reader);
+?>

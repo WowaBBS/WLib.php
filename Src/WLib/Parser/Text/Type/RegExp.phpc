@@ -1,0 +1,28 @@
+<?
+  $this->Load_Class('/Parser/Text/Type/Base');
+//$this->Load_Class('/Parser/Text/Type/Str');
+  
+  Class C_Parser_Text_Type_RegExp Extends C_Parser_Text_Type_Base //C_Parser_Text_Type_Str
+  {
+    Var $Value ='';
+    Var $End   =Null;
+    Var $More  =Null;
+
+    Function Init_Params($k, $v)
+    {
+      Switch($k)
+      {
+      Case '>End'  ; $this->End  =$v; Return True;
+      Case '>More' ; $this->More =$v; Return True;
+      }
+      Return Parent::Init_Params($k, $v);
+    }
+    
+    Function _Init_Args(Array $Args) { $this->Value=$Args[0]?? ''; Return Count($Args)==1; } // TODO: Check is is strings
+    
+    Function _Init_RegExp($Res)
+    {
+      $Res->RegExp($this->Value, $this, $this->More);
+    }
+  }
+?>

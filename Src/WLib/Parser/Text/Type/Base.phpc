@@ -1,0 +1,130 @@
+<?
+  $this->Load_Class('/Object');
+  
+  Class C_Parser_Text_Type_Base Extends C_Object
+  {
+    Var $Tokenizer =Null; //TODO: Remove. Use Rules instead of
+    Var $Parent    =Null;
+  //Var $Args      =[];
+    Var $Sub       =[];
+    Var $To        =Null; // Change state
+    Var $Name      ='';
+    Var $FullName  ='';
+    Var $Condition =[];
+  
+    Function _Init($Args)
+    {
+      $Rules=$Args['Rules'];
+      
+    //$Hide=($v=$Rules[$k='>Hide'])
+      $this->Tokenizer =$Args['Tokenizer' ] ->Object_GetWeak();
+      $this->Parent    =$Args['Parent'    ]?->Object_GetWeak();
+      $this->Name      =$Args['Name'      ];
+      $this->FullName  =($this->GetParent()?->FullName?? '').$this->Name;
+      Parent::_Init($Args);
+      $this->InitRules($Rules);
+    }
+    
+    Function OnChild($Child)
+    {
+      If($Parent=$this->GetParent())
+        $Parent->OnChild($Child);
+    }
+    
+    Function GetTokenizer () { Return $this->Tokenizer->Get(); }
+    Function GetParent    () { Return $this->Parent  ?->Get(); }
+    
+    Function Init_Params($k, $v)
+    {
+      Switch($k)
+      {
+      Case '>Condition' : $this->Condition =$v; Return True;
+      Case '>To'        : $this->To        =$v; Return True;
+      }
+      Return False;
+    }
+    
+    Function InitRules($List)
+    {
+      $Tokenizer=$this->GetTokenizer();
+    
+      $Sub=[];
+      $Args=[];
+      ForEach($List As $k=>$v)
+        If(Is_String($k))
+        {
+          If($k!=='')
+          {
+            Switch($k[0])
+            {
+            Case '>': //TODO: Map
+              If(!$this->Init_Params($k, $v))
+                $this->Log('Error', 'Unknown param ', $k, '=>', $v); //TODO: In
+              UnSet($List[$k]);
+              Break;
+            Case '/':
+              $R=$Tokenizer->Create_Rule($k, $v, $this);
+              $Sub[$k]=$R;
+              UnSet($List[$k]);
+              Break;
+            }
+          }
+        }
+        ElseIf(Is_Integer($k))
+        {
+          $Args[]=$v;
+          UnSet($List[$k]);
+        }
+    
+      $this->Sub=$Sub;
+      
+      If(!$this->_Init_Args($Args) && Count($Args))
+        $this->Log('Error', 'Args ',$Args,' are not allowed in ', $this->FullName);
+      $this->_Init_Rules($List);
+      
+      If($List)
+        $this->Log('Error', 'Not all rules have been processed in ', $this->FullName)->Debug($List);
+    }
+    
+    Function _Init_Args(Array $Args) { Return False; }
+    Function _Init_Rules(Array &$List) { }
+    
+  //****************************************************************
+  // RegExp
+    Var $RegExp_Cached = Null;
+    
+    Function Parse($Chunk, &$Offset, $End)
+    {
+      $RegExp=$this->Get_RegExp();
+      Yield From $RegExp->Parse($Chunk, $Offset, $End);
+    }
+    
+    Function _Get_RegExp()
+    {
+      $Res=$this->Create_Object('/Parser/Text/RegExp');
+      $this->_Init_RegExp($Res);
+      $Res->Finish();
+      $this->Log('Debug', 'RegExp: ', $Res->RegExp_Cur);
+      Return $Res;
+    }
+    
+    Function _Init_RegExp($Res)
+    {
+    }
+    
+    Function Get_RegExp()
+    {
+      Return $this->RegExp_Cached??=$this->_Get_RegExp();
+    }
+
+    Function GetSubRegExp(&$Map, $Sub=False)
+    {
+      $Res=[];
+      ForEach($this->Sub As $SubRule)
+        $Res[]=$SubRule->GetRegExp($Map, $Sub);
+      Return '(?:'.Implode('|', $Res).')';
+    }
+
+  //****************************************************************
+  }
+?>

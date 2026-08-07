@@ -1,0 +1,172 @@
+<?
+  $this->Parent_Class('/Object');
+  
+  Class C_Parser_Text_RegExp Extends C_Object
+  {
+    Var $Texts    =[]; // Str    =>[Str    ,State, More, End  ],
+    Var $RegExps  =[]; // RegExp =>[RegExp ,State, More ],
+    
+    Var $MapText  =[]; // text   =>State
+  //Var $MapTo    =[]; // Id     =>State
+    
+    Var $FirstId ='First' ;
+    Var $MoreId  ='More'  ;
+    Var $TextId  ='Text'  ;
+    
+    Var $RegExp_More ='';
+    Var $RegExp_Main ='';
+    Var $RegExp_Cur  =[];
+    
+    Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+    }
+    
+    Function Text($Str, $To, $End=Null, $More=Null)
+    {
+      $this->MapText[StrToLower($Str)]=$To;
+      $this->Texts[]=[$Str, $To, $More, $End];
+    }
+
+    Function RegExp($Str, $To, $More=Null)
+    {
+      $this->RegExps[]=[$Str, $To, $More];
+    }
+    
+    Static Function _MakeMoreStr(&$Res, $Str, $End)
+    {
+      $Len=StrLen($Str)+($End? 1:0);
+      For($i=1; $i<$Len; $i++)
+        $Res[]=SubStr($Str, 0, $i);
+    }
+    
+    Function _Make_More()
+    {
+      $Res=[];
+      ForEach($this->Texts As [$Str, $To, $More, $End])
+        If($More)
+          $Res[]=$More;
+        Else
+          Self::_MakeMoreStr($Res, $Str, $End);
+      
+      $Res=Array_Flip(Array_Flip($Res));
+      $Res=Array_Map(Preg_Quote(...), $Res);
+        
+      ForEach($this->RegExps As [$Str, $To, $More])
+        If($More)
+          $Res[]=$More?? $Str;
+      
+      $Res=Implode('|', $Res);
+      If($Res!=='')
+      {
+        $Res='(?:'.$Res.')$';
+        If($Id=$this->MoreId)
+          $Res='(?<'.$Id.'>'.$Res.')';
+        Else
+          $Res='(?:'.$Res.')';
+      }
+      $this->RegExp_More=$Res;
+    //Return $Res;
+    }
+    
+    Function _Make_RegExp()
+    {
+      $Res=[];
+      ForEach($this->Texts As [$Str, $To, $More, $End])
+        $Res[]=Preg_Quote($Str).$End;
+      If($Res)
+      {
+        $Res=Implode('|', $Res);
+        $Id=$this->TextId;
+        $Res=['(?<'.$Id.'>'.$Res.')'];
+      }
+      
+      ForEach($this->RegExps As [$Str, $To, $More])
+        $Res[]='(?<'.$To.'>'.$Str.')';
+      $Res=Implode('|', $Res);
+      
+      If($Res!=='')
+        $Res='(?:'.$Res.')';
+      $this->RegExp_Main=$Res;
+    }
+    
+    Function MakeRegExp($More, $End=False, $First=True)
+    {
+    //If($this->RegExp_More==='') $More=False;
+      $Res='';
+      If($this->RegExp_Main!=='')
+      {
+        If($More && $this->RegExp_More!=='')
+          $Res.=$this->RegExp_More.'|';
+        $Res.=$this->RegExp_Main;
+        If($End)
+          $Res.='(?<End>.*?)'; //TODO: Without the End
+        Else
+          $Res.='|$';
+      //If($End || $More)
+          $Res= '(?:'.$Res.')'; //TODO: Without the End
+        If($End)
+          $Res.='?$'; //TODO: Without the End
+        
+        //First
+        If($First===True)
+          $First=$this->FirstId;
+        If($First!=False)
+          $Res='(?<'.$First.'>.*?)'.$Res;
+        
+        $Res='/'.$Res.'/JSs';
+      }
+      $this->RegExp_Cur[$More]=$Res;
+      Return $Res;
+    }
+    
+    Protected Static Function _Texts_Cmp($a, $b)
+    { //[$Str, $To, $More, $End]
+      Return -(StrLen($a[0])<=>StrLen($b[0])) ?: $a[0]<=>$b[0];
+    }
+    
+    Function Finish()
+    {
+      UASort($this->Texts, Static::_Texts_Cmp(...));
+      $this->_Make_More();
+      $this->_Make_RegExp();
+      $this->MakeRegExp(False );
+      $this->MakeRegExp(True  );
+    }
+    
+    Function Parse($Data, &$Offset, $More=False) //TODO: Return [First, Type, Data];
+    {
+    //If($Offset>=StrLen($Data)) { Yield 'More'=>''; Return; }
+      $r=$this->RegExp_Cur[$More];
+      If($r==='')
+      {
+        Yield 'Error/NoRegExp'=>$Data=SubStr($Data, $Offset);
+        $Offset+=StrLen($Data);
+      //Yield 'More'=>'';
+        Return;
+      }
+      
+      If(!Preg_Match($r, $Data, $M, 0, $Offset))//, PREG_UNMATCHED_AS_NULL); //|PREG_OFFSET_CAPTURE
+      {
+        Yield 'Error/NoMatch'=>$Data=SubStr($Data, $Offset);
+        $Offset+=StrLen($Data);
+      //Yield 'More'=>'';
+        Return;
+      }
+      
+    //$R=[];
+      ForEach($M  As $k=>$v)
+        If(Is_String($k) && StrLen($v))
+        {
+        //$R[$k]=$i;
+          If($k==$this->FirstId ) $k='First' ; Else
+          If($k==$this->MoreId  ) $k='More'  ; Else
+          If($k==$this->TextId  ) $k=$this->MapText[$v]??=$this->MapText[StrToLower($v)]?? 'Unknown';
+          
+          Yield $k=>$v;
+          If($k!=='More')
+            $Offset+=StrLen($v);
+        }
+    }
+  }
+?>

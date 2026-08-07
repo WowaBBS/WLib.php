@@ -1,0 +1,93 @@
+<?
+  $this->Parent_Class('/Parser/Text/Reader');
+  
+  Class C_Parser_Text_Tokenizer Extends C_Parser_Text_Reader
+  {
+    Var $Rules=Null;
+    Var $Start='';
+    
+    Function _Init(Array $Args)
+    {
+      $this->Start   =$Args['Start'] ;
+      Parent::_Init($Args);
+      $this->SetRules($Args['Rules']);
+    }
+
+    Function SetRules($v)
+    {
+      $this->Rules=$this->Create_Rule('', $v+['Type'=>'Rules']);
+    }
+ 
+    Function Create_Rule($Name, $Rules, $Parent=Null)
+    {
+      If(Array_Key_Exists($k='Type' ,$Rules)) { $Type=$Rules[$k]; UnSet($Rules[$k]); } Else
+      If(Array_Key_Exists($k=0      ,$Rules)) { $Type=$Rules[$k]; UnSet($Rules[$k]); } Else
+        $Type=$this->Log('Error', 'Unknown type of the rule')->Ret('Base');
+      If($Type[0]!=='/')
+        $Type='/Parser/Text/Type/'.$Type;
+      $Args=[
+        'Name'      =>$Name   ,
+        'Rules'     =>$Rules  ,
+        'Tokenizer' =>$this   ,
+        'Parent'    =>$Parent ,
+      ];
+      $Res=$this->Create_Object($Type, $Args);
+      If($Parent)
+        $Parent->OnChild($Res);
+      Return $Res;
+    }
+    
+    Function GetRule($Name=Null)
+    {
+      Return $this->Rules->Get($Name?? $this->Start);
+    }
+  //****************************************************************
+  
+    Var $State    =Null;
+    Var $Chunk    ='';
+    Var $Offset   =0 ;
+  //Var $NeedMore =False;
+  
+    Function _Rest_Tokens($End)
+    {
+      $Continue=True;
+      While($Continue)//StrLen($this->Chunk))
+      {
+        $Continue=False;
+        ForEach($this->State->Parse($this->Chunk, $this->Offset, $End) As $k=>$v)
+        {
+        //$this->Log('Debug', ' SubToken: ', $k,'=>',$v);
+          If($k==='More') Return;
+          $Continue=StrLen($this->Chunk)>$this->Offset;
+          Yield $k=>$v;
+          If($To=$this->To[$k]?? Null)
+            $this->SetState($To);
+        }
+      }
+    }
+    
+    Function Read_Tokens($Chunks=Null)
+    {
+      $Chunks=Parent::Read_Tokens($Chunks);
+      
+      $this->Chunk  ='';
+      $this->Offset =0;
+      $this->State  =$this->GetRule();
+      ForEach($Chunks As $Chunk)
+      {
+      //$this->Log('Debug', 'Chunk: ', $Chunk);
+      //$this->Log('Debug', 'Chunk: ', StrLen($Chunk), '+', StrLen($this->Chunk)-$this->Offset);
+        If(StrLen($Rest=SubStr($this->Chunk, $this->Offset)))
+          $Chunk=$Rest.$Chunk;
+        $this->Chunk  =$Chunk;
+        $this->Offset =0;
+        Yield From $this->_Rest_Tokens(False);
+      }
+      Yield From $this->_Rest_Tokens(True);
+      If(StrLen($Rest=SubStr($this->Chunk, $this->Offset)))
+        Yield 'Error/Rest'=>$Rest;
+    }
+    
+  //****************************************************************
+  }
+?>

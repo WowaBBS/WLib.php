@@ -1,0 +1,33 @@
+<?
+  $this->Load_Class('/Parser/Text/Type/Base');
+  
+  Class C_Parser_Text_Type_Str Extends C_Parser_Text_Type_Base
+  {
+    Var $List =[];
+    Var $End  =Null;
+    Var $More =Null;
+
+    Function Init_Params($k, $v)
+    {
+      Switch($k)
+      {
+      Case '>End'  ; $this->End  =$v; Return True;
+      Case '>More' ; $this->More =$v; Return True;
+      }
+      Return Parent::Init_Params($k, $v);
+    }
+    
+    Function _Init_Args(Array $Args) { $this->List=$Args; Return Count($Args)>0; } // TODO: Check is it array of strings
+    Function _Init_Rules(&$List)
+    {
+      Parent::_Init_Rules($List);
+    }
+
+    Function _Init_RegExp($Res)
+    {
+      ForEach($this->List As $Value)
+        $Res->Str($Value, $this, $this->End, $this->More);
+    }
+    
+  }
+?>

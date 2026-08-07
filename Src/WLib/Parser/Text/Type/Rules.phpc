@@ -1,0 +1,39 @@
+<?
+  $this->Load_Class('/Parser/Text/Type/Base');
+  
+  Class C_Parser_Text_Type_Rules Extends C_Parser_Text_Type_Base
+  {
+    Var $List =[];
+    Var $End  =Null;
+    Var $More =Null;
+
+    Function Init_Params($k, $v)
+    {
+      Switch($k)
+      {
+      Case '>End'  ; $this->End  =$v; Return True;
+      Case '>More' ; $this->More =$v; Return True;
+      }
+      Return Parent::Init_Params($k, $v);
+    }
+    
+    Function OnChild($Child)
+    {
+      Parent::OnChild($Child);
+    //$this->Log('Debug', 'Add Child ', $Child->FullName, ' to ', Spl_Object_Id($this));
+      $this->List[$Child->FullName]=$Child;
+    }
+    
+    Function _Init_Args(Array $Args) { Return True; } // $this->List=$Args; Return Count($Args)>0; } // TODO: Check is is strings
+  //Function _Init_Args(Array $Args) { $this->List=$Args; Return Count($Args)>0; } // TODO: Check is is strings
+
+    Function Get($Id)
+    {
+      If($Res=$this->List[$Id]?? Null)
+    //If($Res=$this->Sub[$Id]?? Null)
+        Return $Res;
+      $this->Log('Error', 'Unknown ', $Id, ' in ', Array_Keys($this->List));
+      Return Null;
+    }    
+  }
+?>

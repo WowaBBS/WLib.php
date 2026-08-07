@@ -1,0 +1,8 @@
+<?
+  $this->Load_Class('/Parser/Text/Type/Base');
+  
+  Class C_Parser_Text_Type_Union Extends C_Parser_Text_Type_Base
+  {
+    Var $List=[];
+  }
+?>

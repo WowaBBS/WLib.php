@@ -1,0 +1,15 @@
+<?
+  $this->Load_Class('/Parser/Text/Type/Base');
+  
+  Class C_Parser_Text_Type_First Extends C_Parser_Text_Type_Base
+  {
+    Function _GetRegExp(&$Map, $Sub=False)
+    {
+      If($Sub)
+        Return $this->Log('Error', 'Sub RegExp is not supported for ', $this->FullName)->Ret(False);
+      $Map[]=$this->FullName;
+      $m=[];
+      Return '(.*?)'.$this->GetSubRegExp($m, True);
+    }
+  }
+?>

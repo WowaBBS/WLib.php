@@ -22,7 +22,7 @@
     
     Function _Init_RegExp($Res)
     {
-      $Res->RegExp($this->Value, $this, $this->More);
+      $Res->RegExp($this->Value, $this->GetId(), $this->More);
     }
   }
 ?>

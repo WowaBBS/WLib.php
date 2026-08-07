@@ -25,8 +25,9 @@
 
     Function _Init_RegExp($Res)
     {
+      Parent::_Init_RegExp($Res);
       ForEach($this->List As $Value)
-        $Res->Str($Value, $this, $this->End, $this->More);
+        $Res->Text($Value, $this->GetId(), $this->End, $this->More);
     }
     
   }

@@ -3,13 +3,15 @@
   
   Class C_Parser_Text_Type_First Extends C_Parser_Text_Type_Base
   {
-    Function _GetRegExp(&$Map, $Sub=False)
+    Function _Init_RegExp($Res)
     {
-      If($Sub)
-        Return $this->Log('Error', 'Sub RegExp is not supported for ', $this->FullName)->Ret(False);
-      $Map[]=$this->FullName;
-      $m=[];
-      Return '(.*?)'.$this->GetSubRegExp($m, True);
+    //$this->Log('Debug', '!!!!!!!!!!!!!!!!!!');
+      Parent::_Init_RegExp($Res);
+    //$this->GetToRule()?->_Init_RegExp($Res);
+      If($To=$this->GetToRule())
+        $To->_Init_RegExp($Res);
+      Else
+        $this->Log('Error', 'Therer is no to rule: ', $this->To);
     }
   }
 ?>

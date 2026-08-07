@@ -26,6 +26,9 @@
     
     Function _Init_Args(Array $Args) { Return True; } // $this->List=$Args; Return Count($Args)>0; } // TODO: Check is is strings
   //Function _Init_Args(Array $Args) { $this->List=$Args; Return Count($Args)>0; } // TODO: Check is is strings
+    Function _Init_Sub(Array $List)
+    {
+    }
 
     Function Get($Id)
     {

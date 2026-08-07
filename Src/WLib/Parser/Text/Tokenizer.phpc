@@ -39,7 +39,7 @@
     
     Function GetRule($Name=Null)
     {
-      Return $this->Rules->Get($Name?? $this->Start);
+      Return $Name? $this->Rules->Get($Name):Null;
     }
   //****************************************************************
   
@@ -72,7 +72,7 @@
       
       $this->Chunk  ='';
       $this->Offset =0;
-      $this->State  =$this->GetRule();
+      $this->State  =$this->GetRule($this->Start);
       ForEach($Chunks As $Chunk)
       {
       //$this->Log('Debug', 'Chunk: ', $Chunk);

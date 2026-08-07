@@ -161,7 +161,7 @@
         //$R[$k]=$i;
           If($k==$this->FirstId ) $k='First' ; Else
           If($k==$this->MoreId  ) $k='More'  ; Else
-          If($k==$this->TextId  ) $k=$this->MapText[$v]??=$this->MapText[StrToLower($v)]?? 'Unknown';
+          If($k==$this->TextId  ) $k=$this->MapText[$v]??=$this->MapText[StrToLower($v)]?? $this->Log('Error', 'Unkown key ', [$v])->Ret('Error/Unknown');
           
           Yield $k=>$v;
           If($k!=='More')

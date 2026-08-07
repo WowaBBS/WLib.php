@@ -6,7 +6,7 @@
     Var $Tokenizer =Null; //TODO: Remove. Use Rules instead of
     Var $Parent    =Null;
   //Var $Args      =[];
-    Var $Sub       =[];
+  //Var $Sub       =[];
     Var $To        =Null; // Change state
     Var $Name      ='';
     Var $FullName  ='';
@@ -33,6 +33,8 @@
     
     Function GetTokenizer () { Return $this->Tokenizer->Get(); }
     Function GetParent    () { Return $this->Parent  ?->Get(); }
+    Function GetToRule    () { Return $this->GetTokenizer()->GetRule($this->To); }
+    Function GetId        () { Return $this->FullName; }
     
     Function Init_Params($k, $v)
     {
@@ -76,7 +78,8 @@
           UnSet($List[$k]);
         }
     
-      $this->Sub=$Sub;
+      If($Sub)
+        $this->_Init_Sub($Sub);
       
       If(!$this->_Init_Args($Args) && Count($Args))
         $this->Log('Error', 'Args ',$Args,' are not allowed in ', $this->FullName);
@@ -88,6 +91,10 @@
     
     Function _Init_Args(Array $Args) { Return False; }
     Function _Init_Rules(Array &$List) { }
+    Function _Init_Sub(Array $List) 
+    { 
+      $this->Log('Error', 'Sub is not supported in ', $this->FullName)->Debug($List);
+    }
     
   //****************************************************************
   // RegExp

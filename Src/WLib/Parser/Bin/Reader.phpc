@@ -1,0 +1,59 @@
+<?
+  $this->Load_Class('/Object');
+
+  Class C_Parser_Bin_Reader Extends C_Object
+  {
+    Var $FilePath   ='';
+    Var $Stream     =null;
+    Var $Chunk_Size =4096;
+    // STate
+    Var $Offset     =0;
+    
+    Function _Init(Array $Args)
+    {
+      $this->FilePath   =$Args['FilePath'   ];
+      $this->Stream     =$Args['Stream'     ]?? $this->_Init_Stream($Args);
+      $this->Chunk_Size =$Args['Chunk_Size' ]?? $this->Chunk_Size;
+    
+      Parent::_Init($Args);
+    }
+    
+    Function _Init_Stream($Args)
+    {
+      if(Is_String($Content=$Args['Content']?? False))
+        Return $this->Create_Object('/Stream/String', ['Content'=>$Content]);
+      if(Is_File($FilePath=$Args['FilePath']?? ''))
+        Return $this->Create_Object('/Stream/File', ['FileName'=>$FilePath, 'OpenMode'=>omReadOnly|omExist|omBinary]);
+      Return $this->Create_Object('/Stream/Null');
+    }
+    
+    Function Read_Chunks()
+    {
+      Try
+      {
+        $f=&$this->Stream;
+        $s=&$this->Chunk_Size;
+        $f->LockRead();
+        
+        $Offset=&$this->Offset;
+        
+        $f->Seek(0); $Offset=0;
+      
+        While(!$f->Eof())
+        {
+          $Buffer=$f->Recv($s);
+          if($Buffer==='')
+            $this->Log('Fatal', 'Has been received empty data')->BackTrace();
+          Yield $Buffer;
+          $Offset+=StrLen($Buffer);
+        }
+
+        Yield '';
+      }
+      Finally
+      {
+        $f->UnLock();
+      }
+    }
+  }
+?>

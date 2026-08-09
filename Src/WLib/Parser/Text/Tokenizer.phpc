@@ -50,20 +50,20 @@
   
     Function _Rest_Tokens($End)
     {
-      $Continue=True;
-      While($Continue)//StrLen($this->Chunk))
-      {
-        $Continue=False;
-        ForEach($this->State->Parse($this->Chunk, $this->Offset, $End) As $k=>$v)
-        {
-        //$this->Log('Debug', ' SubToken: ', $k,'=>',$v);
-          If($k==='More') Return;
-          $Continue=StrLen($this->Chunk)>$this->Offset;
-          Yield $k=>$v;
-          If($To=$this->To[$k]?? Null)
-            $this->SetState($To);
-        }
-      }
+      $Parser=$this; // Now it's the Tokenizer
+      While(StrLen($this->Chunk)>$this->Offset)
+        ForEach($this->State->Parse($Parser, $this->Chunk, $this->Offset, $End)As $k=>$v)
+          If($k==='More')
+            Return;
+          Else
+            Yield $k=>$v;
+    }
+    
+    Function SetState($To)
+    {
+      If(!$To) Return;
+      $this->Log('Debug', 'SetState: ',$To);
+      $this->State=$this->GetRule($To);
     }
     
     Function Read_Tokens($Chunks=Null)
@@ -72,7 +72,7 @@
       
       $this->Chunk  ='';
       $this->Offset =0;
-      $this->State  =$this->GetRule($this->Start);
+      $this->SetState($this->Start);
       ForEach($Chunks As $Chunk)
       {
       //$this->Log('Debug', 'Chunk: ', $Chunk);

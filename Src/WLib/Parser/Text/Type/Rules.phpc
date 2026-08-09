@@ -21,7 +21,8 @@
     {
       Parent::OnChild($Child);
     //$this->Log('Debug', 'Add Child ', $Child->FullName, ' to ', Spl_Object_Id($this));
-      $this->List[$Child->FullName]=$Child;
+      $this->List[$Child->GetFullName ()]=$Child;
+      $this->List[$Child->GetId       ()]=$Child;
     }
     
     Function _Init_Args(Array $Args) { Return True; } // $this->List=$Args; Return Count($Args)>0; } // TODO: Check is is strings

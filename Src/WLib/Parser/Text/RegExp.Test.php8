@@ -35,8 +35,8 @@
       $Loader->Log('Log', [$For], ':');
       ForEach($RList As $kr=>$R)
       {
-        $M =[]; $O=0; ForEach($R->Parse($For, $O, True  )As $k=>$v) $M [$k]=$v;
-        $M2=[]; $O=0; ForEach($R->Parse($For, $O, False )As $k=>$v) $M2[$k]=$v;
+        $M =[]; $O=0; ForEach($R->ParseMap($For, $O, True  )As $k=>$v) $M [$k]=$v;
+        $M2=[]; $O=0; ForEach($R->ParseMap($For, $O, False )As $k=>$v) $M2[$k]=$v;
       
         If($M==$M2)
           $Loader->Log('Log', ' ', $kr, ' ', $M);
@@ -54,6 +54,12 @@
     '123<?php ' ,
     '123'       ,
     "\n"        ,
+    '<?'        ,
+    '<?='       ,
+    '<?ph'      ,
+    '<?php'     ,
+    '<?phpw'    ,
+    '<?php '    ,
   ];
   Test($List);
 ?>

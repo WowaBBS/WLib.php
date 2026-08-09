@@ -35,7 +35,7 @@
       
       $Builder=$this->Get_Singleton('/RegExp/Char/Builder');
       $RegExp=$Builder->FromListWords(Array_Keys($Match));
-      $RegExp='/^'.$RegExp.'/sS';
+      $RegExp='/^'.$RegExp.'/JDSs';
       
       $this->Match  =$Match  ;
       $this->RegExp =$RegExp ;

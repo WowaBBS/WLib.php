@@ -1,5 +1,7 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  Set_Time_Limit(3);
 
   $FilePath=__FILE__;
   $Loader->GetLogger()->Add('Tokenizer.Test.log');
@@ -15,7 +17,6 @@
       '/PHP'    =>['Str', '<?php' ,'>To'=>'/Code', '>End'=>'\W|$'],
     ],
     '/Code'=>['Union',
-    /* */
       '/Spaces'=>['RegExp' ,'\s+'], //, '>Prefix'=>True
       '/Word'=>['RegExp' ,'[a-zA-Z_][\\w_]*', '>End'=>'[^\w_]|$',],
       '/Rem'=>['Union',
@@ -23,7 +24,7 @@
         '/Inline'   =>['Str' ,'//' ],
         '/MutiLine' =>['Str' ,'/*' ],
       ],
-      '/Numeric'=>['RegExp' ,'\d'],
+      '/Numeric'=>['RegExp' ,'\d+'],
       '/String'=>['Union',
         '/Single'  =>['Str' ,"'"   ], //'>To'=>'/String/Single'
         '/Double'  =>['Str' ,'"'   ], //'>To'=>'/String/Double'

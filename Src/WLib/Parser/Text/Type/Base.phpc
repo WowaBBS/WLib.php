@@ -10,6 +10,7 @@
     Var $To        =Null; // Change state
     Var $Name      ='';
     Var $FullName  ='';
+    Var $Id        ='';
     Var $Condition =[];
   
     Function _Init($Args)
@@ -21,6 +22,7 @@
       $this->Parent    =$Args['Parent'    ]?->Object_GetWeak();
       $this->Name      =$Args['Name'      ];
       $this->FullName  =($this->GetParent()?->FullName?? '').$this->Name;
+      $this->Id        =StrTr($this->FullName, '/', '_');
       Parent::_Init($Args);
       $this->InitRules($Rules);
     }
@@ -33,8 +35,11 @@
     
     Function GetTokenizer () { Return $this->Tokenizer->Get(); }
     Function GetParent    () { Return $this->Parent  ?->Get(); }
-    Function GetToRule    () { Return $this->GetTokenizer()->GetRule($this->To); }
-    Function GetId        () { Return $this->FullName; }
+    Function GetTo        () { Return $this->To?? $this->GetParent()?->GetTo(); }
+    Function GetToRule    () { Return $this->GetTokenizer()->GetRule($this->GetTo()); }
+    Function GetId        () { Return $this->Id; }
+    Function GetTokenName () { Return $this->FullName; }
+    Function GetFullName  () { Return $this->FullName; }
     
     Function Init_Params($k, $v)
     {
@@ -97,13 +102,45 @@
     }
     
   //****************************************************************
+  
+    Function OnFirst($First)
+    {
+      $this->Log('Error', 'Unexpected First: ', $First);
+      Return 'Error/First';
+    }
+    
+    Function OnToken($Parser, $Token)
+    {
+      Yield $this->GetTokenName()=>$Token;
+      If($To=$this->GetTo())
+        $Parser->SetState($To);
+    }
+    
+  //****************************************************************
   // RegExp
     Var $RegExp_Cached = Null;
     
-    Function Parse($Chunk, &$Offset, $End)
+    Function Parse($Parser, $Chunk, &$Offset, $End)
     {
       $RegExp=$this->Get_RegExp();
-      Yield From $RegExp->Parse($Chunk, $Offset, $End);
+      $First ='';
+      $Type  ='';
+      $Token ='';
+      $RegExp->Parse($First, $Type, $Token, $Chunk, $Offset, $End);
+      If(StrLen($First))
+      {
+      //$this->Log('Debug', 'First: ', $First);
+        Yield $this->OnFirst($First)=>$First;
+      }
+      If(!StrLen($Type)) Return;
+      If($Type==='More') { Yield 'More'=>$Token;  Return; }
+      If($State=$Parser->GetRule($Type))
+        Yield From $State->OnToken($Parser, $Token);
+      Else
+      {
+        $this->Log('Error', 'UnknownState: ', $Type, '=>', $Token);
+        Yield 'Error/UnknownState/'.$Type=>$Token;
+      }
     }
     
     Function _Get_RegExp()

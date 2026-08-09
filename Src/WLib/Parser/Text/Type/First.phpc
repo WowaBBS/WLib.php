@@ -13,5 +13,10 @@
       Else
         $this->Log('Error', 'Therer is no to rule: ', $this->To);
     }
+
+    Function OnFirst($First)
+    {
+      Return $this->GetTokenName();
+    }
   }
 ?>

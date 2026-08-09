@@ -1,0 +1,59 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+
+  $FilePath=__FILE__;
+  $Loader->GetLogger()->Add('RegExp.Test.log');
+  
+  Function PhpRegExp(Bool $Short, Bool $End=False)
+  {
+    Global $Loader;
+    $RegExp=$Loader->Create_Object('/Parser/Text/RegExp');
+    $RegExp->Text('<?php' ,'Php'    ,'(?=$|\W)');
+    $RegExp->Text('<?='   ,'Assign' );
+    If($Short)
+      $RegExp->Text('<?'  ,'Short'  );
+      
+    $RegExp->Finish();
+  
+    $RegExp->MakeRegExp(False ,$End, True);
+    $RegExp->MakeRegExp(True  ,$End, True);
+  //$Loader->Log('Log', ' ', $RegExp->RegExp_Cur);
+    Return $RegExp;
+  }
+  
+  Function Test($List)
+  {
+    Global $Loader;
+    
+    $End=!True;
+    Static $RList; $RList??=[
+      'L'=>PhpRegExp($Short=False, $End),
+      'S'=>PhpRegExp($Short=True , $End),
+    ];
+    ForEach($List As $For)
+    {
+      $Loader->Log('Log', [$For], ':');
+      ForEach($RList As $kr=>$R)
+      {
+        $M =[]; $O=0; ForEach($R->Parse($For, $O, True  )As $k=>$v) $M [$k]=$v;
+        $M2=[]; $O=0; ForEach($R->Parse($For, $O, False )As $k=>$v) $M2[$k]=$v;
+      
+        If($M==$M2)
+          $Loader->Log('Log', ' ', $kr, ' ', $M);
+        Else
+          $Loader->Log('Log', ' ', $kr, ' ', $M, ' ', $M2);
+      }
+    }
+  }
+  $List=[
+    '123<?'     ,
+    '123<?='    ,
+    '123<?ph'   ,
+    '123<?php'  ,
+    '123<?phpw' ,
+    '123<?php ' ,
+    '123'       ,
+    "\n"        ,
+  ];
+  Test($List);
+?>

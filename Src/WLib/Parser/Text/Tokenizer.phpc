@@ -52,7 +52,7 @@
     {
       $Parser=$this; // Now it's the Tokenizer
       While(StrLen($this->Chunk)>$this->Offset)
-        ForEach($this->State->Parse($Parser, $this->Chunk, $this->Offset, $End)As $k=>$v)
+        ForEach($this->State->Parse($Parser, $this->Chunk, $this->Offset, !$End)As $k=>$v)
           If($k==='More')
             Return;
           Else
@@ -73,21 +73,22 @@
       $this->Chunk  ='';
       $this->Offset =0;
       $this->SetState($this->Start);
+      $Rest='';
       ForEach($Chunks As $Chunk)
       {
-      //$this->Log('Debug', 'Chunk: ', $Chunk);
-      //$this->Log('Debug', 'Chunk: ', StrLen($Chunk), '+', StrLen($this->Chunk)-$this->Offset);
-        If(StrLen($Rest=SubStr($this->Chunk, $this->Offset)))
+        If(StrLen($Rest))
           $Chunk=$Rest.$Chunk;
+        
         $this->Chunk  =$Chunk;
         $this->Offset =0;
         Yield From $this->_Rest_Tokens(False);
+        $Rest=SubStr($this->Chunk, $this->Offset);
       }
       Yield From $this->_Rest_Tokens(True);
-      If(StrLen($Rest=SubStr($this->Chunk, $this->Offset)))
+      If(StrLen($Rest))
         Yield 'Error/Rest'=>$Rest;
     }
-    
+   
   //****************************************************************
   }
 ?>

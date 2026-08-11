@@ -22,7 +22,8 @@
       $this->Parent    =$Args['Parent'    ]?->Object_GetWeak();
       $this->Name      =$Args['Name'      ];
       $this->FullName  =($this->GetParent()?->FullName?? '').$this->Name;
-      $this->Id        =StrTr($this->FullName, '/', '_');
+    //$this->Id        =StrTr($this->FullName, '/', '_'); ['/'=>'']);
+      $this->Id        =Str_Replace('/', '', $this->FullName); //TODO: Numeric
       Parent::_Init($Args);
       $this->InitRules($Rules);
     }

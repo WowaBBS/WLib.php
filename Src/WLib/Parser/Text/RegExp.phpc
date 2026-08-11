@@ -30,6 +30,7 @@
 
     Function RegExp($Str, $To, $More=Null)
     {
+      If($More===True) $More=$Str;
       $this->RegExps[]=[$Str, $To, $More];
     }
     
@@ -97,14 +98,17 @@
       If($this->RegExp_Main!=='')
       {
         If($More && $this->RegExp_More!=='')
-          $Res.=$this->RegExp_More.'|';
+        {
+          $Res=$this->RegExp_More.'|';
+        //If(!$More) $Res=Str_Replace('|$', '' $Res);
+        }
         $Res.=$this->RegExp_Main;
         If($End)
           $Res.='(?<End>.*?)'; //TODO: Without the End
         Else
           $Res.='|$';
       //If($End || $More)
-          $Res= '(?:'.$Res.')'; //TODO: Without the End
+          $Res= '(?:'.$Res.')';
         If($End)
           $Res.='?$'; //TODO: Without the End
         
@@ -114,7 +118,7 @@
         If($First!=False)
           $Res='(?<'.$First.'>.*?)'.$Res;
         
-        $Res='/'.$Res.'/JSDs';
+        $Res='/'.$Res.'/JSDsi';
       }
       $this->RegExp_Cur[$More]=$Res;
       Return $Res;
@@ -172,6 +176,7 @@
           
           If($k!=='More')
             $Offset+=StrLen($v);
+          
           If(!$Type)
           {
             $Type  =$k;

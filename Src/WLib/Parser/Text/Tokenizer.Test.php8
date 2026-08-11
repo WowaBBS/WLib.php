@@ -12,23 +12,23 @@
   $Rules=[
     '/Content'=>['First', '>To'=>'/Start'],
     '/Start'=>['Union',
-      '/Short'  =>['Str', '<?'    ,'>To'=>'/Code', '>Condition'=>'ShortTags'],
-      '/Assign' =>['Str', '<?='   ,'>To'=>'/Code'],
-      '/PHP'    =>['Str', '<?php' ,'>To'=>'/Code', '>End'=>'\W|$'],
+      '/Short'  =>['Str', '<?'    ,'>To'=>'/PHP', '>Condition'=>'ShortTags'],
+      '/Assign' =>['Str', '<?='   ,'>To'=>'/PHP'],
+      '/PHP'    =>['Str', '<?php' ,'>To'=>'/PHP', '>End'=>'\W|$'],
     ],
-    '/Code'=>['Union',
-      '/Spaces'=>['RegExp' ,'\s+'], //, '>Prefix'=>True
-      '/Word'=>['RegExp' ,'[a-zA-Z_][\\w_]*', '>End'=>'[^\w_]|$',],
+    '/PHP'=>['Union',
+      '/Space'=>['RegExp' ,'\s+'], //, '>Prefix'=>True
+      '/Word'=>['RegExp' ,'[a-z_][\\w_]*', '>End'=>'[^\w_]|$', '>More'=>True],
       '/Rem'=>['Union',
-        '/Sharp'    =>['Str' ,'#'  ], //TODO: Attribute
-        '/Inline'   =>['Str' ,'//' ],
-        '/MutiLine' =>['Str' ,'/*' ],
+        '/Sharp'    =>['Str' ,'#'  ,'>To'=>'/TODO'],
+        '/Inline'   =>['Str' ,'//' ,'>To'=>'/TODO'],
+        '/MutiLine' =>['Str' ,'/*' ,'>To'=>'/TODO'],
       ],
       '/Numeric'=>['RegExp' ,'\d+'],
       '/String'=>['Union',
-        '/Single'  =>['Str' ,"'"   ], //'>To'=>'/String/Single'
-        '/Double'  =>['Str' ,'"'   ], //'>To'=>'/String/Double'
-        '/HereDoc' =>['Str' ,'<<<' ], //'>To'=>'/String/HereDoc'
+        '/Single'  =>['Str' ,"'"   ],//,'>To'=>'/TODO'], //'>To'=>'/String/Single'
+        '/Double'  =>['Str' ,'"'   ,'>To'=>'/TODO'], //'>To'=>'/String/Double'
+        '/HereDoc' =>['Str' ,'<<<' ,'>To'=>'/TODO'], //'>To'=>'/String/HereDoc'
       ],
       '/Execute'  =>['Str' ,'`'  ],
       '/Operator' =>['Union',

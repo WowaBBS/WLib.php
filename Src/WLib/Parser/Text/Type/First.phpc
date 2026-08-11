@@ -3,17 +3,19 @@
   
   Class C_Parser_Text_Type_First Extends C_Parser_Text_Type_Base
   {
+    Var $List=[];
+  
     Function _Init_RegExp($Res)
     {
-    //$this->Log('Debug', '!!!!!!!!!!!!!!!!!!');
       Parent::_Init_RegExp($Res);
     //$this->GetToRule()?->_Init_RegExp($Res);
-      If($To=$this->GetToRule())
-        $To->_Init_RegExp($Res);
-      Else
-        $this->Log('Error', 'Therer is no to rule: ', $this->To);
+      ForEach($this->List As $RuleName)
+        If($Rule=$this->GetRule($RuleName))
+          $Rule->_Init_RegExp($Res);
     }
 
+    Function _Init_Args(Array $Args) { $this->List=$Args; Return Count($Args)>0; } // TODO: Check is it array of strings
+    
     Function OnFirst($First)
     {
       Return $this->GetTokenName();

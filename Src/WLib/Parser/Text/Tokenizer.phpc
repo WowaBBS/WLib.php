@@ -37,10 +37,8 @@
       Return $Res;
     }
     
-    Function GetRule($Name=Null)
-    {
-      Return $Name? $this->Rules->Get($Name):Null;
-    }
+    Function GetRule($Name ) { Return $Name ?$this->Rules->GetRule($Name ):Null; }
+    Function GetById($Id   ) { Return $Id   ?$this->Rules->GetById($Id   ):Null; }
   //****************************************************************
   
     Var $State    =Null;
@@ -62,8 +60,9 @@
     Function SetState($To)
     {
       If(!$To) Return;
-      $this->Log('Debug', 'SetState: ',$To);
-      $this->State=$this->GetRule($To);
+      If(Is_String($To)) $To=$this->GetRule($To);
+      $this->Log('Debug', 'SetState: ',$To->GetFullName());
+      $this->State=$To;
     }
     
     Function Read_Tokens($Chunks=Null)

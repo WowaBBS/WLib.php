@@ -10,11 +10,11 @@
   $Content=File_Get_Contents($FilePath);
   
   $Rules=[
-    '/Content'=>['First', '>To'=>'/Start'],
+    '/Content'=>['First', '/Start'],
     '/Start'=>['Union',
-      '/Short'  =>['Str', '<?'    ,'>To'=>'/PHP', '>Condition'=>'ShortTags'],
-      '/Assign' =>['Str', '<?='   ,'>To'=>'/PHP'],
-      '/PHP'    =>['Str', '<?php' ,'>To'=>'/PHP', '>End'=>'\W|$'],
+      '/Short'  =>['Str', '<?'    ,'>To'=>'/../../PHP', '>Condition'=>'ShortTags'],
+      '/Assign' =>['Str', '<?='   ,'>To'=>'/../../PHP'],
+      '/PHP'    =>['Str', '<?php' ,'>To'=>'/../../PHP', '>End'=>'\W|$'],
     ],
     '/PHP'=>['Union',
       '/Space'=>['RegExp' ,'\s+'], //, '>Prefix'=>True
@@ -26,20 +26,28 @@
       ],
       '/Numeric'=>['RegExp' ,'\d+'],
       '/String'=>['Union',
-        '/Single'  =>['Str' ,"'"   ],//,'>To'=>'/TODO'], //'>To'=>'/String/Single'
+        '/Single'  =>['Str' ,"'", '>To'=>'/Content',
+          '/Content' =>['First' ,'/Quoted', '/End'],
+          '/Quoted'  =>['Str' ,"\\'" ,"\\\\"],
+          '/End'     =>['Str' ,"'", '>To'=>'/PHP'],
+        ],
         '/Double'  =>['Str' ,'"'   ,'>To'=>'/TODO'], //'>To'=>'/String/Double'
         '/HereDoc' =>['Str' ,'<<<' ,'>To'=>'/TODO'], //'>To'=>'/String/HereDoc'
       ],
-      '/Execute'  =>['Str' ,'`'  ],
+      '/Execute'  =>['Str' ,'`'],
       '/Operator' =>['Union',
         '/Brackets' =>['Str', '[', ']', '(', ')', '{', '}'],
         '/Unary'    =>['Str', '++', '--', '~', '@', '$', '-', '+'], // -, +
         '/Arrow'    =>['Str', '->', '?->', '.'],
-        '/Compare'  =>['Str', '<=>'. '=='. '==='. '!='. '!==', '<', '<=', '>', '>='],
+        '/Compare'  =>['Str', '=='. '==='. '!='. '!==', '<', '<=', '>', '>=',
+          'StarShip'=>['Str', '<=>', '>Condition'=>'StarShip'],
+        ],
         '/Binary'   =>['Str', '+', '-', '*', '/',  '%',  '|', '&',  '^'],
-        '/Binary2'  =>['Str', '||','&&', '<<', '>>',],
+        '/Binary2'  =>['Str', '||','&&', '<<', '>>'],
         '/Control'  =>['Str', '?', '??', '?:', ',', ':', ';', '...'],
         '/Assign'   =>['Str', '=', '??=', '?:=', '+=', '-=', '*=', '/=', '.=', '%=', '|=', '&=', '^=', '||=', '&&=', '<<=', '>>=',],
+        '/Pipe'     =>['Str', '|>'],
+        '/Args'     =>['Str', '...'],
       ],
       '/Attribute' =>['Str' ,"#[", '>To'=>'/TODO'],
       '/End'       =>['Str' ,'?>', '>To'=>'/Content'],

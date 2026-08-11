@@ -3,7 +3,6 @@
   
   Class C_Parser_Text_Type_Rules Extends C_Parser_Text_Type_Base
   {
-    Var $List =[];
     Var $End  =Null;
     Var $More =Null;
 
@@ -17,27 +16,19 @@
       Return Parent::Init_Params($k, $v);
     }
     
-    Function OnChild($Child)
-    {
-      Parent::OnChild($Child);
-    //$this->Log('Debug', 'Add Child ', $Child->FullName, ' to ', Spl_Object_Id($this));
-      $this->List[$Child->GetFullName ()]=$Child;
-      $this->List[$Child->GetId       ()]=$Child;
-    }
+    Function _Init_Args(Array $Args) { Return True; } // $this->Children=$Args; Return Count($Args)>0; } // TODO: Check is is strings
+  //Function _Init_Args(Array $Args) { $this->Children=$Args; Return Count($Args)>0; } // TODO: Check is is strings
+  //Function _Init_Sub(Array $List) {}
+
+    Var $ById=[];
     
-    Function _Init_Args(Array $Args) { Return True; } // $this->List=$Args; Return Count($Args)>0; } // TODO: Check is is strings
-  //Function _Init_Args(Array $Args) { $this->List=$Args; Return Count($Args)>0; } // TODO: Check is is strings
-    Function _Init_Sub(Array $List)
+    Function GetById($Id) { Return $Id? ($this->ById[$Id]?? $this->Log('Error', 'Unknown ', $Id, ' in ', Array_Keys($this->ById))->Ret()):Null; }
+    
+    Function OnChild($Child, $Prefix='')
     {
+      Parent::OnChild($Child, $Prefix);
+      $this->ById[$Child->GetId()]=$Child;
     }
 
-    Function Get($Id)
-    {
-      If($Res=$this->List[$Id]?? Null)
-    //If($Res=$this->Sub[$Id]?? Null)
-        Return $Res;
-      $this->Log('Error', 'Unknown ', $Id, ' in ', Array_Keys($this->List));
-      Return Null;
-    }    
   }
 ?>

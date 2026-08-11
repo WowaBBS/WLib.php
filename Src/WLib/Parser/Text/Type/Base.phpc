@@ -28,17 +28,12 @@
       $this->InitRules($Rules);
     }
     
-    Function OnChild($Child)
-    {
-      If($Parent=$this->GetParent())
-        $Parent->OnChild($Child);
-    }
-    
     Function GetTokenizer () { Return $this->Tokenizer->Get(); }
     Function GetParent    () { Return $this->Parent  ?->Get(); }
     Function GetTo        () { Return $this->To?? $this->GetParent()?->GetTo(); }
-    Function GetToRule    () { Return $this->GetTokenizer()->GetRule($this->GetTo()); }
+    Function GetToRule    () { Return $this->GetRule($this->GetTo()); }
     Function GetId        () { Return $this->Id; }
+    Function GetName      () { Return $this->Name; }
     Function GetTokenName () { Return $this->FullName; }
     Function GetFullName  () { Return $this->FullName; }
     
@@ -84,8 +79,7 @@
           UnSet($List[$k]);
         }
     
-      If($Sub)
-        $this->_Init_Sub($Sub);
+    //If($Sub) $this->_Init_Sub($Sub);
       
       If(!$this->_Init_Args($Args) && Count($Args))
         $this->Log('Error', 'Args ',$Args,' are not allowed in ', $this->FullName);
@@ -97,11 +91,41 @@
     
     Function _Init_Args(Array $Args) { Return False; }
     Function _Init_Rules(Array &$List) { }
-    Function _Init_Sub(Array $List) 
-    { 
-      $this->Log('Error', 'Sub is not supported in ', $this->FullName)->Debug($List);
+  //Function _Init_Sub(Array $List) { $this->Log('Error', 'Sub is not supported in ', $this->FullName)->Debug($List); }
+    
+  //****************************************************************
+  // Children
+  
+    Var $Children=[];
+  
+    Function OnChild($Child, $Prefix='')
+    {
+      $this->Children[$Prefix.$Child->GetName()]=$Child;
+      If($Parent=$this->GetParent())
+        $Parent->OnChild($Child, $this->Name.$Prefix);
     }
     
+    Function _GetRule($Id)
+    {
+      Return $this->Children[$Id]?? 
+        $this->GetParent()?->_GetRule($Id);
+    }
+    
+    Function _GetAllRules() { Return $this->Children+($this->GetParent()?->_GetAllRules()?? []); }
+
+    Function GetRule($Id)
+    {
+      If($Id===Null) Return Null;
+      If($Id==='') Return $this;
+      
+      If(Str_Starts_With($Id, '/..'))
+        If($Parent=$this->GetParent())
+          Return $Parent->GetRule(SubStr($Id, 3));
+      
+      Return $this->_GetRule($Id)?? 
+        $this->Log('Error', 'Unknown ', $Id, ' in ', Array_Keys($this->_GetAllRules()))->Ret();
+    }
+  
   //****************************************************************
   
     Function OnFirst($First)
@@ -113,12 +137,13 @@
     Function OnToken($Parser, $Token)
     {
       Yield $this->GetTokenName()=>$Token;
-      If($To=$this->GetTo())
+      If($To=$this->GetToRule())
         $Parser->SetState($To);
     }
     
   //****************************************************************
   // RegExp
+  
     Var $RegExp_Cached = Null;
     
     Function Parse($Parser, $Chunk, &$Offset, $End)
@@ -135,7 +160,7 @@
       }
       If(!StrLen($Type)) Return;
       If($Type==='More') { Yield 'More'=>$Token;  Return; }
-      If($State=$Parser->GetRule($Type))
+      If($State=$Parser->GetById($Type))
         Yield From $State->OnToken($Parser, $Token);
       Else
       {

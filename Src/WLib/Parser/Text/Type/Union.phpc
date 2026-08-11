@@ -3,18 +3,11 @@
   
   Class C_Parser_Text_Type_Union Extends C_Parser_Text_Type_Base
   {
-    Var $List=[];
-
     Function _Init_RegExp($Res)
     {
       Parent::_Init_RegExp($Res);
-      ForEach($this->List As $Rule)
+      ForEach($this->Children As $Rule)
         $Rule->_Init_RegExp($Res);
-    }
-
-    Function _Init_Sub(Array $List) 
-    { 
-      $this->List=$List;
     }
   }
 ?>

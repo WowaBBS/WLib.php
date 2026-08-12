@@ -6,7 +6,7 @@
     Function _Init_RegExp($Res)
     {
       Parent::_Init_RegExp($Res);
-      ForEach($this->Children As $Rule)
+      ForEach($this->Sub As $Rule)
         $Rule->_Init_RegExp($Res);
     }
   }

@@ -24,7 +24,11 @@
     
     Function Text($Str, $To, $End=Null, $More=Null)
     {
-      $this->MapText[StrToLower($Str)]=$To;
+      $str=StrToLower($Str);
+      If($Old=$this->MapText[$str]?? Null)
+        $this->Log('Error', 'Dublicate ', $Str, ' for ', $Old, ' and ', $To);
+      Else
+        $this->MapText[$str]=$To;
       $this->Texts[]=[$Str, $To, $More, $End];
     }
 
@@ -50,7 +54,7 @@
         Else
           Self::_MakeMoreStr($Res, $Str, $End);
       
-      $Res=Array_Flip(Array_Flip($Res));
+      $Res=Array_Flip(Array_Flip($Res)); //< Remove duplicates
       $Res=Array_Map(Function($v) { Return Preg_Quote($v, '/'); }, $Res);
         
       ForEach($this->RegExps As [$Str, $To, $More])
@@ -77,6 +81,7 @@
         $Res[]=Preg_Quote($Str, '/').$End;
       If($Res)
       {
+        $Res=Array_Flip(Array_Flip($Res)); //< Remove duplicates
         $Res=Implode('|', $Res);
         $Id=$this->TextId;
         $Res=['(?<'.$Id.'>'.$Res.')'];

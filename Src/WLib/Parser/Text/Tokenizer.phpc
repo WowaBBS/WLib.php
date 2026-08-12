@@ -61,7 +61,7 @@
     {
       If(!$To) Return;
       If(Is_String($To)) $To=$this->GetRule($To);
-      $this->Log('Debug', 'SetState: ',$To->GetFullName());
+    //$this->Log('Debug', 'SetState: ',$To->GetFullName());
       $this->State=$To;
     }
     

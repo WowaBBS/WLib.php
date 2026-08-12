@@ -74,11 +74,13 @@
     Function __Construct(Array $Args) //Final
     {
     //$this->Object_Loader =$Args['Loader'        ]; UnSet($Args['Loader'        ]);
-      $this->Object_Loader =$Args['Object_Loader' ]; //UnSet($Args['Object_Loader' ]);
+      $Loader=$this->Object_Loader =$Args['Object_Loader' ]; //UnSet($Args['Object_Loader' ]);
       
       $this->_Init($Args);
       if(!$this->Object_Inited)
         Throw New Exception('Initializing is not fully');
+      
+      $Loader->OnCreated($this, $Args);
     //Trigger_Error('Initializing is not fully', E_USER_ERROR); // WARNING
     }
   
@@ -104,6 +106,7 @@
       if(!$this->Object_Inited)
         throw new Exception('Object '.Get_Class($this).' hasn`t initialized');
       $this->_Done();
+      $this->Object_Loader->OnDestroyed($this);
       if($this->Object_Inited)
         throw new Exception('Destroing is not fully');
     }

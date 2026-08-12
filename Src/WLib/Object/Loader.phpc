@@ -6,6 +6,11 @@
     Var $_Singleton  =[];
     Var $Included_Files=[]; //< TODO: Remove?
   //Var $LoadingClass='';
+  
+    Function __Construct()
+    {
+      $this->Map=New \WeakMap();
+    }
     
     Function AddSearchPath($Path)
     {
@@ -72,7 +77,7 @@
       'Struct'    =>['.Struct.php'    ,'S'        ,'Struct'    ,'.phpt'  ], //TODO: Type???
     ];
     
-    Function _Include($Include_Path, $Include_Vars=[], $Include_Type='Include')
+    Function _Include($Include_Path, $Include_Vars=[], $Include_Type='Include') //?_Once
     {
       Extract($Include_Vars);
       Return Match($Include_Type){
@@ -293,6 +298,33 @@
     }
 
     //****************************************************************
+    // Objects life time
+    
+      Var $Map;
+    
+      Function OnCreated($Obj, $Args)
+      {
+        $this->Map[$Obj]=True;
+      }
+      
+      Function UnMark($Obj)
+      {
+        $this->Map[$Obj]=False;
+      }
+      
+      Function OnDestroyed($Obj)
+      {
+        $this->Map[$Obj]=False;
+      }
+      
+      Function CheckHasntDestroyed()
+      {
+        ForEach($this->Map As $Obj=>$v)
+          If($v)
+            $this->Log('Error', 'HasntDestroyed:')->Debug($Obj);
+      }
+      
+    //****************************************************************
     // Debug And Log
     
     Var $Logger=null;
@@ -316,7 +348,7 @@
     Function _ToDebugInfo() { return 'Loader'; }
     
     //****************************************************************
-    Function Done() {} // TODO:
+    Function Done() { $this->CheckHasntDestroyed(); } // TODO:
   }
 
 ?>

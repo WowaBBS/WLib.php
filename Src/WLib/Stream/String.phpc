@@ -1,0 +1,86 @@
+<?
+  $Loader->Parent_Class('/Stream/Base');
+
+  Class C_Stream_String Extends C_Stream_Base
+  {
+    Var $Buffer = '';
+    Var $Pos    =  0; //Position in line
+    
+    Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      $Content=$Args['Content']?? False;
+      If($Content!==False)
+        $this->Write($Content);
+    }
+    
+    Function Recv_Count () { Return StrLen($this->Buffer)- $this->Pos; }
+    Function Eof        () { Return StrLen($this->Buffer)<=$this->Pos; }
+    Function Pos        () { Return                        $this->Pos; }
+    Function Length     () { Return StrLen($this->Buffer)            ; }
+    
+    Function Clear()
+    {
+      $this->Buffer ='';
+      $this->Pos    = 0;
+    }
+    
+    Function PreView($ASize)
+    {
+      $Pos=$this->Pos;
+      $Res=$this->Recv($ASize);
+      $this->Pos=$Pos;
+      
+      Return $Res;
+    }
+  
+    Function Recv($Size)
+    {
+      $Res=$this->Buffer ;
+      $Pos=$this->Pos    ;
+
+      If($Pos>0 || StrLen($Res)>$Size)
+        $Res=SubStr($Res, $Pos, $Size);
+        
+      $this->Pos=$Pos+StrLen($Res);
+      Return $Res;
+    }
+  
+    // Writes always at the end
+    Function Write(String $Data)
+    {
+      If($Data!=='')
+      {
+        If($this->Buffer==='')
+          $this->Buffer=$Data;
+        Else
+          $this->Buffer.=$Data;
+      }
+      Return StrLen($Data);
+    }
+
+    Function Seek($Offset, $Whence=0)
+    {
+      $Length=$this->Length();
+      Switch($Whence)
+      {
+      Case 0: Break; //Absolute
+      Case 1: $Offset+=$this->Pos(); Break; //Current
+      Case 2: $Offset+=$Length; Break; //End
+      }
+      If($Offset<0) $Offset=0; Else
+      If($Offset>$Length) $Offset=$Length;
+      
+      $this->Pos=$Offset;
+      Return True;
+    }
+  
+  //TODO:
+  //Function _Go_Back_Str($Size, $Data, $Pos=0)
+  //Function Write_Back($Data)
+  
+    Function Close()
+    {
+    }
+  }
+?>

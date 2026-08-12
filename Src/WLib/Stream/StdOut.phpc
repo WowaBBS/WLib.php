@@ -1,0 +1,12 @@
+<?
+  $Loader->Parent_Class('/Stream/Output');
+
+  Class C_Stream_StdOut Extends C_Stream_Output
+  {
+    Function _Init(Array $Args)
+    {
+      $Args['Name']??='stdout';
+      Parent::_Init($Args);
+    }
+  }
+?>

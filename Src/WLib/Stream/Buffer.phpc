@@ -1,0 +1,130 @@
+<?
+  $Loader->Parent_Class('/Stream/Base');
+
+  // Writes always at the end
+  Class C_Stream_Buffer Extends C_Stream_Base
+  {
+    Var $Buffer =    [] ;
+    Var $Length =     0 ; //Length of unreaded data
+    Var $Line   =     0 ; //The line in the buffer
+    Var $Pos    =     0 ; //Position in line
+    Var $Remove = False ; //Remove readed data
+  
+    Function _Init(Array $Args)
+    {
+      Parent::_Init($Args);
+      $Content=$Args['Content']?? False;
+      If($Content!==False)
+        $this->Write($Content);
+    }
+    
+  //Function Recv_Count() { Return $this->Length; }
+    Function Recv_Count() { Return StrLen($this->Buffer[$this->Line]?? '')-$this->Pos; }
+  
+    Function Eof()
+    {
+      Return !IsSet($this->Buffer[$this->Line]); // $this->Length>0
+    }
+  
+    Function Clear()
+    {
+      $this->Buffer =[];
+      $this->Length = 0;
+      $this->Line   = 0;
+      $this->Pos    = 0;
+    }
+    
+    Function PreView($ASize)
+    {
+      $Pos=[$this->Line, $this->Pos, $this->Remove];
+      $this->Remove=False;
+      
+      $Res=$this->Read($ASize);
+
+      [$this->Line, $this->Pos, $this->Remove]=$Pos;
+      
+      Return $Res;
+    }
+  
+    Function Recv($ASize)
+    {
+      $_Buffer=&$this->Buffer;
+      If(!$_Buffer)
+        Return '';
+      $Res=$_Buffer[$this->Line];
+
+      // Если можем считать все данные из первой строки, то считываем
+      If(StrLen($Res)-$this->Pos<=$ASize)
+      {
+        if($this->Remove)
+        {
+          For($i=$this->Line+1; $i>0; $i--)
+            Array_Shift($_Buffer);
+          $this->Line=0;
+        }
+        Else
+          $this->Line++;
+        If($this->Pos)
+        {
+          $Res=SubStr($Res, $this->Pos);
+          $this->Pos=0;
+        }
+        $this->Length-=StrLen($Res);
+        Return $Res;
+      }
+      $Res=SubStr($Res, $this->Pos, $ASize);
+      $this->Pos    +=$ASize;
+      $this->Length -=$ASize;
+      Return $Res;
+    }
+  
+    Function Write($Data)
+    {
+      $L=StrLen($Data);
+      If(!$L)
+        Return 0;
+      $this->Length+=$L;
+      $this->Buffer[]=$Data;
+      Return $L;
+    }
+  
+    Function _Go_Back_Str($Size, $Data, $Pos=0)
+    {
+      If($this->Pos)
+      {
+        $Seek=Min($this->Pos, $Size);
+        $this->Pos-=$Seek;
+        $Size-=$Seek;
+        $this->Length+=$Seek;
+        If(!$Size)
+          Return $Seek;
+        $Data=SubStr($Data, $Pos, $Size);
+      }
+      Else
+      {
+        $Seek=0;
+        If($Pos)
+          $Data=SubStr($Data, $Pos);
+      }
+      $this->Length+=$Size;
+      Array_UnShift($this->Buffer, $Data);
+      Return $Seek+$Size;
+    }
+  
+    Function Write_Back($Data)
+    {
+      If((String)$Data==='')
+        Return 0;
+      If($this->Pos)
+        $this->Buffer[0]=SubStr($this->Buffer[0], $this->Pos);
+      $L=StrLen($Data);
+      $this->Length+=$L;
+      Array_UnShift($this->Buffer, $Data);
+      Return $L;
+    }
+  
+    Function Close()
+    {
+    }
+  }
+?>

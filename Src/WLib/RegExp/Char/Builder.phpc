@@ -54,16 +54,16 @@
 
     Function FromListWords($L, $Debug=False)
     {
-      Sort($L, SORT_STRING);
-    
+      Sort($L, SORT_STRING); // TODO: Sort with key
+      
       $Res=[];
       $Prev='';
-      ForEach($L As $s)
+      ForEach($L As $k=>$s)
       {
         $Diff=StrSpn($Prev^$s ,"\0");
         $m=&$Res;
         For($i=0, $l=StrLen($Prev); $i<$l; $i++)
-          if($i<=$Diff)
+          If($i<=$Diff)
             $m=&$m[Ord($Prev[$i])];
           Else
           {

@@ -14,6 +14,7 @@
       $Check1='abc';
       $Check2='(?:a(?:b(?:c|$)|$)|$)';
       $Check3='(?:ab?|)$';
+      
       $this->AssertSame($Check1, $Res1);
       $this->AssertSame($Check2, $Res2);
       $this->AssertSame($Check3, $Res3);

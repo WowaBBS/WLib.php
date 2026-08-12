@@ -3,15 +3,22 @@
   
   Class T_RegExp_Node_Char_Hex Extends T_RegExp_Node_Char_Base
   {
-    Var $Char =0;
+    Var      $Char      =0;
+    Var Bool $UpperCase =True;
     
     Function IsSolid  () { Return True; }
     
-    Function __Construct($Char=0) { $this->Char=$Char; }
+    Function __Construct($Char=0, $UpperCase=True)
+    {
+      $this->Char      =$Char      ;
+      $this->UpperCase =$UpperCase ;
+    }
 
     Function Make($Res)
     {
-      $R=StrToUpper(DecHex($Res->CharToInt8($this->Char))); // TODO: Optional StrToUpper
+      $R=DecHex($Res->CharToInt8($this->Char)); // TODO: Optional StrToUpper
+      If($this->UpperCase)
+        $R=StrToUpper($R);
       Switch($l=StrLen($R))
       {
       Case 1: $Res[]='\x0' ; $Res[]=$R; Break;

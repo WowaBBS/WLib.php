@@ -7,6 +7,7 @@
     Var $Value ='';
     Var $End   =Null;
     Var $More  =Null;
+    Var $Vars  =[]; // [Name: Template]
 
     Function Init_Params($k, $v)
     {
@@ -14,15 +15,32 @@
       {
       Case '>End'  ; $this->End  =$v; Return True;
       Case '>More' ; $this->More =$v; Return True;
+      Case '>Vars' ; $this->Vars =$v; Return True;
       }
       Return Parent::Init_Params($k, $v);
     }
     
     Function _Init_Args(Array $Args) { $this->Value=$Args[0]?? ''; Return Count($Args)==1; } // TODO: Check is is strings
     
+    Function _GetVar($Name)
+    {
+      $Res=$this->Vars[$Name[1]]?? Null;
+      If($Res===Null) Return '{'.$Name.'}';
+      Return '(?:'.$this->_Replace($Res).')';
+    }
+    
+    Function _Replace($Str)
+    {
+      Return Preg_Replace_CallBack(
+        '/{(\w+)}/',
+        $this->_GetVar(...),
+        $Str
+      );
+    }
+    
     Function _Init_RegExp($Res)
     {
-      $Res->RegExp($this->Value, $this->GetId(), $this->More);
+      $Res->RegExp($this->_Replace($this->Value), $this->GetId(), $this->More);
     }
   }
 ?>

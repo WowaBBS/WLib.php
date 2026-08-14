@@ -3,7 +3,7 @@
   
   Set_Time_Limit(3);
 
-  $FilePath=__FILE__;
+  $FilePath=__DIR__.'/Sapmle.php8'; //__FILE__;
   $Loader->GetLogger()->Add('Tokenizer.Test.log');
   $Factory=$Loader->Get_Singleton('/CharSet/Factory');
 
@@ -19,7 +19,7 @@
     '/PHP'=>['Union',
       '/Space' =>['RegExp' ,'\s+'], //, '>Prefix'=>True
       '/Word'  =>['RegExp' ,'[a-z_][\\w_]*', '>End'=>'[^\w_]|$', '>More'=>True],
-      '/Rem'   =>['Union',
+      '/Rem'   =>['Union'  ,
         '/Sharp'    =>['Str' ,'#', '>To'=>'/Content',
           '/Content' =>['First' ,'/End'],
           '/End'     =>['Str' ,"\n", '>To'=>'/PHP'],
@@ -33,7 +33,14 @@
           '/End'     =>['Str' ,'*/', '>To'=>'/PHP'],
         ],
       ],
-      '/Numeric'=>['RegExp' ,'\d+'],
+      '/Float'   =>['RegExp' ,'(?:(?:{LNum}|{DNum})[eE][+-]?{LNum})', '>Vars'=>['LNum'=>'\d+(_\d+)*', 'DNum'=>'(?:{LNum}?.{LNum})|(?:{LNum}.{LNum}?)'], '>More'=>True], //TODO: End
+      '/Numeric' =>['Union',
+      //'/Dec' =>['RegExp' ,'\d+', '>End'=>'[^\w_\\.e]|$', '>More'=>True],
+        '/Dec' =>['RegExp' ,'[1-9]\d*(?:_\d+)*|0(?:_0+)*', '>End'=>'[~\w_\\.]|$', '>More'=>True], // _ -- PHP 7.4.0
+        '/Hex' =>['RegExp' ,'0[xX][\da-fA-F]+(?:_[\da-fA-F]+)*', '>More'=>True],
+        '/Oct' =>['RegExp' ,'0[oO]?[0-7]+(?:_[0-7]+)*', '>More'=>True], // oO -- PHP 8.1.0
+        '/Bin' =>['RegExp' ,'0[bB][01]+(?:_[01]+)*', '>More'=>True],
+      ],
       '/String'=>['Union',
         '/Single'  =>['Str' ,"'", '>To'=>'/Content',
           '/Content' =>['First' ,'/Quoted', '/End'],
@@ -46,14 +53,15 @@
           '/End'     =>['Str' ,'"', '>To'=>'/PHP'],
         ],
         '/HereDoc' =>['Str' ,'<<<' ,'>To'=>'/TODO'], //'>To'=>'/String/HereDoc'
+        //'NowDoc'
       ],
       '/Execute'  =>['Str' ,'`'],
       '/Operator' =>['Union',
         '/Brackets' =>['Str', '[', ']', '(', ')', '{', '}'],
         '/Unary'    =>['Str', '++', '--', '~', '@', '$'], // -, +
         '/Arrow'    =>['Str', '->', '?->', '.'],
-        '/Compare'  =>['Str', '=='. '==='. '!='. '!==', '<', '<=', '>', '>=',
-          'StarShip'=>['Str', '<=>', '>Condition'=>'StarShip'],
+        '/Compare'  =>['Str', '=='. '==='. '!='. '!==', '<', '<=', '>', '>=', '<=>'
+        //'StarShip'=>['Str', '<=>', '>Condition'=>'StarShip'],
         ],
         '/Binary'   =>['Str', '+', '-', '*', '/',  '%',  '|', '&',  '^'],
         '/Binary2'  =>['Str', '||','&&', '<<', '>>'],
@@ -97,7 +105,7 @@
 
   ForEach($Reader->Read_Tokens() As $Type=>$Token)
   {
-    $Loader->Log('Log', 'Token ',$Reader->Offset,': ', $Type, ': ', [$Token]);//->Debug($Token);
+    $Loader->Log('Log', 'Token ',$Type, ': ', [$Token]);
   }
   
 //$Loader->Log('Debug')->Debug($Reader);

@@ -10,6 +10,18 @@
     Function __Construct()
     {
       $this->Map=New \WeakMap();
+      $this->LibTypes=[//0 Extension    , 1 Prefix , 2 Type     , 3 Ext   , 4 Check              , 5 List
+        'Class'     =>['.Class.php'     ,'C'       ,'Class'     ,'.phpc'  ,     Class_Exists(...), Get_Declared_Classes    (...)],
+        'Interface' =>['.Interface.php' ,'I'       ,'Interface' ,'.phpi'  , Interface_Exists(...), Get_Declared_Interfaces (...)],
+        'Enum'      =>['.Enum.php'      ,'E'       ,'Enum'      ,'.phpe'  ,      Enum_Exists(...), Get_Declared_Classes    (...)],
+        'Exception' =>['.Exception.php' ,'E'       ,'Exception' ,'.phpe'  ,     Class_Exists(...), Get_Declared_Classes    (...)],
+        'UnitTest'  =>['.Test.php'      ,'Test'    ,'UnitTest'  ,'.phput' ,     Class_Exists(...), Get_Declared_Classes    (...)],
+        'Lib'       =>['.Lib.php'       ,''        ,'Lib'       ,'.php'   ,                  Null,                          Null],
+        'Module'    =>['.Module.php'    ,''        ,'Lib'       ,'.phpm'  ,                  Null,                          Null],
+        'Trait'     =>['.Trait.php'     ,'Trait'   ,'Trait'     ,'.phpt'  ,     Trait_Exists(...), Get_Declared_Traits     (...)],
+        'Type'      =>['.Type.php'      ,'T'       ,'Type'      ,'.phpt'  ,     Class_Exists(...), Get_Declared_Classes    (...)],
+        'Struct'    =>['.Struct.php'    ,'S'       ,'Struct'    ,'.phpt'  ,     Class_Exists(...), Get_Declared_Classes    (...)], //TODO: Type???
+      ];
     }
     
     Function AddSearchPath($Path)
@@ -64,18 +76,7 @@
       Return False;
     }
     
-    Var $LibTypes=[ // Extension      , Prefix    , Type       ,  Ext
-      'Class'     =>['.Class.php'     ,'C'        ,'Class'     ,'.phpc'  ],
-      'Interface' =>['.Interface.php' ,'I'        ,'Interface' ,'.phpi'  ],
-      'Enum'      =>['.Enum.php'      ,'E'        ,'Enum'      ,'.phpe'  ],
-      'Exception' =>['.Exception.php' ,'E'        ,'Exception' ,'.phpe'  ],
-      'UnitTest'  =>['.Test.php'      ,'Test'     ,'UnitTest'  ,'.phput' ],
-      'Lib'       =>['.Lib.php'       ,''         ,'Lib'       ,'.php'   ],
-      'Module'    =>['.Module.php'    ,''         ,'Lib'       ,'.phpm'  ],
-      'Trait'     =>['.Trait.php'     ,'Trait'    ,'Trait'     ,'.phpt'  ],
-      'Type'      =>['.Type.php'      ,'T'        ,'Type'      ,'.phpt'  ],
-      'Struct'    =>['.Struct.php'    ,'S'        ,'Struct'    ,'.phpt'  ], //TODO: Type???
-    ];
+    Var $LibTypes=[];
     
     Function _Include($Include_Path, $Include_Vars=[], $Include_Type='Include') //?_Once
     {
@@ -90,11 +91,11 @@
     
     Function _Load_Lib(String $Name, Array $Mode=[], $ArgsId='Lib')
     {
-      $Args=$this->LibTypes[$ArgsId];
+      $LibType=$this->LibTypes[$ArgsId];
         
-      $Ext    =$Args[3]; //'.php',
-      $Prefix =$Args[1]; // '',
-      $Type   =$Args[2]; // 'Lib'
+      $Ext    =$LibType[3]; //'.php',
+      $Prefix =$LibType[1]; // '',
+      $Type   =$LibType[2]; // 'Lib'
       
     //$Name=StrToLower($Name);
       if($Name[0]!=='/')
@@ -113,7 +114,7 @@
       }
       
       $_Path=$this->_Find_Lib($Name, $Ext);
-      If($_Path===False && ($Ext2=$Args[0]?? False))
+      If($_Path===False && ($Ext2=$LibType[0]?? False))
         $_Path=$this->_Find_Lib($Name, $Ext2);
         
       $Res=False;
@@ -124,8 +125,12 @@
         If($Res=$this->_Include($_Path, ['Loader'=>$this]))
         {
         //If($Verify) $Verify();
-          $TypeName=$Prefix.Str_Replace('/', '_', $Name);
-          $this->_Check_Finish($Type, $TypeName, $_Path);
+          $PathName=Explode('/', $Name);
+          $TypeNameOld=$Prefix.Implode('_', $PathName);
+          Array_Shift($PathName);
+          $PathName[Count($PathName)-1]=$Prefix.$PathName[Count($PathName)-1];
+          $TypeNameNew=Implode('\\', $PathName);
+          $TypeName=$this->_Check_Finish($Type, $TypeNameNew, $_Path, $TypeNameOld);
           $Res=$TypeName;
         }
       }
@@ -222,28 +227,25 @@
 
     //****************************************************************
     // Check
-    
-    Function _Check_Finish($Type, $TypeName, $Path)
+    Function _Check_Finish($Type, $TypeName, $Path, $TypeNameOld)
     {
-      Switch($Type)
+      $LibType=$this->LibTypes[$Type]?? Null;
+      If(!$LibType) Return $this->Log('Fatal', 'Unreachable place '.$Type)->Ret($TypeName);
+      $Exists=$LibType[4];
+      If($Exists===Null) Return $TypeName;
+      $z=$Exists($TypeName);
+      If(!$z && $Exists($TypeNameOld))
       {
-      Case 'Lib'       : Return;
-      Case 'Class'     : $z=     Class_Exists($TypeName); Break;
-      Case 'Interface' : $z= Interface_Exists($TypeName); Break;
-      Case 'Trait'     : $z=     Trait_Exists($TypeName); Break;
-      Case 'Enum'      : $z=      Enum_Exists($TypeName); Break;
-      Case 'Exception' : $z=     Class_Exists($TypeName); Break;
-      Case 'UnitTest'  : $z=     Class_Exists($TypeName); Break;
-      Case 'Type'      : $z=     Class_Exists($TypeName); Break;
-      Default: Return $this->Log('Fatal', 'Unreachable place '.$Type)->Ret();
+        $z=True;
+        $TypeName=$TypeNameOld;
       }
-      
-      If(!$z) Return $this->Log('Error', 'Check Finish ', $Type, ' ', $TypeName, ' not found in ', $Path)->Ret();
+      If(!$z) Return $this->Log('Error', 'Check Finish ', $Type, ' ', $TypeName, ' not found in ', $Path)->Ret($TypeName);
       
       $Class=New ReflectionClass($TypeName);
       $RealName=$Class->GetName();
       If($TypeName!==$RealName)
         $this->Log('Error', $Type, ' name error: ', $TypeName, ' in not same ', $RealName);
+      Return $TypeName;
     }
     
     //****************************************************************
@@ -259,31 +261,18 @@
 
     Function _Verify_Begin($Type): Int
     {
-      Switch($Type)
-      {
-      Case 'Lib'       : Return 0;
-      Case 'Class'     : Return Count(Get_Declared_Classes    ());
-      Case 'Interface' : Return Count(Get_Declared_Interfaces ());
-      Case 'Trait'     : Return Count(Get_Declared_Trait      ());
-      Case 'Enum'      : Return Count(Get_Declared_Classes    ());
-      Case 'Exception' : Return Count(Get_Declared_Classes    ());
-      Case 'UnitTest'  : Return Count(Get_Declared_Classes    ());
-      }
-      $this->Log('Fatal', 'Unreachable place '.$Type);
+      If(!($LibType=$this->LibTypes[$Type]?? Null)) Return $this->Log('Fatal', 'Unreachable place '.$Type)->Ret();
+      $GetList=$LibType[5];
+      If(!$GetList) Return 0;
+      Return Count($GetList());
     }
     
     Function _Verify_End($Type, Int $Start, String $TypeName)
     {
-      Switch($Type)
-      {
-      Case 'Lib'       : Return;
-      Case 'Class'     : $List=Get_Declared_Classes    (); Break;
-      Case 'Interface' : $List=Get_Declared_Interfaces (); Break;
-      Case 'Trait'     : $List=Get_Declared_Traits     (); Break;
-      Case 'Enum'      : $List=Get_Declared_Classes    (); Break;
-      Case 'Exception' : $List=Get_Declared_Classes    (); Break;
-      Case 'UnitTest'  : $List=Get_Declared_Classes    (); Break;
-      }
+      If(!($LibType=$this->LibTypes[$Type]?? Null)) Return $this->Log('Fatal', 'Unreachable place '.$Type)->Ret();
+      $GetList=$LibType[5];
+      If(!$GetList) Return;
+      $List=$GetList();
       $c=Count($List);
       for($i=$Start; $i<$c; $i++)
         if($List[$i]===$TypeName)
@@ -300,30 +289,19 @@
     //****************************************************************
     // Objects life time
     
-      Var $Map;
+    Var $Map;
+  
+    Function OnCreated   ($Obj, $Args) { $this->Map[$Obj]=True  ; }
+    Function UnMark      ($Obj       ) { $this->Map[$Obj]=False ; }
+    Function OnDestroyed ($Obj       ) { $this->Map[$Obj]=False ; }
     
-      Function OnCreated($Obj, $Args)
-      {
-        $this->Map[$Obj]=True;
-      }
-      
-      Function UnMark($Obj)
-      {
-        $this->Map[$Obj]=False;
-      }
-      
-      Function OnDestroyed($Obj)
-      {
-        $this->Map[$Obj]=False;
-      }
-      
-      Function CheckHasntDestroyed()
-      {
-        ForEach($this->Map As $Obj=>$v)
-          If($v)
-            $this->Log('Error', 'HasntDestroyed:')->Debug($Obj);
-      }
-      
+    Function CheckHasntDestroyed()
+    {
+      ForEach($this->Map As $Obj=>$v)
+        If($v)
+          $this->Log('Error', 'HasntDestroyed:')->Debug($Obj);
+    }
+    
     //****************************************************************
     // Debug And Log
     

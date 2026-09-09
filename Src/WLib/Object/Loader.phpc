@@ -1,9 +1,10 @@
 <?
-  Require_Once('LibType.phpt'); Use Object\TLibType;
+  Require_Once('LibType.phpt'); Use WLib\Object\TLibType;
+  Require_Once('LibPath.phpt'); Use WLib\Object\TLibPath;
 
   Class C_Object_Loader
   {
-    Var $_Paths =['./Lib/'];
+    Var $_Paths =[];
     Var $_Libs  =[];
     Var $_Singleton  =[];
     Var $Included_Files=[]; //< TODO: Remove?
@@ -13,6 +14,7 @@
     {
       $this->Map=New \WeakMap();
       $this->LibTypes=TLibType::CreateDefaultTypes();
+      $this->Paths=TLibPath::GetDefaultList(); //TODO: Need?
     }
     
     Var $LibTypes=[];
@@ -23,56 +25,44 @@
         $this->Log('Fatal', 'Unknown LibType '.$Type)->Ret($this->LibTypes['Lib']);
     }
     
-    Function AddSearchPath($Path)
+    Function AddLib(?String $Name, String $Path, ?String $Prefix=Null)
     {
-      if(Is_Array($Path))
+      Return $this->_Paths[$Lib]=New TLibPath($Name?? 'Lib'.Count($this->Paths), $Path, $Prefix?? ($Name? Null:''));
+    //$this->Log('Log', 'AddSearchPath ', $this->Paths[Count($this->Paths)-1]->Path);
+    }
+    
+    Function AddSearchPath($Path)
+    { // TODO: Warning AddSearchPath is deprecated
+      If(Is_Array($Path))
       {
         ForEach($Path As $Item)
           $this->AddSearchPath($Item);
         Return;
       }
-      $Path=StrTr(RealPath($Path), '\\', '/');
-      if(SubStr($Path, -1)=='/')
-        $Path=SubStr($Path, 0, -1);
-    //if(SubStr($Path, -1)!='/')
-    //  $Path.='/';
-    //$this->Log('Log', 'AddSearchPath ', $Path);
-      $this->_Paths[]=$Path;
+      $this->AddLib(Null, $Path);
     }
  
     Function Loader_Init($APath_Libs)
     {
       $this->_Paths=[];
-      $this->AddSearchPath($APath_Libs);
+      $this->AddLib('WLib', $APath_Libs);
       $this->Load_Class('/Object/Base');
       $this->Load_Type('/Log/Item');
     }
     
-    Function _Check_Path($Path)
-    {
-      $Res=StrTr(RealPath($Path), '\\', '/');
-      if($Res!==$Path)
-        $this->Log('Error', ' _Find_Lib:',"\n",
-          '  Excepted path ', $Res ,"\n",
-          '  Actual   path ', $Path
-        );
-      Return $Res;
-    }
-    
-    Function _Find_Lib(String $Name, String $Ext='')
+    Function _Find_Lib(String $Name):?TLibPath
     {
       If($Name[0]!=='/')
       {
         $this->Log('Error', 'Lib`s name "', $Name, '" should be started with /');
         $Name='/'.$Name;
       }
-      ForEach($this->_Paths As $__Path)
-      {
-        $_Path=$__Path.$Name.$Ext;
-        If(!Is_File($_Path)) Continue;
-        Return $this->_Check_Path($_Path);
-      }
-      Return False;
+      
+      ForEach($this->_Paths As $Lib)
+        If($Res=$Lib->Check($this, $Name))
+          Return $Lib;
+      
+      Return Null;
     }
     
     Function _Include($Include_Path, $Include_Vars=[], $Include_Type='Include') //?_Once
@@ -90,19 +80,7 @@
     {
       $LibType=$this->GetLibType($Type);
         
-      $Ext    =$LibType->Ext    ; //'.php'
-      $Prefix =$LibType->Prefix ; //''
-      $NS     =$LibType->NS     ; //'Lib'
-      
-    //$Name=StrToLower($Name);
-      if($Name[0]!=='/')
-      {
-        $this->Log('Error', 'Lib`s name "', $Name, '" should be started with /');
-        $Name='/'.$Name;
-      }
-
-      $LibState=&$this->_Libs[$NS][$Name];
-    //$LibState=&$this->_Libs[$Name]; //<Remove?
+      $LibState=&$this->_Libs[$LibType->NS][$Name];
       If(!Is_Null($LibState))
       {
         If($LibState!==True)
@@ -110,32 +88,44 @@
         Return $this->Log('Error', 'Recursive loading ',$Type, ' ', $Name)->Ret();
       }
       
-      $_Path=$this->_Find_Lib($Name, $Ext);
-      If($_Path===False && ($Extension=$LibType->Extension))
-        $_Path=$this->_Find_Lib($Name, $Extension);
+    //$Name=StrToLower($Name);
+      If($Name[0]!=='/')
+      {
+        $this->Log('Error', 'Lib`s name "', $Name, '" should be started with /');
+        Return $LibState=$this->_Load_Lib('/'.$Name, $Mode, $Type);
+      }
+
+      $LibPath=$this->_Find_Lib($Name.$LibType->Ext       )
+        ??     $this->_Find_Lib($Name.$LibType->Extension );
         
       $Res=False;
-      If($_Path!==False)
+      If($LibPath)
       {
+        $_Path=$LibPath->Found;
         $LibState=True; // Mark recursive checking
       //$Verify=$this->Verify? $this->_Verify($LibType, $TypeName):False;
         If($Res=$this->_Include($_Path, ['Loader'=>$this]))
         {
         //If($Verify) $Verify();
+        
           $PathName=Explode('/', $Name);
-          $TypeNameOld=$Prefix.Implode('_', $PathName);
-          Array_Shift($PathName);
-          $PathName[Count($PathName)-1]=$Prefix.$PathName[Count($PathName)-1];
-          $TypeNameNew=Implode('\\', $PathName);
-          $TypeName=$this->_Check_Finish($LibType, $TypeNameNew, $_Path, $TypeNameOld);
+          Array_Shift($PathName); //Remove Empty
+          $PathNick=Array_Pop($PathName);
+          If($PathName)
+            $PathName[]='';
+          
+          $TypeNames=[
+            $LibPath->Prefix.Implode('\\', $PathName).$LibType->Prefix.$PathNick, // \NameSpace\PrefixName
+            $LibType->Prefix.'_'.Implode('_', $PathName).$PathNick, // Previx_
+          ];
+          $TypeName=$this->_Check_Finish($LibType, $TypeNames, $_Path);
           $Res=$TypeName;
         }
       }
       
       $LibState=$Res;
-      UnSet($LibState);
       If($Res)
-        $this->Included_Files[$Name.$Ext]=$_Path;
+        $this->Included_Files[$Name.$LibType->Extension]=$_Path;
       Else
       {
         $Safe=$Mode['Safe']?? False;
@@ -224,17 +214,18 @@
 
     //****************************************************************
     // Check
-    Function _Check_Finish($LibType, $TypeName, $Path, $TypeNameOld)
+    Function _Check_Finish($LibType, $TypeNames, $Path)
     {
       $Check=$LibType->Check;
-      If($Check===Null) Return $TypeName;
-      $z=$Check($TypeName);
-      If(!$z && $Check($TypeNameOld))
-      {
-        $z=True;
-        $TypeName=$TypeNameOld;
-      }
-      If(!$z) Return $this->Log('Error', 'Check Finish ', $LibType->Type, ' ', $TypeName, ' not found in ', $Path)->Ret($TypeName);
+      If($Check===Null) Return $TypeNames[0];
+      $Found=False;
+      ForEach($TypeNames As $TypeName)
+        If($Check($TypeName))
+        {
+          $Found=True;
+          Break;
+        }
+      If(!$Found) Return $this->Log('Error', 'Check Finish ', $LibType->Type, ' ', $TypeNames, ' not found in ', $Path)->Ret($TypeName[0]);
       
       $Class=New ReflectionClass($TypeName);
       $RealName=$Class->GetName();

@@ -1,30 +1,34 @@
 <?
-NameSpace Object;
+NameSpace WLib\Object;
 
 Class TLibType
 {
   Var $Type      ;
   Var $Extension ;
+  Var $Ext       ;
   Var $Prefix    ;
   Var $NS        ; 
-  Var $Ext       ;
   Var $Check     ;
   Var $List      ;
   
   Static Function CreateDefaultTypes()
   {
+    $CE=    Class_Exists(...); $CL=Get_Declared_Classes    (...);
+    $IE=Interface_Exists(...); $IL=Get_Declared_Interfaces (...);
+    $TE=    Trait_Exists(...); $TL=Get_Declared_Traits     (...);
+    $EE=     Enum_Exists(...);
     Return Self::CreateTypes([
-    //  Type       ,  Extension      , Prefix , NS         ,  Ext    , Check                , List
-      ['Class'     ,'.Class.php'     ,'C'     ,'Class'     ,'.phpc'  ,     Class_Exists(...), Get_Declared_Classes    (...)],
-      ['Interface' ,'.Interface.php' ,'I'     ,'Interface' ,'.phpi'  , Interface_Exists(...), Get_Declared_Interfaces (...)],
-      ['Enum'      ,'.Enum.php'      ,'E'     ,'Enum'      ,'.phpe'  ,      Enum_Exists(...), Get_Declared_Classes    (...)],
-      ['Exception' ,'.Exception.php' ,'E'     ,'Exception' ,'.phpe'  ,     Class_Exists(...), Get_Declared_Classes    (...)],
-      ['UnitTest'  ,'.Test.php'      ,'Test'  ,'UnitTest'  ,'.phput' ,     Class_Exists(...), Get_Declared_Classes    (...)],
-      ['Lib'       ,'.Lib.php'       ,''      ,'Lib'       ,'.php'   ,                  Null,                          Null],
-      ['Module'    ,'.Module.php'    ,''      ,'Lib'       ,'.phpm'  ,                  Null,                          Null],
-      ['Trait'     ,'.Trait.php'     ,'Trait' ,'Trait'     ,'.phpt'  ,     Trait_Exists(...), Get_Declared_Traits     (...)],
-      ['Type'      ,'.Type.php'      ,'T'     ,'Type'      ,'.phpt'  ,     Class_Exists(...), Get_Declared_Classes    (...)],
-      ['Struct'    ,'.Struct.php'    ,'S'     ,'Struct'    ,'.phpt'  ,     Class_Exists(...), Get_Declared_Classes    (...)], //TODO: Type???
+    //  Type       ,  Extension      ,  Ext    , Prefix ,NS,Chk ,Lst
+      ['Lib'       ,'.Lib.php'       ,'.php'   ,''      ,0 ],
+      ['Module'    ,'.Module.php'    ,'.phpm'  ,''      ,0 ],
+      ['Class'     ,'.Class.php'     ,'.phpc'  ,'C'     ,1 ,$CE ,$CL ],
+      ['Interface' ,'.Interface.php' ,'.phpi'  ,'I'     ,2 ,$IE ,$IL ],
+      ['Enum'      ,'.Enum.php'      ,'.phpe'  ,'E'     ,3 ,$EE ,$CL ],
+      ['Exception' ,'.Exception.php' ,'.phpe'  ,'E'     ,4 ,$CE ,$CL ],
+      ['UnitTest'  ,'.Test.php'      ,'.phput' ,'Test'  ,5 ,$CE ,$CL ],
+      ['Trait'     ,'.Trait.php'     ,'.phpt'  ,'Trait' ,6 ,$TE ,$TL ],
+      ['Type'      ,'.Type.php'      ,'.phpt'  ,'T'     ,7 ,$CE ,$CL ],
+      ['Struct'    ,'.Struct.php'    ,'.phpt'  ,'S'     ,8 ,$CE ,$CL ], //TODO: Type???
     ]);
   }
   
@@ -39,18 +43,18 @@ Class TLibType
   Function __Construct(
     String   $Type      ,
     String   $Extension ,
-    String   $Prefix    ,
-    String   $NS        ,
     String   $Ext       ,
-   ?Callable $Check     ,
-   ?Callable $List      ,
+    String   $Prefix    ,
+             $NS        =0,
+   ?Callable $Check     =Null,
+   ?Callable $List      =Null,
   )
   {
     $this->Type      =$Type      ;
     $this->Extension =$Extension ;
+    $this->Ext       =$Ext       ;
     $this->Prefix    =$Prefix    ;
     $this->NS        =$NS        ;
-    $this->Ext       =$Ext       ;
     $this->Check     =$Check     ;
     $this->List      =$List      ;
   }

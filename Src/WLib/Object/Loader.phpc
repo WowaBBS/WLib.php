@@ -95,6 +95,11 @@
         Return $LibState=$this->_Load_Lib('/'.$Name, $Mode, $Type);
       }
 
+      $PathName=Explode('/', $Name);
+      Array_Shift($PathName); //Remove Empty
+      $PrefixLib=$PathName[0];
+      //TODO: Check prefix for lib
+      
       $LibPath=$this->_Find_Lib($Name.$LibType->Ext       )
         ??     $this->_Find_Lib($Name.$LibType->Extension );
         
@@ -108,8 +113,6 @@
         {
         //If($Verify) $Verify();
         
-          $PathName=Explode('/', $Name);
-          Array_Shift($PathName); //Remove Empty
           $PathNick=Array_Pop($PathName);
           If($PathName)
             $PathName[]='';

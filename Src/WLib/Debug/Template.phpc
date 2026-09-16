@@ -46,11 +46,19 @@
       Default                  : $this->UnKnownType    ($Ctx, $Value); break;
       }
     }
+    
+    Static Function FloatToStr($v)
+    {
+      If(Is_Finite   ($v)) Return (String)$v;
+      If(Is_NaN      ($v)) Return 'NAN';
+      If(Is_Infinite ($v)) Return $v<0? '-INF':'INF';
+                           Return '-NAN';
+    }
  
     Function Boolean        ($Ctx, $v         ) { $Ctx->WriteBool  ($v? 'True':'False'); }
     Function Integer        ($Ctx, $v         ) { $Ctx->WriteNum   ((String)$v); }
-    Function Double         ($Ctx, $v         ) { $Ctx->WriteFloat ((String)$v); }
-    Function Float          ($Ctx, $v         ) { $Ctx->WriteFloat ((String)$v); }
+    Function Double         ($Ctx, $v         ) { $Ctx->WriteFloat (Self::FloatToStr($v)); }
+    Function Float          ($Ctx, $v         ) { $Ctx->WriteFloat (Self::FloatToStr($v)); }
     Function Resource       ($Ctx, $v, $T=null) { $Ctx->WriteType  ($T?? 'Resource '); $Ctx->WriteName(Get_Resource_Type($v)); $Ctx->WriteOp('('); $Ctx->Write((String)$v); $Ctx->WriteOp(')'); }
     Function ClosedResource ($Ctx, $v         ) { $this->Resource  ($Ctx, $v, 'ClosedResource '); }
     Function Null           ($Ctx, $v         ) { $Ctx->WriteNull  ('Null'         ); }

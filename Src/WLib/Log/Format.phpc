@@ -312,6 +312,15 @@
     Function BeginProgress() {}
     Function EndProgress() {}
              
+    Static Function FloatToStr($v)
+    {
+      If(Is_String   ($v)) Return $v;
+      If(Is_Finite   ($v)) Return (String)$v;
+      If(Is_NaN      ($v)) Return 'NaN';
+      If(Is_Infinite ($v)) Return $v<0? '-Inf':'Inf';
+                           Return '-NaN';
+    }
+    
     // Simple types
     Function WriteDef   ($v     ) { $this->_WriteToken('Def'   ,$v); }
     Function WriteOp    ($v     ) { $this->_WriteToken('Op'    ,$v); }
@@ -324,7 +333,7 @@
     Function WriteFunc  ($v     ) { $this->_WriteToken('Func'  ,$v); }
     Function WriteType  ($v     ) { $this->_WriteToken('Type'  ,$v); }
     Function WriteClass ($v     ) { $this->_WriteToken('Class' ,$v); }
-    Function WriteFloat ($v     ) { $this->_WriteToken('Float' ,$v); }
+    Function WriteFloat ($v     ) { $this->_WriteToken('Float' ,Self::FloatToStr($v)); }
     Function WriteNull  ($v=null) { $this->_WriteToken('Null'  ,Is_Null($v)? 'null':$v); }
     Function WriteBool  ($v     ) { $this->_WriteToken('Bool'  ,Is_Bool($v)? ($v? 'True':'False'):$v); }
     Function NewLine() { $this->_WriteToken('NewLine', "\n"); }

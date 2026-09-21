@@ -12,4 +12,4 @@
     $Loader->Load_Class($Type.'/Thread');
   }
   
-?>
+  $Loader->Done();

@@ -8,4 +8,5 @@
   $XML->Parser->TagConv=Null;
   $XML->Parse('<br/>');
   $XML->_UnLock();
-?>
+
+  $Loader->Done();

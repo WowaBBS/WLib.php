@@ -26,4 +26,5 @@
   $Info=$File->GetInfo($Args);
   $Loader->Log('Debug', 'Info:')->Debug($Info);
   $Loader->Log('Debug', 'UnpackedSize: ', $File->GetUnpackedSize());
-?>
+
+  $Loader->Done();

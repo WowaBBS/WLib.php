@@ -29,4 +29,3 @@
   $Loader->Log('Log' ,'TagC only'   )->Tags(['Tag'=>'C' ,'Default'=>Null]);
 
   $Loader->Done();
-?>

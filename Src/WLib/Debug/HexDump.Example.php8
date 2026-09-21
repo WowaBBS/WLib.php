@@ -34,3 +34,4 @@
     $Loader->Log('Log', 'Hex: ', HexDump($Data, $Item));
   }
   
+  $Loader->Done();

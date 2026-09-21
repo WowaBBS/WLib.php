@@ -31,4 +31,5 @@
     'TestB'=>$v->b,
     'TestC'=>$v->c,
   ]]);
-?>
+
+  $Loader->Done();

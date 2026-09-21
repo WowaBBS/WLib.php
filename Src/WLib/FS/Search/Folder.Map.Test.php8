@@ -21,4 +21,5 @@
   {
     echo $f->GetLocalPath(), "\n";
   }
-?>
+
+  $Loader->Done();

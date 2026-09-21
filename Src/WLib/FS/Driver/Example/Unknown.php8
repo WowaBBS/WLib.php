@@ -16,4 +16,5 @@
   $FS->Log('Debug', 'UnknownFunc : ', $Node->Call ('UnknownFunc'            ,['a'=>1, 'b'=>2]));
   $FS->Log('Debug', 'UnknownGet  : ', $Node->Get  ('Unknown'                ,['a'=>1, 'b'=>2]));
   $FS->Log('Debug', 'UnknownSet  : ', $Node->Set  ('Unknown' ,'InTestValue' ,['a'=>1, 'b'=>2]));
-?>
+
+  $Loader->Done();

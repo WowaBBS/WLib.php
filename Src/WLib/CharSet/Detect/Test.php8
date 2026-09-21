@@ -42,4 +42,5 @@
         Else    $Loader->Log('Error' ,'Charset ',Str_Pad($CharSet,8), ' with',$Bom? '    ':'out ', 'bom is not ok, ', $DetectCharSet? 'detected: '.$DetectCharSet:'is not detected');
       }
   }
-?>
+
+  $Loader->Done();

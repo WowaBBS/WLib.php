@@ -33,4 +33,5 @@
   
   $S1->Done();
   $S2->Done();
-?>
+
+  $Loader->Done();

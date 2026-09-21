@@ -7,4 +7,5 @@
 
   $BDD=$Loader->Create_Object('/BD/Descr/BaseData', ['Descr'=>$BD_Descr]);
   $BDD->Log('Debug')->Debug($BDD);
-?>
+
+  $Loader->Done();

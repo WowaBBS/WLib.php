@@ -7,4 +7,3 @@
   sleep(2);
   
   $Loader->Done();
-?>

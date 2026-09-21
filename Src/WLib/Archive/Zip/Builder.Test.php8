@@ -11,4 +11,5 @@
   
   $Loader->Log('Log', 'Peak memory usage: ', Memory_Get_Peak_Usage(true), ' bytes')
     ('Size of archive: ', $ZipBuilder->Written, ' bytes');
-?>
+
+  $Loader->Done();

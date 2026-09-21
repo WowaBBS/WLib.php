@@ -100,4 +100,6 @@
   $S2->SetObject($W2);
   $S2->Get();
   $Loader->Debug($W2);
-?>
+  
+  $Loader->Done();
+  

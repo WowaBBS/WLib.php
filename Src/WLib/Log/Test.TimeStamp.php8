@@ -9,4 +9,3 @@
   $Loader->Log('Log', 'Test3');
   
   $Loader->Done();
-?>

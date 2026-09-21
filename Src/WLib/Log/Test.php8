@@ -42,5 +42,5 @@
   Sleep(1); $Loader->Log('Progress' ,6   )("Load ", 100, "%");
   Sleep(1); $Loader->Log('Progress' ,'End of progress');
   $Loader->Log('Log' ,'End progress');
+
   $Loader->Done();
-?>

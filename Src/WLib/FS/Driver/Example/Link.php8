@@ -50,3 +50,5 @@
 # RmDir('b');
 
   ChDir($OldCwd);
+
+  $Loader->Done();

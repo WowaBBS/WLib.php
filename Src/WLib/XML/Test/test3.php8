@@ -89,4 +89,5 @@
   $XML->SaveToFile('Test.htm');
   $XML->Done();
   $XML=NULL;
-?>
+
+  $Loader->Done();

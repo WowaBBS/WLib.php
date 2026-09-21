@@ -22,4 +22,4 @@
   If(False)
     $Vars['IObjects']==New T_IObjects_BD_Provider($Params);
 
-?>
+  $Loader->Done();

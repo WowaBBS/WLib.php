@@ -9,4 +9,4 @@
     $Loader->Log('Log', 'Chunk ',$Reader->Offset,':')->Debug($Chunk);
   }
 
-?>
+  $Loader->Done();

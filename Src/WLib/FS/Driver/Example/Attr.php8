@@ -7,4 +7,5 @@
   $FS->Log('Debug', 'Attrs/File:'    )->Debug($FS[__FILE__  ]->Get(['Path', 'Created', 'Mode', 'Device_Id', 'Node_Id', 'Md5', 'Sha1', 'Content']));
   $FS->Log('Debug', 'Attrs/Dir:'     )->Debug($FS[__DIR__   ]->Get(['Path', 'Created', 'Mode', 'Device_Id', 'Node_Id'])); //TODO:, 'Md5', 'Sha1'
   $FS->Log('Debug', 'Attrs/Unknown:' )->Debug($FS['Unknown' ]->Get(['Path', 'Stat'])); //TODO:'Created', 'Mode', 'Md5', 'Sha1'
-?>
+
+  $Loader->Done();

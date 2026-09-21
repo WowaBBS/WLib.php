@@ -28,4 +28,5 @@
     if($Vars!==$Vars2)
       $Loader->Log('Fatal', 'Deserialize ', $Str, ' was wrong');
   }
-?>
+
+  $Loader->Done();

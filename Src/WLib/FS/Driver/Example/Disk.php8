@@ -6,4 +6,5 @@
 //TODO:
 # $FS->Log('Debug', 'Disk/File:'    )->Debug($FS[__FILE__  ]->Get(['Disk_Total', 'Disk_Free', 'Disk_Used']));
 # $FS->Log('Debug', 'Disk/Unknown:' )->Debug($FS['Unknown' ]->Get(['Disk_Total', 'Disk_Free', 'Disk_Used']));
-?>
+
+  $Loader->Done();

@@ -15,4 +15,5 @@
     //echo $Info['FileName'],"\n";
     }
   );
-?>
+
+  $Loader->Done();

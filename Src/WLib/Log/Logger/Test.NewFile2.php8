@@ -20,5 +20,4 @@
     $l[$i]->Close();
 
   $Loader->Done();
-//  UnLink('Test.lock');
-?>
+//UnLink('Test.lock');

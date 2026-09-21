@@ -7,4 +7,5 @@
   $Test->StartDir(__Dir__);
 //$Test=$Loader->Create_UnitTest('/URI/UUID/Test/TimeBits' ); $Test->Test_Run(); //$Test->Test();
 //$Test=$Loader->Create_UnitTest('/URI/UUID/Test/Oittaa'   ); $Test->Test_Run(); //$Test->Test();
-?>
+
+  $Loader->Done();

@@ -17,4 +17,5 @@
     UnSet($b);
   }
   UnSet($a);
-?>
+
+  $Loader->Done();

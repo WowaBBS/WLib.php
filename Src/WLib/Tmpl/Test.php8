@@ -20,4 +20,5 @@
   ];
   Echo $TLoader->Load_Template   ($Vars, '/Test.template')->Exec_To_Str($Vars), "\n";
   Echo $TLoader->String_Template ($Vars, '{Var:Hello}')->Exec_To_Str($Vars), "\n";
-?>
+
+  $Loader->Done();

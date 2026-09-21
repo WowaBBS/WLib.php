@@ -7,4 +7,3 @@
   asdadas();
   
   $Loader->Done(); //Will not be called
-?>

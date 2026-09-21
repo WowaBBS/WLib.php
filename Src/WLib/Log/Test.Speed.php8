@@ -25,4 +25,3 @@
   $Loader->Log('Log' ,'Console.Time: ', $Duration2);
 
   $Loader->Done();
-?>

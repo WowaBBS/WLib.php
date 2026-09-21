@@ -125,4 +125,5 @@
   $Loader->Debug($List);
   $Path=['Specs'];
   $Loader->Debug($List[0]->GetVar($Path)->GetList()); // Get virtual field
-?>
+
+  $Loader->Done();

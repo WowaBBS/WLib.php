@@ -9,4 +9,5 @@
   $Exec->Command='TestProcessSample.bat';
   $Exec->Execute();
   $Exec->Done();
-?>
+
+  $Loader->Done();

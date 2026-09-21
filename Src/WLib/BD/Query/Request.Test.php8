@@ -22,5 +22,4 @@
   //Echo $Q->Where->GetSql();
   Echo $Q->GetSql();
  
-  $Loader->Debug($Q);
-?>
+  $Loader->Done();

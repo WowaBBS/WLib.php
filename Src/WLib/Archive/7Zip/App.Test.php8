@@ -54,9 +54,11 @@
   $Exec=$App->UnPack($ArchFile, $ToUnPack,$Args);
   $Loader->Log('Debug', $Exec->Command);
   $Exec->Wait();
+
+  $Loader->Done();
+  
   UnLink('PackOutput.txt'   );
   UnLink('PackError.txt'    );
   UnLink('UnPackOutput.txt' );
   UnLink('UnPackError.txt'  );
 //UnLink($BigFileName);
-?>

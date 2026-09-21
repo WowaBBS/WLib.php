@@ -7,4 +7,5 @@
   $Bom=$Loader->Get_Singleton('/CharSet/TestErrors');
   
   $Bom->Start();
-?>
+  
+  $Loader->Done();

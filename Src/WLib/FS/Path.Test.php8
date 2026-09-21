@@ -9,4 +9,5 @@
   $MP=T_FS_Path::Create('Zaschita'  ); $Loader->Log('Debug', $MP);
   $MP->PathFrom($CP);                  $Loader->Log('Debug', $MP);
   $MP->Add('/index.html');             $Loader->Log('Debug', $MP);
-?>
+
+  $Loader->Done();

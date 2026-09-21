@@ -15,4 +15,4 @@
   Echo $W->GetSql();
  
  //Debug($W);
-?>
+  $Loader->Done();

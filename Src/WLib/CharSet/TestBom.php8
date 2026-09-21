@@ -33,4 +33,5 @@
       $Loader->Log('Log', 'Detect: ', [($s=SubStr($S, 0, $i)), ...$Factory->Detect($s, 'Bom')]);
     $Loader->Log('Log', '');
   }
-?>
+
+  $Loader->Done();

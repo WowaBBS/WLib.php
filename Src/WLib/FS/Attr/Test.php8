@@ -6,4 +6,5 @@
   $Loader->GetLogger()->ScriptLog();
   $Test=$Loader->Create_Object('/UnitTest/Suite');
   $Test->StartDir(__Dir__);
-?>
+
+  $Loader->Done();

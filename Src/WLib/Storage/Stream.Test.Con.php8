@@ -48,4 +48,5 @@
   }
   
   $S->Done();
-?>
+
+  $Loader->Done();

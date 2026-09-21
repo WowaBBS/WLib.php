@@ -59,4 +59,5 @@
     $Loader->Log('Debug', ' ', $k, '=>', $v);
 
   //$Loader->Log('Debug')->Debug($Map);
-?>
+
+  $Loader->Done();

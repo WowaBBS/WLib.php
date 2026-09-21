@@ -22,4 +22,5 @@
     echo $f->GetLocalPath(), "\n";
   //echo $f->GetFullPath(), "\n";
   }
-?>
+
+  $Loader->Done();

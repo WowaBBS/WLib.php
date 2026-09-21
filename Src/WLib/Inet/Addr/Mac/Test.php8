@@ -15,4 +15,5 @@
   $Orig=$List[0];
   ForEach($List As $Mac)
     Assert($f->Parse($Mac)->ToString()===$Orig, $f->Parse($Mac)->ToString().'!='.$Orig);
-?>
+
+  $Loader->Done();

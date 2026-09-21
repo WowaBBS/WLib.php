@@ -41,4 +41,5 @@
       Return $Info['AllFolders'];
     }
   );
-?>
+
+  $Loader->Done();

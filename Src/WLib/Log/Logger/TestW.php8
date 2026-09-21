@@ -12,4 +12,3 @@
 
   $Loader->Done();
   UnLink('TestW.log');
-?>

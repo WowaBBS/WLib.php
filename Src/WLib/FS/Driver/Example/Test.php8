@@ -18,4 +18,5 @@
   $FS->Log('Debug', 'Test_Set    : ', $Node->Set  ('Test'    ,'InTestValue' ,['a'=>1, 'b'=>2]));
   $FS->Log('Debug', 'Test_Get    : ', $Node['Test']);
   $FS->Log('Debug', 'Test_Set    : ', $Node['Test']='InTestValue');
-?>
+
+  $Loader->Done();

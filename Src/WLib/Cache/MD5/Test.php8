@@ -33,4 +33,5 @@
 //$F->Done();
 //$MM->Done();
   $CM->Done();
-?>
+
+  $Loader->Done();

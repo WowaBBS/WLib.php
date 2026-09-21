@@ -26,4 +26,5 @@
   Echo $F->_Alloc(6, 'T2'), "\n";
 //$F->Done();
   $CM->Done();
-?>
+
+  $Loader->Done();

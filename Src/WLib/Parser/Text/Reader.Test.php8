@@ -51,4 +51,5 @@
         ]);
       UnSet($Log);
     }
-?>
+
+  $Loader->Done();

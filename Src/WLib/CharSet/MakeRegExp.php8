@@ -57,4 +57,5 @@
     $Loader->Log('Log', ' Regexp for ', 'BOM',' is ', MeasureTime($Func, $Boms));
     $Loader->Log('Log', ' Regexp for ', 'BOM2',' is ', MeasureTime($Func, Array_Slice($Boms, 0, -6)));
   }
-?>
+
+  $Loader->Done();

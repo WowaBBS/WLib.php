@@ -35,4 +35,4 @@
   If(In_Array($Request->ReqFile, ['descript.ion', 'files.bbs', 'index.txt'], True))
     $TimedLog->ResetImportance();
 
-?>
+  $Loader->Done();

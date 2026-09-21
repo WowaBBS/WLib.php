@@ -124,6 +124,7 @@
   //****************************************************************
     Protected Function _Debug_Info(Array &$Res)
     {
+      Parent::_Debug_Info($Res);
       if(IsSet($Res['Back_Memory' ])) unset($Res['Back_Memory' ]);
     }
     

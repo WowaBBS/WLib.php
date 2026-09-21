@@ -1,7 +1,7 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
 
-  $Loader->GetLogger()->Add('Reader.Test.log');
+  $Loader->GetLogger()->ScriptLog();
   $Reader=$Loader->Get_Singleton('/Parser/Bin/Reader', ['Chunk_Size'=>64, 'FilePath'=>__File__]);
   
   ForEach($Reader->Read_Chunks() As $Chunk)

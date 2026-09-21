@@ -1,7 +1,7 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
-  $Loader->GetLogger()->Add(__FILE__.'.log');
+  $Loader->GetLogger()->ScriptLog();
   
   $Factory  =$Loader->Create_Object('/Archive/Lz4/DeCoder/Factory' ,['Debug'=>!True]);
 
@@ -58,4 +58,6 @@
 
   ForEach($Duration As $TestName=>$Time)
     $Loader->Log('Log' , $TestName, '.Time: ', $Time);
+  
+  //TODO: $Loader->Done();
 ?>

@@ -2,7 +2,7 @@
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
 
   $Logger=$Loader->GetLogger();
-  $Logger->Add('Test.NewFile2.log');
+  $Logger->ScriptLog();
   
   $c=20;
   $l=[];
@@ -12,8 +12,13 @@
   
   for($i=0; $i<$c; $i++)
     $l[$i]->Log('Log', 'Hello ', $i);
+  
+  for($i=0; $i<$c; $i++) //TODO: Bug: the last one in not created?
+    $Logger->Log('Debug', 'Created ',$l[$i]->FilePath, ' ', !$l[$i]->IsDisabled());
+  
   for($i=0; $i<$c; $i++)
     $l[$i]->Close();
 
+  $Loader->Done();
 //  UnLink('Test.lock');
 ?>

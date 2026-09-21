@@ -1,7 +1,7 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
-  $Loader->GetLogger()->Add('Test.OutOfMemory.log');
+  $Loader->GetLogger()->ScriptLog();
 
   while(1)
     $tmp[] = str_repeat('a', 10000);

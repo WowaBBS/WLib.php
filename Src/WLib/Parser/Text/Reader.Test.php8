@@ -2,7 +2,7 @@
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
 
   $FilePath=__FILE__;
-  $Loader->GetLogger()->Add('Reader.Test.log');
+  $Loader->GetLogger()->ScriptLog();
   $Factory=$Loader->Get_Singleton('/CharSet/Factory');
 
   $SpecialWord='TheSpecialWord';

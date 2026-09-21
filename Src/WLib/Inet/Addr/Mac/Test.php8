@@ -1,7 +1,7 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
-  $Loader->GetLogger()->Add('Test.log');
+  $Loader->GetLogger()->ScriptLog();
   $f=$Loader->Get_Singleton('/Inet/Addr/Mac/Factory');
   $Loader->Log('Debug', 'CurrentMac: ', $f->Current());
   $List=[

@@ -1,7 +1,7 @@
 <?
   Include 'D:\MyProj\WLib.php\Src\WLib\Using.php';
 
-  $Loader->GetLogger()->Add(SubStr(__FILE__, 0, -5).'.log');
+  $Loader->GetLogger()->ScriptLog();
   
   $Types=['Base', 'Fiber', 'Linux', 'PThreads', 'Windows'];
   

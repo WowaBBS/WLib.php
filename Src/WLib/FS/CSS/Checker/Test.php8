@@ -2,7 +2,7 @@
   Echo 'Hello';
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
 
-  $Loader->GetLogger()->Add(SubStr(__FILE__,0,-5).'.log');
+  $Loader->GetLogger()->ScriptLog();
   $Factory=$Loader->Get_Singleton('/FS/CSS/Checker/Factory');
   $Node=New($Loader->Load_Type('/FS/CSS/Node'))();
   $Loader->Load_Type('/FS/CSS/Map/Dir');

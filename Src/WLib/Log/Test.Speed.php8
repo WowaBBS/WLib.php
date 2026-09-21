@@ -1,8 +1,7 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
-  $MyLogger=$Loader->GetLogger()->Add('Test.Speed.log');
-  
+  $Loader->GetLogger()->ScriptLog();
   $Loader->GetLogger()->Get('Console')->Disable();
   
   $v=Null;

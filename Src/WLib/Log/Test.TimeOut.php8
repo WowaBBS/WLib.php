@@ -2,7 +2,7 @@
   Set_Time_Limit(1);
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
-  $Loader->GetLogger()->Add('Test.TimeOut.log');
+  $Loader->GetLogger()->ScriptLog();
   
   sleep(2);
   

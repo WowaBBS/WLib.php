@@ -1,7 +1,7 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
-  $Loader->GetLogger()->Add('Test.log');
+  $Loader->GetLogger()->ScriptLog();
   $TLoader=$Loader->Create_Object('/Tmpl/Loader', ['Router'=>['Dir'=>'']]);
   $Manager_Args=[
     'Parser'=>[

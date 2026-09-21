@@ -1,10 +1,7 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
-  $LogFile=$HTTP_SERVER_VARS['PHP_SELF']?? $argv[0];
-  $LogFile=PathInfo($LogFile);
-  $LogFile=$LogFile['dirname'].'/'.$LogFile['filename'].'.log';
-  $Loader->GetLogger()->Add($LogFile);
+  $Loader->GetLogger()->ScriptLog();
   
   $ZipBuilder=$Loader->Create_Object('/Archive/Zip/Builder');
 //$ZipBuilder->AddFile('https://speed.hetzner.de/100MB.bin');

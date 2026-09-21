@@ -1,7 +1,7 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
-  $Loader->GetLogger()->Add('Test.Debug.log');
+  $Loader->GetLogger()->ScriptLog();
   $Loader->Log('Debug', 'Hello ', True, ' ', null, ' Bye ', 0.5);
   $Loader->Log('Log', 'Hello ', ['a', 'b', 'c'])->Debug($argv);
   

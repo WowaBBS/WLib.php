@@ -4,7 +4,7 @@
  
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
 
-  $Loader->GetLogger()->Add(__FILE__.'.log');
+  $Loader->GetLogger()->ScriptLog();
 
   $Loader->Load_Type('/Debug/LimitTime' );
   

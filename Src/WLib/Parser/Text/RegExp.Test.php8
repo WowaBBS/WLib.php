@@ -2,7 +2,7 @@
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
 
   $FilePath=__FILE__;
-  $Loader->GetLogger()->Add('RegExp.Test.log');
+  $Loader->GetLogger()->ScriptLog();
   
   Function PhpRegExp(Bool $Short, Bool $End=False)
   {

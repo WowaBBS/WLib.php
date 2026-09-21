@@ -1,7 +1,7 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
 
-  $Loader->GetLogger()->Add(SubStr(__FILE__,0,-5).'.log');
+  $Loader->GetLogger()->ScriptLog();
   
  #Uses('MTSpeed'  );
  #Uses('XML/MBase'     );

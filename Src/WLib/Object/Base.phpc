@@ -47,8 +47,8 @@
 
     Protected Function _Debug_Info(Array &$Res)
     {
-      if($this->Object_GetLoader()!==Null) UnSet($Res['Object_Loader' ]);
-      if($this->Object_Inited     ===True) UnSet($Res['Object_Inited' ]);
+      if($Res['Object_Loader' ]!==Null) UnSet($Res['Object_Loader' ]);
+      if($Res['Object_Inited' ]===True) UnSet($Res['Object_Inited' ]);
     }
     
     /// Debug manager
@@ -75,12 +75,12 @@
     {
     //$this->Object_Loader =$Args['Loader'        ]; UnSet($Args['Loader'        ]);
       $Loader=$this->Object_Loader =$Args['Object_Loader' ]; //UnSet($Args['Object_Loader' ]);
+      $Loader->OnCreated($this, $Args);
       
       $this->_Init($Args);
       if(!$this->Object_Inited)
-        Throw New Exception('Initializing is not fully');
+        Throw New Exception('Initializing is not fully'); //TODO: Does not call destructor
       
-      $Loader->OnCreated($this, $Args);
     //Trigger_Error('Initializing is not fully', E_USER_ERROR); // WARNING
     }
   

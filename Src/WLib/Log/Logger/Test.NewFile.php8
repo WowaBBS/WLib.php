@@ -6,5 +6,6 @@
 //Echo '!',$l->GetContent().'!';
   $l->Close();
 
+  $Loader->Done();
 //  UnLink('Test.lock');
 ?>

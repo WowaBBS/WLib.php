@@ -5,6 +5,7 @@
   {
     Function _Init(Array $Args)
     {
+      $this->Object_GetLoader()->UnMark($this); //TODO: Destroy all except special one or two
       $Args['Tags']??=['Default'=>Null];
       Parent::_Init($Args);
       If($Console=$Args['Console']?? True)

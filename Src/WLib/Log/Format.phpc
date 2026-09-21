@@ -11,9 +11,11 @@
     
     Function _Init(Array $Args)
     {
-      parent::_Init($Args);
+      $this->Object_GetLoader()->UnMark($this); //TODO: UnMark
+
+      Parent::_Init($Args);
       
-      $Manager =$Args['Manager' ]?? $this->Get_Singleton('/Debug/Manager');
+      $Manager =$Args['Manager' ]?? $this->Get_Singleton('/Debug/Manager'); //TODO: Weak?
       $Stream  =$Args['Stream'  ]?? Null;
       $Buffer  =$Args['Buffer'  ]?? True;
       $this->UseBuffer=!Is_Array($Buffer) && $Buffer;

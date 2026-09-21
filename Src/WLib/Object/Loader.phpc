@@ -17,6 +17,14 @@
       $this->Paths=TLibPath::GetDefaultList(); //TODO: Need?
     }
     
+    Function __Destruct()
+    {
+      If($this->HasDone) Return;
+      If($this->HasDone===False)
+        $this->GetLogger()?->Log('Error', 'Loader hasn\'t destoyed');
+      $this->Done();
+    }
+    
     Var $LibTypes=[];
     
     Function GetLibType($Type)
@@ -272,9 +280,9 @@
     
     Var $Map;
   
-    Function OnCreated   ($Obj, $Args) { $this->Map[$Obj]=True  ; }
+    Function OnCreated   ($Obj, $Args) { $this->Map[$Obj]??=$this->Map[$Args['Object_Outer']?? $this]?? True; }
     Function UnMark      ($Obj       ) { $this->Map[$Obj]=False ; }
-    Function OnDestroyed ($Obj       ) { $this->Map[$Obj]=False ; }
+    Function OnDestroyed ($Obj       ) { $this->Map[$Obj]=Null  ; }
     
     Function CheckHasntDestroyed()
     {
@@ -307,7 +315,27 @@
     Function _ToDebugInfo() { return 'Loader'; }
     
     //****************************************************************
-    Function Done() { $this->CheckHasntDestroyed(); } // TODO:
+    Var $HasDone=False; //
+    
+    Function Done()
+    {
+      If($this->HasDone)
+      {
+        $this->GetLogger()?->Log('Fatal', 'Loader.Done has already called');
+        Return;
+      }
+      $this->HasDone=True;
+      $this->CheckHasntDestroyed();
+    }
+    
+    Function AutoDone() // On destruct
+    {
+      If($this->HasDone===False)
+        $this->HasDone=Null;
+      Else
+        $this->GetLogger()?->Log('Fatal', 'Can\'t AutoDone on destroyed'); //Unreachable
+      Return $this;
+    }
   }
 
 ?>

@@ -15,7 +15,8 @@
     
     Function _Init(Array $Args)
     {
-      parent::_Init($Args);
+      $this->Object_GetLoader()->UnMark($this); //TODO: UnMark
+      Parent::_Init($Args);
     //$this->Stream_Default =Self::$Stream_Echo_Default;
     //$this->Stream_Echo    =Self::$Stream_Echo_Default;
       $this->Template = $this->Create_Object('/Debug/Template');

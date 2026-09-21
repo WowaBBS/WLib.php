@@ -1,9 +1,10 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
-  $Loader->GetLogger()->Add('Test.Fatal.log');
+  $Loader->GetLogger()->ScriptLog();
+  $Loader->AutoDone();
   
   asdadas();
   
-  $Loader->Done();
+  $Loader->Done(); //Will not be called
 ?>

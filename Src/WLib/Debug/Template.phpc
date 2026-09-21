@@ -20,6 +20,12 @@
     Var $ChunkLen=64;
     Var $StrMaxLen=256;
  
+    Function _Init(Array $Args)
+    {
+      $this->Object_GetLoader()->UnMark($this); //TODO: UnMark
+      Parent::_Init($Args);
+    }
+    
     Function Value($Ctx, $Value)
     {
     //$Ctx->Write('<'.$Ctx->Level.'>');

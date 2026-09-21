@@ -10,5 +10,6 @@
   $l1->Close();
   $l2->Close();
 
+  $Loader->Done();
   UnLink('TestW.log');
 ?>

@@ -152,7 +152,8 @@
       $Type=GetType($Value);
       Switch($Type)
       {
-      Case 'boolean': $Value=$Value? 'True':'False'; Break;
+      Case 'boolean' : $Value=$Value? 'True':'False'; Break;
+      Case 'double'  : If(!Is_Finite($Value)) { $Value=Is_InFinite($Value)? ($Value<0? '-Inf':'Inf'):'NaN'; Break; }
     //Case 'null'   : $Value='Null'; Break;
       Default: $Value=(String)$Value;
       }

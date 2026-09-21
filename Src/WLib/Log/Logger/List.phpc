@@ -116,5 +116,24 @@
       $Args['Path']=$Path;
       return $this->Create_Object('/Log/Logger/NewFile', $Args);
     }
+    
+    //Workaround: Fast add log file for script with the same name
+    Function ScriptLog(?String $LogFile=Null, $Args=[])
+    {
+      If(!$LogFile)
+      {
+        If($ScriptFile=$GOBALS['argv'][0]?? $_SERVER['SCRIPT_FILENAME']?? Null) // See $HTTP_SERVER_VARS['PHP_SELF']?? 
+        {
+          $Info=PathInfo($ScriptFile);
+          If(IsSet($Info['dirname']))
+            $LogFile=$Info['dirname'].'/'.$Info['filename'].'.log';
+          Else
+            $LogFile=$Info['filename'].'.log';
+        }
+        Else
+          $LogFile='Script.log';
+      }
+      Return $this->Add($LogFile, $Args+['Name'=>'ScriptLog']);
+    }
   };
 ?>

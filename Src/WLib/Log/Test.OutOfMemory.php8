@@ -2,6 +2,8 @@
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   
   $Loader->GetLogger()->ScriptLog();
+  
+  ini_set('memory_limit', '10M');
 
   while(1)
     $tmp[] = str_repeat('a', 10000);

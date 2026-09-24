@@ -71,6 +71,7 @@
       if($this->Exception_Handler_Old)
         $this->Exception_Handler_Old($E);
       
+      $this->Object_GetLoader()?->Dispose_FailedCall();
       Error_Clear_Last();
     }
  
@@ -127,6 +128,7 @@
       $this->Exception_Handler_Old=Set_Exception_Handler($this->Exception_Handler(...));
       $this->Exception_Handler_Setted=true;
       
+      //TODO: Increase limit using ini_set('memory_limit', '128M'); with max_memory_limit (PHP8.5) instead
       $this->Back_Memory=Str_Repeat("\0", 1024*128);
     //ini_set("display_errors", "off");
     //error_reporting(E_ALL);

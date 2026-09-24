@@ -12,9 +12,9 @@
   
     Function __Construct()
     {
-      $this->Map=New \WeakMap();
-      $this->LibTypes=TLibType::CreateDefaultTypes();
-      $this->Paths=TLibPath::GetDefaultList(); //TODO: Need?
+      $this->Map      =New \WeakMap();
+      $this->LibTypes =TLibType::CreateDefaultTypes();
+      $this->Paths    =TLibPath::GetDefaultList(); //TODO: Need?
     }
     
     Function __Destruct()
@@ -236,6 +236,13 @@
           $Found=True;
           Break;
         }
+      
+      //Create aliaces for legacy
+      //TODO: Check support legacy
+      ForEach($TypeNames As $Aliace)
+        If($TypeName!==$Aliace)
+          $LibType->Aliace($TypeName, $Aliace, False);
+      
       If(!$Found) Return $this->Log('Error', 'Check Finish ', $LibType->Type, ' ', $TypeNames, ' not found in ', $Path)->Ret($TypeName[0]);
       
       $Class=New ReflectionClass($TypeName);
@@ -315,9 +322,17 @@
     Function _ToDebugInfo() { return 'Loader'; }
     
     //****************************************************************
+    // Dispose
+    
     Var $HasDone=False; //
     
-    Function Done()
+    //** Called in case of an unhandled exception.
+    Function Dispose_FailedCall()
+    {
+      $this->AutoDone();
+    }
+    
+    Function Done() //TODO: Rename to dispose
     {
       If($this->HasDone)
       {
@@ -336,6 +351,7 @@
         $this->GetLogger()?->Log('Fatal', 'Can\'t AutoDone on destroyed'); //Unreachable
       Return $this;
     }
+    //****************************************************************
   }
 
 ?>

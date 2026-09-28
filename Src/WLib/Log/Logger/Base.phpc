@@ -35,7 +35,10 @@
         $this->AddImportance($LogItem->Importance);
         $Format=$this->Format;
         $Old=$Format->SetStream($this);
+        $OldState=$Format->GetState();
+        //TODO: Set default state
         $Format->LogItem($LogItem);
+        $Format->SetState($OldState);
       //$this->Write($LogItem->ToString());
         $Old=$Format->SetStream($Old);
         If($Old!=$this)

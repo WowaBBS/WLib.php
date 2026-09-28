@@ -119,6 +119,8 @@
     //  $Ctx->WriteStr($this->Str2Str($v));
       $IsBinary =$this->IsBinary($v);
       $IsMulti  =!$IsBinary && $this->IsMultiString($v);
+      If($Ctx->IsInline() && StrLen($v)<1024) //TODO: ?
+        $IsMulti=False;
       $l=StrLen($v);
       if($l<$this->StrMaxLen && !$IsMulti)
         $Ctx->WriteStr($this->Str2Str($v));

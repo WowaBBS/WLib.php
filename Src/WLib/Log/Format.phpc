@@ -120,7 +120,8 @@
     //****************************************************************
     // Level
     
-    Var $Level    =-1;
+    Var $Log_Depth=3;
+    Var $Level    =-1; //TODO: Rename Depth
     
     Function Level_End() { return $this->Level===0; }
     Function Level_Inc() { $this->Level--; }
@@ -167,7 +168,8 @@
     Function GetState()
     {
       return [
-        'Level'     =>$this->Level     ,
+        'Level'     =>$this->Level     , 
+        'Log_Depth' =>$this->Log_Depth ,
         'Recursive' =>$this->Recursive ,
         'Path'      =>$this->Path      ,
       ];
@@ -175,9 +177,10 @@
  
     Function SetState($State=[])
     {
-      $this->Level     =$State['Level'    ]?? -1;
-      $this->Recursive =$State['Recursive']?? [];
-      $this->Path      =$State['Path'     ]?? [];
+      $this->Level     =$State['Level'     ]?? -1;
+      $this->Log_Depth =$State['Log_Depth' ]??  3;
+      $this->Recursive =$State['Recursive' ]?? [];
+      $this->Path      =$State['Path'      ]?? [];
     }
  
     //****************************************************************
@@ -302,7 +305,7 @@
         Else
         {
           $this->Inline_Begin();
-          $this->Debug($v, 3);
+          $this->Debug($v, $this->Log_Depth);
           $this->Inline_End();
         }
       }

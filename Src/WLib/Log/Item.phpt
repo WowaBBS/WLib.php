@@ -83,7 +83,9 @@
     
     Function Add(... $Args) { return $this->AddArr($Args); }
     
-    Function ShowLevel($v) { $this->ShowLevel=$v; return $this; }
+    Function ShowLevel($v) { $this->ShowLevel=$v; Return $this; }
+    
+    Function Logger($Logger) { If($Logger) $this->Logger=$Logger; Return $this; }
     
     Function File($File, $Line=false, $Col=false)
     {
@@ -175,11 +177,7 @@
       if($this->Logger)
         $this->Logger->LogItem($this);
       if($this->Fatal)
-      {
-      //debug_print_backtrace();
         throw new TLoggerUnsupportedException('Unsupported');
-        //UnSupported();
-      }
     }
     
     Function ToFormat($Res)

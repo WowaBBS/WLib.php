@@ -19,10 +19,10 @@
     
     Function __Destruct()
     {
-      If($this->HasDone) Return;
-      If($this->HasDone===False)
+      If($this->HasDispose) Return;
+      If($this->HasDispose===False)
         $this->GetLogger()?->Log('Error', 'Loader hasn\'t destoyed');
-      $this->Done();
+      $this->Dispose();
     }
     
     Var $LibTypes=[];
@@ -324,31 +324,36 @@
     //****************************************************************
     // Dispose
     
-    Var $HasDone=False; //
+    Var $HasDispose=False; //
     
     //** Called in case of an unhandled exception.
     Function Dispose_FailedCall()
     {
-      $this->AutoDone();
+      $this->AutoDispose();
     }
     
-    Function Done() //TODO: Rename to dispose
+    //TODO: #[Deprecated("Use Dispose() instead")]
+    Function Done     () { Return $this->Dispose     (); }
+    //TODO: #[Deprecated("Use AutoDispose() instead")] 
+    Function AutoDone () { Return $this->AutoDispose (); }
+    
+    Function Dispose() //TODO: Rename to dispose
     {
-      If($this->HasDone)
+      If($this->HasDispose)
       {
-        $this->GetLogger()?->Log('Fatal', 'Loader.Done has already called');
+        $this->GetLogger()?->Log('Fatal', 'Loader.Dispose has already called');
         Return;
       }
-      $this->HasDone=True;
+      $this->HasDispose=True;
       $this->CheckHasntDestroyed();
     }
     
-    Function AutoDone() // On destruct
+    Function AutoDispose() // On destruct
     {
-      If($this->HasDone===False)
-        $this->HasDone=Null;
+      If($this->HasDispose===False)
+        $this->HasDispose=Null;
       Else
-        $this->GetLogger()?->Log('Fatal', 'Can\'t AutoDone on destroyed'); //Unreachable
+        $this->GetLogger()?->Log('Fatal', 'Can\'t AutoDispose on destroyed'); //Unreachable
       Return $this;
     }
     //****************************************************************

@@ -12,8 +12,8 @@
       $Loader=$this->Object_GetLoader();
       If(!$Prefix)
       {
-        ForEach($Loader->_Paths As $Path)
-          If(Str_Starts_With($BaseDir, $Path=RealPath($Path))|| $BaseDir===$Path)
+        ForEach($Loader->_Paths As $LibPath)
+          If(Str_Starts_With($BaseDir, $Path=RealPath($LibPath->Path))|| $BaseDir===$Path)
           {
             $Prefix=SubStr($BaseDir, StrLen($Path));
             If($Prefix==='') $Prefix='/';

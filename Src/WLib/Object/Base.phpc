@@ -16,9 +16,6 @@
     Function Object_IsInited  () { Return $this->Object_Inited ; }
     Function Object_GetId     () { Return Spl_Object_Id($this); }
     
-    #[Deprecated("Use Object_GetLoader() instead")]
-    Function GetLoader() { return $this->Object_GetLoader(); }
-    
   //Static Function Cr($Owner, $Args):Static { return $Owner->Create_Object(Static::Class, $Args); }
     
     //****************************************************************
@@ -101,7 +98,7 @@
       $this->Object_Inited=false;
     }
     
-    Final Function Done()
+    Final Function Dispose()
     {
       if(!$this->Object_Inited)
         throw new Exception('Object '.Get_Class($this).' hasn`t initialized');
@@ -138,6 +135,14 @@
         throw new Exception('Initializing is not fully');
     }
 
+    //****************************************************************
+    // Deprecated
+    
+    #[Deprecated("Use Object_GetLoader() instead")]
+    Function GetLoader() { return $this->Object_GetLoader(); }
+    
+    Final Function Done() { Return $this->Dispose(); }
+    
     //****************************************************************
     // Reflexion
     

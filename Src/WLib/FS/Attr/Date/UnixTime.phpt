@@ -10,8 +10,8 @@
 
     Static Function New($Value)
     {
-      If(Is_Object($Value)) Return $Value;
-      If(Is_Integer($Value)) Return New Static($Value);
+      If(Is_Object ($Value)) Return $Value;
+      If(Is_Int    ($Value)) Return New Static($Value);
       if($Value===Null) Return New Nil();
       Return New Error($Value);
     }

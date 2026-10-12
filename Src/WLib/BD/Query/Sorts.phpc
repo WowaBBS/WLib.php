@@ -22,7 +22,7 @@
         $Fields=[$Fields=>$z];
       $Res=[];
       ForEach($Fields As $k=>$v)
-        $this->AddField($v, Is_Integer($k)? $z:$v);
+        $this->AddField($v, Is_Int($k)? $z:$v);
     }
  
     Function GetUFields($UFields)

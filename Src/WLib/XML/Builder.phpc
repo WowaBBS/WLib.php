@@ -66,7 +66,7 @@
     {
       $HasTag=false;
       ForEach($Tag As $k=>$v)
-        If(Is_Integer($k))
+        If(Is_Int($k))
         {
           If(Is_Array($v))
             $this->TagTree($v);

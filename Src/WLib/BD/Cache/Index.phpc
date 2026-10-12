@@ -81,7 +81,7 @@
       ForEach($ByKey As $k=>$v)
         if(Is_Array($v))
           Static::__Keys_GetIdx($Res, $v);
-        elseif(Is_Integer($k))
+        elseif(Is_Int($k))
           $Res[$k]=1;
     }
  

@@ -63,7 +63,7 @@
     If(!Is_Array($Arr)) Return $Arr;
     $Res=[];
     ForEach($Arr As $k=>$v)
-      $Res[]=Is_Integer($k)? $v:$k.' '.($v? 'Desc':'Asc');
+      $Res[]=Is_Int($k)? $v:$k.' '.($v? 'Desc':'Asc');
     Return Implode(', ', $Res);
   }
  

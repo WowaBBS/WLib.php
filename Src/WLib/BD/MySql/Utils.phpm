@@ -4,7 +4,7 @@
   Function sqlNormNameFields(&$Res, $Fields, $Name)
   {
     ForEach($Fields As $k=>$v)
-      If(Is_Integer($k))
+      If(Is_Int($k))
       {
         If($v=='*')
           $Res[]=$Name.'.'.$v;
@@ -18,7 +18,7 @@
   Function sqlAddWhere(&$RWhere, $Where)
   {
     ForEach($Where As $k=>$v)
-      If(Is_Integer($k))
+      If(Is_Int($k))
         $RWhere[]=$v;
       Else
         $RWhere[$k]=$v;

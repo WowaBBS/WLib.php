@@ -35,9 +35,9 @@
       $Args[]=null;
       $Current=Static::$Current?->Get();
       
-      $this->Logger =Is_Object  ($Args[0])                    ? Array_Shift($Args):$Current?->Logger;
-      $this->Name   =Is_String  ($Args[0])||Is_Array($Args[0])? Array_Shift($Args):Null;
-      $this->Limit  =Is_Integer ($Args[0])||Is_Float($Args[0])? Array_Shift($Args):($Current?? $this)->Limit;
+      $this->Logger =Is_Object ($Args[0])                    ? Array_Shift($Args):$Current?->Logger;
+      $this->Name   =Is_String ($Args[0])||Is_Array($Args[0])? Array_Shift($Args):Null;
+      $this->Limit  =Is_Int    ($Args[0])||Is_Float($Args[0])? Array_Shift($Args):($Current?? $this)->Limit;
     }
     
     Function Next($Name, $Limit=null)

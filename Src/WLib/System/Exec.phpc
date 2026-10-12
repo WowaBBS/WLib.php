@@ -125,7 +125,7 @@
         ];
         $i=$Types[$i]?? $Types[StrToLower($i)]?? null;
       }
-      if(!Is_Integer($i))
+      if(!Is_Int($i))
         return $this->Log('Error', 'Invalid stream index')->Ret();
       return $i;
     }

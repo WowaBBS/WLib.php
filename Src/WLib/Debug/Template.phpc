@@ -185,7 +185,7 @@
           $this->Value($Ctx, $k);
           $Ctx->WriteOp('=>');
         }
-        If(Is_Integer($k) && $k>=$Idx)
+        If(Is_Int($k) && $k>=$Idx)
           $Idx=$k+1;
            
         $Ctx->Level_Inc();

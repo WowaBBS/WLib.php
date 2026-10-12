@@ -26,7 +26,7 @@
     {
       $ExprFactory=$this->GetExprFactory();
       
-      if(Is_String($Field) || Is_Integer($Field) || Is_Null($Field))
+      if(Is_String($Field) || Is_Int($Field) || Is_Null($Field))
         $Field=['Rec', $Field];
       if(Is_Array($Field))
         $Field=$ExprFactory->Create($Field);
@@ -38,7 +38,7 @@
     {
       $ExprFactory=$this->GetExprFactory();
       
-      if(Is_String($Field) || Is_Integer($Field) || Is_Null($Field))
+      if(Is_String($Field) || Is_Int($Field) || Is_Null($Field))
         $Field=['Value', $Field];
       if(Is_Array($Field))
         $Field=$ExprFactory->Create($Field);

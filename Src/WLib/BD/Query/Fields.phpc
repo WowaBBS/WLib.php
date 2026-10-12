@@ -21,7 +21,7 @@
       If(!Is_Array($Fields)) $Fields=[$Fields];
       
       ForEach($Fields As $k=>$v)
-        $this->Fields[Is_Integer($k)? $v:$k]=$v;
+        $this->Fields[Is_Int($k)? $v:$k]=$v;
     }
  
     Function GetUFields($UFields)

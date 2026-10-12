@@ -71,7 +71,7 @@
             }
           }
         }
-        ElseIf(Is_Integer($k))
+        ElseIf(Is_Int($k))
         {
           $Args[]=$v;
           UnSet($List[$k]);

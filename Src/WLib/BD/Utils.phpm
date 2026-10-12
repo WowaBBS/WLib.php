@@ -68,7 +68,7 @@
     If(!Is_Array($Sort)) $Sort=[$Sort=>$z];
     $Res=[];
     ForEach($Sort As $k=>$v)
-      $Res[Is_Integer($k)? $v:$k]=$z;
+      $Res[Is_Int($k)? $v:$k]=$z;
         
     Return ['Sort', $Sort];
   }

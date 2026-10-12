@@ -78,7 +78,7 @@
     $ID=$DefID;
     $DefID=[];
     ForEach($ID As $k=>$v)
-      If(Is_Integer($k))
+      If(Is_Int($k))
         $DefID[$v]=0;
       Else
         $DefID[$k]=$v;

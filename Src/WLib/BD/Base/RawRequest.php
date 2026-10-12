@@ -62,7 +62,7 @@
       
       $Res=[];
       ForEach($Sort As $k=>$v)
-        $Res[Is_Integer($k)? $v:$k]=$z;
+        $Res[Is_Int($k)? $v:$k]=$z;
       $this->Request[]=['Sort', $Sort];
     }
  

@@ -23,8 +23,8 @@
     
     Static Function DetectType($Id)
     {
-      If(Is_Integer ($Id)) Return '\n';
-      If(Is_String  ($Id)) Return 'g{';
+      If(Is_Int    ($Id)) Return '\n';
+      If(Is_String ($Id)) Return 'g{';
       Return Null;
     }
     
@@ -62,9 +62,9 @@
       
       Switch($TypeId=$Info[2])
       {
-      Case 'None' : If(!Is_Null    ($Id)) Return $Res->Error('Id should be Null' ); Break;
-      Case 'Num'  : If(!Is_Integer ($Id)) Return $Res->Error('Id should be Int'  ); Break;
-      Case 'Str'  : If(!Is_String  ($Id)) Return $Res->Error('Id should be Str'  ); Break;
+      Case 'None' : If(!Is_Null   ($Id)) Return $Res->Error('Id should be Null' ); Break;
+      Case 'Num'  : If(!Is_Int    ($Id)) Return $Res->Error('Id should be Int'  ); Break;
+      Case 'Str'  : If(!Is_String ($Id)) Return $Res->Error('Id should be Str'  ); Break;
       Default     : Return $Res->Error('Unknown TypeId: ', $TypeId);
       }
       

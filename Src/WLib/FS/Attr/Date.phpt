@@ -7,7 +7,7 @@
     Function ToUnixTime() { Return 0; }
     Function FracNanoSecond() { Return 0; }
     
-    Function ToString() { $v=$this->ToUnixTime(); Return Is_Integer($v)? GmDate('Y-m-d H:i:s', $v):'0000-00-00 00:00:00'; }
+    Function ToString() { $v=$this->ToUnixTime(); Return Is_Int($v)? GmDate('Y-m-d H:i:s', $v):'0000-00-00 00:00:00'; }
     Function __ToString() { Return $this->ToString(); }
     
     Function Max(...$Args)

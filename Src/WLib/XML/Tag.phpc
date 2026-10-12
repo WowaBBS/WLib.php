@@ -176,7 +176,7 @@
         If(IsSet($Cmd[1]))
         {
           $C1=$Cmd[1];
-          If(Is_Integer($C1))
+          If(Is_Int($C1))
           {
             $i=$C1;
             While($i--)

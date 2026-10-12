@@ -28,7 +28,7 @@
         $Builder->Add_Line($vVar.'='.$Builder->Vars_Get($Tag->GetAttr('Var')).';');
       $Builder->Add_Line('If(Is_Array('.$vVar.'))');
       $Builder->Add_Line('ForEach('.$vVar.' As '.$vm.'=>'.$vv.')');
-      $Builder->Add_Line('  If(Is_Integer('.$vm.'))');
+      $Builder->Add_Line('  If(Is_Int('.$vm.'))');
       $Builder->Add_Line(' {');
       $T=$Builder->Tab;
       $Builder->Tab=$T.'  ';

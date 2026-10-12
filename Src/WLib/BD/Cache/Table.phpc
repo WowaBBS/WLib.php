@@ -123,7 +123,7 @@
       
       ForEach($Fields As $k=>$Field)
       {
-        if(Is_String($Field) || Is_Integer($Field))
+        if(Is_String($Field) || Is_Int($Field))
           $Field=['Rec', $Field];
         if(Is_Array($Field))
           $Fields[$k]=$ExprFactory->Create($Field);

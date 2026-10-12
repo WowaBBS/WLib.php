@@ -79,7 +79,7 @@
   {
     $Res=[];
     ForEach($Arr As $k=>$v)
-      If(!Is_Integer($k))
+      If(!Is_Int($k))
         $Res[$k]=$v;
     Return $Res;
   }
@@ -99,7 +99,7 @@
     For($k=0; IsSet($Arr[$k]); $k++)
       $Res[]=$Arr[$k];
   //ForEach($Arr As $k=>$v)
-  //  If(Is_Integer($k))
+  //  If(Is_Int($k))
   //    $Res[$k]=$v;
     Return $Res;
   }

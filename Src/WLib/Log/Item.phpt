@@ -47,7 +47,7 @@
     {
       $Res=$this->Tags; //[];
       ForEach($Tags As $k=>$v)
-        If(Is_Integer($k))
+        If(Is_Int($k))
           $Res[$v]=True;
         ElseIf($v===Null)
           UnSet($Res[$k]);

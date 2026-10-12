@@ -19,7 +19,7 @@
         $Fields=Array_Shift($Descr);
       $this->Fields=$this->Table->_MakeFields($Fields);
       ForEach($Descr As $k=>$v)
-        if(Is_Integer($k) && Is_String($v))
+        if(Is_Int($k) && Is_String($v))
           Switch($v)
           {
           Case 'Primary':

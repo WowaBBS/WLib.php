@@ -141,7 +141,7 @@
       {
         $Safe=$Mode['Safe']?? False;
         If(!$Safe)
-          $this->Log('Fatal', 'Can`t load lib ',$Name.$Ext)->Ret();
+          $this->Log('Fatal', 'Can`t load lib ',$Name.$LibType->Extension)->Ret();
       }
       Return $Res;
     }

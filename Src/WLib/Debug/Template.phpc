@@ -198,6 +198,9 @@
     
     Function GetObjectVars($Value)
     {
+      If($Value InstanceOf \Closure)
+        Return $this->Closure_GetInfo($Value);
+      
     //$Res=Get_Object_Vars($Value);
       $Res=[];
       ForEach((Array)$Value As $k=>$v)
@@ -205,7 +208,7 @@
         $k=Explode("\0", $k);
         $Res[End($k)]=$v;
       }
-      if(!($Value InstanceOf FFI\CData))
+      if($Value InstanceOf FFI\CData) Return $Res;
       if(Method_Exists($Value, '_Debug_Serialize'))
         $Value->_Debug_Serialize($Res);
       return $Res;
@@ -258,5 +261,61 @@
       $Ctx->WriteResvd('new ');
       $this->CallFunc($Ctx, $Class, $Args);
     }
+  //****************************************************************
+  // Closure
+  
+    Static Bool $Closure_Use     =True  ;
+    Static Bool $Closure_Static  =True  ;
+    Static Bool $Closure_This    =True  ;
+    Static Bool $Closure_Params  =True  ;
+    Static Bool $Closure_VarDump =False ;
+
+    Function Closure_GetParams($List)
+    { //TODO: Uncomportable
+      $Res=[];
+      ForEach($List As $p)
+        $Res[]=$p->__ToString();
+      Return $Res;
+    }
+
+    Function Closure_RemoveUse($Res, $Use)
+    {
+      ForEach($Use As $k=>$v)
+        If(($Res[$k]?? Null)===$v)
+          UnSet($Res[$k]);
+      Return $Res;
+    }
+    
+    Function Closure_GetInfo($Value)
+    {
+      $Res=[];
+      $Ref = new ReflectionFunction($Value);
+      $Res['name']=$Ref->GetName      ();
+      $Res['file']=$Ref->GetFileName  ();
+      $Res['line']=$Ref->GetStartLine ();
+      
+      $Use    =Self::$Closure_Use     ? $Ref->GetClosureUsedVariables ():[];
+      $Static =Self::$Closure_Static  ? $Ref->GetStaticVariables      ():[];
+      $This   =Self::$Closure_This    ? $Ref->GetClosureThis          ():Null;
+      $Params =Self::$Closure_Params  ? $Ref->GetParameters           ():[];
+      
+      If($Static) $Static=$this->Closure_RemoveUse($Static, $Use);
+      
+      If($Use    ) $Res['use'       ]=$Use    ;
+      If($Static ) $Res['static'    ]=$Static ;
+      If($This   ) $Res['this'      ]=$This   ;
+      If($Params ) $Res['parameter' ]=$this->Closure_GetParams($Params );
+      If(Self::$Closure_VarDump)
+      {
+        Ob_Start();
+        Var_Dump($Value);
+        $Res['Var_Dump']=Ob_Get_Contents();
+        Ob_End_Clean();
+      }
+      Return $Res;
+    }
+    
+
+  //****************************************************************
   }
 ?>

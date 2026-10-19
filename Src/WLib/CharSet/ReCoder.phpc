@@ -68,7 +68,7 @@
         {
           If($Bom && $this->Debug) $this->Log('Debug', 'Partical bom detected: ', $CharSet);
         //If(StrLen($Data)>$MaxCharLen)
-        //  $this->Log('Debug', 'String is too long for detection BoM: ',StrLen($Data))->Debug($Bom_Detect->Detect($Data, 'Bom'));
+        //  $this->Log('Debug', 'String is too long for detection BoM: ',StrLen($Data))->Dump($Bom_Detect->Detect($Data, 'Bom'));
           
           $this->Rest     =$Data ;
           $this->NeedMore =True  ;

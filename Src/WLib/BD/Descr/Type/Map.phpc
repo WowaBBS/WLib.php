@@ -23,7 +23,7 @@
       $KeyType   =Static::Args_PopOrGet($Descr, 'KeyType'   ,'String');
       $ValueType =Static::Args_PopOrGet($Descr, 'ValueType' ,'String');
       if($Descr)
-        $this->Log('Error', 'Descr is not supported for ', $this->GetTypeName())->Debug($Descr);
+        $this->Log('Error', 'Descr is not supported for ', $this->GetTypeName())->Dump($Descr);
       return $this->_Get_Type('Set', ['KeyType'=>$KeyType, 'ValueType'=>$ValueType]);
     }
   }

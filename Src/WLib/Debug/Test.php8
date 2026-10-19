@@ -58,6 +58,6 @@
   $a[]=$b;
   $a[]=new TestClass("Hello\nWorld\$", null);
   echo '$a=';
-  $Deb->Debug($a,5);
+  $Deb->Dump($a,5);
 
   $Loader->Done();

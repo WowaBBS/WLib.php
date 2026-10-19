@@ -19,7 +19,7 @@
       If(!Is_Object($Router))
       {
         If(!Is_Array($Router))
-          $Router=$this->Log('Error', 'Wrong router arguments')->Debug($Router)->Ret([]);
+          $Router=$this->Log('Error', 'Wrong router arguments')->Dump($Router)->Ret([]);
         $Router=$this->Create_Object('/Tmpl/Router', $Router);
       }
       

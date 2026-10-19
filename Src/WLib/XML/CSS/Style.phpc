@@ -23,7 +23,7 @@
       $Z=0;
       ForEach($Arr[0]As $k=>$v)
       {
-      //Debug('!'.$v.'! '.$Key.' '.$Z);
+      //Dump('!'.$v.'! '.$Key.' '.$Z);
         If(StrLen($v)>2 && SubStr($v, 0, 2)==='/*')
         {}
         ElseIf($Arr[1][$k]==$v)

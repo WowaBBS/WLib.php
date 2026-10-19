@@ -46,7 +46,7 @@
         $AMode=OpC2W($AMode);
    
       $CmdList=OpW2CCmd($AMode);
-    //Debug($CmdList);
+    //Dump($CmdList);
       ForEach($CmdList As $Cmd)
         Switch($Cmd[0])
         {
@@ -80,7 +80,7 @@
         Case 'Lock':
           $this->Locked=[$Cmd[1]];
           FLock($this->FHandle, $Cmd[1]);
-        //Debug(['lll', $this->FHandle, $Cmd[1]]);
+        //Dump(['lll', $this->FHandle, $Cmd[1]]);
         //$this->Lock($Cmd[1]);
           Break;
         Case 'Clear':
@@ -191,7 +191,7 @@
         $Res=True;
       Else
       {
-      //Debug(['Lock', $this->FHandle, $Typ]);
+      //Dump(['Lock', $this->FHandle, $Typ]);
         $Res=@FLock($this->FHandle, $Typ);
       }
       If($Res)
@@ -212,7 +212,7 @@
       $Typ=$this->Locked[Count($this->Locked)-1];
       If($Typ2==$Typ)
         Return True;
-    //Debug(['UnLock', $this->FHandle, $Typ]);
+    //Dump(['UnLock', $this->FHandle, $Typ]);
       Return @FLock($this->FHandle, $Typ);
     }
   }

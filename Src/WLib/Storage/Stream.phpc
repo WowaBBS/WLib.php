@@ -123,7 +123,7 @@
       if($Res!==False)
         $Stream->Put_Content($Res);
       else
-        $this->Log('Error', 'Can\'t serialize')->Debug($Vas);
+        $this->Log('Error', 'Can\'t serialize')->Dump($Vas);
       $this->LastModInfo =$this->GetModInfo();
       $Stream->Flush();
       $Stream->UnLock();

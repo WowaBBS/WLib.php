@@ -27,8 +27,8 @@
         ForEach($Args['Cfg']As $NS=>$Def)
           $this->_GetCfg($NS, $Def);
       
-     #$this->Debug($Args['Cfg']);
-     #$this->Debug($this->Cfg);
+     #$this->Dump($Args['Cfg']);
+     #$this->Dump($this->Cfg);
       
      #If(IsSet($Args['Pad'    ])||
      #   IsSet($Args['NoZero' ]))

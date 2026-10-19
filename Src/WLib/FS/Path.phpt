@@ -173,7 +173,7 @@
     Function PathFrom($Path, $Cs=False, $ZEnd=False)
     {
       $i=$this->Compare($Path, $Cs);
-    //Debug(['PathFrom', $this->ToString(), $Path->ToString(), $i]);
+    //Dump(['PathFrom', $this->ToString(), $Path->ToString(), $i]);
     //If($ZEnd)
     //  If($Path->Len()!=$this->Len())
     //    $ZEnd=False;
@@ -185,7 +185,7 @@
       $c=$Path->Len()-$i-1;
       If($c>0)
         $this->AddLeft(Str_Repeat('../', $c));
-    //Debug([$this->ToString(), $c, $i]);
+    //Dump([$this->ToString(), $c, $i]);
     }
   }
 

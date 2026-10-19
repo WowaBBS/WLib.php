@@ -24,8 +24,8 @@
   ]);
 
   If(False)
-    $Loader->Log('Debug', 'ToMap:')->Debug($Table);
+    $Loader->Log('Debug', 'ToMap:')->Dump($Table);
   $Loader->Log('Debug', 'Table:', Table::Cr($Table));
-//$Loader->Log('Debug', 'ToMap:')->Debug();
+//$Loader->Log('Debug', 'ToMap:')->Dump();
 
   $Loader->Done();

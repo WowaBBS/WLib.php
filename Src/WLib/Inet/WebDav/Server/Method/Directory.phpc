@@ -13,7 +13,7 @@
       // Not a file: let's serve a directory listing if you are browsing with a web browser
       If($Uri!=='' && SubStr($Uri, -1)!=='/')
       {
-        $this->Log('Debug', 'Redirect: ')->Debug([
+        $this->Log('Debug', 'Redirect: ')->Dump([
           'Uri'=>$Uri,
         ]);
         Http_Response_Code(301);

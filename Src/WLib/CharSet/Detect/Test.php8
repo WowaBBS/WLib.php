@@ -19,7 +19,7 @@
   ForEach($Factory->GetCharSets() As $CharSet)
     $Tests[]='UTF-8'!==$CharSet? IConv('UTF-8', $CharSet, $Content):$Content;
 
-//$Loader->Log('Debug', 'aaa')->Debug($Reader);
+//$Loader->Log('Debug', 'aaa')->Dump($Reader);
 
 //$CharSet='UTF-16LE';
 

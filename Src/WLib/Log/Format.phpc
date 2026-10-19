@@ -152,7 +152,10 @@
     Var $Path      =[];
     Var $Recursive =[];
     
-    Function Debug($v, $Level=false)
+    #[Deprecated("Use Dump() instead")]
+    Function Debug($v, $Level=false) { return $this->Dump($v, $Level); }
+    
+    Function Dump($v, $Level=false)
     {
       $SaveState=$this->GetState();
       $this->SetState();
@@ -305,7 +308,7 @@
         Else
         {
           $this->Inline_Begin();
-          $this->Debug($v, $this->Log_Depth);
+          $this->Dump($v, $this->Log_Depth);
           $this->Inline_End();
         }
       }
@@ -447,11 +450,11 @@
           Case 'user function' : $this->WriteDef   ($Arg         ); break;
           Case 'object'        :
           Case 'array'         :
-            $this->Debug($Arg, 3);
+            $this->Dump($Arg, 3);
             Break;
           Case 'resource'      :
           Default              :
-            $this->Debug($Arg, 1);
+            $this->Dump($Arg, 1);
           }
         }   
         $this->WriteOp(')');

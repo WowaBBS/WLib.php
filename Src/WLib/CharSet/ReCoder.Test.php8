@@ -19,7 +19,7 @@
   ForEach($Factory->GetCharSets() As $CharSet)
     $Tests[]='UTF-8'!==$CharSet? IConv('UTF-8', $CharSet, $Content):$Content;
 
-//$Loader->Log('Debug', 'aaa')->Debug($Reader);
+//$Loader->Log('Debug', 'aaa')->Dump($Reader);
 
 //$CharSet='UTF-16LE';
 
@@ -39,7 +39,7 @@
     //$Loader->Log('Log', 'MbDetect ',Mb_Detect_Encoding($ContentFrom, ['UTF-8', 'UTF-16BE', 'UTF-16LE', 'UTF-32BE', 'UTF-32LE']));
       $Log=$Loader->Log($Ok? 'Log':'Error', 'Charset ',Str_Pad($CharSet, 8), $Bom? ' with    bom':' without bom', ' is ok');
       If(!$Ok)
-        $Log->Debug([
+        $Log->Dump([
           StrLen($ContentTo ),
           StrLen($Content   ),
         ]);

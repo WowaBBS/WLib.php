@@ -155,8 +155,8 @@
     Function BaseNode($Path)
     {
       $Rt=$this->_GetRoute($Path);
-    //Debug([Implode('/',($Rt))]);
-    //Debug([$Path->Make(),$Rt['Path']->Make()]);
+    //Dump([Implode('/',($Rt))]);
+    //Dump([$Path->Make(),$Rt['Path']->Make()]);
       If($Rt)
         Return $this->Base->Node($Rt['Path']);
       Return $this->Get_Singleton('/FS/Driver/Null')->Node($Path);

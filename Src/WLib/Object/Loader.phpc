@@ -295,7 +295,7 @@
     {
       ForEach($this->Map As $Obj=>$v)
         If($v)
-          $this->Log('Error', 'HasntDestroyed:')->Debug($Obj);
+          $this->Log('Error', 'HasntDestroyed:')->Dump($Obj);
     }
     
     //****************************************************************
@@ -303,10 +303,13 @@
     
     Var $Logger=null;
     
-    Function Debug($Var, $Level=-1) // TODO: Return Debug object
+    #[Deprecated("Use Dump() instead")]
+    Function Debug($Var, $Level=-1) { return $this->Dump($Var, $Level); }
+    
+    Function Dump($Var, $Level=-1) // TODO: Return Debug object
     {
       $Deb=$this->Get_Singleton('/Debug/Manager')->Get('Debug.txt');
-      return $Deb->Debug($Var, $Level);
+      return $Deb->Dump($Var, $Level);
     }
     
     Function _CreateLogger()

@@ -139,7 +139,7 @@
     
     Function _Keys_Remove(Array $Key, bool $Full=false)
     {
-    //$this->Log('Debug')->Debug([$this->ByKey, $Key]);
+    //$this->Log('Debug')->Dump([$this->ByKey, $Key]);
       $Res=Static::__Keys_Remove($this->ByKey, $Key);
       if($Full)
       {

@@ -188,7 +188,7 @@
           {
             $Tag->Rules=$Rules;
             $Rules=$Rules->Rules_For_Tag($Tag);
-          //Debug([$Tag, $Rules]);
+          //Dump([$Tag, $Rules]);
           }
         Else
         {

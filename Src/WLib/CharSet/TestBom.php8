@@ -6,7 +6,7 @@
 # $Loader->GetLogger()->Get('Console')->Disable();
   $Factory=$Loader->Get_Singleton('/CharSet/Factory');
   
-//$Loader->Log('Log', 'Map')->Debug($Factory->GetMap());
+//$Loader->Log('Log', 'Map')->Dump($Factory->GetMap());
   
   $Original="\u{FEFF}Hello";
   $Tests=['Hello'];

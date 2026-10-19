@@ -6,6 +6,6 @@
   $BD_Descr=include '.Descr.CrashFix.1.php';
 
   $BDD=$Loader->Create_Object('/BD/Descr/BaseData', ['Descr'=>$BD_Descr]);
-  $BDD->Log('Debug')->Debug($BDD);
+  $BDD->Log('Debug')->Dump($BDD);
 
   $Loader->Done();

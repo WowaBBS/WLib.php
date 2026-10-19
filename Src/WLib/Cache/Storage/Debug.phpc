@@ -11,7 +11,7 @@
     Protected Function _Save()
     {
       $Deb=$this->Get_Singleton('/Debug/Manager')->Get('Storage.deb');
-      $Deb->Debug($this->Vars);
+      $Deb->Dump($this->Vars);
       Return True;
     }
   }

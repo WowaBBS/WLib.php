@@ -41,7 +41,7 @@
         {
           If(Is_String($Res))
           {
-            $this->Log('Error', 'Progess makes two results')->Debug([
+            $this->Log('Error', 'Progess makes two results')->Dump([
               'Res' =>$Res ,
               'Ob'  =>$Ob  ,
             ]);

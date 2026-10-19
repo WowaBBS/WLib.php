@@ -188,7 +188,7 @@
           {
             $n=StrToLower($Tag->Attributes->GetAttr('http-equiv'));
             $v=$Tag->Attributes->GetAttr('content');
-          //Debug($v);
+          //Dump($v);
             $this->Header->Add($n, $v);
           }
         }

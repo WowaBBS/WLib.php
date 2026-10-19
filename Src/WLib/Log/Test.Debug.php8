@@ -3,7 +3,7 @@
   
   $Loader->GetLogger()->ScriptLog();
   $Loader->Log('Debug', 'Hello ', True, ' ', null, ' Bye ', 0.5);
-  $Loader->Log('Log', 'Hello ', ['a', 'b', 'c'])->Debug($argv);
+  $Loader->Log('Log', 'Hello ', ['a', 'b', 'c'])->Dump($argv);
   
   Function Test(...$Vars)
   {

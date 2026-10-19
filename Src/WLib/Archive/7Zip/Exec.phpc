@@ -24,7 +24,7 @@
       $Res=Parent::Open();
       if(Is_String($this->OutPutFile))
         $this->OutPutStream=$this->Create_Object('/Stream/File', [$this->OutPutFile, False]);
-    //$this->Debug($this->OutPutStream);
+    //$this->Dump($this->OutPutStream);
       return $Res;
     }
     

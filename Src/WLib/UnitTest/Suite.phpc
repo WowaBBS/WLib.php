@@ -24,7 +24,7 @@
           $Paths=[];
           ForEach($Loader->_Paths As $k=>$Path)
             $Paths[$k]=RealPath($Path);
-          Return $this->Log('Error', 'TestDir Prefix not found for dir: ', $BaseDir, ' in:')->Debug($Paths)->Ret(False);
+          Return $this->Log('Error', 'TestDir Prefix not found for dir: ', $BaseDir, ' in:')->Dump($Paths)->Ret(False);
         }
       }
       If($Prefix==='/')
@@ -63,7 +63,7 @@
           ForEach($Exts As $Ext)
             If(Str_Ends_With($File, $Ext))
             {
-            //$this->Log('Debug', 'Debug:')->Debug([$File, $Ext]);
+            //$this->Log('Debug', 'Debug:')->Dump([$File, $Ext]);
               $R=SubStr($Path, 0, -StrLen($Ext));
               If(!Str_Starts_With($R, $BaseDir))
               {

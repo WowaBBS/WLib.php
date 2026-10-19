@@ -36,7 +36,7 @@
     Function Open($AStream)
     {
       $this->FStream=$AStream->_Lock();
-    //Debug($AStream->Read(1000));
+    //Dump($AStream->Read(1000));
       $Line=$AStream->Get_Line();
       $Line=Explode(' ', $Line);
       If(Count($Line)<2)

@@ -21,7 +21,7 @@
   $Loader->Log('Log', 'Test ', $S2->IsChanged()? ' Changed':' Not changed');
   
   $Vars=$S2->BeginUpdate(0);
-  $Loader->Debug($Vars);
+  $Loader->Dump($Vars);
   $Vars->a='Bye';
   $Vars->b=['Bye'=>'World'];
   $S2->EndUpdate($Vars);
@@ -29,7 +29,7 @@
   $Loader->Log('Log', 'Test ', $S1->IsChanged()? ' Changed':' Not changed');
   
   $Vars=$S1->Get(0);
-  $Loader->Debug($Vars);
+  $Loader->Dump($Vars);
   
   $S1->Done();
   $S2->Done();

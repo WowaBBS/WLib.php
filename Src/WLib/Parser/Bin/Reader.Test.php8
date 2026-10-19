@@ -6,7 +6,7 @@
   
   ForEach($Reader->Read_Chunks() As $Chunk)
   {
-    $Loader->Log('Log', 'Chunk ',$Reader->Offset,':')->Debug($Chunk);
+    $Loader->Log('Log', 'Chunk ',$Reader->Offset,':')->Dump($Chunk);
   }
 
   $Loader->Done();

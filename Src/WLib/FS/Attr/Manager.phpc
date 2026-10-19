@@ -30,7 +30,7 @@
     {
       ForEach($List As $Id=>$Info)
         If(!$this->Add($Id, $Info))
-          $this->Log('Error', 'Unknown item ', $Id)->Debug($Info);
+          $this->Log('Error', 'Unknown item ', $Id)->Dump($Info);
     }
     
     Function Add($Name, $Info)
@@ -57,7 +57,7 @@
       //'Info'    =>$Info,
       ];
       If($Info)
-        $this->Log('Error', 'Therea are Unknown properties in the attribute ', $Id)->Debug($Info);
+        $this->Log('Error', 'Therea are Unknown properties in the attribute ', $Id)->Dump($Info);
       $Item->Init($Args);
       Return True;
     }

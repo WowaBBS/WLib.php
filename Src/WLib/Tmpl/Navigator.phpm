@@ -100,7 +100,7 @@
     Global $Vars;
     $ns=$Vars['ns'];
     $Nav=GetSession('Navigation', []);
-  //Debug($Nav);
+  //Dump($Nav);
     If(!$ns)
     {
     //$Nav['OldURL']=$URL;
@@ -112,7 +112,7 @@
   //If(!$ns)
   //{
   //  $OURL=$URL;
-  ////Debug(['Reg'=>$URL]);
+  ////Dump(['Reg'=>$URL]);
   //}
   }
  

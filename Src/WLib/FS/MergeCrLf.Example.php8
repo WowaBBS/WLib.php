@@ -11,14 +11,14 @@
   $F->Process(
     Function($Files, $Info) Use($Loader)
     {
-    //$Loader->Debug($Info['RelPath']);
+    //$Loader->Dump($Info['RelPath']);
       If($Info['AllFiles'])
       {
         if(($FS=FileSize($Files['From' ]))>1000000) return;
         if(($TS=FileSize($Files['To'   ]))>1000000) return;
         if($FS===$TS) return;
         if($FS>$TS) return;
-        $Loader->Debug($Info['RelPath'].' ('.$FS.', '.$TS.')');
+        $Loader->Dump($Info['RelPath'].' ('.$FS.', '.$TS.')');
         $Loader->Log('Debug', $Info['RelPath'], ' (', $FS, ', ', $TS, ')');
         $T=File_Get_Contents($Files['To'   ]);
         $T=Str_Replace("\r", '', $T);

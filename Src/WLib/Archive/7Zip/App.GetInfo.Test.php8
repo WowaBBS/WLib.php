@@ -17,14 +17,14 @@
   # 'Async'        =>True             ,
   ];
   $Info=$File->GetInfo($Args);
-  $Loader->Log('Debug', 'Info:')->Debug($Info);
+  $Loader->Log('Debug', 'Info:')->Dump($Info);
   $Loader->Log('Debug', 'UnpackedSize: ', $File->GetUnpackedSize());
   $File->Invalidate();
   $Args=[
     'Output'       =>'InfoOutput.txt' ,
   ]+$Args;
   $Info=$File->GetInfo($Args);
-  $Loader->Log('Debug', 'Info:')->Debug($Info);
+  $Loader->Log('Debug', 'Info:')->Dump($Info);
   $Loader->Log('Debug', 'UnpackedSize: ', $File->GetUnpackedSize());
 
   $Loader->Done();

@@ -77,7 +77,10 @@
     Function Done() { $this->Finish(); $this->Data=[]; $this->Outer=null; $this->Logger=null; }
     Function __Destruct() { $this->Finish(); }
     
-    Function Debug($Vars, $Limit=-1) { $this->Data[]=['Debug', $Vars, $Limit]; return $this; } 
+    #[Deprecated("Use Dump() instead")]
+    Function Debug($Vars, $Limit=-1) { return $this->Dump($Vars, $Limit); } 
+    
+    Function Dump($Vars, $Limit=-1) { $this->Data[]=['Dump', $Vars, $Limit]; return $this; } 
     
     Function Call($CallBack) { $CallBack($this); return $this; } // TODO: Remove?
     
@@ -197,7 +200,8 @@
         Switch($Data[0])
         {
         Case 'Message' : $Res->Write(...$Data[1]); $Res->NewLine(); Break;
-        Case 'Debug'   : $Res->Debug(   $Data[1], $Data[2]);        Break;
+        Case 'Debug'   : // TODO: Legacy
+        Case 'Dump'    : $Res->Dump(   $Data[1], $Data[2]);        Break;
         Case 'Stack'   : $Res->Stack(   $Data[1]); $Res->NewLine(); Break;
         Case 'Flag'    : Break;
         Case 'Exception':
@@ -216,7 +220,7 @@
         Default:
           $Res->Write('[LogError] not ype of data', $Data[0]);
           $Res->NewLine();
-          $Res->Debug($Data, 4);
+          $Res->Dump($Data, 4);
           Break;
         }
       If($Progress)

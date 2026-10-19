@@ -62,7 +62,7 @@
     If($Path===False)
       Return False;
     $File=$SelfMode->File('main.html');
-  //Debug($File);
+  //Dump($File);
     Return Is_File($File);
   }
  
@@ -106,7 +106,7 @@
     $Vars['TmplRouter']=$Router;
     $LMode=$Router->Cur($Vars, $DefMode);
     $Vars['SelfMode']=&$LMode;
-  //Debug($LMode->Mode);
+  //Dump($LMode->Mode);
     Global $Web_HtAccess;
     $Vars['Web']=$Web_HtAccess;
   
@@ -164,16 +164,16 @@
   //}
     If($AMode!==False)
     {
-    //Debug($AMode);
+    //Dump($AMode);
       $MMode=$MMode->Get($Vars, _ParsePath($AMode, $Vars));
-    //Debug([
+    //Dump([
     //  $AMode,
     //  $MMode->Path,
     //  $MMode->Mode,
     //]);
     }
     $PhpCmd=StrToLower($MMode->File('main.php'));
-  //Debug($PhpCmd);
+  //Dump($PhpCmd);
     If(Is_File($PhpCmd))
     {
       Include($PhpCmd);
@@ -227,7 +227,7 @@
       }
       Else
       {
-      //Debug(['SetHeader location: ', $Location, NormMainURL($Location)]);
+      //Dump(['SetHeader location: ', $Location, NormMainURL($Location)]);
         SetHeader('location: '.NormMainURL($Location));
       }
     }
@@ -244,7 +244,7 @@
     //Else
     //{
     //  $Tmp=GetURLNavigation();
-    ////Debug(['Loc'=>$Tmp]);
+    ////Dump(['Loc'=>$Tmp]);
     //  SetHeader('location: '.NormMainURL($Tmp));
     //}
     }

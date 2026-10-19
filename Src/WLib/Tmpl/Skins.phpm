@@ -38,10 +38,10 @@
       'Name'   => '',
       'Parent' => NULL,
     ];
-  //Debug($Args);
+  //Dump($Args);
     $Skins=New T_Tmpl_Skin_Node($Args);
     $Skin=$Skins->Get_Skin($SkinName);
-    //Debug($SkinName);
+  //Dump($SkinName);
     $Paths=$Skin->Get_Paths();
     $Router=_vars_getf('TmplRouter', $Vars);
     $Paths->OldPaths=&$Router->Paths;

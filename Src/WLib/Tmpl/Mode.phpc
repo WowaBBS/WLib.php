@@ -49,12 +49,12 @@
       Global $TypeModeURL;
       Global $Web_HtAccess;
   
-    //Debug($Mode);
+    //Dump($Mode);
       $Mode=$this->Mode($Mode);
     //If($Mode!=='' && $Mode[0]!='/')
     //  $Mode='/'.$Mode;
   
-    //Debug($Mode);
+    //Dump($Mode);
   
       Switch($TypeModeURL)
       {
@@ -79,7 +79,7 @@
       //$Deb[]=$CP->Make();
       //$Deb[]=$GLOBALS['CurPath']->Make();
       //$Deb[]=$Mode;
-      //Debug([
+      //Dump([
       //  $GLOBALS['CurPath']->Make(),
       //  $CP->Make(),
       //  $Mode,
@@ -89,9 +89,9 @@
         $MP->Add('/index.html');
       //$Deb[]=$MP->Make();
         $MP->PathFrom($CP, False);
-      //Debug($CP->Make().' '.$Tmp.' '.$MP->Make());
+      //Dump($CP->Make().' '.$Tmp.' '.$MP->Make());
       //$Deb[]=$MP->Make();
-      //Debug($Deb);
+      //Dump($Deb);
         Return StrToLower($MP->Make()).($z? '?':'');
       }
       Return '';

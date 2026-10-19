@@ -14,5 +14,5 @@
  
   Echo $W->GetSql();
  
- //Debug($W);
+//Dump($W);
   $Loader->Done();

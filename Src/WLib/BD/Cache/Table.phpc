@@ -219,7 +219,7 @@
           if($Key===$Values)
             $Res[]=$Rec;
         }
-        $this->Debug(['FullScan',
+        $this->Dump(['FullScan',
           'Fields'=>$Fields,
           'Values'=>$Values,
           'Result'=>$Res,

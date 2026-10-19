@@ -136,7 +136,7 @@
         $R[$k]->OnEvent($A_Tag);
         $Res[$k]=$R[$k];
       }
-    //Debug($Res);
+    //Dump($Res);
       Return $Res;
     }
  

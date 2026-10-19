@@ -99,8 +99,8 @@
       If(!$this->QHeaders) $this->QHeaders=Http_Headers(); // TODO:
       If(!$this->FileInfo) $this->FileInfo=$this->Stream->Stat();
       $Stat=$this->FileInfo;
-    //Debug($this->FileInfo);
-    //Debug($this->QHeaders);
+    //Dump($this->FileInfo);
+    //Dump($this->QHeaders);
       If(!$this->ETag && $Stat)
         $this->ETag=
           DecHex($Stat['ino'  ]).'-'.
@@ -140,8 +140,8 @@
   
       If(IsSet($QH['If-Range']))
       {
-        Debug($QH);
-        Debug('"'.$this->ETag.'"');
+        Dump($QH);
+        Dump('"'.$this->ETag.'"');
         If($QH['If-Range']!=('"'.$this->ETag.'"'))
           UnSet($QH['Range']);
       }
@@ -155,9 +155,9 @@
           $R=$this->Create_Object('/INet/HTTP/Ranges');
           $R->Set_Size($this->FileInfo['size']);
           $R->Assign_Str($Range[1]);
-        //Debug($R);
-        //Debug($R);
-        //Debug($R->Length());
+        //Dump($R);
+        //Dump($R);
+        //Dump($R->Length());
           If($R->Length())
             $this->Set_Ranges($R);
           Else
@@ -218,9 +218,9 @@
  
     Function Send_Header()
     {
-    //Debug($this->QHeaders);
-    //Debug($this->AHeaders);
-    //Debug($this);
+    //Dump($this->QHeaders);
+    //Dump($this->AHeaders);
+    //Dump($this);
       ForEach($this->AHeaders As $k=>$s)
         If(Is_Int($k))
           Header($s);
@@ -234,7 +234,7 @@
       $SL=IsSet($SLevel[$this->Status])?$SLevel[$this->Status]:0;
       If($SL<2)
         Return;
-    //Debug('Ok');
+    //Dump('Ok');
       $S=$this->Stream->_Lock();
       If($this->Ranges)
       {
@@ -254,11 +254,11 @@
       }
       Display_Errors(False);
       Stream_Output_UnLock();
-    //Debug('_');
-    //Debug(Ignore_User_Abort(1).'!');
-    //Debug(Ignore_User_Abort(False).'!');
+    //Dump('_');
+    //Dump(Ignore_User_Abort(1).'!');
+    //Dump(Ignore_User_Abort(False).'!');
       $S->PassThru();
-    //Debug('Ok');
+    //Dump('Ok');
       Stream_Output_Lock();
       $S->_UnLock();
     }

@@ -70,7 +70,7 @@
     {
       $FuncName=Array_Shift($Arr);
       if(!Is_String($FuncName))
-        $this->Log('Fatal', 'FuncName should be string')->Debug($FuncName);
+        $this->Log('Fatal', 'FuncName should be string')->Dump($FuncName);
       $FuncName=StrToLower($FuncName);
       $FuncRec=$this->Funcs[$FuncName]??False;
       if(!$FuncRec)

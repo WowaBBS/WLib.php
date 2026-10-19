@@ -18,8 +18,8 @@
         $this->Log('Error')
         # ('Desired :', $Desired )
         # ('Actual  :', $Actual  )
-        # ->Debug($Node)
-          ->Debug([
+        # ->Dump($Node)
+          ->Dump([
             'Desired' =>$Desired ,
             'Actual ' =>$Actual  ,
             'Node'    =>$Node    ,

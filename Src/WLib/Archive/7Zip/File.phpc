@@ -21,7 +21,7 @@
       if(!Is_Object($App))
       {
         if(!Is_Array($App))
-          $App=$this->Log('Error', 'Unknown App args')->Debug($App)->Ret([]);
+          $App=$this->Log('Error', 'Unknown App args')->Dump($App)->Ret([]);
         $App=$this->Get_Singleton('/Archive/7Zip/App', $App);
       }
       

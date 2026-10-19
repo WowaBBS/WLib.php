@@ -39,7 +39,7 @@
     Case 'NULL':
     Default:
       Global $Loader;
-      $Loader->Log('Error', 'Variable no found ', Implode('.', $Path))->BackTrace()->Debug($Vars);
+      $Loader->Log('Error', 'Variable no found ', Implode('.', $Path))->BackTrace()->Dump($Vars);
       Return 'Error';
     }
   }
@@ -152,8 +152,8 @@
   // Запрашивает значение переменной $Path в $AVars
   Function &_Vars_Get_($Path, &$AVars)
   {
-  //Debug('Mem:'.memory_get_usage());
-  //Debug('Mem:'.memory_get_peak_usage());
+  //Dump('Mem:'.memory_get_usage());
+  //Dump('Mem:'.memory_get_peak_usage());
     $Res=&$AVars;
     $NULL=NULL;
     While($Path)
@@ -221,7 +221,7 @@
      If($ParseVars['IgnoreNull'])
        $Res='';
   //Return $z; //!!!!!!!!
-  //Debug($Res);
+  //Dump($Res);
     Return $Res;
   }
  

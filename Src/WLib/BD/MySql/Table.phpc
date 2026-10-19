@@ -120,7 +120,7 @@
       $Q=sqlTraceSelect($Cmds);
       $Q=$this->SelectQuery($Q);
       $R=$this->SqlQuery($Q);
-    //$this->Debug($R);
+    //$this->Dump($R);
       If($R->IsError())
         Return False;
       $Res=$R->AsArray();

@@ -38,7 +38,7 @@
       $TypeName=Static::Args_PopOrGet($Descr, 'Type');
       if(!$TypeName)
       {
-        $this->Log('Fatal', 'TypeName is null')->Debug($Descr);
+        $this->Log('Fatal', 'TypeName is null')->Dump($Descr);
         return null;
       }
       
@@ -53,7 +53,7 @@
         return $Parent->Get_Type($Descr);
       }
         
-      $this->Log('Error', 'TypeName ', $TypeName, ' not found')->Debug($Descr);
+      $this->Log('Error', 'TypeName ', $TypeName, ' not found')->Dump($Descr);
       return null;
     }
     

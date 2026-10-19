@@ -42,7 +42,7 @@
         'Actual'   =>$Actual   ,
       ];
       Return $this->Log('Error', 'AssertEquals failed: Expected and Actual are different ', $Message)
-        ->BackTrace()->Debug($Debug)->Ret(True);
+        ->BackTrace()->Dump($Debug)->Ret(True);
     }
     
     Function AssertEqualsWithDelta(Float $Expected, Float $Actual, Float $Delta, $Message='')
@@ -57,7 +57,7 @@
         'Delta'    =>$Delta    ,
       ];
       Return $this->Log('Error', 'AssertEqualsWithDelta failed: Expected and Actual have diff More than Delta ', $Message)
-        ->BackTrace()->Debug($Debug)->Ret(True);
+        ->BackTrace()->Dump($Debug)->Ret(True);
     }
     
     Function AssertSame($Expected, $Actual, $Message='')
@@ -72,9 +72,9 @@
       ]+($Res['Debug']?? []);
       If($Res[1]==='Type')
         Return $this->Log($z? 'Warning':'Error', 'AssertSome failed: Expected and Actual values have different types ', $Message)
-          ->BackTrace()->Debug($Debug)->Ret(True);
+          ->BackTrace()->Dump($Debug)->Ret(True);
       Return $this->Log($z? 'Warning':'Error', 'AssertSome failed: Expected and Actual are different ', $Message)
-        ->BackTrace()->Debug($Debug)->Ret(True);
+        ->BackTrace()->Dump($Debug)->Ret(True);
     }
     
     Function AssertNotSame($Expected, $Actual, $Message='')
@@ -88,7 +88,7 @@
       ]+($Res['Debug']?? []);
     
       Return $this->Log('Error', 'AssertNotSome failed: Expected and Actual values are some ', $Message)
-        ->BackTrace()->Debug($Debug)->Ret(True);
+        ->BackTrace()->Dump($Debug)->Ret(True);
     }
 
     Function IsIdentical($a, $b)
@@ -97,7 +97,7 @@
       $z=$a==$b;
       If(GetType($a)!==GetType($b))
         Return [$z? Null:False, 'Type', 'Msg'=>['values have different types']];
-      If(Is_Float($a) && !$z && (String)$a===(String)$b)
+      If(Is_Float($a) && !$z && (String)$a===(String)$b) //TODO: Error cast INF and NAN
       {
         If(Is_Infinite ($a) && Is_Infinite ($b)) Return [True, 'Float/Inf'];
         If(Is_Nan      ($a) && Is_Nan      ($b)) Return [True, 'Float/Nan'];
@@ -109,8 +109,8 @@
         ];
         Return [False, 'Float/StrEquals', 'Debug'=>$Debug];
       }
+      //TODO: Array
       Return [$z? Null:False, 'UnKnown'];
     }
-
   }
 ?>

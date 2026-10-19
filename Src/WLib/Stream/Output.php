@@ -32,14 +32,14 @@
     If($z)
     {
       $Res=@Ob_Start('Stream_Output_Handler', 1);
-    //Debug('a'.$Res);
-    //Debug(ob_list_handlers());
+    //Dump('a'.$Res);
+    //Dump(ob_list_handlers());
     }
     Else
      {
     //@Ob_End_Flush();
       Ob_End_Clean();
-    //Debug('b');
+    //Dump('b');
     //While(@Ob_End_Clean());
     }
     $Z=$z;

@@ -124,7 +124,7 @@
     
     Static Function Types_Full_CheckTypes($c, $Offet=0)
     {
-    //$GLOBALS['Loader']->Log('Debug', 'CheckStr')->Debug(["\u{FEFF}", $s, $c]);
+    //$GLOBALS['Loader']->Log('Debug', 'CheckStr')->Dump(["\u{FEFF}", $s, $c]);
       for($i=$Offet, $l=StrLen($c); $i<$l;)
       {
         $j=Static::Types_CheckChar($c, $i);

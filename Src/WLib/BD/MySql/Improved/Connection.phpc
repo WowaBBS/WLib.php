@@ -60,7 +60,7 @@
         $this->Connect();
       If(IsSet($GLOBALS['BD_LOG_QUERY'])) // TODO:
         $this->Log($Data);
-    //Debug($Data);
+    //Dump($Data);
       $Res=$this->_link->Query($Data);
     //If(MySqlI_ErrNo($this->_link))
     //  LogStr(MySqlI_ErrNo().': '.MySqlI_Error($this->_link));

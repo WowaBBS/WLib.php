@@ -43,8 +43,8 @@
    */
       // Рассчитываем текущую задерку
       $Delay=$Size/$Limit;
-     /** /
-      Debug([
+    /** /
+      Dump([
         'ASize '=>$ASize ,
         'Size  '=>$Size  ,
         'Time  '=>$Time  ,
@@ -52,7 +52,7 @@
         'DTime '=>$DTime ,
         'Delay '=>$Delay ,
       ]);
-     /**/
+    /**/
       If($Delay<1)
         USleep($Delay*1000000);
       Else

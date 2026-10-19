@@ -84,7 +84,7 @@
       $this->_Init_Rules($List);
       
       If($List)
-        $this->Log('Error', 'Not all rules have been processed in ', $this->FullName)->Debug($List);
+        $this->Log('Error', 'Not all rules have been processed in ', $this->FullName)->Dump($List);
     }
     
     Function _Init_Args(Array $Args) { Return False; }
@@ -97,7 +97,7 @@
     Var $Sub      =[];
     Var $Children =[];
   
-    Function _Init_Sub(Array $List) { $this->Sub=$List; } // $this->Log('Error', 'Sub is not supported in ', $this->FullName)->Debug($List); }
+    Function _Init_Sub(Array $List) { $this->Sub=$List; } // $this->Log('Error', 'Sub is not supported in ', $this->FullName)->Dump($List); }
     
     Function OnChild($Child, $Prefix='')
     {

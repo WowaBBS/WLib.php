@@ -15,7 +15,7 @@
       If($Check!==$Node)
         $this->Log('Error', 'Node stack was rused')->BackTrace();
       If(!$Res)
-        $this->Log('Error', 'Node is not valid')->Debug($Node);
+        $this->Log('Error', 'Node is not valid')->Dump($Node);
       Return $Res;
     }
 
@@ -27,7 +27,7 @@
       Case 'object': Return $this->Node($Node);
       }
       $this->Error('Unsupported node type: ', GetType($Node))
-        ->Debug(['Node'=>$Node, 'Stack'=>Array_Reverse($this->Stack)])
+        ->Dump(['Node'=>$Node, 'Stack'=>Array_Reverse($this->Stack)])
         ->BackTrace();
       Return False;
     }

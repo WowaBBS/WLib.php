@@ -39,7 +39,9 @@
     Function _ToDebugInfo() { return $this->Object_GetId(); }
     
     Function GetLogger() { Return $this->Object_GetLoader()->GetLogger(); }
-    Function Debug($Var, $Level=-1) { Return $this->Object_GetLoader()->Debug($Var, $Level); }
+    Function Dump($Var, $Level=-1) { Return $this->Object_GetLoader()->Dump($Var, $Level); }
+    #[Deprecated("Use Dump() instead")]
+    Function Debug($Var, $Level=-1) { Return $this->Dump($Var, $Level); }
     Function Log($LogLevel, ...$Args) { return New T_Log_Item($this, $this->GetLogger(), $LogLevel, $Args); }
 
     Protected Function _Debug_Info(Array &$Res)

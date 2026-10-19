@@ -2,10 +2,10 @@
   Include '_Using.php';
 
   $FS=$Factory->Create('System'); //, ['Path'=>$Dir]);
-  $FS->Log('Debug', 'Node:'          )->Debug($FS[__FILE__  ]);
-  $FS->Log('Debug', 'Mode: ',                 $FS[__FILE__  ]->Get('Mode'));
-  $FS->Log('Debug', 'Attrs/File:'    )->Debug($FS[__FILE__  ]->Get(['Path', 'Created', 'Mode', 'Device_Id', 'Node_Id', 'Md5', 'Sha1', 'Content']));
-  $FS->Log('Debug', 'Attrs/Dir:'     )->Debug($FS[__DIR__   ]->Get(['Path', 'Created', 'Mode', 'Device_Id', 'Node_Id'])); //TODO:, 'Md5', 'Sha1'
-  $FS->Log('Debug', 'Attrs/Unknown:' )->Debug($FS['Unknown' ]->Get(['Path', 'Stat'])); //TODO:'Created', 'Mode', 'Md5', 'Sha1'
+  $FS->Log('Debug', 'Node:'          )->Dump($FS[__FILE__  ]);
+  $FS->Log('Debug', 'Mode: ',                $FS[__FILE__  ]->Get('Mode'));
+  $FS->Log('Debug', 'Attrs/File:'    )->Dump($FS[__FILE__  ]->Get(['Path', 'Created', 'Mode', 'Device_Id', 'Node_Id', 'Md5', 'Sha1', 'Content']));
+  $FS->Log('Debug', 'Attrs/Dir:'     )->Dump($FS[__DIR__   ]->Get(['Path', 'Created', 'Mode', 'Device_Id', 'Node_Id'])); //TODO:, 'Md5', 'Sha1'
+  $FS->Log('Debug', 'Attrs/Unknown:' )->Dump($FS['Unknown' ]->Get(['Path', 'Stat'])); //TODO:'Created', 'Mode', 'Md5', 'Sha1'
 
   $Loader->Done();

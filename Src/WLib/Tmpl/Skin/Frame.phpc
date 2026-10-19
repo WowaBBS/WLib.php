@@ -16,7 +16,7 @@
   
     Function ToString($Vars=False):String
     {
-    //Debug($Vars);
+    //Dump($Vars);
     //If($this->Content===False)
       If($this->Content==False)
         Return ParseStr($this->Def, $Vars);

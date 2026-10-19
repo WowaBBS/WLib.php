@@ -84,7 +84,7 @@
           Case 2:
             $Matches=[];
             If(!Preg_Match_All('/-+/', $Line, $Matches, PREG_OFFSET_CAPTURE))
-              Return $this->Log('Error', 'No match /-+/', $Matches)->Debug($Res)->Ret();
+              Return $this->Log('Error', 'No match /-+/', $Matches)->Dump($Res)->Ret();
             $Fields=[];
             $FieldsStr=$Res[$i-1];
             ForEach($Matches[0] As [$s, $Pos])
@@ -136,7 +136,7 @@
                   Case 'files'   : $File['Files'   ]=(Integer)$v[0]; Break;
                   Case 'folders' : $File['Folders' ]=(Integer)$v[0]; Break;
                   Default:
-                    $this->Log('Error', 'Unknown property: ', $vi)->Debug($Res);
+                    $this->Log('Error', 'Unknown property: ', $vi)->Dump($Res);
                   }
                 }
                 $File['Files'   ]??=0;
@@ -163,7 +163,7 @@
           }
       if(!$Total)
       {
-        $this->Log('Error', 'No total info')->Debug($Res);
+        $this->Log('Error', 'No total info')->Dump($Res);
         Return [];
       }
       if(IsSet($Info['Blocks'        ])) { $Info['Blocks'       ]=(Int)$Info['Blocks'        ]; }

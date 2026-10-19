@@ -27,9 +27,9 @@
     Function CharMap_Create() { Return New T_RegExp_Char_Map($this); }
     Function _CharMap_CreateEnd() //<TODO: Remove
     {
-    //$this->Log('Debug')->Debug($this);
+    //$this->Log('Debug')->Dump($this);
       $Res=$this->CharMap_Create()->AddEnd()->ToStatic();
-    //$this->Log('Debug', 'b')->Debug($this);
+    //$this->Log('Debug', 'b')->Dump($this);
       Return $Res;
     }
     
@@ -83,7 +83,7 @@
       }
       $Res=$this->_Analyze($Res);
       If($Debug)
-        $this->Log('Debug')->Debug($Res);
+        $this->Log('Debug')->Dump($Res);
      
       Return $Res;
     }
@@ -99,12 +99,12 @@
         
         $Factory   =$this->Create_Object('/RegExp/Node/Factory'   );
         $Optimizer =$this->Create_Object('/RegExp/Node/Optimizer' );
-      //$this->Log('Debug', 'Arr:')->Debug($Res);
-      //$this->Log('Debug', 'Res:',$Ends,' ')->Debug($Res);
+      //$this->Log('Debug', 'Arr:')->Dump($Res);
+      //$this->Log('Debug', 'Res:',$Ends,' ')->Dump($Res);
         $Node=$Factory->Node($Res);
         $Node=$Node->Optimize($Optimizer, Null);
         $Res=$Node->ToString();
-      //$this->Log('Debug', 'Str:',$Ends,' ', $Res); //->Debug($Node);
+      //$this->Log('Debug', 'Str:',$Ends,' ', $Res); //->Dump($Node);
       }
       Else
       {

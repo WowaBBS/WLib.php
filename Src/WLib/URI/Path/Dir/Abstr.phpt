@@ -20,7 +20,7 @@
         {
           $this->Assign($APath);
           $this->Add($AFile);
-        //Debug([$this->ToString(), $this->IsFile()]);
+        //Dump([$this->ToString(), $this->IsFile()]);
           If($this->IsFile())
             Return [$k];
         }
@@ -29,7 +29,7 @@
         {
           $this->Assign($APath);
           $this->Add($AFile);
-        //Debug([$this->ToString(), $this->IsFile()]);
+        //Dump([$this->ToString(), $this->IsFile()]);
           If($this->IsDir())
             Return [$k];
         }

@@ -27,7 +27,7 @@
     {
       $this->Post->Save_To_Mime($this->Mime);
       $this->Files->Save_To_Mime($this->Mime);
-    //Debug($this->Files);
+    //Dump($this->Files);
    
       $this->Mime->Header=&$AHeader;
       $this->Mime->Calc_Content_Length();

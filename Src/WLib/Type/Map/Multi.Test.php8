@@ -58,6 +58,6 @@
   ForEach($Map1 As $k=>$v)
     $Loader->Log('Debug', ' ', $k, '=>', $v);
 
-  //$Loader->Log('Debug')->Debug($Map);
+  //$Loader->Log('Debug')->Dump($Map);
 
   $Loader->Done();

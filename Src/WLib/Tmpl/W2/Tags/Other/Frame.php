@@ -24,7 +24,7 @@
   
       $Builder->Out->Capture();
       $Tags['item'][0]->MakePHPInnerTo($Builder, $Tags['item'][1]);
-    //Debug($Op);
+    //Dump($Op);
   
       $Builder->Add_Line($vFrames."=&".$Builder->Vars_Get('Frame').';');
       $Builder->Add_Line($vFrame.'='.$vFrames."->GetFrame('".$Name."');");

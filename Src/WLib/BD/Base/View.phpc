@@ -92,7 +92,7 @@
     Function GetList($Where=[], $Sort=False, $Count=0, $Pos=0)
     {
       $Table=&$this->Table;
-    //Debug($Table,2);
+    //Dump($Table,2);
       $Q=[];
     //$Q[]=bdSort('b.DateEvent',False);
       $Links=$this->Links;
@@ -111,7 +111,7 @@
       If($Count)
         $Q[]=bdLimit($Pos, $Count);
       $Res=$Table->SelectAll($Q);
-    //$this->Debug($Res);
+    //$this->Dump($Res);
       ReIndexs($Res, (Int)$Pos+1);
       $R=[];
       ForEach($Res As $Item)

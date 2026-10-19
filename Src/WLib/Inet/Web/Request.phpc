@@ -68,8 +68,8 @@
           $Prot.'://'.$Host.
           ':'.$_SERVER['SERVER_PORT'].
           UrlDeCode($_SERVER['REQUEST_URI']));
-    //Debug($_SERVER);
-    //Debug($CurURL->ToString());
+    //Dump($_SERVER);
+    //Dump($CurURL->ToString());
     //$BaseURL=T_Inet_Url::Create(
     //  $Prot.'://'.$Host.
     //  ':'.$_SERVER['SERVER_PORT'].
@@ -86,7 +86,7 @@
       $CurPath  =T_FS_Path::Create($CurURL);
       $Z=$CurPath->Cmp($BaseURL,False,False);
     //$Z=$CurPath->Cmp($BasePath);
-    //Debug(Array($CurPath->ToString(),$BaseURL->Path->ToString(),$Z));
+    //Dump(Array($CurPath->ToString(),$BaseURL->Path->ToString(),$Z));
     //$Z=$CurPath->Compare($BaseURL);
       $Tmp=$BaseURL->Path;
       If($Tmp->IsFile())
@@ -101,11 +101,11 @@
       If(Count($BasePath->Path)==1)
         $BasePath->Path[]='';
       $BaseURL->Path=$BasePath;
-    //Debug($BaseURL);
-    //Debug($BaseURL->ToString());
+    //Dump($BaseURL);
+    //Dump($BaseURL->ToString());
       If($i>0)
         $CurPath->Del(0,$i);
-    //Debug($i);
+    //Dump($i);
       $ReqFile='';
       If($CurPath->IsFile())
       {
@@ -141,13 +141,13 @@
       $RelURL->Path->Add('/');
       $RelURL->Path->Norm();
      */
-      //Debug($RelPath ->ToString());
-      //Debug($BaseURL ->ToString());
-      //Debug($RelURL  ->ToString());
+    //Dump($RelPath ->ToString());
+    //Dump($BaseURL ->ToString());
+    //Dump($RelURL  ->ToString());
    
      /*
-      //Debug($ParseVars['CurPath'  ]);
-      Debug(Array(
+     //Dump($ParseVars['CurPath'  ]);
+      Dump(Array(
         'CurURL'   => $CurURL   ->ToString(),
         'BaseURL'  => $BaseURL  ->ToString(),
         'CurPath'  => $CurPath  ->ToString(),

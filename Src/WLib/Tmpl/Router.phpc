@@ -32,7 +32,7 @@
     //If($Mode!=='')
     //  If($Mode[0]!='/')
     //    $Mode=$Mode2.'/'.$Mode;
-    //Debug([$Mode1, $Mode2, $Mode]);
+    //Dump([$Mode1, $Mode2, $Mode]);
       If($Mode==='')
         $Mode=$Mode2;
       Else
@@ -84,7 +84,7 @@
         $Location=$LocationRes;
         $this->LHash[$Mode]=$Location;
       }
-    //Debug($Location);
+    //Dump($Location);
       Return $Location;
     }
  
@@ -173,7 +173,7 @@
           $PMF=$this->File($Mode.'/'.$L['Exec']);
         Else
           $PMF=$this->File($L['Exec']);
-      //$this->Debug([$Mode.'/'.$L['Exec'], $PMF, $Mode]);
+      //$this->Dump([$Mode.'/'.$L['Exec'], $PMF, $Mode]);
         Include($PMF);
       }
       If($Fld==='')

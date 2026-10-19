@@ -117,7 +117,7 @@
  
     Function Replace_CData($V)
     {
-    //Debug($V);
+    //Dump($V);
       If(IsSet($V[5]) && $V[5])
         Return $V[5];
       $UID=$this->Unique_ID;
@@ -179,7 +179,7 @@
       }
       If($LE)
         $this->Log('Error', 'Xml/Parser/Preg_Last_Error: ', $LE);
-    //Debug($_Tags);
+    //Dump($_Tags);
       For($i=0;$i<$Count;$i++)
     //ForEach($_Tags As $v)
     //While(Preg_Match('/^'.Preg_Offset($Len).$Q.'/is', $XML, $v))
@@ -259,7 +259,7 @@
         $this->Rest=SubStr($XML, $Len, StrLen($XML)-$Len);
       Else
         $this->Rest='';
-    //Debug($this->Rest);
+    //Dump($this->Rest);
     //File_Put_Contents('ttt', $this->Rest);
     }
  

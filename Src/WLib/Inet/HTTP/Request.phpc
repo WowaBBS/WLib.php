@@ -73,13 +73,13 @@
       $this->URL->Param->Assign($_GET);
     //If($_SERVER['REQUEST_METHOD']=='POST')
     //{
-      //$Test=&New C_Stream_File();
-      //$Test->Open('php://input');
-      //Debug($Test->Get_Content());
-      //$Test->Done();
-      //Debug($HTTP_RAW_POST_DATA);
-      //Debug($_SERVER['CONTENT_LENGTH']);
-      //Debug($_POST);
+    //  $Test=&New C_Stream_File();
+    //  $Test->Open('php://input');
+    //  Dump($Test->Get_Content());
+    //  $Test->Done();
+    //  Dump($HTTP_RAW_POST_DATA);
+    //  Dump($_SERVER['CONTENT_LENGTH']);
+    //  Dump($_POST);
     //}
       $this->Post->Assign($_POST);
       $this->Files->Load_Self();

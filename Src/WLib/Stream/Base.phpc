@@ -25,7 +25,7 @@
       While($ASize_Min>0)
       {
         $Str=$this->Recv($ASize_Max);
-      //Debug($Str);
+      //Dump($Str);
         $Len=StrLen($Str);
         If($Len==0)
           Break;
@@ -112,7 +112,7 @@
       Do
       {
         $Out=$this->Recv(1);
-      //Debug($Out);
+      //Dump($Out);
       //If($Out===False)
       //  If(StrLen($Res)>0)
       //    Return $Res;
@@ -145,20 +145,20 @@
       $Res=True;
       Do
        {
-      //Debug('Set_Time_Limit('.$bt.');');
+      //Dump('Set_Time_Limit('.$bt.');');
         if($bt>0)
           Set_Time_Limit($bt);
-      //Debug('$r=$this->Recv('.$bs.');');
+      //Dump('$r=$this->Recv('.$bs.');');
         $r=$this->Recv($bs);
-      //Debug('!');
+      //Dump('!');
       //Ignore_User_Abort(0);
       //Flush();
-      //Debug(Connection_Status().'.'.Connection_Aborted());
-      //Debug(FWrite($fo, '').'.'.Connection_Status().'.'.Connection_Aborted());
+      //Dump(Connection_Status().'.'.Connection_Aborted());
+      //Dump(FWrite($fo, '').'.'.Connection_Status().'.'.Connection_Aborted());
       //$R=0;
         $R=FWrite($fo, $r, StrLen($r));
       //Echo $r;
-      //Debug($R);
+      //Dump($R);
         If($R===False)
          {
           $Res=False;

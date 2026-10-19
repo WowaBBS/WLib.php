@@ -53,7 +53,7 @@
         }
       }
    $Var=Implode('', $Var);
-   //Debug($Var);
+ //Dump($Var);
    Return $Var;
   }
  

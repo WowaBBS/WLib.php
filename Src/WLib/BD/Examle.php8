@@ -119,11 +119,11 @@
     'UmkHours'   => $tblUmkHours    ,
   ]);
 
-  $Loader->Debug($tblFacs);
+  $Loader->Dump($tblFacs);
   $W=$tblFacs->View();
   $List=$W->GetList();
-  $Loader->Debug($List);
+  $Loader->Dump($List);
   $Path=['Specs'];
-  $Loader->Debug($List[0]->GetVar($Path)->GetList()); // Get virtual field
+  $Loader->Dump($List[0]->GetVar($Path)->GetList()); // Get virtual field
 
   $Loader->Done();

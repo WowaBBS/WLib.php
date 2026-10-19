@@ -58,7 +58,7 @@
   
     Function _Load_Info()
     {
-    //Debug('Load Skin '.$this->Path.'info.php');
+    //Dump('Load Skin '.$this->Path.'info.php');
       If(Is_File($this->Path.'info.php'))
         Include($this->Path.'info.php');
       Else
@@ -162,7 +162,7 @@
       $Res=New T_URI_Paths();
       $Res->Assign_Paths($Paths);
       $P=$this->_Get_Paths();
-    //Debug($P);
+    //Dump($P);
       ForEach($P As $p)
         $Res->AddPath($p[0], $p[1]);
       $this->Paths=$Res;
@@ -196,7 +196,7 @@
       Case 'URL'     : $Res =  $this->URL    ; Break;
       Case 'Frames'  :
       Case 'Frame'   :
-      //Debug($this->Info, 3);
+      //Dump($this->Info, 3);
         $Res=$this->Create_Object('/Tmpl/Skin/Frames', ['List'=>$this->Info['Frames']]);
         $this->Vars['Frames']=$Res;
         $this->Vars['Frame' ]=$Res;

@@ -89,7 +89,7 @@
     'Name.RegExp.OtherExt' =>['Any', 'Mask' ],
     'AnyOtherName'         =>['Any',        ],
   ];
-//$Loader->Log('Debug', 'Rule:')->Debug($Rule);
+//$Loader->Log('Debug', 'Rule:')->Dump($Rule);
   ForEach($Tests As $Test=>$Check)
   {
     $Res=$Map->CheckNode($Node->Set($Test));

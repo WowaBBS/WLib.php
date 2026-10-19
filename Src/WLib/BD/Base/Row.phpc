@@ -32,7 +32,7 @@
       ElseIf(IsSet($this->View->Table->Links[$Dir]))
       {
         $Link=$this->View->Table->Links[$Dir];
-      //Debug($Link);
+      //Dump($Link);
         $Table=$Link[1]['Table'];
         If($this->ZLink)
           Switch($Link[1]['Type'])
@@ -60,7 +60,7 @@
             $Where=[];
             ForEach($Link[1]['Fields']As $k=>$Field)
               $Where[$Field]=$this->Rec[$Link[0]['Fields'][$k]];
-          //Debug([
+          //Dump([
           //  'Rec'=>$this->Rec,
           //  'Fields'=>$Link[1]['Fields'],
           //  'AFields'=>$Link[0]['Fields'],

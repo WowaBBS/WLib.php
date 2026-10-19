@@ -143,7 +143,7 @@
       $LastTags=&$this->LastTags;
       $Len=0;
       $Count=Preg_Match_All($this->Match, $Tmpl, $_Tags, PREG_SET_ORDER);
-    //Debug($_Tags);
+    //Dump($_Tags);
       ForEach($_Tags As $v)
     //While(Preg_Match('/^'.Preg_Offset($Len).$Q.'/is', $Tmpl, $v))
     //While(Preg_Match('/'.$Q.'/is', $Tmpl, $v, 0, $Len))
@@ -231,7 +231,7 @@
         $this->AddTag($NewTag);
       }
       $this->Rest='';
-    //Debug($this);
+    //Dump($this);
     }
   }
 ?>

@@ -29,7 +29,7 @@
       $Pth=New T_FS_Path($Path);
       If($Pth->IsRoot())
         $Pth->Del(0);
-    //Debug($Pth);
+    //Dump($Pth);
       $Res=[];
       ForEach($this->ListNodes As $k=>$v)
       {

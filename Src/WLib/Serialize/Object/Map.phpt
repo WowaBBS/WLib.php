@@ -28,7 +28,7 @@
           if($ObjectVars)
             $Map->CopyToObj($ObjectVars, $v);
         # else
-        #   $this->Factory->Log('Error', 'Serialize/Object/Map::CopyToObj property ', $Name, ' not found')->Debug($Vars);
+        #   $this->Factory->Log('Error', 'Serialize/Object/Map::CopyToObj property ', $Name, ' not found')->Dump($Vars);
         }
         else
         {

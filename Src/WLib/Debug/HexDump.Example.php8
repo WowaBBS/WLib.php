@@ -24,7 +24,7 @@
   ];
   
   $Dump=HexDump('123');
-  $Loader->Log('Log', 'Debug: ', $Dump)->Debug($Dump);
+  $Loader->Log('Log', 'Debug: ', $Dump)->Dump($Dump);
   $Loader->Log('Log', 'ToString: ', $Dump->ToString());
   
   ForEach($List As $Item)

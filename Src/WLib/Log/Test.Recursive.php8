@@ -25,7 +25,7 @@
   $v->c->b=$v->b;
   $v->c->c=$v->c;
   
-  $Loader->Log('Log' ,'Test Recursive:')->Debug(['Test'=>[
+  $Loader->Log('Log' ,'Test Recursive:')->Dump(['Test'=>[
     'TestV'=>$v,
     'TestA'=>$v->a,
     'TestB'=>$v->b,

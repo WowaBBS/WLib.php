@@ -26,7 +26,7 @@
       if($Type=$this->Get_Singleton('/BD/Descr/Type/'.$TypeName, [], ['Safe'=>True]))
         return $Type->Create($Descr);
         
-      $this->Log('Error', 'TypeName ', $TypeName, ' not found')->Debug($Descr);
+      $this->Log('Error', 'TypeName ', $TypeName, ' not found')->Dump($Descr);
       return null;
     }
     
@@ -35,7 +35,7 @@
       if($Type=$this->Get_Singleton('/BD/Descr/Type/'.$TypeName, $Args))
         return $Type;
         
-      $this->Log('Error', 'TypeName ', $TypeName, ' not found')->Debug($Args);
+      $this->Log('Error', 'TypeName ', $TypeName, ' not found')->Dump($Args);
       return null;
     }
     
@@ -46,7 +46,7 @@
     Function Create($Descr)
     {
       if($Descr)
-        $this->Log('Error', 'Descr is not supported for ', $this->GetTypeName())->Debug($Descr);
+        $this->Log('Error', 'Descr is not supported for ', $this->GetTypeName())->Dump($Descr);
       return $this;
     }
   }

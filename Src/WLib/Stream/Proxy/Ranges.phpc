@@ -68,7 +68,7 @@
     Function Recv($Size)
     {
       $Rest_Len=$this->Range[4]-$this->Pos;
-    //Debug([$l, Count($Res), $Size]);
+    //Dump([$l, Count($Res), $Size]);
       If($Rest_Len<=0)
         Return '';
       $Res=parent::Recv(Min($Rest_Len, $Size));

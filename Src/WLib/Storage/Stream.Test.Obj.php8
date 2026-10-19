@@ -31,7 +31,7 @@
   $Vars=$S1->Get(0);
   $Loader->Dump($Vars);
   
-  $S1->Done();
-  $S2->Done();
+  $S1->Dispose();
+  $S2->Dispose();
 
-  $Loader->Done();
+  $Loader->Dispose();

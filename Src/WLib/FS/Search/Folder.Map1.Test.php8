@@ -22,4 +22,4 @@
     echo $f->GetLocalPath(), "\n";
   }
 
-  $Loader->Done();
+  $Loader->Dispose();

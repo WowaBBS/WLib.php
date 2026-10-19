@@ -51,4 +51,4 @@
 
   ChDir($OldCwd);
 
-  $Loader->Done();
+  $Loader->Dispose();

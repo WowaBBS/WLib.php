@@ -12,4 +12,4 @@
   }
   Test('a', null, 1.5, ['a'=>'b', False=>'d']);
   
-  $Loader->Done();
+  $Loader->Dispose();

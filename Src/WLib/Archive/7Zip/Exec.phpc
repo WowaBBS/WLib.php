@@ -68,7 +68,7 @@
       if($this->OutPutStream)
       {
         $this->OutPutStream->Close();
-        $this->OutPutStream->Done();
+        $this->OutPutStream->Dispose();
         $this->OutPutStream=null;
       }
       $Res=Parent::Close();

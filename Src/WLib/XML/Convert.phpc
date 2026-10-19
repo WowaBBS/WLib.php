@@ -112,7 +112,7 @@
     //$Res[0]='<? Function '.$FN.'($Vars){ ?'.'>'.$Res[0];
       $Res=Implode('', $Res);
       SaveText($FileTo, $Res);
-      $XML->Done();
+      $XML->Dispose();
       $XML=NULL;
     }
  
@@ -147,7 +147,7 @@
       $this->Convert_XML($XML, $Data);
   
       $Res=$XML->Build();
-      $XML->Done();
+      $XML->Dispose();
       $XML=NULL;
       Return $Res;
     }
@@ -169,7 +169,7 @@
       $CSS->AddStr($Str);
       $this->Convert_CSS($CSS, $Data);
       $Res=$CSS->Make();
-      $CSS->Done();
+      $CSS->Dispose();
       Return $Res;
     }
  
@@ -216,7 +216,7 @@
             $CSS->AddStr($Tag->GetCData(True));
             $this->Convert_CSS($CSS, $Data);
             $Tag->PutCData($CSS->Make(), '');
-            $CSS->Done();
+            $CSS->Dispose();
             $CSS=NULL;
           }
           $Tag=$Tag->ListNext;
@@ -235,7 +235,7 @@
               ]
             );
             $Tag->Attributes->SetAttr('style', $Style->Make());
-            $Style->Done();
+            $Style->Dispose();
           }
           If($this->Z_Convert_Links)
           {

@@ -233,7 +233,7 @@
         return $Exec;
       $Exec->Wait();
       $Res=$Exec->GetExitCode();
-      $Exec->Done();
+      $Exec->Dispose();
       return $Res;
     }
   
@@ -269,7 +269,7 @@
       $Exec->Open();
       $Exec->Wait();
       $Exit=$Exec->GetExitCode();
-      $Exec->Done();
+      $Exec->Dispose();
       $Exec=null;
       return $Exit===0;
     }
@@ -310,7 +310,7 @@
         ['InstallLocation', 'DisplayName'], // 'InstallSource'
         ['Recursive'=>true]
       );
-      $Reg->Done();
+      $Reg->Dispose();
       $Res=[];
       ForEach($List As $Item)
       {

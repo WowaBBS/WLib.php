@@ -18,7 +18,7 @@
       $this->Total->Manager=null;
     }
     
-    Function _Done()
+    Function _Dispose()
     {
       $this->GetItem('Total')->Time=0;
     //$this->Total->Logger  =$this;
@@ -43,8 +43,8 @@
           Str_Pad($Item->TimeStr, $LenTime, ' ', STR_PAD_LEFT),
           $Item->Count>1? Str_Pad($Item->CountStr, $LenCount+1, ' ', STR_PAD_LEFT):''
         );
-      $Log->Done();
-      Parent::_Done();
+      $Log->Dispose();
+      Parent::_Dispose();
     }
     
     Function Start($Args)

@@ -13,4 +13,4 @@
   $Loader->log('Log', Var_Export($C->Calc(['tesT'], ['Test']), true));
   $Loader->log('Log', Var_Export($C->Calc(['tesT'], ['Tast']), true));
 
-  $Loader->Done();
+  $Loader->Dispose();

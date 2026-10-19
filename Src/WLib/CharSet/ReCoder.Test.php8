@@ -46,4 +46,4 @@
       UnSet($Log);
     }
 
-  $Loader->Done();
+  $Loader->Dispose();

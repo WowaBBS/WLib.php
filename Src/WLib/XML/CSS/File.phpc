@@ -5,10 +5,10 @@
  
   Class C_XML_CSS_File Extends C_XML_CSS_Base
   {
-    Function _Done()
+    Function _Dispose()
     {
       $this->Clear();
-      Parent::_Done();
+      Parent::_Dispose();
     }
  
     Function Clear()
@@ -120,7 +120,7 @@
  
     Function Delete_By_Key($Key)
     {
-      $this->Styles[$Key]->Done();
+      $this->Styles[$Key]->Dispose();
       UnSet($this->Styles[$Key]);
     }
  

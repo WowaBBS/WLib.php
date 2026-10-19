@@ -10,4 +10,4 @@
   $MP->PathFrom($CP);                  $Loader->Log('Debug', $MP);
   $MP->Add('/index.html');             $Loader->Log('Debug', $MP);
 
-  $Loader->Done();
+  $Loader->Dispose();

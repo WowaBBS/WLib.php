@@ -44,13 +44,13 @@
     //$this->Method_Set();
     }
   
-    Function _Done()
+    Function _Dispose()
     {
-      $this->Cookies->Done();
+      $this->Cookies->Dispose();
       $this->Files->_UnLock();
       If($this->FPoster)
         $this->FPoster->_UnLock();
-      parent::_Done();
+      parent::_Dispose();
     }
   
     Function &Get_Current()
@@ -76,7 +76,7 @@
     //  $Test=&New C_Stream_File();
     //  $Test->Open('php://input');
     //  Dump($Test->Get_Content());
-    //  $Test->Done();
+    //  $Test->Dispose();
     //  Dump($HTTP_RAW_POST_DATA);
     //  Dump($_SERVER['CONTENT_LENGTH']);
     //  Dump($_POST);
@@ -209,7 +209,7 @@
       $Poster->Header_Make(&$Header);
       $Header->Add_Header($this->Header);
       $Header->Save_To_Stream(&$Sock);
-    //$Header->Done();
+    //$Header->Dispose();
   
       $Sock->Write("\r\n");
       $Poster->Save_To_Stream(&$Sock);

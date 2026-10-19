@@ -4,7 +4,7 @@
   class C_Storage_Base extends C_Object
   {
     Function _Init(Array $Args) { Parent::_Init($Args); }
-    Function _Done() { Parent::_Done(); }
+    Function _Dispose() { Parent::_Dispose(); }
   
     Function IsChanged    (           ) { $this->Log('Fatal', 'Usupported'); return false; }
     Function Get          ($Default=[]) { $this->Log('Fatal', 'Usupported'); return $Default; }

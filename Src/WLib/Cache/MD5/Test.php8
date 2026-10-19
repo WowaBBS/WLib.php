@@ -14,7 +14,7 @@
   CheckMD5($F, 'Manager.phpc');
   CheckMD5($F, 'EnumDir.phpc');
   CheckMD5($F, 'Storage.phpc');
-//$F->Done();
+//$F->Dispose();
   $F=$MM->Get('');
   CheckMD5($F, 'Manager.phpc');
   CheckMD5($F, 'EnumDir.phpc');
@@ -30,8 +30,8 @@
   UnLink('Test');
   CheckMD5($F, 'Test');
   
-//$F->Done();
-//$MM->Done();
-  $CM->Done();
+//$F->Dispose();
+//$MM->Dispose();
+  $CM->Dispose();
 
-  $Loader->Done();
+  $Loader->Dispose();

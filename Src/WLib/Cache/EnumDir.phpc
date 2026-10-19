@@ -37,11 +37,11 @@
       parent::_Init($Args);
     }
     
-    Protected Function _Done()
+    Protected Function _Dispose()
     {
       if($this->RemoveUnChecked)
         $this->RemoveDirty();
-      parent::_Done();
+      parent::_Dispose();
     }
     
     Protected Function _Load()

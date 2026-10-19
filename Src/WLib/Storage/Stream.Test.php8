@@ -44,7 +44,7 @@
   t3($S1, $S2);
   t1($S2, 'S2');
   
-  $S1->Done();
-  $S2->Done();
+  $S1->Dispose();
+  $S2->Dispose();
 
-  $Loader->Done();
+  $Loader->Dispose();

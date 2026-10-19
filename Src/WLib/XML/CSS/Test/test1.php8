@@ -15,12 +15,12 @@
 //Dump($Style);
 //Dump($Style->Make());
   $Loader->Dump($Style->Styles);
-  $Style->Done();
+  $Style->Dispose();
  
   $CSS=$Loader->Create_Object('/XML/CSS/File');
   $CSS->AddFile('main.css');
   Echo $CSS->Make(), "\n";
   $Loader->Dump($CSS->Styles);
-  $CSS->Done();
+  $CSS->Dispose();
  
-  $Loader->Done();
+  $Loader->Dispose();

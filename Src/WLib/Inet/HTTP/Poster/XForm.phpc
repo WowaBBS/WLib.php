@@ -14,10 +14,10 @@
         $this->Post=New T_Inet_HTTP_GetReqquest();
     }
    
-  //Function _Done()
+  //Function _Dispose()
   //{
-  // $this->Post->Done();
-  // parent::_Done();
+  // $this->Post->Dispose();
+  // parent::_Dispose();
   //}
    
     Function Method()

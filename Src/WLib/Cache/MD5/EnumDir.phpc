@@ -18,10 +18,10 @@
       return $Res;
     }
     
-    Function _Done()
+    Function _Dispose()
     {
       UnSet($this->Storages);
-      Parent::_Done();
+      Parent::_Dispose();
     }
 
     Function CalcMD5($FullPath, $RootPath='')

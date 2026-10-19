@@ -59,7 +59,7 @@
       $CSS->AddStr($Tag->GetCData(True));
       Word_CSS_Convert($CSS);
       $Tag->PutCData($CSS->Make(),'');
-      $CSS->Done();
+      $CSS->Dispose();
       $CSS=NULL;
     }
     If(IsSet($TagsDel1[$Tag->tagName]))
@@ -80,14 +80,14 @@
         If(StrIPos($k1,'color')!==False)
           UnSet($Style->Styles[$k1]);
       $Tag->Attributes->SetAttr('style',$Style->Make());
-      $Style->Done();
+      $Style->Dispose();
       $Style=NULL;
     }
     $Tag=$Tag->ListNext;
   }
   //VarsToPHPFile('Test.htm.php',$XML->BuildHash());
   $XML->SaveToFile('Test.htm');
-  $XML->Done();
+  $XML->Dispose();
   $XML=NULL;
 
-  $Loader->Done();
+  $Loader->Dispose();

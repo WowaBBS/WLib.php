@@ -13,9 +13,9 @@
       parent::_Init($Args);
     }
 
-    Protected Function _Done()
+    Protected Function _Dispose()
     {
-      parent::_Done();
+      parent::_Dispose();
     }
     
     Function Get_Type($Descr)

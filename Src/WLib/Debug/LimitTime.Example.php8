@@ -18,4 +18,4 @@
   }
   UnSet($a);
 
-  $Loader->Done();
+  $Loader->Dispose();

@@ -270,10 +270,10 @@
     {
     }
   
-    Function _Done()
+    Function _Dispose()
     {
       $this->Close();
-      parent::_Done();
+      parent::_Dispose();
     }
   
     Function ShutDown()

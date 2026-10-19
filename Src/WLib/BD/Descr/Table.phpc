@@ -119,9 +119,9 @@
         }
     }
 
-    Protected Function _Done()
+    Protected Function _Dispose()
     {
-      parent::_Done();
+      parent::_Dispose();
     }
     
     Function Types_GetParent()

@@ -16,11 +16,11 @@
         $this->Files=&$this->Create_Object('/Inet/HTTP/Files');
     }
   
-    Function _Done()
+    Function _Dispose()
     {
-      $this->Mime->Done();
+      $this->Mime->Dispose();
       $this->Files->_UnLock();
-      parent::_Done();
+      parent::_Dispose();
     }
   
     Function Header_Make(&$AHeader)

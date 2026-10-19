@@ -11,4 +11,4 @@
   $Html=$Loader->Create_Object('/Inet/Web/Debug/Text');
   $Html->Print();
 
-  $Loader->Done();
+  $Loader->Dispose();

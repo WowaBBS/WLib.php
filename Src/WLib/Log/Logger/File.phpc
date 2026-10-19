@@ -16,9 +16,9 @@
         $this->Open($this->FilePath);
     }
 
-    Function _Done()
+    Function _Dispose()
     {
-      parent::_Done();
+      parent::_Dispose();
       if($this->RemoveUnimportant && $this->Importance<=0)
         If(Is_File($this->FilePath))
           UnLink($this->FilePath);

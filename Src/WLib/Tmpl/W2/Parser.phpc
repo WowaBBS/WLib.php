@@ -72,13 +72,13 @@
       $this->Match='/'.$Q.'/isS';
     }
  
-    Function _Done()
+    Function _Dispose()
     {
       $this->Rest='';
       $this->LastTags=[];
       $this->LastTag=False;
       $this->Mode=0;
-      parent::_Done();
+      parent::_Dispose();
     }
  
     Function AddTagCData($Tags=[])

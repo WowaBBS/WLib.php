@@ -74,7 +74,8 @@
       return $this;
     }
     
-    Function Done() { $this->Finish(); $this->Data=[]; $this->Outer=null; $this->Logger=null; }
+    Function Done() { $this->Dispose(); } //Deprecated
+    Function Dispose() { $this->Finish(); $this->Data=[]; $this->Outer=null; $this->Logger=null; }
     Function __Destruct() { $this->Finish(); }
     
     #[Deprecated("Use Dump() instead")]

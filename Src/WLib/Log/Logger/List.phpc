@@ -17,9 +17,9 @@
     # }
     }
     
-    Function _Done()
+    Function _Dispose()
     {
-      Parent::_Done();
+      Parent::_Dispose();
     }
     
     Function _LogItem($LogItem)

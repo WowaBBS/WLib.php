@@ -27,10 +27,10 @@
       $this->Types['W2'] =$this->Create_Object('/Tmpl/W2/Manager');
     }
  
-    Protected Function _Done()
+    Protected Function _Dispose()
     {
-      $this->Router->Done();
-      parent::_Done();
+      $this->Router->Dispose();
+      parent::_Dispose();
     }
  
     Protected Function _Norm_Path(&$Vars, $TmplName)

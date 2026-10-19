@@ -8,4 +8,4 @@
   Sleep(1);
   $Loader->Log('Log', 'Test3');
   
-  $Loader->Done();
+  $Loader->Dispose();

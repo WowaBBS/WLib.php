@@ -8,6 +8,6 @@
   
   $Exec->Command='TestProcessSample.bat';
   $Exec->Execute();
-  $Exec->Done();
+  $Exec->Dispose();
 
-  $Loader->Done();
+  $Loader->Dispose();

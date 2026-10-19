@@ -47,13 +47,13 @@
       $this->Clear();
     }
  
-    Function _Done()
+    Function _Dispose()
     {
       $this->Rest     ='';
       $this->LastTags =[];
       $this->LastTag  =false;
       $this->Mode     =0;
-      Parent::_Done();
+      Parent::_Dispose();
     }
  
     Function Clear()

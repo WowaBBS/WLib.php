@@ -47,6 +47,6 @@
     }
   }
   
-  $S->Done();
+  $S->Dispose();
 
-  $Loader->Done();
+  $Loader->Dispose();

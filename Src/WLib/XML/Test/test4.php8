@@ -149,7 +149,7 @@
   File_Put_Contents('Abbb.txt',Implode("\n",$RS));
   $Res=NULL;
   $XML->SaveToFile('Test.htm');
-  $XML->Done();
+  $XML->Dispose();
   $XML=NULL;
 
-  $Loader->Done();
+  $Loader->Dispose();

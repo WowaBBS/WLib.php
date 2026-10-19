@@ -19,5 +19,5 @@
   for($i=0; $i<$c; $i++)
     $l[$i]->Close();
 
-  $Loader->Done();
+  $Loader->Dispose();
 //UnLink('Test.lock');

@@ -58,4 +58,4 @@
     $Loader->Log('Log', ' Regexp for ', 'BOM2',' is ', MeasureTime($Func, Array_Slice($Boms, 0, -6)));
   }
 
-  $Loader->Done();
+  $Loader->Dispose();

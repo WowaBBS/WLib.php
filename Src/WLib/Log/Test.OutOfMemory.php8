@@ -8,4 +8,4 @@
   while(1)
     $tmp[] = str_repeat('a', 10000);
   
-  $Loader->Done();
+  $Loader->Dispose();

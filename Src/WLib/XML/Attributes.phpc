@@ -6,10 +6,10 @@
   {
     Var $Attr=[];
  
-    Function _Done()
+    Function _Dispose()
     {
       $this->Clear();
-      Parent::_Done();
+      Parent::_Dispose();
     }
  
     Function Assign($Data)

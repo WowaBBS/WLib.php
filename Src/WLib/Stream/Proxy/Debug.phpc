@@ -16,10 +16,10 @@
       $this->Debug=$Task->Create_Log('Debug_Proxy.log');
     }
 
-    Function _Done()
+    Function _Dispose()
     {
-      $this->Debug->Done();
-      parent::_Done();
+      $this->Debug->Dispose();
+      parent::_Dispose();
     }
 
     Function Open($AStream)
@@ -75,7 +75,7 @@
         $this->Set_Mode('Close', 'Ok');
       //$this->Debug->UnLock();
       //$this->Debug->Close();
-      //$this->Debug->Done();
+      //$this->Debug->Dispose();
       }
       parent::Close();
     }

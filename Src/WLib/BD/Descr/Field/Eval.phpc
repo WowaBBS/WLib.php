@@ -13,9 +13,9 @@
       $this->Eval  =$this->Create_Expr ($Eval  );
     }
 
-    Protected Function _Done()
+    Protected Function _Dispose()
     {
-      parent::_Done();
+      parent::_Dispose();
     }
   }
 ?>

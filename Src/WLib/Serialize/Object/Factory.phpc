@@ -8,15 +8,15 @@
   {
     Var $ClassMaps=[];
     
-    Function _Done()
+    Function _Dispose()
     {
       $this->ClassMaps=[];
-      Parent::_Done();
+      Parent::_Dispose();
     }
   
     Function GetClassMap($Obj)
     {
-      If(Is_Object($Obj))      
+      If(Is_Object($Obj))
         $Class=Get_Class($Obj);
       Else
         $Class=$Obj;

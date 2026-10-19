@@ -12,9 +12,9 @@
       Parent::_Init($Args);
     }
     
-    Function _Done()
+    Function _Dispose()
     {
-      Parent::_Done();
+      Parent::_Dispose();
     }
     
     Function GetExt()

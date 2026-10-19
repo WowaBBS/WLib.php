@@ -25,11 +25,11 @@
       parent::_Init($Args);
     }
  
-    Function _Done()
+    Function _Dispose()
     {
       If($this->Document)
         $this->Delete(False);
-      parent::_Done();
+      parent::_Dispose();
     }
     
     Function ListFirst($ADocument)
@@ -104,7 +104,7 @@
       Else
         $this->Document->LastTag =$this->ListPrev;
       $Res=$this->_Clear();
-      $this->Done();
+      $this->Dispose();
       Return $Res;
     }
  

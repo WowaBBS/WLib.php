@@ -17,10 +17,10 @@
       }
     }
     
-    Protected Function _Done()
+    Protected Function _Dispose()
     {
       $this->Clear();
-      parent::_Done();
+      parent::_Dispose();
     }
     
     //****************************************************************

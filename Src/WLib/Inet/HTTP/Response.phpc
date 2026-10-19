@@ -25,12 +25,12 @@
       $this->Cookies =$this->Create_Object('/Inet/HTTP/Cookie/List');
     }
  
-    Function _Done()
+    Function _Dispose()
     {
       If($this->FStream)
         $this->FStream->_UnLock();
-      $this->Cookies->Done();
-      Parent::_Done();
+      $this->Cookies->Dispose();
+      Parent::_Dispose();
     }
  
     Function Open($AStream)

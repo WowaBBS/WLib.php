@@ -60,4 +60,4 @@
 
   //$Loader->Log('Debug')->Dump($Map);
 
-  $Loader->Done();
+  $Loader->Dispose();

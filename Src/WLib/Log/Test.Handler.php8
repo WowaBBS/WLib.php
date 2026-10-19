@@ -16,4 +16,4 @@
   
 //$MainLogger->Restore_Error_Handler();
   
-  $Loader->Done();
+  $Loader->Dispose();

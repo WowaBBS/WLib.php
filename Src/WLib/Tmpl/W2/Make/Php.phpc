@@ -24,10 +24,10 @@
       $this->Tags=$this->Get_Singleton('/Tmpl/W2/Tag/Factory');
     }
  
-    Function _Done()
+    Function _Dispose()
     {
-      $this->Out->Done();
-      parent::_Done();
+      $this->Out->Dispose();
+      parent::_Dispose();
     }
  
   //Function AddStr($Data)

@@ -77,8 +77,8 @@
       }
       else
         Eval(SubStr($Builder->GetPHP(), 2, -2));
-      $Builder->Done();
-      $Tmpl->Done();
+      $Builder->Dispose();
+      $Tmpl->Dispose();
       $Tmpl=NULL;
     }
  

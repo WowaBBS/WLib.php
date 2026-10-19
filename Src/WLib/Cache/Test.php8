@@ -24,7 +24,7 @@
   Echo $F->_Alloc(3), "\n";
   Echo $F->_Alloc(4, 'T2'), "\n";
   Echo $F->_Alloc(6, 'T2'), "\n";
-//$F->Done();
-  $CM->Done();
+//$F->Dispose();
+  $CM->Dispose();
 
-  $Loader->Done();
+  $Loader->Dispose();

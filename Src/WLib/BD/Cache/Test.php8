@@ -101,5 +101,5 @@
   $S2->Get();
   $Loader->Dump($W2);
   
-  $Loader->Done();
+  $Loader->Dispose();
   

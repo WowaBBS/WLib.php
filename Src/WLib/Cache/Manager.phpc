@@ -28,16 +28,16 @@
         $this->Vars['MkDir']=$Args['MkDir'];
     }
 
-    Function _Done()
+    Function _Dispose()
     {
-      Parent::_Done();
+      Parent::_Dispose();
       $List=Array_Reverse(Array_Keys($this->Objects)); // TODO: Remove copying array
       $Objects =&$this->Objects;
       $Cache   =&$this->Cache;
       ForEach($List As $i)
       {
         $I=$Objects[$i];
-        $Cache[$I[0]][$I[1]]->Done();
+        $Cache[$I[0]][$I[1]]->Dispose();
       }
     }
     

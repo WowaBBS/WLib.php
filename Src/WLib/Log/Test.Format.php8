@@ -3,4 +3,4 @@
   
   $Loader->Log('Log' ,'Test Format: ',[1,2=>3], ' ', ['a', 'b'=>'c']);
 
-  $Loader->Done();
+  $Loader->Dispose();

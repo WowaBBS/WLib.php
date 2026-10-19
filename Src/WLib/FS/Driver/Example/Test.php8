@@ -19,4 +19,4 @@
   $FS->Log('Debug', 'Test_Get    : ', $Node['Test']);
   $FS->Log('Debug', 'Test_Set    : ', $Node['Test']='InTestValue');
 
-  $Loader->Done();
+  $Loader->Dispose();

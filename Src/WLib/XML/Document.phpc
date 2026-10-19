@@ -26,15 +26,15 @@
     //$FirstTag
     }
  
-    Function _Done()
+    Function _Dispose()
     {
       While($this->FirstTag)
-        $this->FirstTag->ListDelete(); //$this->FirstTag->Done();
-      $this->Parser->Done();
+        $this->FirstTag->ListDelete(); //$this->FirstTag->Dispose();
+      $this->Parser->Dispose();
       $this->Parser   =false;
       $this->FirstTag =false;
       $this->LastTag  =false;
-      Parent::_Done();
+      Parent::_Dispose();
     }
  
     Function Clear()

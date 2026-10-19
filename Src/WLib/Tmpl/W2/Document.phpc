@@ -34,18 +34,18 @@
     //$FirstTag
     }
  
-    Function _Done()
+    Function _Dispose()
     {
       While($this->FirstTag)
       {
       //Echo $this->FirstTag->TagBuild(), ' ';
         $this->FirstTag->ListDelete();
       }
-      $this->Parser->Done();
+      $this->Parser->Dispose();
       $this->Parser   =False;
       $this->FirstTag =False;
       $this->LastTag  =False;
-      parent::_Done();
+      parent::_Dispose();
     }
  
     Function Clear()

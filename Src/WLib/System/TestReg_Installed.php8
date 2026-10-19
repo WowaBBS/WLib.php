@@ -24,6 +24,6 @@
   }
   $Res=Var_Export($Res, true);
   File_Put_Contents('TestReg_Installed.txt', $Res);
-  $Reg->Done();
+  $Reg->Dispose();
 
-  $Loader->Done();
+  $Loader->Dispose();

@@ -13,10 +13,10 @@
     Var $Cl    =[]; // ['class'=>[1=>$Obj, ]]
   //Var $ToNext=[]; // [1 => $Obj,]
  
-    Function _Done()
+    Function _Dispose()
     {
       $this->Clear();
-      Parent::_Done();
+      Parent::_Dispose();
     }
  
     Function Clear()

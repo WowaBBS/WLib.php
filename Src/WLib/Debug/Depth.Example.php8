@@ -11,4 +11,4 @@
   $Loader->Log('Log', Depth(100), $Data);
   $Loader->Log('Log', $Data);
   
-  $Loader->Done();
+  $Loader->Dispose();

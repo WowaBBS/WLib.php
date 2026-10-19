@@ -16,9 +16,9 @@
       $this->Connect=$this->Manager->Create_Connect($Args);
     }
 
-    Protected Function _Done()
+    Protected Function _Dispose()
     {
-      parent::_Done();
+      parent::_Dispose();
     }
     
     Function GetTable($Name): C_BD_Base_Table

@@ -8,4 +8,4 @@
   $FS->Log('Debug', 'Attrs/Dir:'     )->Dump($FS[__DIR__   ]->Get(['Path', 'Created', 'Mode', 'Device_Id', 'Node_Id'])); //TODO:, 'Md5', 'Sha1'
   $FS->Log('Debug', 'Attrs/Unknown:' )->Dump($FS['Unknown' ]->Get(['Path', 'Stat'])); //TODO:'Created', 'Mode', 'Md5', 'Sha1'
 
-  $Loader->Done();
+  $Loader->Dispose();

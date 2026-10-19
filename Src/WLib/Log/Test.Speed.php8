@@ -24,4 +24,4 @@
   $Loader->Log('Log' ,'File.Time: ', $Duration1);
   $Loader->Log('Log' ,'Console.Time: ', $Duration2);
 
-  $Loader->Done();
+  $Loader->Dispose();

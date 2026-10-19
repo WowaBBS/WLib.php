@@ -18,4 +18,4 @@
   $tblContents ->AddLink('content_id'   ,[$tblPhotos, $tblFiles]);
   $tblRubrics  ->AddLink('rubric_id'    ,['parent_id'=>$tblRubrics, $tblContents, $tblPhotos, $tblFiles]);
 
-  $Loader->Done();
+  $Loader->Dispose();

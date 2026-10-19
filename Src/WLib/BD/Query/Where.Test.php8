@@ -15,4 +15,4 @@
   Echo $W->GetSql();
  
 //Dump($W);
-  $Loader->Done();
+  $Loader->Dispose();

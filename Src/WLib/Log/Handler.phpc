@@ -13,10 +13,10 @@
         $this->Set_Error_Handler();
     }
     
-    Function _Done()
+    Function _Dispose()
     {
       $this->Restore_Error_Handler();
-      Parent::_Done();
+      Parent::_Dispose();
     }
     
     Function GetLogger() { Return $this->Logger?? Parent::GetLogger(); }

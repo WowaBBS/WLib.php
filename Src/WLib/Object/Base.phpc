@@ -87,7 +87,7 @@
     {
       // TODO: Check locking
       if($this->Object_Inited)
-        $this->Done();
+        $this->Dispose();
     }
   
     Protected Function _Init(Array $Args)
@@ -95,7 +95,7 @@
       $this->Object_Inited=true;
     }
 
-    Protected Function _Done()
+    Protected Function _Dispose()
     {
       $this->Object_Inited=false;
     }
@@ -105,6 +105,7 @@
       if(!$this->Object_Inited)
         throw new Exception('Object '.Get_Class($this).' hasn`t initialized');
       $this->_Done();
+      $this->_Dispose();
       $this->Object_Loader->OnDestroyed($this);
       if($this->Object_Inited)
         throw new Exception('Destroing is not fully');
@@ -144,6 +145,8 @@
     Function GetLoader() { return $this->Object_GetLoader(); }
     
     Final Function Done() { Return $this->Dispose(); }
+
+    Protected Function _Done() {}
     
     //****************************************************************
     // Reflexion

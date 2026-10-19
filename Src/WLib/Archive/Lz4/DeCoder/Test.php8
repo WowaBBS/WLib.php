@@ -59,4 +59,4 @@
   ForEach($Duration As $TestName=>$Time)
     $Loader->Log('Log' , $TestName, '.Time: ', $Time);
   
-  $Loader->Done();
+  $Loader->Dispose();

@@ -19,7 +19,7 @@
    $Q->Where->FullText('Text','One two');
   $Q->Where->Search(Array('a.Name','b.Title'),'One two');
  
-  //Echo $Q->Where->GetSql();
+//Echo $Q->Where->GetSql();
   Echo $Q->GetSql();
  
-  $Loader->Done();
+  $Loader->Dispose();

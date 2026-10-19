@@ -7,4 +7,4 @@
 # $FS->Log('Debug', 'Disk/File:'    )->Dump($FS[__FILE__  ]->Get(['Disk_Total', 'Disk_Free', 'Disk_Used']));
 # $FS->Log('Debug', 'Disk/Unknown:' )->Dump($FS['Unknown' ]->Get(['Disk_Total', 'Disk_Free', 'Disk_Used']));
 
-  $Loader->Done();
+  $Loader->Dispose();

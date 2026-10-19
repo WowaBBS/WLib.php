@@ -53,14 +53,14 @@
       $this->State=$State;
     }
      
-    Function _Done()
+    Function _Dispose()
     {
       $this->_SetState('Closed');
       $Stream=$this->Stream;
       $Stream->Close();
-      $Stream->Done();
+      $Stream->Dispose();
       $this->Stream=null;
-      Parent::_Done();
+      Parent::_Dispose();
     }
   
     Protected Function _Get(bool $UnLock, $Default=[])

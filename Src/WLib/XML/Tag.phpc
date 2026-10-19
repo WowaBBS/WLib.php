@@ -351,11 +351,11 @@
       While($LTag!==$ETag)
       {
         $LTag2=$LTag->_Clear();
-        $LTag->Done();
+        $LTag->Dispose();
         $LTag=$LTag2;
       }
       $Res=$LTag->_Clear();
-      $LTag->Done();
+      $LTag->Dispose();
       Return $Res;
     /* */
     }
@@ -372,7 +372,7 @@
       Else
         $this->Document->LastTag =$this->ListPrev;
       $Res=$this->_Clear();
-      $this->Done();
+      $this->Dispose();
       Return $Res;
     }
  
@@ -381,11 +381,11 @@
       Return $this->ListDelete();
     }
  
-    Function _Done()
+    Function _Dispose()
     {
       If($this->Document)
         $this->Delete(False);
-      Parent::_Done();
+      Parent::_Dispose();
     }
  
   //****************************************************************

@@ -16,11 +16,11 @@
         $this->Stream=Null;
     }
    
-    Function _Done()
+    Function _Dispose()
     {
       If($this->Stream)
         $this->Stream->_UnLock();
-      parent::_Done();
+      parent::_Dispose();
     }
    
     Function Length_Set($ALength=0)

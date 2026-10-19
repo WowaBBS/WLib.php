@@ -45,11 +45,11 @@
     //Var $Shaper   = 3145728 ;
     Var $Shaper   = False ;
  
-    Function _Done()
+    Function _Dispose()
     {
       If($this->Stream) $this->Stream->_UnLock();
       If($this->Ranges) $this->Ranges->_UnLock();
-      parent::_Done();
+      parent::_Dispose();
     }
  
     Function Set_Ranges($ARanges)
@@ -78,7 +78,7 @@
       $S->Assign($AFileName);
       If(!$S->Open(omReadOnly|omBinary|omExclusive))
       {
-        $S->Done();
+        $S->Dispose();
         Return False;
       }
       $this->Set_Stream_Object($S);

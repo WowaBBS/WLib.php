@@ -26,17 +26,17 @@
         $this->Attributes=$this->Create_Object('/Tmpl/W2/Tag/Attributes', [$Args['Attributes']??null]);
     }
  
-    Function _Done()
+    Function _Dispose()
     {
       If($this->Attributes ?? false)
       {
-        $this->Attributes->Done();
+        $this->Attributes->Dispose();
         $this->Attributes=NULL;
       }
     //FStr($this->tagName );
     //FStr($this->_f      );
     //FStr($this->_e      );
-      parent::_Done();
+      parent::_Dispose();
     }
     
     Function HasAttributes() { return $this->Attributes??false; }

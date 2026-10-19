@@ -9,4 +9,4 @@
   $XML->Parse('<br/>');
   $XML->_UnLock();
 
-  $Loader->Done();
+  $Loader->Dispose();

@@ -27,15 +27,15 @@
       return false;
     }
     
-    Function _Done()
+    Function _Dispose()
     {
       if($this->AutoDoneStream)
       {
         if($this->CheckStream())
-          $this->Stream->Done();
+          $this->Stream->Dispose();
         $this->Stream=null;
       }
-      parent::_Done();
+      parent::_Dispose();
     }
     
     Function SetStream($Stream, $Args=[])

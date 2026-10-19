@@ -16,9 +16,9 @@
       $this->Def  =$this->Create_Value ($Def  );
     }
     
-    Protected Function _Done()
+    Protected Function _Dispose()
     {
-      parent::_Done();
+      parent::_Dispose();
     }
   }
 ?>

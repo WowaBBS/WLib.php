@@ -23,4 +23,4 @@
   //echo $f->GetFullPath(), "\n";
   }
 
-  $Loader->Done();
+  $Loader->Dispose();

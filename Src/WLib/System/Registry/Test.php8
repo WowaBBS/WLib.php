@@ -19,4 +19,4 @@
   ForEach($V=($R->GetValues()) As $k=>$v)
     $Loader->Log('Debug', ' - ', $V->CurrentType(), ': ', $k, ' => ', $v);
 
-  $Loader->Done();
+  $Loader->Dispose();

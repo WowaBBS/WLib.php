@@ -10,11 +10,11 @@
       Parent::__Construct($Args);
     }
 
-    Protected Function _Done()
+    Protected Function _Dispose()
     {
       If($this->Object_Lock!==0)
         $this->Log('Error', 'Object_Lock: ',$this->Object_Lock, '!==0');
-      Parent::_Done();
+      Parent::_Dispose();
     }
   
     Function Object_GetDefaultName() { Return Static::Class; }
@@ -29,7 +29,7 @@
     {
       $Res=--$this->Object_Lock;
       If($Res<=0)
-        $this->Done();
+        $this->Dispose();
     }
   }
 ?>

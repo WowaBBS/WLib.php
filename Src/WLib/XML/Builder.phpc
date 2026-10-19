@@ -21,9 +21,9 @@
                                $this->Stream=$Stream->_Lock();
     }
     
-    Function _Done()
+    Function _Dispose()
     {
-      Parent::_Done();
+      Parent::_Dispose();
       $this->Stream->_UnLock();
     }
     

@@ -13,9 +13,9 @@
       $this->Connect = $Args['Connect'];
     }
  
-    Protected Function _Done()
+    Protected Function _Dispose()
     {
-      Parent::_Done();
+      Parent::_Dispose();
       $this->Free();
     }
  

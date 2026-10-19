@@ -34,4 +34,4 @@
     $Loader->Log('Log', '');
   }
 
-  $Loader->Done();
+  $Loader->Dispose();

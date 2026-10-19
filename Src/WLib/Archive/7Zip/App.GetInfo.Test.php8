@@ -27,4 +27,4 @@
   $Loader->Log('Debug', 'Info:')->Dump($Info);
   $Loader->Log('Debug', 'UnpackedSize: ', $File->GetUnpackedSize());
 
-  $Loader->Done();
+  $Loader->Dispose();

@@ -18,10 +18,10 @@
         $this->SetHandler();
     }
     
-    Function _Done()
+    Function _Dispose()
     {
       $this->SetHandler(False);
-      Parent::_Done();
+      Parent::_Dispose();
     }
   };
 ?>

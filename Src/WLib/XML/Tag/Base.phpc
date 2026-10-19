@@ -29,14 +29,14 @@
         $this->Attributes=$this->Create_Object('/XML/Attributes');
     }
  
-    Function _Done()
+    Function _Dispose()
     {
       If(IsSet($this->Attributes) && $this->Attributes)
       {
-        $this->Attributes->Done();
+        $this->Attributes->Dispose();
         $this->Attributes=NULL;
       }
-      Parent::_Done();
+      Parent::_Dispose();
     }
  
     Function TagBuild()

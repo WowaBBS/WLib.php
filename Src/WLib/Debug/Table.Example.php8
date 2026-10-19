@@ -28,4 +28,4 @@
   $Loader->Log('Debug', 'Table:', Table::Cr($Table));
 //$Loader->Log('Debug', 'ToMap:')->Dump();
 
-  $Loader->Done();
+  $Loader->Dispose();

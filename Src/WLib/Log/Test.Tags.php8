@@ -28,4 +28,4 @@
   $Loader->Log('Log' ,'TagB only'   )->Tags(['Tag'=>'B' ,'Default'=>Null]);
   $Loader->Log('Log' ,'TagC only'   )->Tags(['Tag'=>'C' ,'Default'=>Null]);
 
-  $Loader->Done();
+  $Loader->Dispose();

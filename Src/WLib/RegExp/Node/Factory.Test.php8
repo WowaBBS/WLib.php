@@ -13,4 +13,4 @@
   Else
     $Loader->Log('Debug', 'Ok: ', $Actual);
 
-  $Loader->Done();
+  $Loader->Dispose();

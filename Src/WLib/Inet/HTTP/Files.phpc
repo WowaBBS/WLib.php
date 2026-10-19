@@ -13,12 +13,12 @@
       $this->Map=New T_Type_Map_Multi();
     }
 
-    Function _Done()
+    Function _Dispose()
     {
       ForEach($this->Map->GetItems() As $Item)
         If(Is_Object($Item->Value[3]))
           $Item->Value[3]->_UnLock();
-      parent::_Done();
+      parent::_Dispose();
     }
 
     Function Count()

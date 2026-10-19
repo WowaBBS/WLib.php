@@ -16,6 +16,6 @@
       $Res[$v]=$k;
   $Res=Var_Export($Res, true);
   File_Put_Contents('TestReg_VC.txt', $Res);
-  $Reg->Done();
+  $Reg->Dispose();
 
-  $Loader->Done();
+  $Loader->Dispose();

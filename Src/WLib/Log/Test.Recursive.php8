@@ -32,4 +32,4 @@
     'TestC'=>$v->c,
   ]]);
 
-  $Loader->Done();
+  $Loader->Dispose();

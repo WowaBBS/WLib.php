@@ -5,4 +5,4 @@
   
   asdadas();
   
-  $Loader->Done(); //Will not be called
+  $Loader->Dispose(); //Will not be called

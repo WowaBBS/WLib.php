@@ -29,4 +29,4 @@
       $Loader->Log('Fatal', 'Deserialize ', $Str, ' was wrong');
   }
 
-  $Loader->Done();
+  $Loader->Dispose();

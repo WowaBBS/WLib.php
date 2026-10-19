@@ -37,9 +37,9 @@
       $i=&$p->Stream_Output();
       $res=$i->Contents_Get();
       $i->Close();
-      $i->Done();
+      $i->Dispose();
       $p->Close();
-      $p->Done();
+      $p->Dispose();
       $res=Explode("\r\n", $res);
       $Res=[];
       ForEach($res As $v)
@@ -328,7 +328,7 @@
         {
           $Log=$this->Log('Error', 'Exec::Close ', $this->Command);
           $Log('  ', $S);
-          $Log->Done();
+          $Log->Dispose();
         }
       }
       $Pipes=$this->OutPipes;
@@ -340,10 +340,10 @@
       $this->Handle=False;
     }
   
-    Function _Done()
+    Function _Dispose()
     {
       $this->Close();
-      parent::_Done();
+      parent::_Dispose();
     }
   }
  

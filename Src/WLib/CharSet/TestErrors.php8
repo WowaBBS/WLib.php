@@ -8,4 +8,4 @@
   
   $Bom->Start();
   
-  $Loader->Done();
+  $Loader->Dispose();

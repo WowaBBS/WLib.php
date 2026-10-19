@@ -19,11 +19,11 @@
         $this->Load();
     }
     
-    Protected Function _Done()
+    Protected Function _Dispose()
     {
       If($this->RemoveDirtyOnDone)
         $this->RemoveDirty();
-      Parent::_Done();
+      Parent::_Dispose();
     }
  
     Protected Function _Save()

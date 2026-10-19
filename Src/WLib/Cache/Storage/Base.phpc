@@ -23,11 +23,11 @@
         $this->Load();
     }
     
-    Protected Function _Done()
+    Protected Function _Dispose()
     {
       If($this->IsChanged)
         $this->Save();
-      Parent::_Done();
+      Parent::_Dispose();
       $this->Vars=[];
       $this->IsLoaded=false ;
     }

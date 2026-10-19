@@ -10,11 +10,11 @@
       parent::_Init($Args);
     }
   
-    Function _Done()
+    Function _Dispose()
     {
       If($this->Poster)
-        $this->Poster->Done();
-      parent::_Done();
+        $this->Poster->Dispose();
+      parent::_Dispose();
     }
   
     Function Method()

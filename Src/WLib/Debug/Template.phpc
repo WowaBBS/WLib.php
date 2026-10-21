@@ -294,17 +294,17 @@
       $Res['file']=$Ref->GetFileName  ();
       $Res['line']=$Ref->GetStartLine ();
       
-      $Use    =Self::$Closure_Use     ? $Ref->GetClosureUsedVariables ():[];
-      $Static =Self::$Closure_Static  ? $Ref->GetStaticVariables      ():[];
-      $This   =Self::$Closure_This    ? $Ref->GetClosureThis          ():Null;
-      $Params =Self::$Closure_Params  ? $Ref->GetParameters           ():[];
+      $Use    =$Ref->GetClosureUsedVariables ();
+      $Static =$Ref->GetStaticVariables      ();
+      $This   =$Ref->GetClosureThis          ();
+      $Params =$Ref->GetParameters           ();
       
       If($Static) $Static=$this->Closure_RemoveUse($Static, $Use);
       
-      If($Use    ) $Res['use'       ]=$Use    ;
-      If($Static ) $Res['static'    ]=$Static ;
-      If($This   ) $Res['this'      ]=$This   ;
-      If($Params ) $Res['parameter' ]=$this->Closure_GetParams($Params );
+      If(Self::$Closure_Use     && $Use    ) $Res['use'       ]=$Use    ;
+      If(Self::$Closure_Static  && $Static ) $Res['static'    ]=$Static ;
+      If(Self::$Closure_This    && $This   ) $Res['this'      ]=$This   ;
+      If(Self::$Closure_Params  && $Params ) $Res['parameter' ]=$this->Closure_GetParams($Params );
       If(Self::$Closure_VarDump)
       {
         Ob_Start();

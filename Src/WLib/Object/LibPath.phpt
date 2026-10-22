@@ -1,7 +1,7 @@
 <?
 NameSpace WLib\Object;
 
-Class TLibPath
+Class T_LibPath
 {
   Var $Name   ;
   Var $Path   ;

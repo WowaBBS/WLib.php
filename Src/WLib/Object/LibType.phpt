@@ -1,7 +1,7 @@
 <?
 NameSpace WLib\Object;
 
-Class TLibType
+Class T_LibType
 {
   Var $Type      ;
   Var $Extension ;
@@ -20,16 +20,16 @@ Class TLibType
     $EE=     Enum_Exists(...);
     Return Self::CreateTypes([
     //  Type       ,  Extension      ,  Ext    , Prefix ,NS,Chk ,Lst ,CA
-      ['Lib'       ,'.Lib.php'       ,'.php'   ,''      ,0 ],
-      ['Module'    ,'.Module.php'    ,'.phpm'  ,''      ,0 ],
-      ['Class'     ,'.Class.php'     ,'.phpc'  ,'C'     ,1 ,$CE ,$CL ,1 ],
-      ['Interface' ,'.Interface.php' ,'.phpi'  ,'I'     ,2 ,$IE ,$IL ,1 ],
-      ['Enum'      ,'.Enum.php'      ,'.phpe'  ,'E'     ,3 ,$EE ,$CL ,1 ],
-      ['Exception' ,'.Exception.php' ,'.phpe'  ,'E'     ,4 ,$CE ,$CL ,1 ],
-      ['UnitTest'  ,'.Test.php'      ,'.phput' ,'Test'  ,5 ,$CE ,$CL ,1 ],
-      ['Trait'     ,'.Trait.php'     ,'.phpt'  ,'Trait' ,6 ,$TE ,$TL ,1 ],
-      ['Type'      ,'.Type.php'      ,'.phpt'  ,'T'     ,7 ,$CE ,$CL ,1 ],
-      ['Struct'    ,'.Struct.php'    ,'.phpt'  ,'S'     ,8 ,$CE ,$CL ,1 ], //TODO: Type???
+      ['Lib'       ,'.Lib.php'       ,'.php'   ,''       ,0 ],
+      ['Module'    ,'.Module.php'    ,'.phpm'  ,''       ,0 ],
+      ['Class'     ,'.Class.php'     ,'.phpc'  ,'C_'     ,1 ,$CE ,$CL ,1 ],
+      ['Interface' ,'.Interface.php' ,'.phpi'  ,'I_'     ,2 ,$IE ,$IL ,1 ],
+      ['Enum'      ,'.Enum.php'      ,'.phpe'  ,'E_'     ,3 ,$EE ,$CL ,1 ],
+      ['Exception' ,'.Exception.php' ,'.phpe'  ,'E_'     ,4 ,$CE ,$CL ,1 ],
+      ['UnitTest'  ,'.Test.php'      ,'.phput' ,'Test_'  ,5 ,$CE ,$CL ,1 ],
+      ['Trait'     ,'.Trait.php'     ,'.phpt'  ,'Trait_' ,6 ,$TE ,$TL ,1 ],
+      ['Type'      ,'.Type.php'      ,'.phpt'  ,'T_'     ,7 ,$CE ,$CL ,1 ],
+      ['Struct'    ,'.Struct.php'    ,'.phpt'  ,'S_'     ,8 ,$CE ,$CL ,1 ], //TODO: Type???
     ]);
   }
   

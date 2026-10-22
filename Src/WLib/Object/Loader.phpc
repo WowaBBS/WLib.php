@@ -1,11 +1,11 @@
 <?
   NameSpace WLib\Object;
 
-  Require_Once('LibType.phpt'); Use WLib\Object\TLibType;
-  Require_Once('LibPath.phpt'); Use WLib\Object\TLibPath;
-  Class_Alias(CLoader::class, 'C_Object_Loader');
+  Require_Once('LibType.phpt');
+  Require_Once('LibPath.phpt');
+  Class_Alias(C_Loader::class, \C_Object_Loader::class);
 
-  Class CLoader
+  Class C_Loader
 //Class C_Object_Loader
   {
     Var $_Paths =[];
@@ -28,8 +28,8 @@
     Function __Construct()
     {
       $this->Map      =New \WeakMap();
-      $this->LibTypes =TLibType::CreateDefaultTypes();
-      $this->Paths    =TLibPath::GetDefaultList(); //TODO: Need?
+      $this->LibTypes =T_LibType::CreateDefaultTypes();
+      $this->Paths    =T_LibPath::GetDefaultList(); //TODO: Need?
     }
     
     Function __Destruct()
@@ -50,8 +50,8 @@
     
     Function AddLib(?String $Name, String $Path, ?String $Prefix=Null)
     {
-      Return $this->_Paths[]=New TLibPath($Name?? 'Lib'.Count($this->Paths), $Path, $Prefix?? ($Name? Null:''));
-    //Return $this->_Paths[$Lib]=New TLibPath($Name?? 'Lib'.Count($this->Paths), $Path, $Prefix?? ($Name? Null:''));
+      Return $this->_Paths[]=New T_LibPath($Name?? 'Lib'.Count($this->Paths), $Path, $Prefix?? ($Name? Null:''));
+    //Return $this->_Paths[$Lib]=New T_LibPath($Name?? 'Lib'.Count($this->Paths), $Path, $Prefix?? ($Name? Null:''));
     //$this->Log('Log', 'AddSearchPath ', $this->Paths[Count($this->Paths)-1]->Path);
     }
     
@@ -74,7 +74,7 @@
       $this->Load_Type('/Log/Item');
     }
     
-    Function _Find_Lib(String $Name):?TLibPath
+    Function _Find_Lib(String $Name):?T_LibPath
     {
       If($Name[0]!=='/')
       {
@@ -143,7 +143,7 @@
           
           $TypeNames=[
             $LibPath->Prefix.Implode('\\', $PathName).$LibType->Prefix.$PathNick, // \NameSpace\PrefixName
-            $LibType->Prefix.'_'.Implode('_', $PathName).$PathNick, // Previx_
+            $LibType->Prefix.Implode('_', $PathName).$PathNick, // Previx_
           ];
           $TypeName=$this->_Check_Finish($LibType, $TypeNames, $_Path);
           $Res=$TypeName;

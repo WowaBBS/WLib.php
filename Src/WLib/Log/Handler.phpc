@@ -129,7 +129,7 @@
       $this->Exception_Handler_Setted=true;
       
       //TODO: Increase limit using ini_set('memory_limit', '128M'); with max_memory_limit (PHP8.5) instead
-      $this->Back_Memory=Str_Repeat("\0", 1024*128);
+    //$this->Back_Memory=Str_Repeat("\0", 1024*128);
     //ini_set("display_errors", "off");
     //error_reporting(E_ALL);
     //ini_set('html_errors', 'on');

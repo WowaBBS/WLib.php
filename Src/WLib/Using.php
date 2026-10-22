@@ -4,7 +4,8 @@
    If(!Class_Exists('C_Object_Loader'))
      Include_Once 'Object/Loader.phpc';
    
-   $Loader=New C_Object_Loader();
+   $Loader=C_Object_Loader::Get();
+ //$Loader=New C_Object_Loader();
  }
- $Loader->Loader_Init(__DIR__);
+//$Loader->Loader_Init(__DIR__);
 ?>

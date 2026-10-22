@@ -1,14 +1,29 @@
 <?
+  NameSpace WLib\Object;
+
   Require_Once('LibType.phpt'); Use WLib\Object\TLibType;
   Require_Once('LibPath.phpt'); Use WLib\Object\TLibPath;
+  Class_Alias(CLoader::class, 'C_Object_Loader');
 
-  Class C_Object_Loader
+  Class CLoader
+//Class C_Object_Loader
   {
     Var $_Paths =[];
     Var $_Libs  =[];
     Var $_Singleton  =[];
     Var $Included_Files=[]; //< TODO: Remove?
+    Var $Paths ;
   //Var $LoadingClass='';
+  
+    Static ?Self $Loader=null; // TODO: Thread var
+    
+    Static Function Get() { Return Static::$Loader??=Static::_Get(); }
+    Static Function _Get()
+    {
+      $Res=New Static();
+      $Res->Loader_Init(DirName(__DIR__));
+      return $Res;
+    }
   
     Function __Construct()
     {
@@ -35,7 +50,8 @@
     
     Function AddLib(?String $Name, String $Path, ?String $Prefix=Null)
     {
-      Return $this->_Paths[$Lib]=New TLibPath($Name?? 'Lib'.Count($this->Paths), $Path, $Prefix?? ($Name? Null:''));
+      Return $this->_Paths[]=New TLibPath($Name?? 'Lib'.Count($this->Paths), $Path, $Prefix?? ($Name? Null:''));
+    //Return $this->_Paths[$Lib]=New TLibPath($Name?? 'Lib'.Count($this->Paths), $Path, $Prefix?? ($Name? Null:''));
     //$this->Log('Log', 'AddSearchPath ', $this->Paths[Count($this->Paths)-1]->Path);
     }
     
@@ -186,7 +202,7 @@
  
     Function Object($Name, Array $Args=[], Array $Mode=[])
     {
-      throw new Exception('Not implemented');
+      throw new \Exception('Not implemented');
       //see: D:\MyWeb\_files\wlib\system\loader.phpc
       // This is creating singleton from System/Singleton/
     }
@@ -245,7 +261,7 @@
       
       If(!$Found) Return $this->Log('Error', 'Check Finish ', $LibType->Type, ' ', $TypeNames, ' not found in ', $Path)->Ret($TypeName[0]);
       
-      $Class=New ReflectionClass($TypeName);
+      $Class=New \ReflectionClass($TypeName);
       $RealName=$Class->GetName();
       If($TypeName!==$RealName)
         $this->Log('Error', $LibType->Type, ' name error: ', $TypeName, ' in not same ', $RealName);
@@ -319,7 +335,8 @@
     }
     
     Function GetLogger() { return $this->Logger?? $this->_CreateLogger(); }
-    Function Log($LogLevel, ...$Args) { return New T_Log_Item($this, $this->GetLogger(), $LogLevel, $Args); }
+  //Function Log($LogLevel, ...$Args) { return New T_Log_Item($this, $this->GetLogger(), $LogLevel, $Args); }
+    Function Log($LogLevel, ...$Args) { return New \WLib\Log\TItem($this, $this->GetLogger(), $LogLevel, $Args); }
 
     Function ToDebugInfo() { return $this->_ToDebugInfo(); }
     Function _ToDebugInfo() { return 'Loader'; }

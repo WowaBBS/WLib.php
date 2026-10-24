@@ -1,10 +1,10 @@
 <?
   $Loader->Load_Interface('/Debug/Custom');
-  $Loader->Load_Type('/Debug/Item');
+  $Loader->Load_Type('/Debug/Custom/Item'); Use Function WLib\Debug\Custom\DebugItem;
   
   Function HexDump($Data, $Args=[]) { Return New T_Debug_HexDump($Data, $Args); }
 
-  Class T_Debug_HexDump Implements I_Debug_Custom, Stringable
+  Class T_Debug_HexDump Implements \WLib\Debug\I_Custom, \Stringable
   {
     Var $Data   = '';
     Var $Args   = [];
@@ -139,8 +139,8 @@
       return $Res;
     }
     
-    // Interface I_Debug_Custom
-    Function Debug_Write(C_Log_Format $To)
+    // Interface \WLib\Debug\I_Custom
+    Function Debug_Write(\WLib\Log\C_Format $To)
     {
     //ForEach($this->Get() As [$Value, $Type]) $To($Value, $TokenTypes[$Type]);
       ForEach($this->Get() As $Item) $To($Item->Value, $Item->Type);

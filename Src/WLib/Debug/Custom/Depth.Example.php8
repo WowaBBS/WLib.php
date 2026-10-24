@@ -1,7 +1,7 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   $Loader->GetLogger()->ScriptLog();
-  $Loader->Load_Type('/Debug/Depth'); Use Function WLib\Debug\Depth;
+  $Loader->Load_Type('/Debug/Custom/Depth'); Use Function WLib\Debug\Custom\Depth;
   
   $Data=[];
   For($i=0; $i<8; $i++)

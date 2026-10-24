@@ -1,10 +1,13 @@
 <? NameSpace WLib\Debug\Measure;
+
+  $Loader->Load_Type('/Debug/Custom/Item'); Use Function \WLib\Debug\Custom\DebugItem;
   
   Class T_Base
   {
     Var $Value   ;
     Var $Postfix ;
-    Var $Type_Num='Num';
+    Var $Type_Num     ='Num'   ;
+    Var $Type_Postfix ='Class' ;
     
     Function __Construct($Value, $Postfix)
     {
@@ -27,14 +30,12 @@
         $Res[]=$v;
       Else
       {
-        $s=Number_Format($v, $Precision);
-        If($v>=1000)
-          $s=StrTr($s, ',', '`');
+        $s=Number_Format($v, $Precision, '.', '`');
         $Res[]=DebugItem($s, $this->Type_Num);
       }
       
       If(($Postfix=$this->Postfix)!=='')
-        $Res[]=$Postfix;
+        $Res[]=DebugItem($Postfix, $this->Type_Postfix);
     }
     
     Static Function Compare($a, $b)

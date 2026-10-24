@@ -1,12 +1,12 @@
-<?
+<? NameSpace WLib\Debug\Custom;
   $Loader->Load_Interface('/Debug/Custom');
   
 //Function DebugItem($Value, $Type=Null) { Return $Value; }
-//Function DebugItem($Value, $Type=Null) { Return Is_Null($Type)? $Value:New T_Debug_Item($Value, $Type); }
-  Function DebugItem($Value, $Type=Null) { Return New T_Debug_Item($Value, $Type); }
+//Function DebugItem($Value, $Type=Null) { Return Is_Null($Type)? $Value:New T_Item($Value, $Type); }
+  Function DebugItem($Value, $Type=Null) { Return New T_Item($Value, $Type); }
 //Function DebugItem($Value, $Type=Null) { Return [$Value, $Type]; }
 
-  Class T_Debug_Item Implements I_Debug_Custom, Stringable
+  Class T_Item Implements \WLib\Debug\I_Custom, \Stringable
   {
     Var $Value = ''    ;
     Var $Type  = 'Def' ;
@@ -17,8 +17,8 @@
       $this->Type  =$Type  ;
     }
     
-    // Interface I_Debug_Custom
-    Function Debug_Write(C_Log_Format $To)
+    // Interface \WLib\Debug\I_Custom
+    Function Debug_Write(\WLib\Log\C_Format $To)
     {
       $To($this->Value, $this->Type);
     }

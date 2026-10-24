@@ -1,9 +1,9 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   $Loader->GetLogger()->ScriptLog();
-  $Loader->Load_Type('/Debug/Table');
+  $Loader->Load_Type('/Debug/Table/List');
   
-  Use T_Debug_Table  As Table;
+  Use \WLib\Debug\Table\T_List As Table;
 
   $Table=Table::ToMap([
     ['File'           ,'Size', 'Float'    ],

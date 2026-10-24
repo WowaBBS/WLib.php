@@ -1,5 +1,7 @@
 <? NameSpace WLib\Debug\Measure;
-  $this->Load_Type('/Debug/Measure/Base');
+
+  $Loader->Load_Type('/Debug/Custom/Item' ); Use Function \WLib\Debug\Custom\DebugItem;
+  $Loader->Load_Type('/Debug/Measure/Base');
   
   Class T_Time Extends T_Base
   {

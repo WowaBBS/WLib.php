@@ -1,0 +1,8 @@
+<? NameSpace WLib\Debug\Table;
+
+  Interface I_Cell
+  {
+    Function Debug_Table_Align(&$Align):Void;
+    
+  };
+?>

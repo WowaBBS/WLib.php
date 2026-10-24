@@ -7,9 +7,9 @@
   {
     Var $Format ;
     
-    Function __Construct($Value, $Format)
+    Function __Construct($Value, $Postfix, $Format)
     {
-      Parent::__Construct($Value, ' ');
+      Parent::__Construct($Value, $Postfix);
       $this->Format =$Format;
     }
 
@@ -22,11 +22,17 @@
       $v %= $PerDay;
       
       If($Days)
-        Parent::ToDebug($Days, $Res);
+      {
+        $Res[]=$Days;
+        $Res[]=' ';
+      }
       
       $s=Date($this->Format, (Int)$v);
       
       $Res[]=DebugItem($s, $this->Type_Num); //TODO: Split
+
+      If(($Postfix=$this->Postfix)!=='')
+        $Res[]=DebugItem($Postfix, $this->Type_Postfix);
     }
   }
 ?>

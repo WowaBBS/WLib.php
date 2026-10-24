@@ -6,11 +6,6 @@
   $Loader->Load_Type('/Debug/Custom/List');
   $this->Load_Type('/Debug/Measure/Rules');
   
-  Function Size      (Int $Size, $Type='SizeBytes') { Return SizeBytes($Size, $Type); }
-  Function SizeBytes (Int $Size, $Type='SizeBytes') { Return Value($Size, $Type); }
-  Function Time      (Float|Int $Time) { Return Value($Time, 'Time'); }
-  Function Value     (Float|Int $Size, $Type='Default') { Return New T_Value($Size, $Type); }
-  
   Class T_Value
     Extends    \WLib\Debug\Custom\T_List
     Implements \WLib\Debug\Table\I_Cell

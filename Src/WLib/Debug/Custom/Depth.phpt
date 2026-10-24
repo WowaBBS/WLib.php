@@ -1,6 +1,7 @@
 <? NameSpace WLib\Debug\Custom;
   $Loader->Load_Interface('/Debug/Custom');
   
+  //TODO; Remove
   Function Depth(Int $Level) { Return New T_Depth($Level); }
 
   Class T_Depth Implements \WLib\Debug\I_Custom

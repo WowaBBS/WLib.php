@@ -2,6 +2,7 @@
   $Loader->Load_Interface('/Debug/Custom');
   $Loader->Load_Type('/Debug/Custom/Item'); Use Function WLib\Debug\Custom\DebugItem;
   
+  //TODO; Remove
   Function HexDump($Data, $Args=[]) { Return New T_Debug_HexDump($Data, $Args); }
 
   Class T_Debug_HexDump Implements \WLib\Debug\I_Custom, \Stringable

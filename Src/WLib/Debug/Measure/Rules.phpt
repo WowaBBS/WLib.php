@@ -1,7 +1,8 @@
 <? NameSpace WLib\Debug\Measure;
   $this->Load_Lib('/Log/Logger'); Use \WLib\Log\Logger;
-  $this->Load_Type('/Debug/Measure/Scale');
-  $this->Load_Type('/Debug/Measure/Time');
+  $this->Load_Type('/Debug/Measure/Scale'   );
+  $this->Load_Type('/Debug/Measure/Time'    );
+  $this->Load_Type('/Debug/Measure/Postfix' );
   
   Class T_Rules
   {
@@ -15,59 +16,62 @@
       While($a<=$b)
       {
         $m=($a+$b)>>1;
-      //Logger::Debug('Compare: ', ['m'=>$m, 'l'=>$l[$m]->Value, 'r'=>$v]);
         If($l[$m]->Value>=$v)
           $b=$m-1;
         Else
           $a=$m+1;
-      //Logger::Debug('Choose', ['a'=>$a, 'b'=>$b]);
       }
-    //Logger::Debug('Final: ', ['a'=>$a, 'b'=>$b]);
       Return $l[$b>0? $b:$a];
     }
     
-    Static Array $Prefixes=[
+    Static Array $Exp=[
       'Big'   =>['k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y', 'R', 'Q'],
       'Small' =>['m', 'u', 'n', 'p', 'f', 'a', 'a', 'y', 'r', 'q'],
       'DEC'   =>['da', 'h'],
       'dec'   =>['d', 'c'],
     //'Zero'  =>[''],
     ];
-    
-    Static Array $Times=[
-            60=>     'i:s',
-         60*60=>   'H:i:s',
-    //24*60*60=> 'z H:i:s',
-    ];
-    
-    Static Array $Steps=[
+
+    Static Array $Run=[
       'Binary'    =>[
         ['Default', 'Old'],
-        ['Case', 'Old' ,[['Steps', 'BinaryOld']]],
-        ['Case', 'New' ,[['Steps', 'BinaryNew']]],
-        ['Case', 'Dec' ,[['Steps', 'BinaryDec']]],
+        ['Case', 'Old' ,[['>Run', 'BinaryOld']]],
+        ['Case', 'New' ,[['>Run', 'BinaryNew']]],
+        ['Case', 'Dec' ,[['>Run', 'BinaryDec']]],
       ],
-      'BinaryNew' =>[['Postfix', 'i'], ['Steps', 'BinaryOld']],
-      'BinaryOld' =>[['Exp', 1024, 'Big']],
-      'BinaryDec' =>[['Exp', 1000, 'Big']],
+      'BinaryNew' =>[['Postfix<', 'i'], ['>Run', 'BinaryOld']],
+      'BinaryOld' =>[['+Exp', 1024, 'Big']],
+      'BinaryDec' =>[['+Exp', 1000, 'Big']],
       'Numeric'   =>[
-        ['Exp', 1000, 'Big'   ],
-        ['Exp', 1e-3, 'Small' ],
-      //'Zero',
+        ['+Exp', 1000, 'Big'   ],
+        ['+Exp', 1e-3, 'Small' ],
       ],
       'NumericDec'   =>[
-        ['Exp', 10   ,'DEC'],
-        ['Exp', 1e-1 ,'dec'],
-        ['Steps', 'Numeric'],
+        ['+Exp', 10   ,'DEC'],
+        ['+Exp', 1e-1 ,'dec'],
+        ['>Run', 'Numeric'],
+      ],
+      'Years'=>[
+        ['Postfix<', 'yr'],
+        ['+Scale', 3, 3], //Sience 3 year
+        ['+Exp', 1000, 'Big'], //>1000 years
+      ],
+      'Time'=>[
+        ['+Exp'  , 1e-3, 'Small'], // <1s
+        ['Postfix=', ''],
+        ['+Time',       60,     'i:s'],
+        ['+Time',    60*60,   'H:i:s'],
+        ['Scale*=', 365.2425*24*60*60],
+        ['>Run', 'Years'], //>3 years
       ],
     ];
     
     Static Array $Types=[
-      'SizeBytes'   =>[['Postfix', 'B'   ], 'Zero', 'One', ['Steps', 'Binary']],
-      'SizeBits'    =>[['Postfix', 'b'   ], 'Zero', 'One', ['Steps', 'Binary']],
-      'SpeedBytes'  =>[['Postfix', 'Bps' ], 'Zero', 'One', ['Steps', 'Binary']],
-      'SpeedBits'   =>[['Postfix', 'bps' ], 'Zero', 'One', ['Steps', 'Binary']],
-      'Time'        =>[['Postfix', 's'   ], 'Zero', 'One', 'Time', ['Exp', 1e-3, 'Small']],
+      'SizeBytes'   =>[['Postfix<', 'B'   ], '+Zero', '+One', ['>Run', 'Binary']],
+      'SizeBits'    =>[['Postfix<', 'b'   ], '+Zero', '+One', ['>Run', 'Binary']],
+      'SpeedBytes'  =>[['Postfix<', 'Bps' ], '+Zero', '+One', ['>Run', 'Binary']],
+      'SpeedBits'   =>[['Postfix<', 'bps' ], '+Zero', '+One', ['>Run', 'Binary']],
+      'Time'        =>[['Postfix<', 's'   ], '+Zero', '+One', ['>Run', 'Time'  ]],
       
       'Default'     =>[],
 
@@ -80,41 +84,52 @@
     Static Function Get($Name) { Return Self::$Cache[$Name]??=Self::_Get($Name); }
     Static Function _Get($Name)
     {
+      $Postfix ='';
+      $Arg     ='';
+      
       If($Steps=Self::$Types[$Name]?? Null)
-        Return New Self('', $Steps, '');
+        Return New Self($Steps, $Arg, $Postfix);
+      
+      [$Name, $Arg, $Postfix]=Self::Parse($Name);
+      If(!Is_Null($Steps=Self::$Types[$Name]?? Null))
+        Return New Self($Steps, $Arg, $Postfix);
+        
+      Self::Error('Unknown measure rules name')->Dump(['Name'=>$Name, 'Arg'=>$Arg, 'Add'=>$Postfix]);
+      Return New Self([], $Arg, $Postfix);
+    }
+    
+    Static Function Parse($Name)
+    {
       $Name=Explode(';', $Name, 2);
-      $AddPostfix=$Name[1]?? '';
+      $Postfix=$Name[1]?? '';
       $Name=$Name[0];
       $Name=Explode(',', $Name, 2);
       $Arg=$Name[1]?? '';
       $Name=$Name[0];
-      If(!Is_Null($Steps=Self::$Types[$Name]?? Null))
-        Return New Self($AddPostfix, $Steps, $Arg);
-      Self::Error('Unknown measure rules name')->Dump(['Name'=>$Name, 'Arg'=>$Arg, 'Add'=>$AddPostfix]);
-      Return New Self($AddPostfix, [], $Arg);
+      Return [$Name, $Arg, $Postfix];
     }
     
     Function __Construct(
-       String       $AddPostfix , //=''        ,
-       String|Array $Steps      , //='Numeric' ,
-       String       $Arg        , //=''        ,
+       String|Array $Steps   , //='Numeric' ,
+       String       $Arg     , //=''        ,
+       String       $Postfix , //=''        ,
     )
     {
-      $this->AddBase(0, $AddPostfix);
-      $this->AddBase(1, $AddPostfix);
-      $this->Run($Steps, $AddPostfix, $Arg);
+      $this->Base(0, $Postfix);
+      $this->Base(1, $Postfix);
+      $this->Run($Steps, New T_Postfix($Postfix), $Arg);
       USort($this->List, T_Base::Compare(...));
-    //Logger::Dump($this);
     }
     
     Function Run(
-      String|Array $Steps      ,
-      String       $AddPostfix ,
-      String       $Arg        ,
+      String|Array $Steps   ,
+      T_Postfix    $Postfix ,
+      String       $Arg     ,
+      Float        $Scale =1,
     )
     {
       If(Is_String($Steps))
-        $Steps=Static::$Steps[$Steps];
+        $Steps=Static::$Run[$Steps];
       ForEach($Steps As $Step)
       {
         If(Is_String($Step))
@@ -122,44 +137,38 @@
         $Name=$Step[0];
         Switch($Name)
         {
-        Case 'Nop'     : Break;
-        Case 'Default' : If($Arg==='') $Arg=$Step[1]; Break;
-        Case 'Case'    : If($Arg===$Step[1]) $this->Run($Step[2], $AddPostfix, $Arg); Break;
-        Case 'Postfix' : $AddPostfix=$Step[1].$AddPostfix; Break;
-        Case 'Steps'   : $this->Run($Step[1]?? '', $AddPostfix, $Arg); Break;
-        Case 'Zero'    : $this->AddBase(0, $Step[1]?? $AddPostfix); Break;
-        Case 'One'     : $this->AddBase(1, $Step[1]?? $AddPostfix); Break;
-        Case 'Exp'     : $this->AddExp($Step[1], Self::$Prefixes[$Step[2]], $AddPostfix); Break;
-        Case 'Time'    :
-          ForEach(Self::$Times As $Value=>$Format)
-            $this->AddRule(New T_Time($Value, $Format));
-          Break;
+        Case 'Nop'      : Break;
+        Case 'Default'  : If($Arg==='') $Arg=$Step[1]; Break;
+        Case 'Case'     : If($Arg===$Step[1]) $this->Run($Step[2], Clone $Postfix, $Arg, $Scale); Break;
+        
+        Case 'Postfix=' : $Postfix->SetFirst ($Step[1]); Break;
+        Case 'Postfix<' : $Postfix->UnShift  ($Step[1]); Break;
+        
+        Case 'Scale='   : $Scale   =$Step[1]; Break;
+        Case 'Scale*='  : $Scale  *=$Step[1]; Break;
+        Case 'Scale/='  : $Scale  /=$Step[1]; Break;
+        
+        Case '>Run'     : $this->Run   ($Step[1]?? '', Clone $Postfix, $Arg, $Scale); Break;
+        Case '+Zero'    : $this->Base  (     0          ,$Postfix); Break;
+        Case '+One'     : $this->Base  ($Scale          ,$Postfix); Break;
+        Case '+Scale'   : $this->Scale ($Scale*$Step[1] ,$Postfix, $Step[2]?? Null); Break;
+        Case '+Time'    : $this->Time  ($Scale*$Step[1] ,$Postfix, $Step[2]); Break;
+        Case '+Exp'     : $this->Exp   ($Step[1], Self::$Exp[$Step[2]], $Postfix, $Scale); Break;
         Default: $this->Error('Unknown step name ', $Name);
         }
       }
     }
     
-    Function AddRule(T_Base $Rule)
-    {
-      $Key=Pack('d', $Rule->Value);
-      $this->List[$Key]=$Rule;
-    }
+    Function Add(T_Base $Rule) { $this->List[$Rule->Key]=$Rule; }
     
-    Function AddScale(Float $Value, String $Postfix)
-    {
-      $this->AddRule(New T_Scale($Value, $Postfix));
-    }
+    Function Base  (Float $Value, String $Postfix                     ) { $this->Add(New T_Base  ($Value, $Postfix          )); }
+    Function Scale (Float $Value, String $Postfix, ?Float $Scale=Null ) { $this->Add(New T_Scale ($Value, $Postfix, $Scale  )); }
+    Function Time  (Float $Value, String $Postfix, String $Format     ) { $this->Add(New T_Time  ($Value, $Postfix, $Format )); }
     
-    Function AddBase(Float $Value, String $Postfix)
+    Function Exp(Float $Exp, Array $List, String $Postfix, Float $Scale=1)
     {
-      $this->AddRule(New T_Base($Value, $Postfix));
-    }
-    
-    Function AddExp(Float $Exp, Array $List, String $AddPostfix)
-    {
-      $Shift=1;
-      ForEach($List As $Postfix)
-        $this->AddScale($Shift*=$Exp, $Postfix.$AddPostfix);
+      ForEach($List As $ExpPostfix)
+        $this->Scale($Scale*=$Exp, $ExpPostfix.$Postfix);
     }
     
     Static Function Error(...$Args) { Return Logger::Error(...$Args); }

@@ -5,15 +5,15 @@
   {
     Var $Scale;
     
-    Function __Construct($Value, $Postfix)
+    Function __Construct(Float|Int $Value, String $Postfix, Null|Float|Int $Scale=Null)
     {
       Parent::__Construct($Value, $Postfix);
-      $this->Scale   =$Value? 1/$Value:1;
+      $this->Scale=$Value? ($Scale?? 1)/$Value:1;
     }
 
     Function ToDebug($v, Array &$Res)
     {
-      If ($this->Scale !== 1)
+      If($this->Scale!==1)
         $v*=$this->Scale;
         
       Parent::ToDebug($v, $Res);

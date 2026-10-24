@@ -30,8 +30,10 @@
   ForEach($Sizes As $Size)
     $Table[]=[
       'Numeric' =>Debug::Numeric($Size),
-      'Size'    =>Debug::Size($Size),
-      'Time>'   =>Debug::Time($Size),
+      'Size'    =>Debug::Size($Size),         // Most popular
+      'New'     =>Debug::Size($Size, ',New'), // KiB MiB
+      'Hdd'     =>Debug::Size($Size, ',Dec'), // K is 1000 instaed of 1024
+      'Time>'   =>Debug::Time($Size, ';*p'),
       'Time<'   =>Debug::Time(1/Max($Size,1)),
     ];
   $Loader->Log('Debug', 'Size:', Debug::Table($Table));

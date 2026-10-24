@@ -5,12 +5,6 @@
   $Loader->Load_Lib('/Debug/Format' ); Use \WLib\Debug\Format As Debug;
   $Loader->Load_Lib('/Log/Logger'   ); Use \WLib\Log\Logger;
   
-  Logger::Log('Numeric :', Debug::Numeric (1_234_567));
-  Logger::Log('Size    :', Debug::Size    (1_234_567));
-  Logger::Log('Speed   :', Debug::Speed   (1_234_567));
-  Logger::Log('Time    :', Debug::Time    (1_234_567));
-  Logger::Log('Time    :', Debug::Time    (1.2345e-7));
-  
   $Data='0123456789abcdef0123456789abcdef00';
   Logger::Log('HexDump :', Debug::HexDump ($Data));
   Logger::Log('HexDump :', Debug::HexDump ($Data, ['Addr'=> 1]));
@@ -31,5 +25,13 @@
   
   Logger::Log('Table   :', Debug::Table   ($Table));
   Logger::Log('Format numeric and marks: [1, 2, 3.14, -2e4, 5 >= 7>>1]');
+  
+  Logger::Log('Numeric :', Debug::Numeric (1_234_567));
+  Logger::Log('Size    :', Debug::Size    (1_234_567));
+  Logger::Log('SizeNew :', Debug::Size    (1_234_567, ',New')); // KiB MiB
+  Logger::Log('SizeHdd :', Debug::Size    (1_234_567, ',Dec')); // K is 1000 instaed of 1024
+  Logger::Log('Speed   :', Debug::Speed   (1_234_567));
+  Logger::Log('Time    :', Debug::Time    (1_234_567));
+  Logger::Log('Time    :', Debug::Time    (1.2345e-7));
   
   $Loader->Dispose();

@@ -4,6 +4,7 @@
   
   Class T_Base
   {
+    Var $Key     ;
     Var $Value   ;
     Var $Postfix ;
     Var $Type_Num     ='Num'   ;
@@ -11,6 +12,7 @@
     
     Function __Construct($Value, $Postfix)
     {
+      $this->Key     =Pack('d', $Value);
       $this->Value   =$Value   ;
       $this->Postfix =$Postfix ;
     }

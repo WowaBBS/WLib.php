@@ -63,11 +63,11 @@
     ];
     
     Static Array $Types=[
-      'SizeBytes'   =>[['Postfix', 'B'   ], ['Steps', 'Binary']],
-      'SizeBits'    =>[['Postfix', 'b'   ], ['Steps', 'Binary']],
-      'SpeedBytes'  =>[['Postfix', 'Bps' ], ['Steps', 'Binary']],
-      'SpeedBits'   =>[['Postfix', 'bps' ], ['Steps', 'Binary']],
-      'Time'        =>[['Postfix', 's'   ], 'Time', ['Exp', 1e-3, 'Small']],
+      'SizeBytes'   =>[['Postfix', 'B'   ], 'Zero', 'One', ['Steps', 'Binary']],
+      'SizeBits'    =>[['Postfix', 'b'   ], 'Zero', 'One', ['Steps', 'Binary']],
+      'SpeedBytes'  =>[['Postfix', 'Bps' ], 'Zero', 'One', ['Steps', 'Binary']],
+      'SpeedBits'   =>[['Postfix', 'bps' ], 'Zero', 'One', ['Steps', 'Binary']],
+      'Time'        =>[['Postfix', 's'   ], 'Zero', 'One', 'Time', ['Exp', 1e-3, 'Small']],
       
       'Default'     =>[],
 
@@ -100,10 +100,9 @@
        String       $Arg        , //=''        ,
     )
     {
-      $this->Run($Steps, $AddPostfix, $Arg);
-    //If(!$this->List)
       $this->AddBase(0, $AddPostfix);
       $this->AddBase(1, $AddPostfix);
+      $this->Run($Steps, $AddPostfix, $Arg);
       USort($this->List, T_Base::Compare(...));
     //Logger::Dump($this);
     }
@@ -128,8 +127,8 @@
         Case 'Case'    : If($Arg===$Step[1]) $this->Run($Step[2], $AddPostfix, $Arg); Break;
         Case 'Postfix' : $AddPostfix=$Step[1].$AddPostfix; Break;
         Case 'Steps'   : $this->Run($Step[1]?? '', $AddPostfix, $Arg); Break;
-      //Case 'Zero'    : $this->AddBase(0, $Step[1]?? $AddPostfix); Break;
-      //Case 'One'     : $this->AddBase(1, $Step[1]?? $AddPostfix); Break;
+        Case 'Zero'    : $this->AddBase(0, $Step[1]?? $AddPostfix); Break;
+        Case 'One'     : $this->AddBase(1, $Step[1]?? $AddPostfix); Break;
         Case 'Exp'     : $this->AddExp($Step[1], Self::$Prefixes[$Step[2]], $AddPostfix); Break;
         Case 'Time'    :
           ForEach(Self::$Times As $Value=>$Format)

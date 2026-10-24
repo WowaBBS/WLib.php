@@ -18,7 +18,7 @@
     Static Function Time    ($v):I_Custom { Return Self::Measure($v, 'Time'       ); }
     
     Static Function Log_Depth(Int $Level):I_Custom { Return New T_Depth($Level); }
-    Static Function Log_Item($Value, $Type=Null):I_Custom { Return New T_Item($Value, $Type=Null); }
+    Static Function Log_Item($Value, $Type=Null):I_Custom { Return New T_Item($Value, $Type); }
     Static Function Log_List(Array $List):I_Custom { Return New T_List($List); }
 
     Static Function HexDump($Data, $Args=[]):I_Custom { Return New T_HexDump($Data, $Args); }

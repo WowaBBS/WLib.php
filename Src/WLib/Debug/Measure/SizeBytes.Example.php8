@@ -1,7 +1,8 @@
 <?
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   $Loader->GetLogger()->ScriptLog();
-  $Loader->Load_Type('/Debug/Measure/Value'); Use Function \WLib\Debug\Measure\{Size, Value};
+//$Loader->Load_Type('/Debug/Measure/Value'); Use Function \WLib\Debug\Measure\{Size, Value, Time};
+  $Loader->Load_Lib('/Debug/Format'); Use \WLib\Debug\Format As Debug;
   
   $Sizes=[
     0,
@@ -28,7 +29,13 @@
   
   $Log=$Loader->Log('Debug', 'Size:');
   ForEach($Sizes As $Size)
-    $Log(Value($Size), '=>', Size($Size));
+  //$Log(Value($Size), '=>', Size($Size), '=>', Time($Size), '=>', Time(1/Max($Size,1)));
+    $Log(
+      Debug::Numeric($Size), '=>', 
+      Debug::Size($Size), '=>', 
+      Debug::Time($Size), '=>', 
+      Debug::Time(1/Max($Size,1))
+    );
   $Log->Done();
 //$Loader->Log('Debug', 'ToMap:')->Dump();
 

@@ -1,7 +1,7 @@
 <?
   // Taken from builder of UE, directory Builder/Lib/Debug
   $Loader->Parent_Class('/Object');
-  $Loader->Load_Lib('/Debug/Stream'   );
+//$Loader->Load_Lib('/Debug/Stream'   );
  
   Class C_Debug_Manager extends C_Object
   {
@@ -117,6 +117,4 @@
         };
     }
   };
-  
-//C_Debug_Manager::$Stream_Echo_Default=new T_Debug_Stream_Echo_Default();
 ?>

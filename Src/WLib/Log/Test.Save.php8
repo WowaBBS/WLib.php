@@ -1,0 +1,22 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  $Loader->GetLogger()->ScriptLog();
+  
+  $Stream=$Loader->Create_Object('/Stream/Buffer');
+  $LogStream=$Loader->Create_Object('/Log/Logger/Stream', ['Stream'=>$Stream, 'AutoDoneStream'=>False]);
+  $Logger=$LogStream;
+//$Logger=$Loader;
+  $Logger->Log('Debug'   ,'It is debug'   );
+  $Logger->Log('Note'    ,'It is note'    );
+  $Logger->Log('Log'     ,'It is log'     );
+  $Logger->Log('Warning' ,'It is warning' );
+  $Logger->Log('Error'   ,'It is error'   );
+
+  $Loader->Log('Debug', $Stream->Get_Content());
+  $Stream->Clear();
+  $Logger->Log('Log'     ,'Hello world'     );
+  $Loader->Log('Debug', $Stream->Get_Content());
+
+  $Loader->Dispose();
+  

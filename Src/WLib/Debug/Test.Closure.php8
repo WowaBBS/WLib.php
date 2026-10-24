@@ -1,0 +1,16 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  $Loader->GetLogger()->ScriptLog();
+  
+  C_Debug_Template::$Closure_VarDump=True;
+  
+  $Use='Used value';
+  $Closure=Function(Int $Arg1, ?String $Args2='World') Use($Use):String {
+    Static $Counter=0;
+    Return 'Hello';
+  };
+  $Loader->Log('Debug', 'Closure:')->Dump([
+    $Closure,
+  ]);
+
+  $Loader->Dispose();

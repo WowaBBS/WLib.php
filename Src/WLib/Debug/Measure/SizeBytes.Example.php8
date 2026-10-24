@@ -1,0 +1,35 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  $Loader->GetLogger()->ScriptLog();
+  $Loader->Load_Type('/Debug/Measure/Value'); Use Function \WLib\Debug\Measure\{Size, Value};
+  
+  $Sizes=[
+    0,
+    1,
+    10,
+    100,
+    1_000,
+    10_000,
+    100_000,
+    1_000_000,
+    10_000_000,
+    100_000_000,
+    1_000_000_000,
+    10_000_000_000,
+    100_000_000_000,
+    1_000_000_000_000,
+    10_000_000_000_000,
+    100_000_000_000_000,
+    1_000_000_000_000_000,
+    10_000_000_000_000_000,
+    100_000_000_000_000_000,
+    1_000_000_000_000_000_000,
+  ];
+  
+  $Log=$Loader->Log('Debug', 'Size:');
+  ForEach($Sizes As $Size)
+    $Log(Value($Size), '=>', Size($Size));
+  $Log->Done();
+//$Loader->Log('Debug', 'ToMap:')->Dump();
+
+  $Loader->Dispose();

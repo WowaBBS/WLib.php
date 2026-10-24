@@ -1,7 +1,7 @@
 <?
   $Loader->Parent_Class('/Object');
-  $Loader->Load_Type('/Debug/Timer' );
-  $Loader->Load_Type('/Debug/TimerItem'   );
+  $Loader->Load_Type('/Debug/Timer'     );
+  $Loader->Load_Type('/Debug/TimerItem' );
 
   class C_Debug_Performance extends C_Object
   {

@@ -12,6 +12,7 @@
     Function _Init(Array $Args)
     {
       $this->Object_GetLoader()->UnMark($this); //TODO: UnMark
+      $this->Detect_Init();
 
       Parent::_Init($Args);
       
@@ -294,12 +295,12 @@
 
       Switch(GetType($v))
       {
-      Case 'boolean'       : $this->WriteBool  ($v); break;
-      Case 'integer'       : $this->WriteNum   ($v); break;
-      Case 'double'        : $this->WriteFloat ($v); break;
-      Case 'string'        : $this->WriteText  ($v); break;
-      Case 'NULL'          : $this->WriteNull  (  ); break;
-    //Case 'float'         : $this->WriteFloat ($v); break;
+      Case 'boolean'       : $this->WriteBool   ($v); break;
+      Case 'integer'       : $this->WriteNum    ($v); break;
+      Case 'double'        : $this->WriteFloat  ($v); break;
+      Case 'string'        : $this->WriteDetect ($v); break;
+      Case 'NULL'          : $this->WriteNull   (  ); break;
+    //Case 'float'         : $this->WriteFloat  ($v); break;
       Default              :
         if($v InstanceOf I_Debug_Custom)
         {
@@ -345,6 +346,56 @@
     Function WriteNull  ($v=null) { $this->_WriteToken('Null'  ,Is_Null($v)? 'null':$v); }
     Function WriteBool  ($v     ) { $this->_WriteToken('Bool'  ,Is_Bool($v)? ($v? 'True':'False'):$v); }
     Function NewLine() { $this->_WriteToken('NewLine', "\n"); }
+    
+    Function Detect_Init()
+    {
+      $Res = [];
+      ForEach ($this->Detect_Op As $Op)
+        $Res[$Op] = 'Op';
+      $this->Detect = $Res;
+      $this->Detect_Pattern =
+        Str_Replace(
+          '[:Marks:]',
+          Preg_Quote($this->Detect_Marks, '/'),
+          $this->Detect_Pattern
+        );
+    }
+    
+    Var $Detect_Op=[
+      ':', ';', ',', '.',   '`', '\'', '"',   '@', '#', '$',   '?->', '->', '=>',
+      '>'  ,'<'  ,'<>'  ,'=='  ,'!='  ,   '+'  ,'-'  ,'*'  ,'/'  ,'%'  ,'\\'  ,
+      '>=' ,'<=' ,'<=>' ,'===' ,'!==' ,   '+=' ,'-=' ,'*=' ,'/=' ,'%=' ,'\\=' ,
+      '|'  ,'&'  ,'^'  ,'<<'  ,'>>'  ,'~' ,'||'  ,'&&'  ,'!',
+      '|=' ,'&=' ,'^=' ,'<<=' ,'>>='      ,'||=' ,'&&=' , 
+      '(', ')', '[', ']', '{', '}',   '?', '?:', '??', '??=',
+    ];
+    Var $Detect=[];
+    
+    Var $Detect_Marks='_#$@.,:;!?()[]{}+-*\\%&|~<=>^`\'"';
+    Var $Detect_Pattern = '/(?:(\d+)|([[:Marks:]]+)|([^\d[:Marks:]]+)|(.))/xSs';
+    Var $Detect_Type =[
+      'Def'   ,
+      'Num'   , //1. Numeric
+      'Op'    , //2. Marks
+      'Text'  , //3. Space
+      'Fatal' , //4. Others
+    ];
+    
+    Function WriteDetect($v)
+    {
+    //$this->_WriteToken($this->Detect[$v]?? 'Text'  ,$v);
+      If (Preg_Match_All($this->Detect_Pattern, $v, $Matches, PREG_SET_ORDER))
+      {
+        ForEach ($Matches As $Match)
+          ForEach ($Match As $Key=>$Value)
+            If ($Key && $Value!== '')
+            {
+              $Type = $this->Detect_Type[$Key];
+              $this->_WriteToken($Type ,$Value);
+              Break;
+            }
+      }
+    }
     
     Function WriteRecursive($Path)
     {

@@ -8,6 +8,7 @@
   
   $Loader->Load_Type('/Debug/HexDump'       );
   $Loader->Load_Type('/Debug/Table/List'    );
+  $Loader->Load_Type('/Debug/Table/Make'    );
 
   Class Format
   {
@@ -24,9 +25,10 @@
     Static Function HexDump($Data, $Args=[]):I_Custom { Return New T_HexDump($Data, $Args); }
     
     Static Function Table(Array $List, Array $Args=[]):I_Custom { Return Table\T_List::Cr    ($List, $Args); }
-    Static Function ToMap(Array $List                ):Array    { Return Table\T_List::ToMap ($List       ); }
+    Static Function ToMap(Array $List                ):Array    { Return Table\T_Make::ToMap ($List       ); } //TODO: Make table
     
   //TODO:
+  // base_convert
   //DataFormat($Prefix='', $Postfix='', Int $Base=0, String $Split='_', Int $Chunk=4, Int $Pad=0)
   //Static Function Data(Int|String $Value, Int $Base=0, Int $Pad=0)
   //Static Function Hex(Int|String $Value, Int $Pad=0, $Format=Null)

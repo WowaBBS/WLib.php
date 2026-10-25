@@ -2,10 +2,12 @@
   for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
   $Loader->GetLogger()->ScriptLog();
   $Loader->Load_Type('/Debug/Table/List');
+  $Loader->Load_Type('/Debug/Table/Make');
   
   Use \WLib\Debug\Table\T_List As Table;
+  Use \WLib\Debug\Table\T_Make As MakeTable;
 
-  $Table=Table::ToMap([
+  $Table=MakeTable::ToMap([
     ['File'           ,'Size', 'Float'    ],
     ['Date.phpt'      ,  548 ,    3.1415  ],
     ['Func.phpt'      , 1771 , 1415.3     ],

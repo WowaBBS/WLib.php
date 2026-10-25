@@ -12,9 +12,10 @@
   
   $Table=Debug::ToMap([
     ['File'           ,'Size', 'Float'    ],
-    ['Date.phpt'      ,  548 ,    3.1415  ],
+    ['Filder/'        ,'[Dir]',    Null   ],
+    ['Date.phpt'      ,  548 ,    3.1415  ,'Mega'=>'Data'],
     ['Func.phpt'      , 1771 , 1415.3     ],
-    ['Hash.phpt'      ,  834 , 3.14e40    ],
+    ['Hash.phpt'      ,  834 , 3.14e40    ,'Extra'=>'Data'],
     ['IntId.phpt'     , 1062 , 3.1415e-40 ],
     ['Item.phpc'      , 1980 ,    0       ],
     ['Manager.phpc'   , 5468 , ACos(8)    ],

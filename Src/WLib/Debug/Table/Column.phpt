@@ -10,6 +10,7 @@
     Var $Class = Null; // 0.1
     Var $Size  =    0;
     Var $Split =  ' ';
+    Var $On    = Null; //TODO:
     
     Function __Construct($Key, $Prev=Null, Array $Args=[])
     {
@@ -38,7 +39,7 @@
       Case 'boolean' : $Value=$Value? 'True':'False'; Break;
       Case 'double'  : If(!Is_Finite($Value)) { $Value=Is_InFinite($Value)? ($Value<0? '-Inf':'Inf'):'NaN'; Break; }
       Case 'object'  : If($Value InstanceOf \WLib\Debug\I_Custom) { $Type='Custom'; Break; }
-    //Case 'null'   : $Value='Null'; Break;
+    //Case 'null'    : $Value='Null'; Break;
       Default: $Value=(String)$Value;
       }
       
@@ -65,10 +66,10 @@
   
     Function Debug_Write_Value(\WLib\Log\C_Format $To, $Value, $Type, $Class=Null, $IsEnd=False)
     {
-      $Len=StrLen($Value);
-      $Add=$this->Size-$Len;
-      $Class??=$this->Class;
-      $Align  =$this->Align;
+      $Len     =StrLen($Value);
+      $Add     =$this->Size-$Len;
+      $Class ??=$this->Class;
+      $Align   =$this->Align;
 
       Switch($Type)
       {

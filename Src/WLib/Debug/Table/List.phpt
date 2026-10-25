@@ -13,38 +13,6 @@
       Return New Static($List, $Args);
     }
     
-    Static Function ToMap(Array $List)
-    {
-      If(!$List) Return $List;
-      $Columns=Null;
-      $Res=[];
-      $Next=0;
-      ForEach($List As $Key=>$Rec)
-      {
-        If(Is_Int($Key))
-          If($Next===$Key)
-          {
-            $Key=Null;
-            $Next++;
-          }
-          Else
-            $Next=Null;
-          
-        If(!Is_Array($Rec)) Continue;
-        
-        If($Columns===Null) { $Columns=$Rec; Continue; }
-        $Row=[];
-        ForEach($Rec As $k=>$v)
-          $Row[$Columns[$k]?? $k]=$v;
-        If($Key===Null)
-          $Res[]=$Row;
-        Else
-          $Res[$Key]=$Row;
-      }
-      
-      Return $Res;
-    }
-    
     Function __Construct($List, $Args) //TODO: Add $Columns and $Args
     {
       // Create columns

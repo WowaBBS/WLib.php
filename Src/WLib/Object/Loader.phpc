@@ -1,8 +1,10 @@
 <?
   NameSpace WLib\Object;
 
-  Require_Once('LibType.phpt');
-  Require_Once('LibPath.phpt');
+  Require_Once('LibType.phpt'  );
+  Require_Once('LibPath.phpt'  );
+  Require_Once('AutoLoad.phpt' );
+  Require_Once('ShutDown.phpt' );
   Class_Alias(C_Loader::class, \C_Object_Loader::class);
 
   Class C_Loader
@@ -30,13 +32,16 @@
       $this->Map      =New \WeakMap();
       $this->LibTypes =T_LibType::CreateDefaultTypes();
       $this->Paths    =T_LibPath::GetDefaultList(); //TODO: Need?
+    
+      $this->AutoLoad=New T_AutoLoad($this);
+      $this->ShutDown=New T_ShutDown($this);
     }
     
     Function __Destruct()
     {
       If($this->HasDispose) Return;
       If($this->HasDispose===False)
-        $this->GetLogger()?->Log('Error', 'Loader hasn\'t destoyed');
+        $this->GetLogger()?->Log('Warning', 'OnDestruct: Loader hasn\'t destoyed');
       $this->Dispose();
     }
     
@@ -191,13 +196,8 @@
     Function Get_Singleton($Name, Array $Args=[], Array $Mode=[])
     {
       $Key=Count($Args)? $Name.Serialize($Args):$Name;
-      $S=&$this->_Singleton;
     //this->Log('Log', 'GetSinlgeton(', $Key ,')[', Implode(', ', Array_Keys($S)), ']');
-      if(IsSet($S[$Key]))
-        $Res=$S[$Key];
-      else
-        $Res=$S[$Key]=$this->Create_Object($Name, $Args, $Mode);
-      return $Res;
+      Return $this->_Singleton[$Key] ??= $this->Create_Object($Name, $Args, $Mode);
     }
  
     Function Object($Name, Array $Args=[], Array $Mode=[])
@@ -239,15 +239,15 @@
     Function End_Type   () {}
     Function End_Lib    () {}
 
-    //****************************************************************
-    // Check
+  //****************************************************************
+  // Check
     Function _Check_Finish($LibType, $TypeNames, $Path)
     {
       $Check=$LibType->Check;
       If($Check===Null) Return $TypeNames[0];
       $Found=False;
       ForEach($TypeNames As $TypeName)
-        If($Check($TypeName))
+        If($Check($TypeName, False))
         {
           $Found=True;
           Break;
@@ -268,8 +268,8 @@
       Return $TypeName;
     }
     
-    //****************************************************************
-    // Old Verify functional
+  //****************************************************************
+  // Old Verify functional
     
     Var $Verify=True;
     
@@ -298,8 +298,8 @@
       $this->Log('Error', 'Verify: ', $LibType->Type, ' ', $TypeName, ' not found');
     }
 
-    //****************************************************************
-    // Objects life time
+  //****************************************************************
+  // Objects life time
     
     Var $Map;
   
@@ -314,8 +314,8 @@
           $this->Log('Error', 'HasntDestroyed:')->Dump($Obj);
     }
     
-    //****************************************************************
-    // Debug And Log
+  //****************************************************************
+  // Debug And Log
     
     Var $Logger=null;
     
@@ -341,8 +341,31 @@
     Function ToDebugInfo() { return $this->_ToDebugInfo(); }
     Function _ToDebugInfo() { return 'Loader'; }
     
-    //****************************************************************
-    // Dispose
+    Protected Function _Debug_Info(Array &$Res)
+    {
+      if($this->_Singleton) $Res['_Singleton']=Array_Keys($this->_Singleton);
+      if($this->Logger) $Res['Logger']=Get_Class($this->Logger);
+    }
+    
+    /// Debug manager
+    Final Function _Debug_Serialize(Array &$Res) { $this->_Debug_Info($Res); }
+    
+    Final Function __debugInfo()
+    {
+    //throw new Exception('!!!!!!!!!!!!!!!!!!!!');
+    //$Res=Get_Object_Vars($this);
+      $Res=[];
+      ForEach((Array)$this As $k=>$v)
+      {
+        $k=Explode("\0", $k);
+        $Res[End($k)]=$v;
+      }
+      $this->_Debug_Info($Res);
+      return $Res;
+    }
+    
+  //****************************************************************
+  // Dispose
     
     Var $HasDispose=False; //
     
@@ -376,7 +399,26 @@
         $this->GetLogger()?->Log('Fatal', 'Can\'t AutoDispose on destroyed'); //Unreachable
       Return $this;
     }
-    //****************************************************************
+  
+  //****************************************************************
+  // Autoload
+  
+    Var $AutoLoad { Get=>$this->AutoLoad ??= New ($this->Load_Type('/Object/AutoLoad'))($this); }
+    
+  //****************************************************************
+  // ShutDown
+  
+    Var $ShutSown { Get=>$this->ShutDown ??= New ($this->Load_Type('/Object/ShutDown'))($this); }
+    
+    Function OnShutDown()
+    {
+      If($this->HasDispose) Return;
+      If($this->HasDispose===False) 
+        $this->GetLogger()?->Log('Warning', 'OnShutDown: Loader hasn\'t destoyed');
+      $this->Dispose();
+    }
+    
+  //****************************************************************
   }
 
 ?>

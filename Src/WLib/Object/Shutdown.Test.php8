@@ -1,0 +1,20 @@
+<?
+  for($F=__FILE__; $F;) if(@include($F=DirName($F)).'/Using.php') break;
+  
+  Use \WLib\Log\Logger;
+  
+  $Loader->GetLogger()->ScriptLog();
+
+  Function f($s, $throw=false)
+  {
+    Logger::Log($s);
+    If($throw)
+      Throw New \RuntimeException($s);
+  }
+
+  Register_ShutDown_Function(fn()=>f('f1'));
+  Register_ShutDown_Function(fn()=>f('f2'));
+  $Loader->ShutDown->Add(fn()=>f('f3'));
+  $Loader->ShutDown->Add(fn()=>f('f4', !true));
+//Throw New \RuntimeException('Hell o');
+?>

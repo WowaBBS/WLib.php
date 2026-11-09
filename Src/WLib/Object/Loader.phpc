@@ -393,7 +393,7 @@
     
     Function AutoDispose() // On destruct
     {
-      If($this->HasDispose===False)
+      If(!$this->HasDispose)
         $this->HasDispose=Null;
       Else
         $this->GetLogger()?->Log('Fatal', 'Can\'t AutoDispose on destroyed'); //Unreachable
@@ -408,7 +408,7 @@
   //****************************************************************
   // ShutDown
   
-    Var $ShutSown { Get=>$this->ShutDown ??= New ($this->Load_Type('/Object/ShutDown'))($this); }
+    Var $ShutDown { Get=>$this->ShutDown ??= New ($this->Load_Type('/Object/ShutDown'))($this); }
     
     Function OnShutDown()
     {

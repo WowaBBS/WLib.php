@@ -10,6 +10,12 @@
     {
       $this->FilePath          =$Args['FilePath'          ]?? '';
       $this->RemoveUnimportant =$Args['RemoveUnimportant' ]?? true;
+      IF(!IsSet($Args['EnCode']))
+      {
+        static $DefaultEnCode=GetEnv('WLIB_LOG_ENCODE');
+        If($DefaultEnCode)
+          $Args['EnCode']=$DefaultEnCode;
+      }
       $Args['Stream' ]=False;
       parent::_Init($Args);
       if($this->FilePath)

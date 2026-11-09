@@ -380,9 +380,24 @@
       'Text'  , //3. Space
       'Fatal' , //4. Others
     ];
+    Var $Detect_EnCoding =['cp1251', 'cp866', 'ISO-8859-1', 'UTF-32LE', 'UTF-32BE', 'UTF-16LE', 'UTF-16BE']; //'UTF-8', 'ASCII'
+    
+    static function IsUtf(string &$text): bool
+    {
+      return (bool)preg_match('/./u', $text);
+    }
     
     Function WriteDetect($v)
     {
+      If(!Self::IsUtf($v))
+      { //TODO: The same for writting strings with prefix encoding: cp1251"IIpubet mup"; cp866"IIPUBET MNP";
+        $EnCoding=Mb_Detect_EnCoding($v, $this->Detect_EnCoding, True); //TODO: Fast detecting
+        If($EnCoding===False)
+          $v=Preg_Replace_CallBack('/[\x80-\xFF]/', Fn($m)=>'\\'.DecHex(Ord($m[0])), $v);
+        Else
+          $v=IConv($EnCoding, 'UTF-8', $v); //TRANSLIT//IGNORE
+      }
+    
     //$this->_WriteToken($this->Detect[$v]?? 'Text'  ,$v);
       If (Preg_Match_All($this->Detect_Pattern, $v, $Matches, PREG_SET_ORDER))
       {

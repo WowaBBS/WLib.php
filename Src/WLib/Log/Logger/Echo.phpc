@@ -3,15 +3,17 @@
  
   Class C_Log_Logger_Echo extends C_Log_Logger_Base
   {
-    Static Function _DetectFormat()
+    Var $Handle;
+  
+    Static Function _DetectFormat($Handle = STDOUT)
     {
       if(PHP_SAPI==='cli')
       {
         if(Function_Exists('sapi_windows_vt100_support'))
-          if(sapi_windows_vt100_support(STDOUT))
+          if(sapi_windows_vt100_support($Handle))
             return '/Log/Format/v100';
         if(Function_Exists('posix_ttyname'))
-          if(Posix_TtyName(STDOUT)!==false)
+          if(Posix_TtyName($Handle)!==false)
             return '/Log/Format/v100';
       }
       return '/Log/Format';
@@ -19,13 +21,17 @@
   
     Function _Init(Array $Args)
     {
-      $Args['Format']??=Self::_DetectFormat();
+      $Handle = $Args['Handle']?? STDOUT;
+    //$Handle = $Args['Handle']?? STDERR;
+      $Args['Format'] ??=Self::_DetectFormat($Handle);
+      $this->Handle =$Handle;
       parent::_Init($Args);
     }
     
     Function Write($Str)
     {
-      Echo $Str;
+    //Echo $Str;
+      FWrite($this->Handle, $Str);
     }
 
     Function Flush()

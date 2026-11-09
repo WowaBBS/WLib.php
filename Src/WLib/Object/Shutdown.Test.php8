@@ -15,6 +15,6 @@
   Register_ShutDown_Function(fn()=>f('f1'));
   Register_ShutDown_Function(fn()=>f('f2'));
   $Loader->ShutDown->Add(fn()=>f('f3'));
-  $Loader->ShutDown->Add(fn()=>f('f4', !true));
+  \WLib\Object\T_ShutDown::Register(fn()=>f('f4', !true));
 //Throw New \RuntimeException('Hell o');
 ?>

@@ -22,8 +22,8 @@
         If(!$Prefix)
         {
           $Paths=[];
-          ForEach($Loader->_Paths As $k=>$Path)
-            $Paths[$k]=RealPath($Path);
+          ForEach($Loader->_Paths As $k=>$LibPath)
+            $Paths[$k]=RealPath($LibPath->Path);
           Return $this->Log('Error', 'TestDir Prefix not found for dir: ', $BaseDir, ' in:')->Dump($Paths)->Ret(False);
         }
       }

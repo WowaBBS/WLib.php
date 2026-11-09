@@ -13,6 +13,11 @@ Class T_ShutDown
     Register_ShutDown_Function($this->Handler_Start(...));
   }
   
+  Static Function Register(Callable $Func, $Key=Null)
+  {
+    C_Loader::Get()->ShutDown->Add($Func, $Key);
+  }
+  
   Function Add(Callable $Func, $Key=Null)
   {
     $Key ??= $Func;

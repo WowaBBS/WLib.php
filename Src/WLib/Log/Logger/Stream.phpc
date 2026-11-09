@@ -6,11 +6,14 @@
   {
     Protected $Stream         =null;
     Protected $AutoDoneStream =true;
+    Protected $EnCode         ='';
     
     Function _Init(Array $Args)
     {
       parent::_Init($Args);
-      $this->AutoDoneStream=$Args['AutoDoneStream']?? $this->AutoDoneStream;
+      If($EnCode=$Args['EnCode']?? '')
+        $this->EnCode=$EnCode.'//TRANSLIT//IGNORE';
+      $this->AutoDoneStream =$Args['AutoDoneStream']?? $this->AutoDoneStream;
       $this->SetStream($Args['Stream']?? False, $Args);
       $this->CheckStream();
     }
@@ -57,6 +60,8 @@
     
     Function Write($Str)
     {
+      If($EnCode=$this->EnCode)
+        $Str=IConv('UTF-8', $EnCode, $Str);
       $this->Stream->Write($Str);
     }
 

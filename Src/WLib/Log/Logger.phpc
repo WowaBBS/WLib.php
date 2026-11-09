@@ -112,6 +112,7 @@
       If($NotRemove)
       {
         $Handler->SetLogger($this);
+        $Handler->Install();
         Return $Old;
       }
       ELse

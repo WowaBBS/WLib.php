@@ -1,0 +1,55 @@
+<?
+  $Loader->Parent_Class('/Object');
+ 
+  Abstract Class C_Log_Handler_Base Extends C_Object
+  {
+    Var      $Logger =Null;
+    Var Bool $Setted =False;
+  
+    Function _Init(Array $Args)
+    {
+      $this->Object_GetLoader()->UnMark($this); //TODO: UnMark
+      Parent::_Init($Args);
+      If($Args['Install']?? False)
+        $this->Install();
+    }
+    
+    Function _Dispose()
+    {
+    //$this->UnInstall();
+      Parent::_Dispose();
+    }
+    
+    Function GetLogger() { Return $this->Logger?? Parent::GetLogger(); }
+    Function GetOverridedLogger() { Return $this->Logger; }
+    Function SetLogger($v) { $this->Logger=$v; }
+    
+  //****************************************************************
+  
+    Function AddMemory()
+    {
+      //TODO: Increase limit using ini_set('memory_limit', '128M'); with max_memory_limit (PHP8.5) instead
+    }
+    
+    Function Install()
+    {
+      If($this->Setted) Return;
+      $this->Setted=True;
+      If(!$this->_Install())
+        $this->Setted=False;
+    }
+    
+    Function UnInstall()
+    {
+      If(!$this->Setted) Return;
+      $this->Setted=False;
+      if(!$this->_UnInstall())
+        $this->Setted=True;
+    }
+    
+    Function _Install   ():bool { Return True; }
+    Function _UnInstall ():bool { Return True; }
+    
+  //****************************************************************
+  };
+?>

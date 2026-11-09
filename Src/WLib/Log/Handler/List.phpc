@@ -1,0 +1,38 @@
+<?
+  $Loader->Parent_Class('/Log/Handler/Base');
+ 
+  Class C_Log_Handler_List Extends C_Log_Handler_Base
+  {
+    Var $List=[
+    ];
+    
+    Function Add($Item)
+    {
+      $this->List[]=$Item;
+      return $Item;
+    }
+  
+    Function Install()
+    {
+      ForEach($this->List As $Handler)
+        $Handler->Install();
+      Return True;
+    }
+
+    Function UnInstall()
+    {
+      ForEach($this->List As $Handler)
+        $Handler->UnInstall();
+      Return True;
+    }
+
+    Function SetLogger($v)
+    { 
+      Parent::SetLogger($v);
+      ForEach($this->List As $Handler)
+        $Handler->SetLogger($v);
+    }
+    
+  //****************************************************************
+  };
+?>

@@ -1,0 +1,33 @@
+<?
+  $Loader->Parent_Class('/Log/Handler/Base');
+ 
+  Class C_Log_Handler_Exception Extends C_Log_Handler_Base
+  {
+    Var $Old = Null;
+  
+    Function Handler(Throwable $E)
+    {
+      $this->AddMemory();
+
+      if(Get_Class($E)!=='TLoggerUnsupportedException')
+      {
+        $ErrorType=C_Log_Handler_Error::Error_Type($E->GetCode());
+        $this->Log($ErrorType[0], 'Exception_Handler: ', $E->GetMessage())
+          ->File($E->GetFile(), $E->GetLine())
+          ->SetStack($E->GetTrace())
+          ->ShowLevel($ErrorType[1]=='[Zero Error] '? '['.Get_Class($E).'] ':$ErrorType[1]);
+      }
+        
+      if($this->Old)
+        $this->Old($E);
+      
+      $this->Object_GetLoader()?->Dispose_FailedCall();
+      Error_Clear_Last();
+    }
+ 
+    Function _Install   ():bool { $this->Old=Set_Exception_Handler($this->Handler(...)); Return True; }
+    Function _UnInstall ():bool {        Restore_Exception_Handler(                   ); Return True; }
+    
+  //****************************************************************
+  };
+?>

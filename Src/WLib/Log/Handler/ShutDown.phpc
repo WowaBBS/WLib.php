@@ -1,0 +1,31 @@
+<?
+  $Loader->Parent_Class('/Log/Handler/Base');
+ 
+  Class C_Log_Handler_ShutDown Extends C_Log_Handler_Base
+  {
+    Function Handler()
+    {
+      if(!$this->Setted)
+        return;
+        
+      $this->AddMemory();
+      
+      if($error=Error_Get_Last())
+        if($error['type']===E_ERROR)
+        {
+          Set_Time_Limit(10);
+          $this->Log('Error', 'Shutdown_Function: ', $error['message'])
+            ->File($error['file'], $error['line'])
+            ->ShowLevel('[Fatal Error] ')
+          //->BackTrace(1)
+            ->NoBackTrace()
+          ;
+        }
+    }
+    
+    Function _Install   ():bool { Register_Shutdown_Function($this->Handler(...)); Return True; }
+    Function _UnInstall ():bool { Return True; }
+    
+  //****************************************************************
+  };
+?>

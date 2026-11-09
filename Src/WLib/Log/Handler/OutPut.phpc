@@ -1,0 +1,74 @@
+<?
+  $Loader->Parent_Class('/Log/Handler/Base');
+ 
+  Class C_Log_Handler_OutPut Extends C_Log_Handler_Base
+  {
+    Var Array  $Carry    =[];
+    Var String $LogLevel ='Log';
+    Var Int    $Ob_Level =  0  ;
+    Var String $Mode     ='Error'; // 'Error', 'Log', 'Pass', 'Ignore'
+
+    Function _Init(Array $Args)
+    {
+      $this->LogLevel = $Args['LogLevel' ]?? $this->LogLevel;
+      $this->Mode     = $Args['Mode'     ]?? PHP_SAPI==='cli'? 'Log':'Error';
+
+      Parent::_Init($Args);
+    }
+    
+    Function Handler($Chunk)
+    {
+      Switch($this->Mode)
+      {
+      Case 'Log'    : Break;
+      Case 'Pass'   : Return $Chunk;
+      Case 'Error'  : Return $this->Log('Error', 'Start output from:')->BackTrace()->Ret('');
+      Case 'Ignore' : Return '';
+      Default:
+        $this->Log('Error', 'Unknown output handler mode:', $this->Mode);
+        Return '';
+      }
+      
+      $Carry = &$this->Carry;
+      $Log   = Null;
+      // разбираем по строкам: echo может прийти без \n на конце
+      While (($Pos = StrPos($Chunk, "\n")) !== False)
+      {
+        $Line    = RTrim(SubStr($Chunk, 0, $Pos));
+        $Chunk   =       SubStr($Chunk, $Pos + 1);
+        
+        If (StrLen($Line))  $Carry[] = $Line;
+        
+        If ($Log)  $Log             (                 ...$Carry);
+        Else       $Log = $this->Log($this->LogLevel, ...$Carry);
+        
+        $Carry = [];
+        If (!StrLen($Chunk))
+          Return;
+      }
+      $Carry []= $Chunk;
+      Return ''; // наружу ничего не отдаём (или return $chunk, чтобы вывод шёл как обычно)
+    }
+    
+    Function _Install():bool
+    {
+    //Ob_Implicit_Flush();
+      $this->Ob_Level = Ob_Get_Level();
+      If($this->Ob_Level!==0)
+        $this->Log('Error', 'Ob_Level should be first for \Log\Handler\OutPut; Handlers: ', Ob_List_Handlers());
+      Ob_Start($this->Handler(...), 1);
+      Return True;
+    }
+    
+    Function _UnInstall():bool
+    {
+      //Now just exit on error, but it can be fixed (may be), used ob_get_status(true) and ob_list_handlers()
+      If($this->Ob_Level!==Ob_Get_Level())
+        Return $this->Log('Error', 'Ob_End should be at the same level for \Log\Handler\OutPut; Actual: ', Ob_Get_Level(), '; Desired: ',$this->Ob_Level, '; Handlers: ', Ob_List_Handlers())->Ret(False);
+      Ob_End_Flush();
+      Return True;
+    }
+    
+  //****************************************************************
+  };
+?>

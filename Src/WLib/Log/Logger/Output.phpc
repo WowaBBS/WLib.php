@@ -1,0 +1,33 @@
+<?
+  $Loader->Parent_Class('/Log/Logger/Stream');
+ 
+  Class C_Log_Logger_Output extends C_Log_Logger_Echo
+  {
+    Var $Outpu   ;
+    Var $Error   ;
+    Var $Current ;
+    
+    Function _create($name)
+    {
+      $f=@FOpen('php://'.$name, 'wb');
+      Stream_Set_Blocking($f, False);
+      return $f;
+    }
+  
+    Function _Init(Array $Args)
+    {
+    //$this->Output  = $this->_create('output');
+      $this->Output  = $this->_create('stdout');
+      $this->Error   = $this->_create('stderr');
+      $this->Current = $this->Error;
+      
+      $Args['Format']??=Self::_DetectFormat();
+      parent::_Init($Args);
+    }
+    
+    Function Write($Str)
+    {
+      FWrite($this->current, $Str); //Echo $Str;
+    }
+  };
+?>

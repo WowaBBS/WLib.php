@@ -3,6 +3,8 @@
  
   Class C_Log_Manager Extends C_Log_Logger_List
   {
+    Var $Handler;
+  
     Function _Init(Array $Args)
     {
       $this->Object_GetLoader()->UnMark($this); //TODO: Destroy all except special one or two
@@ -14,6 +16,8 @@
           $Console=$this->Create_Object('/Log/Logger/Echo', Is_Array($Console)? $Console:[]);
         $this->Add($Console, ['Name'=>'Console']);
       }
+      $this->Handler=$this->Get_Singleton('/Log/Handler');
+
       If($Args['Set_Error_Handler']?? True)
         $this->SetHandler();
     }

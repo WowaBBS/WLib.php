@@ -4,30 +4,42 @@
   Class C_Log_Handler_OutPut Extends C_Log_Handler_Base
   {
     Var Array  $Carry    =[];
-    Var String $LogLevel ='Log';
     Var Int    $Ob_Level =  0  ;
-    Var String $Mode     ='Error'; // 'Error', 'Log', 'Pass', 'Ignore'
+    Var String $Mode     ='Debug'; // 'Error', 'Log', 'Pass', 'Ignore', 'Debug'
 
     Function _Init(Array $Args)
     {
-      $this->LogLevel = $Args['LogLevel' ]?? $this->LogLevel;
-      $this->Mode     = $Args['Mode'     ]?? PHP_SAPI==='cli'? 'Log':'Error';
+      $this->Mode= $Args['Mode']?? $this->Mode; //PHP_SAPI==='cli'? 'Log':'Error';
 
       Parent::_Init($Args);
     }
     
-    Function Handler($Chunk)
+    Function SetModeLog() { $this->Mode='Log'; }
+    
+    Function Handler($Chunk, Int $Phase)
     {
       Switch($this->Mode)
       {
       Case 'Log'    : Break;
       Case 'Pass'   : Return $Chunk;
-      Case 'Error'  : Return $this->Log('Error', 'Start output from:')->BackTrace()->Ret('');
+      Case 'Error'  : Return $this->Log('Error', 'Start output from:')->BackTrace(0, 2)->Ret('');
       Case 'Ignore' : Return '';
+      Case 'Debug'  :
+        $Phase = Match($Phase) {
+          PHP_OUTPUT_HANDLER_START=>'Start', // Indicates that output buffering has begun.
+          PHP_OUTPUT_HANDLER_WRITE=>'Write', // Indicates that the output buffer is being flushed, and had data to output.
+          PHP_OUTPUT_HANDLER_FLUSH=>'Flush', // Indicates that the buffer has been flushed.
+          PHP_OUTPUT_HANDLER_CLEAN=>'Clean', // Indicates that the output buffer has been cleaned.
+          PHP_OUTPUT_HANDLER_FINAL=>'Final', // Indicates that this is the final output buffering operation.
+          default => 'Unknown'.$Phase,
+        };
+        $this->Log('Error', 'Output.', $Phase,': ',$Chunk)->BackTrace(0, 2);
+        Return '';
       Default:
         $this->Log('Error', 'Unknown output handler mode:', $this->Mode);
         Return '';
       }
+      
       
       $Carry = &$this->Carry;
       $Log   = Null;
@@ -39,8 +51,9 @@
         
         If (StrLen($Line))  $Carry[] = $Line;
         
-        If ($Log)  $Log             (                 ...$Carry);
-        Else       $Log = $this->Log($this->LogLevel, ...$Carry);
+        // TODO: Partial output when "\n" hasn't received yet
+        If ($Log)  $Log             (       ...$Carry);
+        Else       $Log = $this->Log('Log', ...$Carry);
         
         $Carry = [];
         If (!StrLen($Chunk))
